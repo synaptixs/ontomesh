@@ -1,0 +1,40 @@
+{
+  "@context": "https://ontology.example.com/tmf/jsonld/tmf-context.json",
+  "@type": [
+    "Alarm",
+    "CommunicationsAlarm"
+  ],
+  "@id": "https://gtc.example.com/alarms/ALM-20260410-001",
+  "alarmType": "CommunicationsAlarm",
+  "perceivedSeverity": "Critical",
+  "alarmState": "Cleared",
+  "probableCause": "transmissionError",
+  "specificProblem": "gNB 043 lost uplink connectivity to AMF \u2014 packet loss 18.7%",
+  "sourceResource": {
+    "@type": "NetworkFunction",
+    "@id": "https://gtc.example.com/resources/gnb-043",
+    "name": "gNB Site 043",
+    "nfType": "gNB",
+    "operationalState": "Disabled",
+    "adminState": "Locked",
+    "sidDomain": "Resource",
+    "tmfApiId": "TMF639"
+  },
+  "generatedAt": "2026-04-10T02:14:00Z",
+  "generatedBy": {
+    "@type": "Party",
+    "@id": "https://gtc.example.com/parties/ml-monitor-agent",
+    "name": "ML Monitor Agent"
+  },
+  "_tmf": {
+    "apiId": "TMF642",
+    "apiVersion": "v4.0",
+    "sidDomain": "Resource",
+    "sidABE": "Resource Trouble",
+    "etomProcess": "1.4.4 Alarm Surveillance"
+  },
+  "_validation": {
+    "shacl_gate": "tmf-shapes.ttl#AlarmShape",
+    "status": "PASS"
+  }
+}

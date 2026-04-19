@@ -1,0 +1,597 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+
+<https://ontology.example.com/vocab/enterprise/>
+  a skos:ConceptScheme ;
+  skos:prefLabel "Enterprise Domain Vocabulary" ;
+  rdfs:comment "Controlled vocabulary for the enterprise domain ontology. "
+               "Covers preferred labels, synonyms, and deprecated terms." ;
+  dcterms:creator "Ontology Toolkit — Auto-generated from ontology_metadata" .
+
+
+# ── Concept per Domain Class ────────────────────────────────────────
+
+:AgentRolesConcept
+  a skos:Concept ;
+  skos:prefLabel "Agent Roles" ;
+  skos:definition "Vocabulary concept for Agent Roles." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :AgentRoles .
+
+:AgentConcept
+  a skos:Concept ;
+  skos:prefLabel "Agent" ;
+  skos:altLabel "Actor" ;
+  skos:altLabel "System Agent" ;
+  skos:altLabel "Sensor" ;
+  skos:definition "A human, system, AI agent, or sensor that produces or acts on domain facts." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Agent .
+
+:AssetTypeConcept
+  a skos:Concept ;
+  skos:prefLabel "Asset Type" ;
+  skos:altLabel "Asset Category" ;
+  skos:altLabel "Resource Class" ;
+  skos:definition "A classification category for managed assets." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :AssetType .
+
+:AssetConcept
+  a skos:Concept ;
+  skos:prefLabel "Asset" ;
+  skos:altLabel "Resource" ;
+  skos:altLabel "Managed Object" ;
+  skos:altLabel "Network Element" ;
+  skos:definition "A physical or logical resource managed by the organization." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Asset .
+
+:DomainEventConcept
+  a skos:Concept ;
+  skos:prefLabel "Domain Event" ;
+  skos:altLabel "Operation" ;
+  skos:altLabel "Activity" ;
+  skos:altLabel "Incident" ;
+  skos:altLabel "Inspection" ;
+  skos:definition "A significant occurrence in the domain that changes state or produces evidence." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :DomainEvent .
+
+:EventParticipantsConcept
+  a skos:Concept ;
+  skos:prefLabel "Event Participants" ;
+  skos:definition "Vocabulary concept for Event Participants." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :EventParticipants .
+
+:ObservationRecordConcept
+  a skos:Concept ;
+  skos:prefLabel "Observation" ;
+  skos:altLabel "Measurement" ;
+  skos:altLabel "Reading" ;
+  skos:altLabel "Detection" ;
+  skos:altLabel "Finding" ;
+  skos:definition "A measured, computed, or imported fact about an asset or event, with provenance." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ObservationRecord .
+
+:OrganizationConcept
+  a skos:Concept ;
+  skos:prefLabel "Organization" ;
+  skos:altLabel "Enterprise" ;
+  skos:altLabel "Company" ;
+  skos:altLabel "Entity" ;
+  skos:definition "A legal or operational entity that owns, operates, or governs assets." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Organization .
+
+:PolicyConcept
+  a skos:Concept ;
+  skos:prefLabel "Policy" ;
+  skos:altLabel "Rule" ;
+  skos:altLabel "Standard" ;
+  skos:altLabel "SLA" ;
+  skos:definition "A rule or constraint that governs asset operations and agent behaviour." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Policy .
+
+:PolicyApplicationConcept
+  a skos:Concept ;
+  skos:prefLabel "Policy Application" ;
+  skos:altLabel "Compliance Check" ;
+  skos:altLabel "Audit Record" ;
+  skos:definition "Records the application of a policy to an event or asset with outcome." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :PolicyApplication .
+
+:RoleConcept
+  a skos:Concept ;
+  skos:prefLabel "Role" ;
+  skos:altLabel "Function" ;
+  skos:altLabel "Responsibility" ;
+  skos:definition "A contextual function an agent performs in a specific scope." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Role .
+
+:AgreementConcept
+  a skos:Concept ;
+  skos:prefLabel "Agreement" ;
+  skos:altLabel "SLA" ;
+  skos:altLabel "Contract" ;
+  skos:altLabel "Service Level Agreement" ;
+  skos:definition "A commercial, SLA, or roaming agreement between parties (TMF651)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Agreement .
+
+:AlarmConcept
+  a skos:Concept ;
+  skos:prefLabel "Alarm" ;
+  skos:altLabel "Fault" ;
+  skos:altLabel "Notification" ;
+  skos:altLabel "Alert" ;
+  skos:definition "A network fault notification raised by a network function or element (TMF642)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Alarm .
+
+:AttachmentConcept
+  a skos:Concept ;
+  skos:prefLabel "Attachment" ;
+  skos:definition "A file or URL attachment linked to any TMF entity per SID Common ABE." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Attachment .
+
+:CharacteristicConcept
+  a skos:Concept ;
+  skos:prefLabel "Characteristic" ;
+  skos:altLabel "Attribute" ;
+  skos:altLabel "Property" ;
+  skos:altLabel "Feature" ;
+  skos:definition "A key-value attribute pair that extends any entity per SID Characteristic ABE." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Characteristic .
+
+:CustomerAccountConcept
+  a skos:Concept ;
+  skos:prefLabel "Customer Account" ;
+  skos:altLabel "Account" ;
+  skos:altLabel "Billing Account" ;
+  skos:definition "A billing and service management account per TMF666." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :CustomerAccount .
+
+:NoteConcept
+  a skos:Concept ;
+  skos:prefLabel "Note" ;
+  skos:definition "A free-text annotation linked to any TMF entity per SID Common ABE." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Note .
+
+:PartyConcept
+  a skos:Concept ;
+  skos:prefLabel "Party" ;
+  skos:altLabel "Individual" ;
+  skos:altLabel "Organization" ;
+  skos:altLabel "Customer" ;
+  skos:altLabel "Partner" ;
+  skos:definition "An individual or organisation that plays a role in the business (TMF632)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Party .
+
+:PartyRoleConcept
+  a skos:Concept ;
+  skos:prefLabel "Party Role" ;
+  skos:altLabel "Role" ;
+  skos:altLabel "Function" ;
+  skos:altLabel "Relationship" ;
+  skos:definition "A contextual role a party plays, such as Customer or Partner (TMF669)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :PartyRole .
+
+:PerformanceIndicatorConcept
+  a skos:Concept ;
+  skos:prefLabel "Performance Indicator" ;
+  skos:altLabel "KPI" ;
+  skos:altLabel "Metric" ;
+  skos:altLabel "Measurement" ;
+  skos:altLabel "Observation" ;
+  skos:definition "A KPI measurement or ML-derived metric with PROV-O provenance." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :PerformanceIndicator .
+
+:GeographicLocationConcept
+  a skos:Concept ;
+  skos:prefLabel "Geographic Place" ;
+  skos:altLabel "Location" ;
+  skos:altLabel "Address" ;
+  skos:altLabel "Site" ;
+  skos:definition "A geographic location, address, or site per TMF673/674/675." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :GeographicLocation .
+
+:PolicyConcept
+  a skos:Concept ;
+  skos:prefLabel "Policy" ;
+  skos:altLabel "Rule" ;
+  skos:altLabel "Regulation" ;
+  skos:altLabel "Standard" ;
+  skos:altLabel "SLA Policy" ;
+  skos:definition "A rule or constraint governing operations, network, or compliance." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Policy .
+
+:ProductConcept
+  a skos:Concept ;
+  skos:prefLabel "Product" ;
+  skos:altLabel "Subscribed Product" ;
+  skos:altLabel "Active Subscription" ;
+  skos:definition "A product instance subscribed to by a party per TMF637." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Product .
+
+:ProductOfferingConcept
+  a skos:Concept ;
+  skos:prefLabel "Product Offering" ;
+  skos:altLabel "Commercial Offer" ;
+  skos:altLabel "Tariff Plan" ;
+  skos:definition "A commercial offering available to customers per TMF620." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ProductOffering .
+
+:ProductOrderConcept
+  a skos:Concept ;
+  skos:prefLabel "Product Order" ;
+  skos:altLabel "Customer Order" ;
+  skos:altLabel "Service Request" ;
+  skos:definition "A customer request to provision, modify, or terminate a product (TMF622)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ProductOrder .
+
+:ProductSpecificationConcept
+  a skos:Concept ;
+  skos:prefLabel "Product Specification" ;
+  skos:altLabel "Product Template" ;
+  skos:altLabel "Product Catalog Entry" ;
+  skos:definition "Specification of a product type per SID Product domain/TMF620." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ProductSpecification .
+
+:ResourceConcept
+  a skos:Concept ;
+  skos:prefLabel "Resource" ;
+  skos:altLabel "Network Element" ;
+  skos:altLabel "Network Function" ;
+  skos:altLabel "Physical Asset" ;
+  skos:definition "A logical or physical telecom resource instance (TMF639). Covers NetworkFunction, Equipment, IPAddress." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Resource .
+
+:ResourceRelationshipConcept
+  a skos:Concept ;
+  skos:prefLabel "Resource Relationship" ;
+  skos:altLabel "Resource Association" ;
+  skos:altLabel "Network Topology Link" ;
+  skos:definition "Typed association between two resources (composedOf, connectsTo, dependsOn)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ResourceRelationship .
+
+:ResourceSpecificationConcept
+  a skos:Concept ;
+  skos:prefLabel "Resource Specification" ;
+  skos:altLabel "Resource Template" ;
+  skos:altLabel "Resource Catalog Entry" ;
+  skos:definition "Catalog template for a resource type. Specification pattern per SID/TMF634." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ResourceSpecification .
+
+:ServiceConcept
+  a skos:Concept ;
+  skos:prefLabel "Service" ;
+  skos:altLabel "Customer Facing Service" ;
+  skos:altLabel "Resource Facing Service" ;
+  skos:definition "An active service instance in the service inventory (TMF638). Covers CFS and RFS." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :Service .
+
+:ServiceOrderConcept
+  a skos:Concept ;
+  skos:prefLabel "Service Order" ;
+  skos:altLabel "Fulfilment Order" ;
+  skos:altLabel "Provisioning Order" ;
+  skos:definition "An internal fulfilment order to provision or modify a service (TMF641)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ServiceOrder .
+
+:ServiceProblemConcept
+  a skos:Concept ;
+  skos:prefLabel "Service Problem" ;
+  skos:altLabel "Trouble Ticket" ;
+  skos:altLabel "Incident" ;
+  skos:altLabel "Fault Report" ;
+  skos:definition "A service quality or availability problem raised against a customer service (TMF656)." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ServiceProblem .
+
+:ServiceSpecificationConcept
+  a skos:Concept ;
+  skos:prefLabel "Service Specification" ;
+  skos:altLabel "Service Template" ;
+  skos:altLabel "Service Catalog Entry" ;
+  skos:definition "Catalog definition of a service type. Specification pattern per SID/TMF633." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ServiceSpecification .
+
+:UserRoleConcept
+  a skos:Concept ;
+  skos:prefLabel "User Role" ;
+  skos:definition "A named permission set for users per SID Enterprise ABE / TMF672." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :UserRole .
+
+
+# ── Status and Type Enumerations ───────────────────────────────────
+
+:AgentAgentTypeScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Agent Agent Type Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:AgentAgentTypeHuman
+  a skos:Concept ;
+  skos:prefLabel "Human" ;
+  skos:notation "HUMAN" ;
+  skos:inScheme :AgentAgentTypeScheme .
+:AgentAgentTypeAiAgent
+  a skos:Concept ;
+  skos:prefLabel "Ai Agent" ;
+  skos:notation "AI_AGENT" ;
+  skos:inScheme :AgentAgentTypeScheme .
+:AgentAgentTypeSensor
+  a skos:Concept ;
+  skos:prefLabel "Sensor" ;
+  skos:notation "SENSOR" ;
+  skos:inScheme :AgentAgentTypeScheme .
+:AgentAgentTypeSystem
+  a skos:Concept ;
+  skos:prefLabel "System" ;
+  skos:notation "SYSTEM" ;
+  skos:inScheme :AgentAgentTypeScheme .
+
+:AssetStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Asset Asset Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:AssetStatusActive
+  a skos:Concept ;
+  skos:prefLabel "Active" ;
+  skos:notation "ACTIVE" ;
+  skos:inScheme :AssetStatusScheme .
+:AssetStatusUnderMaintenance
+  a skos:Concept ;
+  skos:prefLabel "Under Maintenance" ;
+  skos:notation "UNDER_MAINTENANCE" ;
+  skos:inScheme :AssetStatusScheme .
+
+:DomainEventEventTypeScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Domain Event Event Type Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:DomainEventEventTypeComplianceAudit
+  a skos:Concept ;
+  skos:prefLabel "Compliance Audit" ;
+  skos:notation "COMPLIANCE_AUDIT" ;
+  skos:inScheme :DomainEventEventTypeScheme .
+:DomainEventEventTypeIncident
+  a skos:Concept ;
+  skos:prefLabel "Incident" ;
+  skos:notation "INCIDENT" ;
+  skos:inScheme :DomainEventEventTypeScheme .
+:DomainEventEventTypeInspection
+  a skos:Concept ;
+  skos:prefLabel "Inspection" ;
+  skos:notation "INSPECTION" ;
+  skos:inScheme :DomainEventEventTypeScheme .
+:DomainEventEventTypeMaintenance
+  a skos:Concept ;
+  skos:prefLabel "Maintenance" ;
+  skos:notation "MAINTENANCE" ;
+  skos:inScheme :DomainEventEventTypeScheme .
+
+:DomainEventStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Domain Event Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:DomainEventStatusCompleted
+  a skos:Concept ;
+  skos:prefLabel "Completed" ;
+  skos:notation "COMPLETED" ;
+  skos:inScheme :DomainEventStatusScheme .
+:DomainEventStatusInProgress
+  a skos:Concept ;
+  skos:prefLabel "In Progress" ;
+  skos:notation "IN_PROGRESS" ;
+  skos:inScheme :DomainEventStatusScheme .
+
+:DomainEventOutcomeScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Domain Event Outcome Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:DomainEventOutcomeResolved
+  a skos:Concept ;
+  skos:prefLabel "Resolved" ;
+  skos:notation "RESOLVED" ;
+  skos:inScheme :DomainEventOutcomeScheme .
+:DomainEventOutcomeCompliant
+  a skos:Concept ;
+  skos:prefLabel "Compliant" ;
+  skos:notation "COMPLIANT" ;
+  skos:inScheme :DomainEventOutcomeScheme .
+:DomainEventOutcomePass
+  a skos:Concept ;
+  skos:prefLabel "Pass" ;
+  skos:notation "PASS" ;
+  skos:inScheme :DomainEventOutcomeScheme .
+
+:EventParticipantsParticipationRoleScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Event Participants Participation Role Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:EventParticipantsParticipationRoleInitiator
+  a skos:Concept ;
+  skos:prefLabel "Initiator" ;
+  skos:notation "INITIATOR" ;
+  skos:inScheme :EventParticipantsParticipationRoleScheme .
+:EventParticipantsParticipationRoleObserver
+  a skos:Concept ;
+  skos:prefLabel "Observer" ;
+  skos:notation "OBSERVER" ;
+  skos:inScheme :EventParticipantsParticipationRoleScheme .
+:EventParticipantsParticipationRoleExecutor
+  a skos:Concept ;
+  skos:prefLabel "Executor" ;
+  skos:notation "EXECUTOR" ;
+  skos:inScheme :EventParticipantsParticipationRoleScheme .
+
+:ObservationRecordDerivationMethodScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Observation Derivation Method Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:ObservationRecordDerivationMethodMeasured
+  a skos:Concept ;
+  skos:prefLabel "Measured" ;
+  skos:notation "MEASURED" ;
+  skos:inScheme :ObservationRecordDerivationMethodScheme .
+:ObservationRecordDerivationMethodSynthesized
+  a skos:Concept ;
+  skos:prefLabel "Synthesized" ;
+  skos:notation "SYNTHESIZED" ;
+  skos:inScheme :ObservationRecordDerivationMethodScheme .
+
+:PolicyPolicyTypeScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Policy Policy Type Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:PolicyPolicyTypeSla
+  a skos:Concept ;
+  skos:prefLabel "Sla" ;
+  skos:notation "SLA" ;
+  skos:inScheme :PolicyPolicyTypeScheme .
+:PolicyPolicyTypeSecurity
+  a skos:Concept ;
+  skos:prefLabel "Security" ;
+  skos:notation "SECURITY" ;
+  skos:inScheme :PolicyPolicyTypeScheme .
+:PolicyPolicyTypeCompliance
+  a skos:Concept ;
+  skos:prefLabel "Compliance" ;
+  skos:notation "COMPLIANCE" ;
+  skos:inScheme :PolicyPolicyTypeScheme .
+:PolicyPolicyTypeOperational
+  a skos:Concept ;
+  skos:prefLabel "Operational" ;
+  skos:notation "OPERATIONAL" ;
+  skos:inScheme :PolicyPolicyTypeScheme .
+
+:PolicyApplicationOutcomeScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Policy Application Outcome Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:PolicyApplicationOutcomeCompliant
+  a skos:Concept ;
+  skos:prefLabel "Compliant" ;
+  skos:notation "COMPLIANT" ;
+  skos:inScheme :PolicyApplicationOutcomeScheme .
+:PolicyApplicationOutcomeNonCompliant
+  a skos:Concept ;
+  skos:prefLabel "Non Compliant" ;
+  skos:notation "NON_COMPLIANT" ;
+  skos:inScheme :PolicyApplicationOutcomeScheme .
+
+:AgreementStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Agreement Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:AgreementStatusActive
+  a skos:Concept ;
+  skos:prefLabel "Active" ;
+  skos:notation "Active" ;
+  skos:inScheme :AgreementStatusScheme .
+
+:CustomerAccountStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Customer Account Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:CustomerAccountStatusActive
+  a skos:Concept ;
+  skos:prefLabel "Active" ;
+  skos:notation "Active" ;
+  skos:inScheme :CustomerAccountStatusScheme .
+
+:PartyRoleStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Party Role Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:PartyRoleStatusInitialized
+  a skos:Concept ;
+  skos:prefLabel "Initialized" ;
+  skos:notation "Initialized" ;
+  skos:inScheme :PartyRoleStatusScheme .
+
+:PerformanceIndicatorDerivationMethodScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Performance Indicator Derivation Method Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:PerformanceIndicatorDerivationMethodMeasured
+  a skos:Concept ;
+  skos:prefLabel "Measured" ;
+  skos:notation "MEASURED" ;
+  skos:inScheme :PerformanceIndicatorDerivationMethodScheme .
+:PerformanceIndicatorDerivationMethodSynthesized
+  a skos:Concept ;
+  skos:prefLabel "Synthesized" ;
+  skos:notation "SYNTHESIZED" ;
+  skos:inScheme :PerformanceIndicatorDerivationMethodScheme .
+
+:ProductStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Product Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:ProductStatusActive
+  a skos:Concept ;
+  skos:prefLabel "Active" ;
+  skos:notation "Active" ;
+  skos:inScheme :ProductStatusScheme .
+
+:ServiceProblemStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Service Problem Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:ServiceProblemStatusIn progress
+  a skos:Concept ;
+  skos:prefLabel "In Progress" ;
+  skos:notation "In Progress" ;
+  skos:inScheme :ServiceProblemStatusScheme .
+:ServiceProblemStatusResolved
+  a skos:Concept ;
+  skos:prefLabel "Resolved" ;
+  skos:notation "Resolved" ;
+  skos:inScheme :ServiceProblemStatusScheme .

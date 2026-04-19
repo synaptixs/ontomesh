@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────
+# urls.yaml — Customer URL configuration for the Ontology Toolkit
+# ─────────────────────────────────────────────────────────────────────
+#
+# The toolkit ships with placeholder URLs in the `example.com` namespace.
+# Before you run the toolkit against your own data, edit the values under
+# `ontology:` and `instance:` so they point at your own domains.
+#
+# After editing this file, apply the substitution with:
+#
+#   python scripts/apply_url_config.py --dry-run      # preview changes
+#   python scripts/apply_url_config.py --apply        # write changes
+#
+# Use --target to choose which files are rewritten:
+#   --target source   → src/*.py and db/*.sql only (default)
+#   --target output   → everything under output/
+#   --target all      → both of the above
+#
+# Standards URIs (W3C, Dublin Core, TM Forum public docs) are NEVER
+# rewritten — see STANDARDS_ALLOWLIST in scripts/apply_url_config.py.
+# ─────────────────────────────────────────────────────────────────────
+
+# Class A — Ontology namespaces (your semantic-web identity).
+# Trailing slashes are required; each value MUST end with '/'.
+ontology:
+  # Primary enterprise ontology base IRI.
+  base:   "https://ontology.example.com/enterprise/"
+  # SHACL shapes namespace.
+  shapes: "https://ontology.example.com/shapes/enterprise/"
+  # SKOS vocabulary namespace.
+  vocab:  "https://ontology.example.com/vocab/enterprise/"
+  # TM Forum SID alignment namespace.
+  tmf:    "https://ontology.example.com/tmf/"
+  # Bare domain used in a handful of sentinel strings (no scheme, no slash).
+  org_domain: "ontology.example.com"
+
+# Class B — Instance URI roots (identifiers for your real entities).
+# Each value should be a URI prefix WITH trailing slash.
+instance:
+  # Primary customer / tenant URI root. Used for assets, resources,
+  # services, orders, agents, parties, alarms, products, etc.
+  base:  "https://gtc.example.com/"
+  # OSS / telemetry system URI root (metrics, KPI sources).
+  oss:   "https://oss.gtc.example.com/"
+  # ML / monitoring-agent URI root.
+  ml:    "https://ml.gtc.example.com/"
+  # Audit system URI root.
+  audit: "https://audit.gtc.example.com/"
+
+# ─────────────────────────────────────────────────────────────────────
+# EXAMPLE — a customer named "Acme Telecom" would set:
+#
+# ontology:
+#   base:   "https://ontology.acme.com/enterprise/"
+#   shapes: "https://ontology.acme.com/shapes/enterprise/"
+#   vocab:  "https://ontology.acme.com/vocab/enterprise/"
+#   tmf:    "https://ontology.acme.com/tmf/"
+#   org_domain: "ontology.acme.com"
+#
+# instance:
+#   base:  "https://id.acme.com/"
+#   oss:   "https://oss.acme.com/"
+#   ml:    "https://ml.acme.com/"
+#   audit: "https://audit.acme.com/"
+# ─────────────────────────────────────────────────────────────────────

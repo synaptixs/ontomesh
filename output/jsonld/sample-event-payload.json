@@ -1,0 +1,40 @@
+{
+  "@context": "https://ontology.example.com/enterprise/jsonld/enterprise-context.json",
+  "@type": [
+    "DomainEvent",
+    "IncidentEvent"
+  ],
+  "@id": "https://gtc.example.com/events/evt-001",
+  "title": "High packet loss on gNB 043",
+  "eventType": "INCIDENT",
+  "status": "COMPLETED",
+  "outcome": "RESOLVED",
+  "observedAsset": {
+    "@type": "Asset",
+    "@id": "https://gtc.example.com/assets/NE-RAN-043"
+  },
+  "participant": [
+    {
+      "@type": "Agent",
+      "@id": "https://gtc.example.com/agents/noc-engineer-01",
+      "participationRole": "INITIATOR"
+    },
+    {
+      "@type": "Agent",
+      "@id": "https://gtc.example.com/agents/ml-monitor-agent",
+      "participationRole": "OBSERVER"
+    }
+  ],
+  "governedBy": {
+    "@type": "Policy",
+    "@id": "https://gtc.example.com/policies/OPS-INC-RTO-4H",
+    "code": "OPS-INC-RTO-4H"
+  },
+  "startedAt": "2026-04-10T02:15:00Z",
+  "endedAt": "2026-04-10T05:44:00Z",
+  "sensitivityTier": "https://ontology.example.com/enterprise/Internal",
+  "_validation": {
+    "shacl_gate": "enterprise-shapes.ttl#DomainEventCompletenessShape",
+    "status": "PASS"
+  }
+}

@@ -1,0 +1,59 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix shapes: <https://ontology.example.com/shapes/enterprise/> .
+
+# ── Agent Credential Acceptance Gate ─────────────────────────────────
+shapes:AgentCredentialShape
+  a sh:NodeShape ;
+  sh:targetClass :Agent ;
+  sh:property [
+    sh:path :hasAgentIri ;
+    sh:minCount 1 ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Agent must carry a persistent IRI for provenance." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :authorizedTiers ;
+    sh:minCount 1 ;
+    sh:message "Agent must declare its authorized sensitivity tiers." ;
+    sh:severity sh:Violation
+  ] .
+
+# ── Agent Acceptance Gate: ObservationRecord ──────────────────────────
+shapes:ObservationAcceptanceGate
+  a sh:NodeShape ;
+  sh:targetClass :ObservationRecord ;
+  sh:property [
+    sh:path prov:wasGeneratedBy ;
+    sh:minCount 1 ;
+    sh:message "Observation must carry prov:wasGeneratedBy (PROV-O required)." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path prov:generatedAtTime ;
+    sh:minCount 1 ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Observation must carry prov:generatedAtTime timestamp." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasConfidenceScore ;
+    sh:minCount 1 ;
+    sh:minInclusive 0.0 ;
+    sh:maxInclusive 1.0 ;
+    sh:message "Confidence score is required and must be 0.0–1.0." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :derivationMethod ;
+    sh:minCount 1 ;
+    sh:in ( "MEASURED" "INFERRED" "IMPORTED" "SYNTHESIZED" ) ;
+    sh:message "Derivation method must be MEASURED, INFERRED, IMPORTED, or SYNTHESIZED." ;
+    sh:severity sh:Violation
+  ] .
+

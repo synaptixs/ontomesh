@@ -1,0 +1,2500 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix shapes: <https://ontology.example.com/shapes/enterprise/> .
+
+
+
+# ── Meta-shape: Sensitivity Annotation Required ───────────────────────
+shapes:SensitivityAnnotationShape
+  a sh:NodeShape ;
+  sh:targetClass owl:Class ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Every OWL class must have a :sensitivityTier annotation." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── AgentRoles ──────────────────────────────────────────
+shapes:AgentRolesShape
+  a sh:NodeShape ;
+  sh:targetClass :AgentRoles ;
+  sh:property [
+    sh:path :hasValidFrom ;
+    sh:datatype xsd:string ;
+    sh:message "Valid From: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidUntil ;
+    sh:datatype xsd:string ;
+    sh:message "Valid Until: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :agent ;
+    sh:class :Agent ;
+    sh:minCount 1 ;
+    sh:message "Agent Id: required reference to :Agent." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :role ;
+    sh:class :Role ;
+    sh:minCount 1 ;
+    sh:message "Role Id: required reference to :Role." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :scopeAsset ;
+    sh:class :Asset ;
+    sh:message "Scope Asset Id: reference to :Asset." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Agent ──────────────────────────────────────────
+shapes:AgentShape
+  a sh:NodeShape ;
+  sh:targetClass :Agent ;
+  sh:property [
+    sh:path :hasAgentIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Agent IRI: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasAgentType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Agent Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCredentialExpiry ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Credential Expiry: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAuthorizedTiers ;
+    sh:datatype xsd:string ;
+    sh:message "Authorized Tiers: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasActive ;
+    sh:datatype xsd:boolean ;
+    sh:message "Active: type xsd:boolean." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :org ;
+    sh:class :Organization ;
+    sh:message "Org Id: reference to :Organization." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── AssetType ──────────────────────────────────────────
+shapes:AssetTypeShape
+  a sh:NodeShape ;
+  sh:targetClass :AssetType ;
+  sh:property [
+    sh:path :hasCode ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Code: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Label: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUnitOfMeasure ;
+    sh:datatype xsd:string ;
+    sh:message "Unit Of Measure: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :parent ;
+    sh:class :AssetType ;
+    sh:message "Parent Type Id: reference to :AssetType." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Asset ──────────────────────────────────────────
+shapes:AssetShape
+  a sh:NodeShape ;
+  sh:targetClass :Asset ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasLocationCode ;
+    sh:datatype xsd:string ;
+    sh:message "Location Code: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Asset Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCommissionedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Commissioned At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDecommissionedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Decommissioned At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :external ;
+    sh:class owl:Thing ;
+    sh:message "External Identifier: reference to owl:Thing." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :asset ;
+    sh:class :AssetType ;
+    sh:minCount 1 ;
+    sh:message "Asset Type Id: required reference to :AssetType." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :owner ;
+    sh:class :Organization ;
+    sh:message "Owner Org Id: reference to :Organization." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :operator ;
+    sh:class :Organization ;
+    sh:message "Operator Org Id: reference to :Organization." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── DomainEvent ──────────────────────────────────────────
+shapes:DomainEventShape
+  a sh:NodeShape ;
+  sh:targetClass :DomainEvent ;
+  sh:property [
+    sh:path :hasEventIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Event Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEventType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Event Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasTitle ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Title: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOutcome ;
+    sh:datatype xsd:string ;
+    sh:message "Outcome: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStartedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Started At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCompletedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Completed At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :asset ;
+    sh:class :Asset ;
+    sh:message "Asset Id: reference to :Asset." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :initiatedBy ;
+    sh:class :Agent ;
+    sh:message "Initiated By: reference to :Agent." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :policy ;
+    sh:class :Policy ;
+    sh:message "Policy Id: reference to :Policy." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── EventParticipants ──────────────────────────────────────────
+shapes:EventParticipantsShape
+  a sh:NodeShape ;
+  sh:targetClass :EventParticipants ;
+  sh:property [
+    sh:path :hasParticipationRole ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Participation Role: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasJoinedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Joined At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :event ;
+    sh:class :DomainEvent ;
+    sh:minCount 1 ;
+    sh:message "Event Id: required reference to :DomainEvent." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :agent ;
+    sh:class :Agent ;
+    sh:minCount 1 ;
+    sh:message "Agent Id: required reference to :Agent." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ObservationRecord ──────────────────────────────────────────
+shapes:ObservationRecordShape
+  a sh:NodeShape ;
+  sh:targetClass :ObservationRecord ;
+  sh:property [
+    sh:path :hasObservationIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Observation Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasObservationType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Observation Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasNumericValue ;
+    sh:datatype xsd:decimal ;
+    sh:message "Numeric Value: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasTextValue ;
+    sh:datatype xsd:string ;
+    sh:message "Text Value: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUnitOfMeasure ;
+    sh:datatype xsd:string ;
+    sh:message "Unit Of Measure: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasConfidenceScore ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.0 ;
+    sh:maxInclusive 1.0 ;
+    sh:message "Confidence Score: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDerivationMethod ;
+    sh:datatype xsd:string ;
+    sh:message "Derivation Method: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSourceRef ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Source Reference: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasObservedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:message "Observed At: required, type xsd:dateTime." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :asset ;
+    sh:class :Asset ;
+    sh:message "Asset Id: reference to :Asset." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :event ;
+    sh:class :DomainEvent ;
+    sh:message "Event Id: reference to :DomainEvent." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :recordedBy ;
+    sh:class :Agent ;
+    sh:minCount 1 ;
+    sh:message "Recorded By: required reference to :Agent." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Organization ──────────────────────────────────────────
+shapes:OrganizationShape
+  a sh:NodeShape ;
+  sh:targetClass :Organization ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasOrgType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Org Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasJurisdiction ;
+    sh:datatype xsd:string ;
+    sh:message "Jurisdiction: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasActive ;
+    sh:datatype xsd:boolean ;
+    sh:message "Active: type xsd:boolean." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :parent ;
+    sh:class :Organization ;
+    sh:message "Parent Org Id: reference to :Organization." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Policy ──────────────────────────────────────────
+shapes:PolicyShape
+  a sh:NodeShape ;
+  sh:targetClass :Policy ;
+  sh:property [
+    sh:path :hasCode ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Code: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasTitle ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Title: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasPolicyType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Policy Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEffectiveFrom ;
+    sh:datatype xsd:string ;
+    sh:message "Effective From: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEffectiveUntil ;
+    sh:datatype xsd:string ;
+    sh:message "Effective Until: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSensitivityTier ;
+    sh:datatype xsd:string ;
+    sh:message "Sensitivity Tier: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasActive ;
+    sh:datatype xsd:boolean ;
+    sh:message "Active: type xsd:boolean." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :governing ;
+    sh:class :Organization ;
+    sh:message "Governing Org Id: reference to :Organization." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── PolicyApplication ──────────────────────────────────────────
+shapes:PolicyApplicationShape
+  a sh:NodeShape ;
+  sh:targetClass :PolicyApplication ;
+  sh:property [
+    sh:path :hasOutcome ;
+    sh:datatype xsd:string ;
+    sh:message "Outcome: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasNotes ;
+    sh:datatype xsd:string ;
+    sh:message "Notes: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAppliedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Applied At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :policy ;
+    sh:class :Policy ;
+    sh:minCount 1 ;
+    sh:message "Policy Id: required reference to :Policy." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :event ;
+    sh:class :DomainEvent ;
+    sh:message "Event Id: reference to :DomainEvent." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :asset ;
+    sh:class :Asset ;
+    sh:message "Asset Id: reference to :Asset." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :appliedBy ;
+    sh:class :Agent ;
+    sh:minCount 1 ;
+    sh:message "Applied By: required reference to :Agent." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Role ──────────────────────────────────────────
+shapes:RoleShape
+  a sh:NodeShape ;
+  sh:targetClass :Role ;
+  sh:property [
+    sh:path :hasCode ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Code: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Label: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSensitivityTier ;
+    sh:datatype xsd:string ;
+    sh:message "Sensitivity Tier: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Agreement ──────────────────────────────────────────
+shapes:AgreementShape
+  a sh:NodeShape ;
+  sh:targetClass :Agreement ;
+  sh:property [
+    sh:path :hasAgreementIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Agreement Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasAgreementType ;
+    sh:datatype xsd:string ;
+    sh:message "Agreement Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidFrom ;
+    sh:datatype xsd:string ;
+    sh:message "Valid From: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidUntil ;
+    sh:datatype xsd:string ;
+    sh:message "Valid Until: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :partyA ;
+    sh:class :Party ;
+    sh:message "Party A Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :partyB ;
+    sh:class :Party ;
+    sh:message "Party B Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Alarm ──────────────────────────────────────────
+shapes:AlarmShape
+  a sh:NodeShape ;
+  sh:targetClass :Alarm ;
+  sh:property [
+    sh:path :hasAlarmIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Alarm Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAlarmType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Alarm Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasPerceivedSeverity ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Perceived Severity: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasProbableCause ;
+    sh:datatype xsd:string ;
+    sh:message "Probable Cause: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSpecificProblem ;
+    sh:datatype xsd:string ;
+    sh:message "Specific Problem: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAlarmState ;
+    sh:datatype xsd:string ;
+    sh:message "Alarm State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasRaisedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:message "Raised At: required, type xsd:dateTime." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasAcknowledgedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Acknowledged At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasClearedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Cleared At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sourceResource ;
+    sh:class :Resource ;
+    sh:message "Source Resource Id: reference to :Resource." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :rootCauseAlarm ;
+    sh:class :Alarm ;
+    sh:message "Root Cause Alarm Id: reference to :Alarm." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :raisedBy ;
+    sh:class :Party ;
+    sh:message "Raised By Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :acknowledgedBy ;
+    sh:class :Party ;
+    sh:message "Acknowledged By Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Attachment ──────────────────────────────────────────
+shapes:AttachmentShape
+  a sh:NodeShape ;
+  sh:targetClass :Attachment ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:message "Name: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasMimeType ;
+    sh:datatype xsd:string ;
+    sh:message "Mime Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUrl ;
+    sh:datatype xsd:string ;
+    sh:message "Url: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAttachmentType ;
+    sh:datatype xsd:string ;
+    sh:message "Attachment Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOwnerType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Owner Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :owner ;
+    sh:class owl:Thing ;
+    sh:minCount 1 ;
+    sh:message "Owner Id: required reference to owl:Thing." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Characteristic ──────────────────────────────────────────
+shapes:CharacteristicShape
+  a sh:NodeShape ;
+  sh:targetClass :Characteristic ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasValue ;
+    sh:datatype xsd:string ;
+    sh:message "Value: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValueType ;
+    sh:datatype xsd:string ;
+    sh:message "Value Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUnit ;
+    sh:datatype xsd:string ;
+    sh:message "Unit: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOwnerType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Owner Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :owner ;
+    sh:class owl:Thing ;
+    sh:minCount 1 ;
+    sh:message "Owner Id: required reference to owl:Thing." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── CustomerAccount ──────────────────────────────────────────
+shapes:CustomerAccountShape
+  a sh:NodeShape ;
+  sh:targetClass :CustomerAccount ;
+  sh:property [
+    sh:path :hasAccountIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Account Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAccountNumber ;
+    sh:datatype xsd:string ;
+    sh:message "Account Number: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasAccountType ;
+    sh:datatype xsd:string ;
+    sh:message "Account Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreditLimit ;
+    sh:datatype xsd:decimal ;
+    sh:message "Credit Limit: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCurrencyCode ;
+    sh:datatype xsd:string ;
+    sh:message "Currency Code: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :party ;
+    sh:class :Party ;
+    sh:minCount 1 ;
+    sh:message "Party Id: required reference to :Party." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Note ──────────────────────────────────────────
+shapes:NoteShape
+  a sh:NodeShape ;
+  sh:targetClass :Note ;
+  sh:property [
+    sh:path :hasText ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Text: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasAuthor ;
+    sh:datatype xsd:string ;
+    sh:message "Author: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDate ;
+    sh:datatype xsd:string ;
+    sh:message "Date: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasNoteType ;
+    sh:datatype xsd:string ;
+    sh:message "Note Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOwnerType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Owner Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :owner ;
+    sh:class owl:Thing ;
+    sh:minCount 1 ;
+    sh:message "Owner Id: required reference to owl:Thing." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Party ──────────────────────────────────────────
+shapes:PartyShape
+  a sh:NodeShape ;
+  sh:targetClass :Party ;
+  sh:property [
+    sh:path :hasPartyIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Party IRI: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasPartyType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Party Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasGivenName ;
+    sh:datatype xsd:string ;
+    sh:message "Given Name: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasFamilyName ;
+    sh:datatype xsd:string ;
+    sh:message "Family Name: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasNationality ;
+    sh:datatype xsd:string ;
+    sh:message "Nationality: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasTradingName ;
+    sh:datatype xsd:string ;
+    sh:message "Trading Name: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOrgType ;
+    sh:datatype xsd:string ;
+    sh:message "Org Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEmail ;
+    sh:datatype xsd:string ;
+    sh:message "Email: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasPhone ;
+    sh:datatype xsd:string ;
+    sh:message "Phone: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLifecycleStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Lifecycle Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :place ;
+    sh:class :GeographicLocation ;
+    sh:message "Place Id: reference to :GeographicLocation." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── PartyRole ──────────────────────────────────────────
+shapes:PartyRoleShape
+  a sh:NodeShape ;
+  sh:targetClass :PartyRole ;
+  sh:property [
+    sh:path :hasRoleName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Role Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasRoleType ;
+    sh:datatype xsd:string ;
+    sh:message "Role Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidFrom ;
+    sh:datatype xsd:string ;
+    sh:message "Valid From: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidUntil ;
+    sh:datatype xsd:string ;
+    sh:message "Valid Until: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :party ;
+    sh:class :Party ;
+    sh:minCount 1 ;
+    sh:message "Party Id: required reference to :Party." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── PerformanceIndicator ──────────────────────────────────────────
+shapes:PerformanceIndicatorShape
+  a sh:NodeShape ;
+  sh:targetClass :PerformanceIndicator ;
+  sh:property [
+    sh:path :hasKpiIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Kpi Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUnitOfMeasure ;
+    sh:datatype xsd:string ;
+    sh:message "Unit Of Measure: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasKpiType ;
+    sh:datatype xsd:string ;
+    sh:message "Kpi Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasNumericValue ;
+    sh:datatype xsd:decimal ;
+    sh:message "Numeric Value: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStringValue ;
+    sh:datatype xsd:string ;
+    sh:message "String Value: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasConfidenceScore ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.0 ;
+    sh:maxInclusive 1.0 ;
+    sh:message "Confidence Score: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDerivationMethod ;
+    sh:datatype xsd:string ;
+    sh:message "Derivation Method: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSourceRef ;
+    sh:datatype xsd:string ;
+    sh:message "Source Ref: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasThresholdLow ;
+    sh:datatype xsd:decimal ;
+    sh:message "Threshold Low: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasThresholdHigh ;
+    sh:datatype xsd:decimal ;
+    sh:message "Threshold High: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasBreachIndicator ;
+    sh:datatype xsd:integer ;
+    sh:message "Breach Indicator: type xsd:integer." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasObservedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:message "Observed At: required, type xsd:dateTime." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :resource ;
+    sh:class :Resource ;
+    sh:message "Resource Id: reference to :Resource." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :service ;
+    sh:class :Service ;
+    sh:message "Service Id: reference to :Service." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :recordedByParty ;
+    sh:class :Party ;
+    sh:message "Recorded By Party Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── GeographicLocation ──────────────────────────────────────────
+shapes:GeographicLocationShape
+  a sh:NodeShape ;
+  sh:targetClass :GeographicLocation ;
+  sh:property [
+    sh:path :hasPlaceIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Place Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasPlaceType ;
+    sh:datatype xsd:string ;
+    sh:message "Place Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStreetNr ;
+    sh:datatype xsd:string ;
+    sh:message "Street Nr: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStreetName ;
+    sh:datatype xsd:string ;
+    sh:message "Street Name: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCity ;
+    sh:datatype xsd:string ;
+    sh:message "City: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStateOrProvince ;
+    sh:datatype xsd:string ;
+    sh:message "State Or Province: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasPostcode ;
+    sh:datatype xsd:string ;
+    sh:message "Postcode: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCountry ;
+    sh:datatype xsd:string ;
+    sh:message "Country: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLatitude ;
+    sh:datatype xsd:decimal ;
+    sh:message "Latitude: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLongitude ;
+    sh:datatype xsd:decimal ;
+    sh:message "Longitude: type xsd:decimal." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLifecycleStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Lifecycle Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :parentPlace ;
+    sh:class :GeographicLocation ;
+    sh:message "Parent Place Id: reference to :GeographicLocation." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Policy ──────────────────────────────────────────
+shapes:PolicyShape
+  a sh:NodeShape ;
+  sh:targetClass :Policy ;
+  sh:property [
+    sh:path :hasPolicyIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Policy Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasPolicyType ;
+    sh:datatype xsd:string ;
+    sh:message "Policy Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasVersion ;
+    sh:datatype xsd:string ;
+    sh:message "Version: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasGoverningBody ;
+    sh:datatype xsd:string ;
+    sh:message "Governing Body: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEffectiveFrom ;
+    sh:datatype xsd:string ;
+    sh:message "Effective From: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEffectiveUntil ;
+    sh:datatype xsd:string ;
+    sh:message "Effective Until: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Product ──────────────────────────────────────────
+shapes:ProductShape
+  a sh:NodeShape ;
+  sh:targetClass :Product ;
+  sh:property [
+    sh:path :hasProductIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Product Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStartDate ;
+    sh:datatype xsd:date ;
+    sh:message "Start Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEndDate ;
+    sh:datatype xsd:date ;
+    sh:message "End Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :productOffering ;
+    sh:class :ProductOffering ;
+    sh:message "Product Offering Id: reference to :ProductOffering." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :parentProduct ;
+    sh:class :Product ;
+    sh:message "Parent Product Id: reference to :Product." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :realisingService ;
+    sh:class :Service ;
+    sh:message "Realising Service Id: reference to :Service." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ProductOffering ──────────────────────────────────────────
+shapes:ProductOfferingShape
+  a sh:NodeShape ;
+  sh:targetClass :ProductOffering ;
+  sh:property [
+    sh:path :hasOfferingIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Offering Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasVersion ;
+    sh:datatype xsd:string ;
+    sh:message "Version: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasIsBundle ;
+    sh:datatype xsd:boolean ;
+    sh:message "Is Bundle: type xsd:boolean." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLifecycleStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Lifecycle Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidForStart ;
+    sh:datatype xsd:string ;
+    sh:message "Valid For Start: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasValidForEnd ;
+    sh:datatype xsd:string ;
+    sh:message "Valid For End: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :productSpec ;
+    sh:class :ProductSpecification ;
+    sh:message "Product Spec Id: reference to :ProductSpecification." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ProductOrder ──────────────────────────────────────────
+shapes:ProductOrderShape
+  a sh:NodeShape ;
+  sh:targetClass :ProductOrder ;
+  sh:property [
+    sh:path :hasOrderIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Order Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOrderDate ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:message "Order Date: required, type xsd:date." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCompletionDate ;
+    sh:datatype xsd:date ;
+    sh:message "Completion Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasRequestedCompletion ;
+    sh:datatype xsd:string ;
+    sh:message "Requested Completion: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOrderType ;
+    sh:datatype xsd:string ;
+    sh:message "Order Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasState ;
+    sh:datatype xsd:string ;
+    sh:message "State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :customerAccount ;
+    sh:class :CustomerAccount ;
+    sh:message "Customer Account Id: reference to :CustomerAccount." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :productOffering ;
+    sh:class :ProductOffering ;
+    sh:message "Product Offering Id: reference to :ProductOffering." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :submittedBy ;
+    sh:class :Party ;
+    sh:message "Submitted By Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ProductSpecification ──────────────────────────────────────────
+shapes:ProductSpecificationShape
+  a sh:NodeShape ;
+  sh:targetClass :ProductSpecification ;
+  sh:property [
+    sh:path :hasSpecIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Spec Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasVersion ;
+    sh:datatype xsd:string ;
+    sh:message "Version: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasProductNumber ;
+    sh:datatype xsd:string ;
+    sh:message "Product Number: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasBrand ;
+    sh:datatype xsd:string ;
+    sh:message "Brand: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLifecycleStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Lifecycle Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasIsBundle ;
+    sh:datatype xsd:boolean ;
+    sh:message "Is Bundle: type xsd:boolean." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Resource ──────────────────────────────────────────
+shapes:ResourceShape
+  a sh:NodeShape ;
+  sh:targetClass :Resource ;
+  sh:property [
+    sh:path :hasResourceIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Resource Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasResourceType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Resource Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasNfType ;
+    sh:datatype xsd:string ;
+    sh:message "Network Function Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOperationalState ;
+    sh:datatype xsd:string ;
+    sh:message "Operational State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasAdminState ;
+    sh:datatype xsd:string ;
+    sh:message "Administrative State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUsageState ;
+    sh:datatype xsd:string ;
+    sh:message "Usage State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasExternalSystem ;
+    sh:datatype xsd:string ;
+    sh:message "External System: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStartOperatingDate ;
+    sh:datatype xsd:date ;
+    sh:message "Start Operating Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEndOperatingDate ;
+    sh:datatype xsd:date ;
+    sh:message "End Operating Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :resourceSpec ;
+    sh:class :ResourceSpecification ;
+    sh:message "Resource Spec Id: reference to :ResourceSpecification." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :parentResource ;
+    sh:class :Resource ;
+    sh:message "Parent Resource Id: reference to :Resource." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :place ;
+    sh:class :GeographicLocation ;
+    sh:message "Place Id: reference to :GeographicLocation." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :external ;
+    sh:class owl:Thing ;
+    sh:message "External Id: reference to owl:Thing." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ResourceRelationship ──────────────────────────────────────────
+shapes:ResourceRelationshipShape
+  a sh:NodeShape ;
+  sh:targetClass :ResourceRelationship ;
+  sh:property [
+    sh:path :hasRelationshipType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Relationship Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :resource ;
+    sh:class :Resource ;
+    sh:minCount 1 ;
+    sh:message "Resource Id: required reference to :Resource." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :relatedResource ;
+    sh:class :Resource ;
+    sh:minCount 1 ;
+    sh:message "Related Resource Id: required reference to :Resource." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ResourceSpecification ──────────────────────────────────────────
+shapes:ResourceSpecificationShape
+  a sh:NodeShape ;
+  sh:targetClass :ResourceSpecification ;
+  sh:property [
+    sh:path :hasSpecIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Spec Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasVersion ;
+    sh:datatype xsd:string ;
+    sh:message "Version: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCategory ;
+    sh:datatype xsd:string ;
+    sh:message "Resource Category: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLifecycleStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Lifecycle Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasIsBundle ;
+    sh:datatype xsd:boolean ;
+    sh:message "Is Bundle: type xsd:boolean." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Service ──────────────────────────────────────────
+shapes:ServiceShape
+  a sh:NodeShape ;
+  sh:targetClass :Service ;
+  sh:property [
+    sh:path :hasServiceIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Service Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasServiceType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Service Type: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasState ;
+    sh:datatype xsd:string ;
+    sh:message "State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStartDate ;
+    sh:datatype xsd:date ;
+    sh:message "Start Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEndDate ;
+    sh:datatype xsd:date ;
+    sh:message "End Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :serviceSpec ;
+    sh:class :ServiceSpecification ;
+    sh:message "Service Spec Id: reference to :ServiceSpecification." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :parentService ;
+    sh:class :Service ;
+    sh:message "Parent Service Id: reference to :Service." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :realisingResource ;
+    sh:class :Resource ;
+    sh:message "Realising Resource Id: reference to :Resource." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ServiceOrder ──────────────────────────────────────────
+shapes:ServiceOrderShape
+  a sh:NodeShape ;
+  sh:targetClass :ServiceOrder ;
+  sh:property [
+    sh:path :hasOrderIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Order Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOrderDate ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:message "Order Date: required, type xsd:date." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasCompletionDate ;
+    sh:datatype xsd:date ;
+    sh:message "Completion Date: type xsd:date." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasOrderType ;
+    sh:datatype xsd:string ;
+    sh:message "Order Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasState ;
+    sh:datatype xsd:string ;
+    sh:message "State: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasUpdatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Updated At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :productOrder ;
+    sh:class :ProductOrder ;
+    sh:message "Product Order Id: reference to :ProductOrder." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :serviceSpec ;
+    sh:class :ServiceSpecification ;
+    sh:message "Service Spec Id: reference to :ServiceSpecification." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :submittedBy ;
+    sh:class :Party ;
+    sh:message "Submitted By Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ServiceProblem ──────────────────────────────────────────
+shapes:ServiceProblemShape
+  a sh:NodeShape ;
+  sh:targetClass :ServiceProblem ;
+  sh:property [
+    sh:path :hasProblemIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Problem Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Description: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasPriority ;
+    sh:datatype xsd:string ;
+    sh:message "Priority: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCategory ;
+    sh:datatype xsd:string ;
+    sh:message "Problem Category: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSlaViolated ;
+    sh:datatype xsd:integer ;
+    sh:message "Sla Violated: type xsd:integer." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasResolutionNotes ;
+    sh:datatype xsd:string ;
+    sh:message "Resolution Notes: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasSubmittedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:message "Submitted At: required, type xsd:dateTime." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasResolvedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Resolved At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :service ;
+    sh:class :Service ;
+    sh:message "Service Id: reference to :Service." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :alarm ;
+    sh:class :Alarm ;
+    sh:message "Alarm Id: reference to :Alarm." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :raisedBy ;
+    sh:class :Party ;
+    sh:message "Raised By Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :resolvedBy ;
+    sh:class :Party ;
+    sh:message "Resolved By Id: reference to :Party." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── ServiceSpecification ──────────────────────────────────────────
+shapes:ServiceSpecificationShape
+  a sh:NodeShape ;
+  sh:targetClass :ServiceSpecification ;
+  sh:property [
+    sh:path :hasSpecIri ;
+    sh:datatype xsd:anyURI ;
+    sh:message "Spec Iri: type xsd:anyURI." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasVersion ;
+    sh:datatype xsd:string ;
+    sh:message "Version: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasServiceType ;
+    sh:datatype xsd:string ;
+    sh:message "Service Type: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasLifecycleStatus ;
+    sh:datatype xsd:string ;
+    sh:message "Lifecycle Status: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── UserRole ──────────────────────────────────────────
+shapes:UserRoleShape
+  a sh:NodeShape ;
+  sh:targetClass :UserRole ;
+  sh:property [
+    sh:path :hasName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:message "Name: required, type xsd:string." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasDescription ;
+    sh:datatype xsd:string ;
+    sh:message "Description: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasPermissionSet ;
+    sh:datatype xsd:string ;
+    sh:message "Permission Set: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasCreatedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Created At: type xsd:dateTime." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( :Public :Internal :Confidential :Restricted ) ;
+    sh:message "Sensitivity tier annotation is required." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── Agent Acceptance Gate: ObservationRecord ──────────────────────────
+shapes:ObservationAcceptanceGate
+  a sh:NodeShape ;
+  sh:targetClass :ObservationRecord ;
+  sh:property [
+    sh:path prov:wasGeneratedBy ;
+    sh:minCount 1 ;
+    sh:message "Observation must carry prov:wasGeneratedBy (PROV-O required)." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path prov:generatedAtTime ;
+    sh:minCount 1 ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Observation must carry prov:generatedAtTime timestamp." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasConfidenceScore ;
+    sh:minCount 1 ;
+    sh:minInclusive 0.0 ;
+    sh:maxInclusive 1.0 ;
+    sh:message "Confidence score is required and must be 0.0–1.0." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :derivationMethod ;
+    sh:minCount 1 ;
+    sh:in ( "MEASURED" "INFERRED" "IMPORTED" "SYNTHESIZED" ) ;
+    sh:message "Derivation method must be MEASURED, INFERRED, IMPORTED, or SYNTHESIZED." ;
+    sh:severity sh:Violation
+  ] .
+
+
+# ── DomainEvent Completeness Gate ────────────────────────────────────
+shapes:DomainEventCompletenessShape
+  a sh:NodeShape ;
+  sh:targetClass :DomainEvent ;
+  sh:property [
+    sh:path :hasParticipant ;
+    sh:minCount 1 ;
+    sh:class :Agent ;
+    sh:message "Every DomainEvent must have at least one participant." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :hasEventStatus ;
+    sh:minCount 1 ;
+    sh:in ( "OPEN" "IN_PROGRESS" "COMPLETED" "FAILED" "CANCELLED" ) ;
+    sh:message "Event status must be one of the defined values." ;
+    sh:severity sh:Violation
+  ] .
+

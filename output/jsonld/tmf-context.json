@@ -1,0 +1,119 @@
+{
+  "@context": {
+    "@vocab": "https://ontology.example.com/tmf/",
+    "tmf": "https://www.tmforum.org/sid/",
+    "etom": "https://www.tmforum.org/etom/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "generatedBy": {
+      "@id": "prov:wasGeneratedBy",
+      "@type": "@id"
+    },
+    "generatedAt": {
+      "@id": "prov:generatedAtTime",
+      "@type": "xsd:dateTime"
+    },
+    "associatedWith": {
+      "@id": "prov:wasAssociatedWith",
+      "@type": "@id"
+    },
+    "Resource": {
+      "@id": "https://ontology.example.com/tmf/Resource"
+    },
+    "NetworkFunction": {
+      "@id": "https://ontology.example.com/tmf/NetworkFunction"
+    },
+    "NetworkSlice": {
+      "@id": "https://ontology.example.com/tmf/NetworkSlice"
+    },
+    "Service": {
+      "@id": "https://ontology.example.com/tmf/Service"
+    },
+    "CustomerFacingService": {
+      "@id": "https://ontology.example.com/tmf/CustomerFacingService"
+    },
+    "ResourceFacingService": {
+      "@id": "https://ontology.example.com/tmf/ResourceFacingService"
+    },
+    "Product": {
+      "@id": "https://ontology.example.com/tmf/Product"
+    },
+    "Party": {
+      "@id": "https://ontology.example.com/tmf/Party"
+    },
+    "Alarm": {
+      "@id": "https://ontology.example.com/tmf/Alarm"
+    },
+    "PerformanceIndicator": {
+      "@id": "https://ontology.example.com/tmf/PerformanceIndicator"
+    },
+    "Agreement": {
+      "@id": "https://ontology.example.com/tmf/Agreement"
+    },
+    "operationalState": {
+      "@id": "https://ontology.example.com/tmf/hasOperationalState",
+      "@type": "xsd:string"
+    },
+    "adminState": {
+      "@id": "https://ontology.example.com/tmf/hasAdminState",
+      "@type": "xsd:string"
+    },
+    "nfType": {
+      "@id": "https://ontology.example.com/tmf/hasNfType",
+      "@type": "xsd:string"
+    },
+    "perceivedSeverity": {
+      "@id": "https://ontology.example.com/tmf/hasPerceivedSeverity",
+      "@type": "xsd:string"
+    },
+    "alarmState": {
+      "@id": "https://ontology.example.com/tmf/hasAlarmState",
+      "@type": "xsd:string"
+    },
+    "probableCause": {
+      "@id": "https://ontology.example.com/tmf/hasProbableCause",
+      "@type": "xsd:string"
+    },
+    "specificProblem": {
+      "@id": "https://ontology.example.com/tmf/hasSpecificProblem",
+      "@type": "xsd:string"
+    },
+    "serviceState": {
+      "@id": "https://ontology.example.com/tmf/hasServiceState",
+      "@type": "xsd:string"
+    },
+    "confidence": {
+      "@id": "https://ontology.example.com/tmf/hasConfidenceScore",
+      "@type": "xsd:decimal"
+    },
+    "derivedBy": {
+      "@id": "https://ontology.example.com/tmf/derivationMethod",
+      "@type": "xsd:string"
+    },
+    "sourceRef": {
+      "@id": "https://ontology.example.com/tmf/sourceRef",
+      "@type": "xsd:anyURI"
+    },
+    "kpiType": {
+      "@id": "https://ontology.example.com/tmf/kpiType",
+      "@type": "xsd:string"
+    },
+    "breachIndicator": {
+      "@id": "https://ontology.example.com/tmf/breachIndicator",
+      "@type": "xsd:boolean"
+    },
+    "thresholdHigh": {
+      "@id": "https://ontology.example.com/tmf/thresholdHigh",
+      "@type": "xsd:decimal"
+    },
+    "sidDomain": {
+      "@id": "https://ontology.example.com/tmf/sidDomain",
+      "@type": "xsd:string"
+    },
+    "tmfApiId": {
+      "@id": "https://ontology.example.com/tmf/tmfApiId",
+      "@type": "xsd:string"
+    }
+  }
+}

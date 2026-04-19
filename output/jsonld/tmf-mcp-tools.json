@@ -1,0 +1,160 @@
+{
+  "mcp_tools": [
+    {
+      "name": "get_network_function_status",
+      "description": "Returns the operational and administrative state of a 5G network function (TMF639).",
+      "x-semantic-context": "https://ontology.example.com/tmf/jsonld/tmf-context.json",
+      "x-tmf-api": "TMF639",
+      "x-sid-class": "https://ontology.example.com/tmf/NetworkFunction",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "nf_iri": {
+            "type": "string",
+            "description": "IRI of the network function resource"
+          },
+          "nf_type": {
+            "type": "string",
+            "enum": [
+              "AMF",
+              "SMF",
+              "UPF",
+              "gNB",
+              "PCF",
+              "UDM",
+              "NRF"
+            ]
+          }
+        },
+        "required": [
+          "nf_iri"
+        ]
+      }
+    },
+    {
+      "name": "raise_alarm",
+      "description": "Records a network alarm with ITU-T X.733 attributes and PROV-O provenance (TMF642).",
+      "x-semantic-context": "https://ontology.example.com/tmf/jsonld/tmf-context.json",
+      "x-tmf-api": "TMF642",
+      "x-sid-class": "https://ontology.example.com/tmf/Alarm",
+      "x-shacl-gate": "https://ontology.example.com/tmf/shapes/tmf-shapes.ttl#AlarmShape",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "alarm_type": {
+            "type": "string",
+            "enum": [
+              "CommunicationsAlarm",
+              "EquipmentAlarm",
+              "QualityOfServiceAlarm",
+              "ProcessingErrorAlarm",
+              "EnvironmentalAlarm",
+              "SecurityViolation"
+            ]
+          },
+          "perceived_severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "Major",
+              "Minor",
+              "Warning",
+              "Indeterminate"
+            ]
+          },
+          "probable_cause": {
+            "type": "string"
+          },
+          "specific_problem": {
+            "type": "string"
+          },
+          "source_resource_iri": {
+            "type": "string"
+          },
+          "raised_by_iri": {
+            "type": "string"
+          },
+          "raised_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "alarm_type",
+          "perceived_severity",
+          "source_resource_iri",
+          "raised_by_iri",
+          "raised_at"
+        ]
+      }
+    },
+    {
+      "name": "record_kpi",
+      "description": "Records a KPI measurement or ML-derived metric with PROV-O provenance (SID ResourcePerformance / TMF688).",
+      "x-semantic-context": "https://ontology.example.com/tmf/jsonld/tmf-context.json",
+      "x-tmf-api": "TMF688",
+      "x-sid-class": "https://ontology.example.com/tmf/PerformanceIndicator",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_iri": {
+            "type": "string"
+          },
+          "kpi_type": {
+            "type": "string",
+            "enum": [
+              "AVAILABILITY",
+              "LATENCY",
+              "PACKET_LOSS",
+              "THROUGHPUT",
+              "SIGNAL_STRENGTH",
+              "CAPACITY",
+              "ML_CONFIDENCE",
+              "PSI_SCORE",
+              "DRIFT_SCORE"
+            ]
+          },
+          "numeric_value": {
+            "type": "number"
+          },
+          "unit_of_measure": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "derivation": {
+            "type": "string",
+            "enum": [
+              "MEASURED",
+              "INFERRED",
+              "IMPORTED",
+              "SYNTHESIZED"
+            ]
+          },
+          "source_ref": {
+            "type": "string"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recorded_by_iri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "resource_iri",
+          "kpi_type",
+          "numeric_value",
+          "confidence",
+          "derivation",
+          "observed_at",
+          "recorded_by_iri"
+        ]
+      }
+    }
+  ]
+}

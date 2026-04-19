@@ -1,0 +1,130 @@
+{
+  "mcp_tools": [
+    {
+      "name": "record_observation",
+      "description": "Records a sensor or agent observation against an asset with full PROV-O provenance.",
+      "x-semantic-context": "https://ontology.example.com/enterprise/jsonld/enterprise-context.json",
+      "x-shacl-gate": "https://ontology.example.com/enterprise/shapes/agent-gate.ttl#ObservationAcceptanceGate",
+      "x-ontology-class": "https://ontology.example.com/enterprise/ObservationRecord",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "description": "IRI of the target asset"
+          },
+          "observation_type": {
+            "type": "string"
+          },
+          "numeric_value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "derivation": {
+            "type": "string",
+            "enum": [
+              "MEASURED",
+              "INFERRED",
+              "IMPORTED",
+              "SYNTHESIZED"
+            ]
+          },
+          "source_ref": {
+            "type": "string",
+            "format": "uri"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agent_iri": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "asset_id",
+          "observation_type",
+          "confidence",
+          "derivation",
+          "observed_at",
+          "agent_iri"
+        ]
+      }
+    },
+    {
+      "name": "create_domain_event",
+      "description": "Creates a domain event (incident, maintenance, inspection, audit) with participant and policy linkage.",
+      "x-semantic-context": "https://ontology.example.com/enterprise/jsonld/enterprise-context.json",
+      "x-shacl-gate": "https://ontology.example.com/enterprise/shapes/enterprise-shapes.ttl#DomainEventCompletenessShape",
+      "x-ontology-class": "https://ontology.example.com/enterprise/DomainEvent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "INCIDENT",
+              "MAINTENANCE",
+              "INSPECTION",
+              "COMPLIANCE_AUDIT",
+              "CHANGE"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "asset_id": {
+            "type": "string"
+          },
+          "initiated_by": {
+            "type": "string",
+            "description": "Agent IRI"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "event_type",
+          "title",
+          "asset_id",
+          "initiated_by",
+          "started_at"
+        ]
+      }
+    },
+    {
+      "name": "validate_payload",
+      "description": "Validates a JSON-LD payload against the enterprise SHACL shapes before any action.",
+      "x-semantic-context": "https://ontology.example.com/enterprise/jsonld/enterprise-context.json",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "object",
+            "description": "JSON-LD payload to validate"
+          },
+          "shape_class": {
+            "type": "string",
+            "description": "Target SHACL shape name"
+          }
+        },
+        "required": [
+          "payload"
+        ]
+      }
+    }
+  ]
+}
