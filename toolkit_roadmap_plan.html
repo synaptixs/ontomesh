@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontology Toolkit — Implementation Roadmap</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+:root {
+  --ink: #111827;
+  --paper: #ffffff;
+  --off: #f9fafb;
+  --rule: #e5e7eb;
+  --muted: #6b7280;
+  --p1: #7c3aed; --p1l: #f5f3ff;
+  --p2: #0369a1; --p2l: #f0f9ff;
+  --p3: #047857; --p3l: #ecfdf5;
+  --done: #15803d; --donel: #f0fdf4;
+  --warn: #b45309; --warnl: #fffbeb;
+  --red:  #b91c1c;  --redl: #fef2f2;
+  --gold: #d97706;
+  --s1: #7c3aed; --s2: #0369a1; --s3: #047857; --s4: #374151;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
+.page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+/* Typography */
+.eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: .4rem; }
+h1 { font-size: 1.9rem; font-weight: 600; letter-spacing: -.025em; line-height: 1.2; margin-bottom: .6rem; }
+h2 { font-size: 1rem; font-weight: 600; }
+h3 { font-size: .85rem; font-weight: 600; letter-spacing: .01em; }
+.lead { font-size: 15px; color: var(--muted); max-width: 680px; line-height: 1.7; }
+code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--off); padding: 1px 5px; border-radius: 3px; }
+
+/* Section label */
+.sec-label {
+  display: flex; align-items: center; gap: .75rem;
+  margin: 2.5rem 0 1.25rem;
+  padding-bottom: .6rem;
+  border-bottom: 1.5px solid var(--ink);
+}
+.sec-label h2 { font-size: .9rem; }
+.sec-label .num {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--muted); border: 1px solid var(--rule);
+  padding: 1px 7px; border-radius: 2px;
+}
+
+/* Badges */
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 2px; white-space: nowrap; letter-spacing: .03em; }
+.b-p1   { background: var(--p1l);   color: var(--p1); }
+.b-p2   { background: var(--p2l);   color: var(--p2); }
+.b-p3   { background: var(--p3l);   color: var(--p3); }
+.b-done { background: var(--donel); color: var(--done); }
+.b-warn { background: var(--warnl); color: var(--warn); }
+.b-red  { background: var(--redl);  color: var(--red); }
+.b-grey { background: var(--off);   color: var(--muted); }
+
+/* Stats row */
+.stats { display: grid; grid-template-columns: repeat(5,1fr); gap: 0; border: 1px solid var(--rule); margin: 1.5rem 0 2.5rem; }
+.stat { padding: 1.1rem 1.25rem; border-right: 1px solid var(--rule); }
+.stat:last-child { border-right: none; }
+.stat-n { font-size: 1.8rem; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+.stat-l { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+/* Phase header cards */
+.phase-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 1.5rem 0; }
+.phase-card { border: 1px solid var(--rule); padding: 1.1rem; }
+.phase-card .ph-num { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+.phase-card h3 { font-size: .85rem; margin-bottom: 4px; }
+.phase-card .ph-sub { font-size: 12px; color: var(--muted); }
+.phase-card .ph-bar { height: 3px; margin-top: 12px; }
+
+/* Timeline Gantt */
+.gantt-wrap { overflow-x: auto; margin: 1rem 0; }
+.gantt { min-width: 800px; }
+.gantt-header { display: grid; grid-template-columns: 240px repeat(12,1fr); font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); border-bottom: 1px solid var(--rule); padding-bottom: 6px; margin-bottom: 4px; }
+.gantt-row { display: grid; grid-template-columns: 240px repeat(12,1fr); align-items: center; padding: 5px 0; border-bottom: 1px solid var(--off); }
+.gantt-row:hover { background: var(--off); }
+.gantt-label { font-size: 12px; padding-right: 12px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gantt-bar { border-radius: 2px; height: 14px; }
+.phase-sep { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 10px 0 4px; grid-column: 1 / -1; border-top: 1px solid var(--rule); margin-top: 4px; }
+
+/* Sprint table */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; background: var(--off); border-bottom: 1px solid var(--rule); border-top: 1px solid var(--rule); text-align: left; }
+td { padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+.area-row td { background: var(--off); font-weight: 600; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 7px 10px; }
+.t-feat { font-weight: 500; }
+.t-detail { font-size: 12px; color: var(--muted); }
+.t-owner { font-family: 'DM Mono', monospace; font-size: 11px; white-space: nowrap; }
+.t-dep { font-size: 11px; color: var(--muted); }
+.t-sprint { font-family: 'DM Mono', monospace; font-size: 11px; text-align: center; }
+.t-effort { font-family: 'DM Mono', monospace; font-size: 11px; text-align: right; white-space: nowrap; }
+
+/* Role chips */
+.role { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 2px; margin: 1px; }
+.r-arch  { background: #ede9fe; color: #5b21b6; }
+.r-eng   { background: #dbeafe; color: #1e40af; }
+.r-ml    { background: #fce7f3; color: #9d174d; }
+.r-plat  { background: #d1fae5; color: #065f46; }
+.r-gov   { background: #fef3c7; color: #92400e; }
+
+/* Risk table */
+.risk-hi  { color: var(--red); font-weight: 600; }
+.risk-med { color: var(--warn); font-weight: 600; }
+.risk-lo  { color: var(--done); font-weight: 600; }
+
+/* Dependency diagram text */
+.dep-note { font-size: 12px; color: var(--muted); font-style: italic; padding: 6px 0; }
+
+/* Gate cards */
+.gate-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 1rem 0; }
+.gate-card { border-left: 3px solid; padding: .9rem 1rem; background: var(--off); }
+.gate-card h3 { font-size: .8rem; margin-bottom: 6px; }
+.gate-card ul { padding-left: 1rem; font-size: 12px; color: var(--muted); }
+.gate-card li { margin-bottom: 3px; }
+
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- Header -->
+<div class="eyebrow">Implementation plan — April 2026</div>
+<h1>Ontology Toolkit Roadmap</h1>
+<p class="lead">Sequenced delivery plan for the 24-item future roadmap. Three phases across 12 months. Critical-path items first, strategic items last.</p>
+
+<!-- Summary stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-n">24</div><div class="stat-l">Roadmap items<br>across 3 phases</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--p1)">7</div><div class="stat-l">P1 — close gaps<br>~3 sprints</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--p2)">8</div><div class="stat-l">P2 — new capability<br>~9 sprints</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--p3)">9</div><div class="stat-l">P3 — strategic<br>~16 sprints</div></div>
+  <div class="stat"><div class="stat-n">271</div><div class="stat-l">Engineering-days<br>estimated total</div></div>
+</div>
+
+<!-- Phase overview cards -->
+<div class="sec-label"><h2>Phase overview</h2></div>
+<div class="phase-grid">
+  <div class="phase-card">
+    <div class="ph-num">PHASE 1 · M1–M3</div>
+    <h3>Seal the gaps</h3>
+    <div class="ph-sub">Close P1 items. TMF630 compliance, SPARQL tests, reasoner integration. Makes every existing artifact verifiable.</div>
+    <div class="ph-bar" style="background:var(--p1)"></div>
+  </div>
+  <div class="phase-card">
+    <div class="ph-num">PHASE 2A · M4–M6</div>
+    <h3>Data &amp; CI/CD</h3>
+    <div class="ph-sub">Log connector, CI/CD pipeline, LLM wizard assist. Broadens data sources and automates quality enforcement.</div>
+    <div class="ph-bar" style="background:var(--p2)"></div>
+  </div>
+  <div class="phase-card">
+    <div class="ph-num">PHASE 2B · M7–M9</div>
+    <h3>TMF &amp; federation</h3>
+    <div class="ph-sub">Remaining TMF domains, conflict resolution, ontology alignment. Completes the telecom vertical and enables multi-domain operation.</div>
+    <div class="ph-bar" style="background:var(--p2)"></div>
+  </div>
+  <div class="phase-card">
+    <div class="ph-num">PHASE 3 · M10–M12+</div>
+    <h3>Scale &amp; community</h3>
+    <div class="ph-sub">Graph store deploy, Docker kit, browser wizard, additional templates, W3C community group, drift detection.</div>
+    <div class="ph-bar" style="background:var(--p3)"></div>
+  </div>
+</div>
+
+<!-- Gantt chart -->
+<div class="sec-label"><h2>12-month delivery timeline</h2><span class="num">2-week sprints</span></div>
+<div class="gantt-wrap">
+<div class="gantt">
+  <div class="gantt-header">
+    <div></div>
+    <div>M1</div><div>M1</div><div>M2</div><div>M2</div>
+    <div>M3</div><div>M3</div><div>M4</div><div>M4</div>
+    <div>M5</div><div>M6</div><div>M7–9</div><div>M10–12</div>
+  </div>
+
+  <div class="phase-sep">Phase 1 — seal the gaps (months 1–3)</div>
+
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> TMF630 meta-attrs</div>
+    <div style="grid-column:2/4" class="gantt-bar" style="background:var(--p1);opacity:.8"></div>
+    <div style="grid-column:2/4; background:var(--p1); opacity:.85; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:4/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> href URL generation</div>
+    <div style="grid-column:2/3; background:var(--p1); opacity:.85; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:3/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> EntityRefOrValue pattern</div>
+    <div style="grid-column:3/5; background:var(--p1); opacity:.7; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:5/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> OWL profile selection</div>
+    <div style="grid-column:2/3; background:var(--p1); opacity:.6; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:3/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> Reasoner integration</div>
+    <div style="grid-column:3/6; background:var(--p1); opacity:.8; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:6/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> SPARQL CQ tests</div>
+    <div style="grid-column:4/7; background:var(--p1); border-radius:2px; height:14px;"></div>
+    <div style="grid-column:7/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1">P1</span> Full 31-criteria scoring</div>
+    <div style="grid-column:5/7; background:var(--p1); opacity:.75; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:7/14"></div>
+  </div>
+
+  <div class="phase-sep">Phase 2A — data &amp; CI/CD (months 4–6)</div>
+
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> CI/CD pipeline</div>
+    <div style="grid-column:7/9; background:var(--p2); border-radius:2px; height:14px;"></div>
+    <div style="grid-column:9/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> Log connector</div>
+    <div style="grid-column:7/11; background:var(--p2); border-radius:2px; height:14px;"></div>
+    <div style="grid-column:11/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> LLM-assisted wizard</div>
+    <div style="grid-column:8/10; background:var(--p2); opacity:.75; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:10/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> Named-graph RBAC</div>
+    <div style="grid-column:9/11; background:var(--p2); opacity:.8; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:11/14"></div>
+  </div>
+
+  <div class="phase-sep">Phase 2B — TMF &amp; federation (months 7–9)</div>
+
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> TMF remaining domains</div>
+    <div style="grid-column:11/12; background:var(--p2); border-radius:2px; height:14px;"></div>
+    <div style="grid-column:12/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> TMF Event Hub</div>
+    <div style="grid-column:11/12; background:var(--p2); opacity:.7; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:12/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> Conflict resolution</div>
+    <div style="grid-column:11/13; background:var(--p2); opacity:.85; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:13/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2">P2</span> Ontology alignment</div>
+    <div style="grid-column:11/13; background:var(--p2); opacity:.7; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:13/14"></div>
+  </div>
+
+  <div class="phase-sep">Phase 3 — scale &amp; community (months 10–12+)</div>
+
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3">P3</span> Graph store publishing</div>
+    <div style="grid-column:13/14; background:var(--p3); border-radius:2px; height:14px;"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3">P3</span> Docker Compose kit</div>
+    <div style="grid-column:13/14; background:var(--p3); opacity:.8; border-radius:2px; height:14px;"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3">P3</span> Industry templates (+5)</div>
+    <div style="grid-column:13/14; background:var(--p3); opacity:.7; border-radius:2px; height:14px;"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3">P3</span> Drift detection extension</div>
+    <div style="grid-column:13/14; background:var(--p3); opacity:.75; border-radius:2px; height:14px;"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3">P3</span> Browser wizard / modular OWL</div>
+    <div style="grid-column:13/14; background:var(--p3); opacity:.6; border-radius:2px; height:14px;"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3">P3</span> W3C Community Group</div>
+    <div style="grid-column:13/14; background:var(--p3); opacity:.5; border-radius:2px; height:14px;"></div>
+  </div>
+</div>
+</div>
+
+<!-- Sprint plan -->
+<div class="sec-label"><h2>Sprint-level delivery plan</h2><span class="num">2-week sprints · effort in days</span></div>
+
+<table>
+<colgroup>
+  <col style="width:55px">
+  <col style="width:55px">
+  <col style="width:185px">
+  <col>
+  <col style="width:120px">
+  <col style="width:65px">
+  <col style="width:50px">
+</colgroup>
+<thead>
+<tr><th>Phase</th><th>Sprint</th><th>Item</th><th>Scope &amp; deliverable</th><th>Roles</th><th>Depends on</th><th>Effort</th></tr>
+</thead>
+<tbody>
+
+<!-- PHASE 1 -->
+<tr class="area-row"><td colspan="7">Phase 1 — Seal the gaps &nbsp;·&nbsp; Months 1–3 &nbsp;·&nbsp; ~27 engineering-days</td></tr>
+
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S1</td>
+  <td class="t-feat">TMF630 meta-attributes</td>
+  <td class="t-detail">Add <code>@baseType</code>, <code>@schemaLocation</code>, <code>@referredType</code> to <code>tmf-context.json</code> and all 4 sample payloads. Add to MCP tool output schemas. Update CQ-TMF tests to validate presence. Update TMF630 compliance assessment.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">—</td>
+  <td class="t-effort">2d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S1</td>
+  <td class="t-feat">href URL generation</td>
+  <td class="t-detail">Add <code>href</code> as a computed annotation in the JSON-LD context following <code>/{apiRoot}/{resource}/{id}</code> pattern. Populate in all payloads. Document URL pattern per TMF API in <code>TMF_API_MAP</code>.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">↑ meta-attrs</td>
+  <td class="t-effort">1d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S1</td>
+  <td class="t-feat">OWL profile selection</td>
+  <td class="t-detail">Add profile detection to onboarding wizard (Step 2): if generated axiom count &gt;50K → suggest EL; if role chains or nominals present → require DL. Outputs a <code>profile_recommendation.md</code> alongside the schema.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">—</td>
+  <td class="t-effort">2d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S2</td>
+  <td class="t-feat">EntityRefOrValue pattern</td>
+  <td class="t-detail">Add <code>RefOrValue</code> support to <code>jsonld_generator.py</code>: a reference form (id + href + @referredType only) and a value form (full inline). Update all FK-linked properties in sample payloads to demonstrate both forms. Add SHACL shape for reference form validation.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-eng">Data Eng</span></td>
+  <td class="t-dep">↑ meta-attrs</td>
+  <td class="t-effort">5d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S3</td>
+  <td class="t-feat">Reasoner integration</td>
+  <td class="t-detail">Integrate ROBOT framework: <code>robot reason</code> (ELK for EL profile, HermiT for DL) run after Phases 2 and 3. Class hierarchy snapshot stored; diff fails the build on unexpected hierarchy changes. Unsatisfiable classes reported as CRITICAL findings.</td>
+  <td><span class="role r-eng">Platform Eng</span> <span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">ROBOT CLI</td>
+  <td class="t-effort">5d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S4</td>
+  <td class="t-feat">SPARQL CQ test suite</td>
+  <td class="t-detail">Load generated Turtle into Oxigraph (lightweight, zero-install SPARQL engine). Run all CQ tests as SPARQL SELECT/ASK against the RDF graph. Replace SQL equivalents. Results include graph-path validation that SQL cannot provide (e.g. multi-hop PROV-O chains). New <code>tests/sparql/*.sparql</code> files.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-eng">Platform Eng</span></td>
+  <td class="t-dep">Oxigraph binary</td>
+  <td class="t-effort">8d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p1">P1</span></td>
+  <td class="t-sprint">S5</td>
+  <td class="t-feat">Full 31-criteria auto-score</td>
+  <td class="t-detail">Automate the remaining 17 governance criteria by introspecting: shape coverage per class (Criteria: Structural Constraints), CQ coverage per ontology class (Competency Question Coverage), SPARQL test pass rate (Semantic Rule Coverage), sensitivity annotation completeness. Score written into <code>governance_scorecard.csv</code> with evidence links.</td>
+  <td><span class="role r-gov">Governance</span> <span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">↑ SPARQL CQs<br>↑ Reasoner</td>
+  <td class="t-effort">4d</td>
+</tr>
+
+<!-- PHASE 2A -->
+<tr class="area-row"><td colspan="7">Phase 2A — Data &amp; CI/CD &nbsp;·&nbsp; Months 4–6 &nbsp;·&nbsp; ~34 engineering-days</td></tr>
+
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S6</td>
+  <td class="t-feat">CI/CD pipeline</td>
+  <td class="t-detail">Ship <code>.github/workflows/ontology.yml</code> (GitHub Actions) and <code>Jenkinsfile</code>. Stages: (1) reasoner consistency, (2) SHACL validation, (3) SPARQL CQ tests, (4) regression gate, (5) governance score delta report as PR comment. Blocks merge on Critical SHACL violations or CQ regressions.</td>
+  <td><span class="role r-eng">Platform Eng</span></td>
+  <td class="t-dep">↑ SPARQL CQs<br>↑ Reasoner</td>
+  <td class="t-effort">6d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S6–S8</td>
+  <td class="t-feat">Structured log connector</td>
+  <td class="t-detail">New <code>src/log_connector.py</code>. Format detectors: syslog RFC5424, JSON-lines, CEF, OpenTelemetry trace, plain regex. Entity extractor anchored to <code>ontology_metadata</code> class names and external_id patterns. Produces ObservationRecord instances with <code>derivation_method=IMPORTED</code>, <code>source_ref=file:line</code>, <code>confidence_score</code> from match certainty. CLI: <code>python3 toolkit.py --phase log --log-path /var/log/*.log</code></td>
+  <td><span class="role r-eng">Data Eng</span> <span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">PROV-O patterns<br>ontology_metadata</td>
+  <td class="t-effort">15d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S7</td>
+  <td class="t-feat">LLM-assisted wizard</td>
+  <td class="t-detail">Add optional <code>--llm</code> flag to <code>onboard.py</code>. On domain description entry, call the Anthropic API (claude-sonnet) to suggest entities, events, relationships, and 8 CQs. User reviews and edits suggestions rather than typing from scratch. Estimated onboarding time: 15 minutes → &lt;5 minutes.</td>
+  <td><span class="role r-eng">Data Eng</span></td>
+  <td class="t-dep">Anthropic API key</td>
+  <td class="t-effort">5d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S8</td>
+  <td class="t-feat">Named-graph RBAC</td>
+  <td class="t-detail">Generate working access control configs from sensitivity tier annotations: (1) Stardog RBAC policy file, (2) Apache Fuseki/Shiro config, (3) Amazon Neptune IAM policy JSON. Each config partitions the RDF store into 4 named graphs (Public, Internal, Confidential, Restricted) with role-based access. CLI: <code>python3 toolkit.py --phase security --store stardog</code></td>
+  <td><span class="role r-eng">Platform Eng</span> <span class="role r-gov">Security</span></td>
+  <td class="t-dep">Sensitivity tiers<br>Graph store</td>
+  <td class="t-effort">8d</td>
+</tr>
+
+<!-- PHASE 2B -->
+<tr class="area-row"><td colspan="7">Phase 2B — TMF &amp; Federation &nbsp;·&nbsp; Months 7–9 &nbsp;·&nbsp; ~49 engineering-days</td></tr>
+
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S9–S11</td>
+  <td class="t-feat">TMF remaining domains</td>
+  <td class="t-detail">Add ~8 tables and ~15 TMF Open APIs not yet in schema: Revenue Management (TMF678 Customer Bill, TMF679 Product Offering Qualification), Trouble (TMF621), Network Slice Mgmt (TMF645), Service Quality (TMF657), Geographic Site (TMF674). Update SID hierarchy, seed data, CQ catalog, TMF API coverage map.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-eng">Data Eng</span></td>
+  <td class="t-dep">TMF SID hierarchy<br>TMF seed data</td>
+  <td class="t-effort">20d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S9</td>
+  <td class="t-feat">TMF Event Hub</td>
+  <td class="t-detail">Model TMF630 Part 1 §5 notification pattern: <code>EventSubscription</code> OWL class, <code>tmf_event_subscription</code> table (callback_url, event_type, status), SHACL shape, MCP tool <code>subscribe_to_events</code>. Enables async agent notification in ODA-compliant deployments.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">TMF schema<br>JSON-LD context</td>
+  <td class="t-effort">5d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S10–S11</td>
+  <td class="t-feat">Multi-agent conflict resolution</td>
+  <td class="t-detail">Implement the 3-tier resolution chain (framework Section 10.1): Tier 1 — SHACL axiom check rejects logically inconsistent assertion. Tier 2 — priority chain (measured &gt; derived &gt; imported &gt; default). Tier 3 — human escalation queue (<code>tmf_conflict_event</code> table). SPARQL ASK conflict detection query. PROV-O <code>wasInvalidatedBy</code> on losing assertions.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-ml">AI/ML Eng</span></td>
+  <td class="t-dep">PROV-O patterns<br>SHACL agent gate</td>
+  <td class="t-effort">10d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p2">P2</span></td>
+  <td class="t-sprint">S11–S12</td>
+  <td class="t-feat">Ontology alignment &amp; federation</td>
+  <td class="t-detail">Generate <code>owl:equivalentClass</code> and <code>skos:exactMatch</code> axioms aligning the generated ontology with DOLCE, FOAF, Schema.org, and SOSA (W3C Sensor ontology for observations). Produce alignment ontology as separate Turtle module. SPARQL SERVICE federation endpoint configuration for multi-domain queries across named graphs.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">OWL ontology<br>SID hierarchy</td>
+  <td class="t-effort">12d</td>
+</tr>
+
+<!-- PHASE 3 -->
+<tr class="area-row"><td colspan="7">Phase 3 — Scale &amp; Community &nbsp;·&nbsp; Months 10–12+ &nbsp;·&nbsp; ~161 engineering-days</td></tr>
+
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S13</td>
+  <td class="t-feat">Graph store publishing</td>
+  <td class="t-detail">One-command upload of all Turtle artifacts to: Apache Jena Fuseki, Stardog, Oxigraph, Amazon Neptune, Ontotext GraphDB. With named-graph partitioning by sensitivity tier. CLI: <code>python3 toolkit.py --phase publish --store fuseki --endpoint http://host:3030</code></td>
+  <td><span class="role r-eng">Platform Eng</span></td>
+  <td class="t-dep">↑ SPARQL CQs<br>↑ Named-graph RBAC</td>
+  <td class="t-effort">8d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S13</td>
+  <td class="t-feat">Docker Compose kit</td>
+  <td class="t-detail">Single <code>docker-compose.yml</code> spinning up: toolkit (Python), Oxigraph SPARQL endpoint, SHACL validation service, OpenAPI gateway with TMF URL patterns, pgAdmin (if PostgreSQL selected). Full stack demo in one command. Includes pre-loaded telecom and healthcare examples.</td>
+  <td><span class="role r-eng">Platform Eng</span></td>
+  <td class="t-dep">↑ Graph store publish<br>↑ CI/CD</td>
+  <td class="t-effort">5d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S14</td>
+  <td class="t-feat">Drift detection ontology extension</td>
+  <td class="t-detail">Extend <code>PerformanceIndicator</code> class to natively model ML monitoring metrics: PSI (Population Stability Index), KL/JS divergence, calibration score, log template shift. Adds <code>DriftObservation</code> OWL subclass, dedicated SHACL shapes, and SKOS concepts. Direct semantic home for the ML Drift Monitoring white paper.</td>
+  <td><span class="role r-ml">ML Eng</span> <span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">PerformanceIndicator</td>
+  <td class="t-effort">8d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S14–S16</td>
+  <td class="t-feat">Industry templates (+5)</td>
+  <td class="t-detail">Add: Energy &amp; Utilities (IEC CIM alignment), Logistics &amp; Supply Chain, Government (DCAT/INSPIRE alignment), Insurance, Pharmaceuticals (IDMP alignment). Each template includes domain-specific entities, events, relationships, 8+ CQs, and a sensitivity classification guide.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-gov">Domain SMEs</span></td>
+  <td class="t-dep">Onboarding wizard</td>
+  <td class="t-effort">25d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S15–S17</td>
+  <td class="t-feat">Modular OWL + browser wizard</td>
+  <td class="t-detail">Modular: <code>owl:imports</code> support for multi-team authoring — acyclicity check, cross-module IRI conflict detection, per-module versioning. Browser wizard: web form equivalent of <code>onboard.py</code> with drag-and-drop entity/relationship builder. Generates session JSON consumed by CLI pipeline.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-eng">Frontend</span></td>
+  <td class="t-dep">Session JSON stable</td>
+  <td class="t-effort">30d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S15–S20</td>
+  <td class="t-feat">Log entity discovery (NLP)</td>
+  <td class="t-detail">Statistical co-occurrence analysis over log corpora to surface candidate entities and relationships not yet in the ontology. Requires NLP pipeline (spaCy). Produces a scored candidate list for expert review — does not auto-add to ontology. Feeds back into onboarding wizard as entity suggestions.</td>
+  <td><span class="role r-ml">ML Eng</span></td>
+  <td class="t-dep">↑ Log connector<br>spaCy / NLP lib</td>
+  <td class="t-effort">30d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S16–S18</td>
+  <td class="t-feat">TMF630 Task + bulk operations</td>
+  <td class="t-detail">TMF630 Parts 4 and 7: async Task resource (OWL class, table, SHACL shape, MCP tool) and bulk import/export job pattern (ImportJob, ExportJob classes). Required for full TMF Open API conformance certification against the TMF Test Orchestration Platform.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-eng">Data Eng</span></td>
+  <td class="t-dep">↑ TMF domains<br>↑ EntityRefOrValue</td>
+  <td class="t-effort">12d</td>
+</tr>
+<tr>
+  <td><span class="badge b-p3">P3</span></td>
+  <td class="t-sprint">S18+</td>
+  <td class="t-feat">W3C Community Group</td>
+  <td class="t-detail">Publish framework and toolkit to a W3C Community Group. Prerequisites: CI/CD pipeline green, full 31-criteria governance auto-scored, SPARQL CQ tests in place, at least 3 pilot deployments documented. Migrate GitHub repo to community ownership. Define IPR policy, contribution governance, and versioning committee.</td>
+  <td><span class="role r-gov">Program Lead</span> <span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">↑ CI/CD<br>↑ Full scoring<br>3+ pilots</td>
+  <td class="t-effort">60d</td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- Phase gates -->
+<div class="sec-label" style="margin-top:2.5rem"><h2>Phase exit gates</h2></div>
+<div class="gate-grid">
+  <div class="gate-card" style="border-color:var(--p1)">
+    <h3 style="color:var(--p1)">Phase 1 exit</h3>
+    <ul>
+      <li>@baseType / @schemaLocation in all payloads</li>
+      <li>SPARQL CQs all passing (not SQL)</li>
+      <li>Reasoner: zero unsatisfiable classes</li>
+      <li>31/31 governance criteria auto-scored</li>
+      <li>Average governance score ≥ 4.2 / 5.0</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--p2)">
+    <h3 style="color:var(--p2)">Phase 2A exit</h3>
+    <ul>
+      <li>CI/CD pipeline blocks on Critical violations</li>
+      <li>Log connector processes syslog + JSON</li>
+      <li>RBAC config generated for ≥ 2 graph stores</li>
+      <li>Onboarding time ≤ 5 min (LLM-assisted)</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--p2)">
+    <h3 style="color:var(--p2)">Phase 2B exit</h3>
+    <ul>
+      <li>TMF API coverage ≥ 30 APIs</li>
+      <li>Conflict resolution: all 3 tiers tested</li>
+      <li>Alignment axioms to DOLCE + FOAF</li>
+      <li>Multi-domain SPARQL federation working</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--p3)">
+    <h3 style="color:var(--p3)">Phase 3 exit</h3>
+    <ul>
+      <li>One-command Docker stack running</li>
+      <li>10 industry templates available</li>
+      <li>≥ 3 documented pilot deployments</li>
+      <li>W3C Community Group charter filed</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Risk table -->
+<div class="sec-label" style="margin-top:2rem"><h2>Key risks and mitigations</h2></div>
+<table>
+<colgroup><col style="width:180px"><col style="width:70px"><col><col></colgroup>
+<thead><tr><th>Risk</th><th>Level</th><th>Impact</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr>
+  <td class="t-feat">SPARQL/reasoner toolchain adds install friction</td>
+  <td><span class="risk-hi">High</span></td>
+  <td class="t-detail">Oxigraph or ROBOT not available in restricted environments. Breaks CI/CD integration.</td>
+  <td class="t-detail">Ship pre-built binaries in a <code>bin/</code> directory. Provide Docker-only fallback. Make SPARQL tests optional (degrade gracefully to SQL).</td>
+</tr>
+<tr>
+  <td class="t-feat">LLM API cost and latency in wizard</td>
+  <td><span class="risk-med">Medium</span></td>
+  <td class="t-detail">Anthropic API calls add cost and latency to onboarding. Air-gapped environments cannot use it.</td>
+  <td class="t-detail">Keep LLM assistance strictly opt-in (<code>--llm</code> flag). Wizard remains fully functional without it. Cache suggestions in session JSON.</td>
+</tr>
+<tr>
+  <td class="t-feat">DB2 / Oracle client library complexity</td>
+  <td><span class="risk-med">Medium</span></td>
+  <td class="t-detail">IBM DB2 CLI driver and Oracle ODBC require OS-level installation that blocks adoption in container environments.</td>
+  <td class="t-detail">Oracle thin mode (oracledb) already avoids this. For DB2: document Docker base image with pre-installed CLI driver. Provide <code>Dockerfile.db2</code>.</td>
+</tr>
+<tr>
+  <td class="t-feat">TMF membership paywall on API specs</td>
+  <td><span class="risk-med">Medium</span></td>
+  <td class="t-detail">Some TMF specifications require membership to access. Blocks complete TMF630 conformance work.</td>
+  <td class="t-detail">All 18 current Open APIs are Apache 2.0 on GitHub. TMF630 design guidelines are available as older versions (4.2.0). Work from public sources; flag where v5.0 paywall blocks.</td>
+</tr>
+<tr>
+  <td class="t-feat">W3C Community Group consensus overhead</td>
+  <td><span class="risk-lo">Low</span></td>
+  <td class="t-detail">Community group governance slows iteration and version decisions.</td>
+  <td class="t-detail">Incubate in a personal/org GitHub repo until ≥3 external contributors and ≥3 pilot deployments exist. Only then propose migration.</td>
+</tr>
+<tr>
+  <td class="t-feat">Log format diversity underestimated</td>
+  <td><span class="risk-hi">High</span></td>
+  <td class="t-detail">5G NF logs, BSS/OSS logs, and cloud platform logs are far more heterogeneous than the 4 planned formats. MVP log connector may cover &lt;30% of real log volume.</td>
+  <td class="t-detail">Scope the connector to JSON-structured + syslog as the MVP. Build a plugin interface for custom format detectors from day one. Community contributions fill the gaps.</td>
+</tr>
+</tbody>
+</table>
+
+<!-- Team model -->
+<div class="sec-label" style="margin-top:2rem"><h2>Recommended team model</h2></div>
+<table>
+<colgroup><col style="width:170px"><col><col style="width:120px"><col style="width:80px"></colgroup>
+<thead><tr><th>Role</th><th>Responsibilities across roadmap</th><th>Phases active</th><th>FTE</th></tr></thead>
+<tbody>
+<tr>
+  <td><span class="role r-arch">Ontology Engineer</span></td>
+  <td class="t-detail">OWL modeling, SHACL shapes, SID alignment, TMF domain extensions, alignment axioms, modular OWL. Primary owner of all Phase 2 ontology artifacts.</td>
+  <td>All phases</td>
+  <td class="t-effort">1.0</td>
+</tr>
+<tr>
+  <td><span class="role r-eng">Platform / Data Engineer</span></td>
+  <td class="t-detail">CI/CD pipeline, SPARQL endpoint, graph store publishing, Docker Compose, database connectors, log connector format adapters, RBAC configuration generation.</td>
+  <td>P1 S3+, P2, P3</td>
+  <td class="t-effort">0.5–1.0</td>
+</tr>
+<tr>
+  <td><span class="role r-ml">ML / AI Engineer</span></td>
+  <td class="t-detail">LLM-assisted wizard, conflict resolution logic, log entity discovery NLP pipeline, drift detection ontology extension. Cross-cuts with ML monitoring white paper outputs.</td>
+  <td>P2A S7, P3</td>
+  <td class="t-effort">0.25–0.5</td>
+</tr>
+<tr>
+  <td><span class="role r-gov">Governance / Domain SME</span></td>
+  <td class="t-detail">Signs off scope charters per industry template, validates sensitivity classifications, reviews 31-criteria governance scorecard, approves MAJOR version increments. Provides domain-specific CQs for new templates.</td>
+  <td>All phases (part-time)</td>
+  <td class="t-effort">0.1–0.2</td>
+</tr>
+<tr>
+  <td><span class="role r-eng">Frontend Engineer</span></td>
+  <td class="t-detail">Browser-based onboarding wizard (Phase 3 only). Drag-and-drop entity/relationship builder. Generates session JSON consumed by CLI pipeline. React or plain HTML — no framework required.</td>
+  <td>P3 S15+ only</td>
+  <td class="t-effort">0.5 (P3 only)</td>
+</tr>
+</tbody>
+</table>
+
+<footer>
+  <span>Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.3</span>
+  <span>Total estimated effort: 271 engineering-days across 12 months</span>
+</footer>
+
+</div>
+</body>
+</html>
