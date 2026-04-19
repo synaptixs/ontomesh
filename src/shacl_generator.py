@@ -207,6 +207,36 @@ shapes:DomainEventCompletenessShape
 """
 
 
+def _entity_ref_shape() -> str:
+    """SHACL shape validating the EntityRefOrValue reference form (TMF630 Part 2).
+
+    A reference form MUST carry @referredType and href. The @id is the IRI.
+    The value form carries a full @type and all attributes — validated by the
+    target class NodeShape, not this shape.
+    """
+    return """\
+# ── EntityRefOrValue: Reference Form Validation ──────────────────────
+shapes:EntityRefShape
+  a sh:NodeShape ;
+  sh:targetClass :EntityRef ;
+  sh:property [
+    sh:path :referredType ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "EntityRef (reference form) must carry @referredType." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :href ;
+    sh:minCount 1 ;
+    sh:datatype xsd:anyURI ;
+    sh:message "EntityRef (reference form) must carry a href following /{apiRoot}/{resource}/{id}." ;
+    sh:severity sh:Violation
+  ] .
+
+"""
+
+
 def generate_shacl(intro: DBIntrospector, output_dir: str):
     tables = intro.introspect_all()
     os.makedirs(output_dir, exist_ok=True)
@@ -221,6 +251,7 @@ def generate_shacl(intro: DBIntrospector, output_dir: str):
     # Add domain-specific extensions
     lines.append(_observation_extra_shapes())
     lines.append(_event_shape_extensions())
+    lines.append(_entity_ref_shape())
 
     shapes_path = os.path.join(output_dir, "enterprise-shapes.ttl")
     with open(shapes_path, "w") as f:

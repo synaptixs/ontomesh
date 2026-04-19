@@ -1,0 +1,18 @@
+# CQ-004: Which agent produced each observation (PROV-O: wasGeneratedBy)?
+# Priority: Critical
+# Validates: PROV-O provenance, agent-observation relationship
+# Multi-hop: ObservationRecord → prov:wasGeneratedBy → Activity → prov:wasAssociatedWith → Agent
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?obs ?obsType ?activity ?agent ?agentLabel WHERE {
+  ?obs a :ObservationRecord ;
+       prov:wasGeneratedBy ?activity .
+  ?activity prov:wasAssociatedWith ?agent .
+  OPTIONAL { ?obs :observationType ?obsType }
+  OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+ORDER BY DESC(?obs)

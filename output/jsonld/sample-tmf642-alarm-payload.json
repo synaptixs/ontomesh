@@ -4,7 +4,10 @@
     "Alarm",
     "CommunicationsAlarm"
   ],
+  "@baseType": "Alarm",
+  "@schemaLocation": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF642-Alarm-v4.0.0.swagger.json",
   "@id": "https://gtc.example.com/alarms/ALM-20260410-001",
+  "href": "https://gtc.example.com/tmf-api/alarmManagement/v4/alarm/ALM-20260410-001",
   "alarmType": "CommunicationsAlarm",
   "perceivedSeverity": "Critical",
   "alarmState": "Cleared",
@@ -12,7 +15,9 @@
   "specificProblem": "gNB 043 lost uplink connectivity to AMF \u2014 packet loss 18.7%",
   "sourceResource": {
     "@type": "NetworkFunction",
+    "@referredType": "NetworkFunction",
     "@id": "https://gtc.example.com/resources/gnb-043",
+    "href": "https://gtc.example.com/tmf-api/resourceInventoryManagement/v5/resource/gnb-043",
     "name": "gNB Site 043",
     "nfType": "gNB",
     "operationalState": "Disabled",
@@ -23,7 +28,9 @@
   "generatedAt": "2026-04-10T02:14:00Z",
   "generatedBy": {
     "@type": "Party",
+    "@referredType": "Party",
     "@id": "https://gtc.example.com/parties/ml-monitor-agent",
+    "href": "https://gtc.example.com/tmf-api/partyManagement/v5/individual/ml-monitor-agent",
     "name": "ML Monitor Agent"
   },
   "_tmf": {

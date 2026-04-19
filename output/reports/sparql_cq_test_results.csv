@@ -1,0 +1,9 @@
+cq_id,priority,status,question,backend,row_count,sample_result,validates,sparql_file
+CQ-001,Critical,PASS-STRUCTURAL,Which assets exist in the domain and who owns them?,rdflib,0,(TBox-only — no instance data in ontology),"Entity identification, relationship completeness",CQ-001-assets-and-owners.sparql
+CQ-002,Critical,PASS-STRUCTURAL,What type is each asset and what is its current status?,rdflib,0,(TBox-only — no instance data in ontology),"Asset type hierarchy, status semantics",CQ-002-asset-type-and-status.sparql
+CQ-003,Critical,PASS-STRUCTURAL,Which events have occurred against each asset?,rdflib,0,(TBox-only — no instance data in ontology),"Event modeling, asset-event relationship",CQ-003-events-per-asset.sparql
+CQ-004,Critical,PASS-STRUCTURAL,Which agent produced each observation (PROV-O: wasGeneratedBy)?,rdflib,0,(TBox-only — no instance data in ontology),"PROV-O provenance, agent-observation relationship",CQ-004-prov-agent-per-observation.sparql
+CQ-005,Critical,PASS-STRUCTURAL,What is the confidence score and derivation method for each observation?,rdflib,0,(TBox-only — no instance data in ontology),"Observation completeness, confidence modeling",CQ-005-confidence-and-derivation.sparql
+CQ-006,High,PASS-STRUCTURAL,What role does each agent hold and in what scope?,rdflib,0,(TBox-only — no instance data in ontology),"Role separation, agent-role relationship",CQ-006-agent-roles.sparql
+CQ-007,Critical,PASS-STRUCTURAL,"Which policy governed each event, and what was the compliance outcome?",rdflib,0,(TBox-only — no instance data in ontology),"Policy-event relationship, compliance modeling",CQ-007-policy-governance.sparql
+CQ-008,High,PASS,Which assets have observations with confidence below 0.8 (low-trust data)?,rdflib,0,(empty),"Confidence filtering, trust-level querying",CQ-008-low-confidence-observations.sparql

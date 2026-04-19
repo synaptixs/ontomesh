@@ -18,6 +18,22 @@
       "@id": "prov:wasAssociatedWith",
       "@type": "@id"
     },
+    "href": {
+      "@id": "https://ontology.example.com/tmf/href",
+      "@type": "xsd:anyURI"
+    },
+    "@baseType": {
+      "@id": "https://ontology.example.com/tmf/baseType",
+      "@type": "xsd:string"
+    },
+    "@schemaLocation": {
+      "@id": "https://ontology.example.com/tmf/schemaLocation",
+      "@type": "xsd:anyURI"
+    },
+    "@referredType": {
+      "@id": "https://ontology.example.com/tmf/referredType",
+      "@type": "xsd:string"
+    },
     "Resource": {
       "@id": "https://ontology.example.com/tmf/Resource"
     },

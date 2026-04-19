@@ -1,0 +1,18 @@
+# CQ-003: Which events have occurred against each asset?
+# Priority: Critical
+# Validates: Event modeling, asset-event relationship
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT ?event ?eventLabel ?eventType ?status ?asset ?assetLabel WHERE {
+  ?event a :DomainEvent ;
+         :refersToAsset ?asset .
+  OPTIONAL { ?event rdfs:label ?eventLabel }
+  OPTIONAL { ?event :hasEventType ?eventType }
+  OPTIONAL { ?event :hasStatus ?status }
+  OPTIONAL { ?asset rdfs:label ?assetLabel }
+}
+ORDER BY DESC(?event)

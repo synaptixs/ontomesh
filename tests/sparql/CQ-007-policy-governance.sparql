@@ -1,0 +1,21 @@
+# CQ-007: Which policy governed each event, and what was the compliance outcome?
+# Priority: Critical
+# Validates: Policy-event relationship, compliance modeling
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?event ?eventLabel ?policy ?policyCode ?policyType ?outcome WHERE {
+  ?event a :DomainEvent ;
+         :governedBy ?policy .
+  OPTIONAL { ?event rdfs:label ?eventLabel }
+  OPTIONAL { ?policy :policyCode ?policyCode }
+  OPTIONAL { ?policy :policyType ?policyType }
+  OPTIONAL {
+    ?policyApp :forEvent ?event ;
+               :appliesPolicy ?policy ;
+               :hasOutcome ?outcome .
+  }
+}
+ORDER BY DESC(?event)
