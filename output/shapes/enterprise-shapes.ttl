@@ -2498,3 +2498,23 @@ shapes:DomainEventCompletenessShape
     sh:severity sh:Violation
   ] .
 
+
+# ── EntityRefOrValue: Reference Form Validation ──────────────────────
+shapes:EntityRefShape
+  a sh:NodeShape ;
+  sh:targetClass :EntityRef ;
+  sh:property [
+    sh:path :referredType ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "EntityRef (reference form) must carry @referredType." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path :href ;
+    sh:minCount 1 ;
+    sh:datatype xsd:anyURI ;
+    sh:message "EntityRef (reference form) must carry a href following /{apiRoot}/{resource}/{id}." ;
+    sh:severity sh:Violation
+  ] .
+

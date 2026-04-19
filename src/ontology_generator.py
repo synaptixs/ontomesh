@@ -134,15 +134,9 @@ def _data_property_block(col: ColumnModel, table: TableModel) -> str:
     ]
     if col.description:
         lines.append(f'  rdfs:comment "{_str(col.description)}" ;')
-    lines.append(f"  :sensitivityTier :{col.sensitivity_tier} ;")
     if col.not_null:
-        lines.append(f"  # Required property (NOT NULL in schema)")
-    lines[-1] = lines[-1].rstrip(" ;") + " ."
-    if lines[-1].endswith("# Required property (NOT NULL in schema)."):
-        # fix comment becoming part of triple
-        lines[-1] = lines[-2][:-1] + " ."
-        lines.pop(-2)
-        lines.append("  # Required property (NOT NULL in schema)")
+        lines.append(f'  owl:minCardinality "1"^^xsd:nonNegativeInteger ;')
+    lines.append(f"  :sensitivityTier :{col.sensitivity_tier} .")
     return "\n".join(lines) + "\n"
 
 
@@ -307,6 +301,9 @@ def generate_ontology(intro: DBIntrospector, output_dir: str):
     print(f"  ✓ Ontology written      → {ontology_path}")
     _report_stats(tables, ontology_path)
 
+    # OWL profile selection — writes profile_recommendation.md
+    write_profile_recommendation(tables, ontology_path, output_dir)
+
     # ── Events sub-module ────────────────────────────────────────────
     event_content = (
         PREFIXES + "\n"
@@ -343,3 +340,97 @@ def _report_stats(tables, path):
     event_classes = sum(1 for t in tables if t.is_event_class)
     print(f"    Classes: {classes}  |  Data properties: {data_props}  "
           f"|  Object properties: {obj_props}  |  Event tables: {event_classes}")
+
+
+# ── OWL Profile Selection ────────────────────────────────────────────────
+
+def _detect_owl_profile(tables: list, ontology_path: str) -> dict:
+    """Detect the appropriate OWL 2 profile for the generated ontology.
+
+    Rules (aligned with OWL 2 profiles spec):
+    - EL profile:  count axioms <= 50000, no role chains, no nominals
+    - DL profile:  role chains (owl:propertyChainAxiom) or nominals (owl:oneOf) present
+    - RL profile:  data-only, no existential restrictions (not currently auto-detected)
+
+    Returns a dict with: profile, axiom_count, has_role_chains, has_nominals, rationale
+    """
+    classes     = len(tables)
+    data_props  = sum(len(t.data_properties) for t in tables)
+    obj_props   = sum(len(t.object_properties) for t in tables)
+    axiom_count = classes + data_props + obj_props
+
+    has_role_chains = False
+    has_nominals    = False
+    try:
+        with open(ontology_path) as f:
+            content = f.read()
+        has_role_chains = "propertyChainAxiom" in content
+        has_nominals    = "owl:oneOf" in content
+    except OSError:
+        pass
+
+    if has_role_chains or has_nominals:
+        profile  = "OWL 2 DL"
+        rationale = ("Role chains or nominals detected — OWL 2 DL required for "
+                     "full expressivity. Use HermiT or Pellet as the reasoner.")
+    elif axiom_count > 50_000:
+        profile  = "OWL 2 EL"
+        rationale = (f"Axiom count {axiom_count} exceeds 50 000 — OWL 2 EL recommended "
+                     "for tractable classification. Use ELK as the reasoner.")
+    else:
+        profile  = "OWL 2 EL"
+        rationale = (f"Axiom count {axiom_count} is within EL limits and no DL "
+                     "constructs detected — OWL 2 EL profile is sufficient. "
+                     "ELK reasoner recommended.")
+
+    return {
+        "profile":         profile,
+        "axiom_count":     axiom_count,
+        "classes":         classes,
+        "data_properties": data_props,
+        "object_properties": obj_props,
+        "has_role_chains": has_role_chains,
+        "has_nominals":    has_nominals,
+        "rationale":       rationale,
+        "reasoner":        "HermiT" if profile == "OWL 2 DL" else "ELK",
+    }
+
+
+def write_profile_recommendation(tables: list, ontology_path: str, output_dir: str) -> str:
+    """Write profile_recommendation.md alongside the schema artifacts."""
+    result = _detect_owl_profile(tables, ontology_path)
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "profile_recommendation.md")
+    lines = [
+        "# OWL 2 Profile Recommendation\n",
+        f"**Recommended profile:** {result['profile']}  \n",
+        f"**Recommended reasoner:** {result['reasoner']}  \n\n",
+        "## Axiom summary\n\n",
+        f"| Metric | Count |\n",
+        f"|--------|-------|\n",
+        f"| OWL classes | {result['classes']} |\n",
+        f"| Data properties | {result['data_properties']} |\n",
+        f"| Object properties | {result['object_properties']} |\n",
+        f"| **Total axioms (est.)** | **{result['axiom_count']}** |\n\n",
+        "## Decision rationale\n\n",
+        f"{result['rationale']}\n\n",
+        "## Profile decision rules\n\n",
+        "| Rule | Trigger | Profile |\n",
+        "|------|---------|--------|\n",
+        "| Role chains present | `owl:propertyChainAxiom` in ontology | OWL 2 DL |\n",
+        "| Nominals present | `owl:oneOf` in ontology | OWL 2 DL |\n",
+        "| Axiom count > 50 000 | Large schema | OWL 2 EL |\n",
+        "| Default | No complex constructs, ≤ 50 000 axioms | OWL 2 EL |\n\n",
+        "## Reasoner integration\n\n",
+        "Run the reasoner via ROBOT after Phase 2:\n\n",
+        "```bash\n",
+        f"robot reason --reasoner {result['reasoner'].lower()} \\\n",
+        "  --input output/ontology/enterprise.ttl \\\n",
+        "  --output output/ontology/enterprise-classified.ttl\n",
+        "```\n\n",
+        "*Generated by Ontology Toolkit — Phase 1 OWL Profile Selection*\n",
+    ]
+    with open(path, "w") as f:
+        f.writelines(lines)
+    print(f"  ✓ OWL profile recommendation → {path}  [{result['profile']}]")
+    return result["profile"]

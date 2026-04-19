@@ -161,6 +161,22 @@ def phase2_ontology(db_path: str, out_path: str):
     generate_ontology(intro, os.path.join(out_path, "ontology"))
     intro.close()
 
+    # Reasoner integration — classify and snapshot (graceful if ROBOT absent)
+    from reasoner import run_and_report
+    ontology_path = os.path.join(out_path, "ontology", "enterprise.ttl")
+    profile_path  = os.path.join(out_path, "ontology", "profile_recommendation.md")
+    profile = "OWL 2 EL"
+    try:
+        if os.path.isfile(profile_path):
+            with open(profile_path) as f:
+                for line in f:
+                    if "**Recommended profile:**" in line:
+                        profile = line.split("**Recommended profile:**")[1].strip().rstrip("  ").rstrip()
+                        break
+    except Exception:
+        pass
+    run_and_report(ontology_path, os.path.join(out_path, "ontology"), profile)
+
 
 def phase3_shacl(db_path: str, out_path: str):
     step(3, "Validation — SHACL Shape Generation")
@@ -253,6 +269,13 @@ def phase_test(db_path: str, out_path: str):
     run_cq_tests(intro, os.path.join(out_path, "reports"))
     intro.close()
 
+    # SPARQL CQ test suite
+    from sparql_tester import run_sparql_cq_tests
+    run_sparql_cq_tests(
+        os.path.join(out_path, "ontology"),
+        os.path.join(out_path, "reports"),
+    )
+
 
 def phase_report(out_path: str):
     step(0, "HTML Report Generation")
@@ -269,7 +292,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","tmf","test","report"],
+                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql"],
                         help="Run a specific phase only")
     parser.add_argument("--industry", default="Enterprise", help="Industry label for output")
     args = parser.parse_args()
@@ -279,15 +302,31 @@ def main():
 
     os.makedirs(args.out, exist_ok=True)
 
+    def phase_reasoner(db_path: str, out_path: str):
+        step(0, "Reasoner — OWL 2 Consistency Check + Hierarchy Snapshot")
+        from reasoner import run_and_report
+        ontology_path = os.path.join(out_path, "ontology", "enterprise.ttl")
+        run_and_report(ontology_path, os.path.join(out_path, "ontology"))
+
+    def phase_sparql(db_path: str, out_path: str):
+        step(0, "SPARQL CQ Tests")
+        from sparql_tester import run_sparql_cq_tests
+        run_sparql_cq_tests(
+            os.path.join(out_path, "ontology"),
+            os.path.join(out_path, "reports"),
+        )
+
     phases = {
-        "1":      [(phase1_foundation, [args.db, args.out])],
-        "2":      [(phase2_ontology,   [args.db, args.out])],
-        "3":      [(phase3_shacl,      [args.db, args.out])],
-        "4":      [(phase4_mapping,    [args.db, args.out])],
-        "5":      [(phase5_exchange,   [args.db, args.out])],
-        "tmf":    [(phase_tmf,         [args.db, args.out])],
-        "test":   [(phase_test,        [args.db, args.out])],
-        "report": [(phase_report,      [args.out])],
+        "1":       [(phase1_foundation, [args.db, args.out])],
+        "2":       [(phase2_ontology,   [args.db, args.out])],
+        "3":       [(phase3_shacl,      [args.db, args.out])],
+        "4":       [(phase4_mapping,    [args.db, args.out])],
+        "5":       [(phase5_exchange,   [args.db, args.out])],
+        "tmf":     [(phase_tmf,         [args.db, args.out])],
+        "test":    [(phase_test,        [args.db, args.out])],
+        "report":  [(phase_report,      [args.out])],
+        "reasoner":[(phase_reasoner,    [args.db, args.out])],
+        "sparql":  [(phase_sparql,      [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
