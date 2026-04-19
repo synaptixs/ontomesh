@@ -130,21 +130,21 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 
 <!-- Summary stats -->
 <div class="stats">
-  <div class="stat"><div class="stat-n">24</div><div class="stat-l">Roadmap items<br>across 3 phases</div></div>
-  <div class="stat"><div class="stat-n" style="color:var(--p1)">7</div><div class="stat-l">P1 — close gaps<br>~3 sprints</div></div>
+  <div class="stat"><div class="stat-n">32</div><div class="stat-l">Roadmap items<br>3 phases + runtime layer</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--done)">7</div><div class="stat-l">Phase 1 ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--p2)">8</div><div class="stat-l">P2 — new capability<br>~9 sprints</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--p3)">9</div><div class="stat-l">P3 — strategic<br>~16 sprints</div></div>
-  <div class="stat"><div class="stat-n">271</div><div class="stat-l">Engineering-days<br>estimated total</div></div>
+  <div class="stat"><div class="stat-n">326</div><div class="stat-l">Engineering-days<br>estimated total (incl. runtime)</div></div>
 </div>
 
 <!-- Phase overview cards -->
 <div class="sec-label"><h2>Phase overview</h2></div>
 <div class="phase-grid">
   <div class="phase-card">
-    <div class="ph-num">PHASE 1 · M1–M3</div>
+    <div class="ph-num">PHASE 1 · M1–M3 · ✓ COMPLETED APR 2026</div>
     <h3>Seal the gaps</h3>
     <div class="ph-sub">Close P1 items. TMF630 compliance, SPARQL tests, reasoner integration. Makes every existing artifact verifiable.</div>
-    <div class="ph-bar" style="background:var(--p1)"></div>
+    <div class="ph-bar" style="background:var(--done)"></div>
   </div>
   <div class="phase-card">
     <div class="ph-num">PHASE 2A · M4–M6</div>
@@ -164,6 +164,12 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div class="ph-sub">Graph store deploy, Docker kit, browser wizard, additional templates, W3C community group, drift detection.</div>
     <div class="ph-bar" style="background:var(--p3)"></div>
   </div>
+  <div class="phase-card" style="border-top:3px solid #7c3aed;margin-top:12px;grid-column:1/-1;background:#faf5ff">
+    <div class="ph-num" style="color:#7c3aed">RUNTIME LAYER · PARALLEL TRACK</div>
+    <h3>Ontology-augmented AI runtime</h3>
+    <div class="ph-sub">The consumption layer that connects toolkit artifacts to LLMs. Payload assembler, flavor registry, SHACL output gate, PROV-O response stamping, ObservationRecord feedback loop. Runs alongside all pipeline phases — not after them.</div>
+    <div class="ph-bar" style="background:#7c3aed"></div>
+  </div>
 </div>
 
 <!-- Gantt chart -->
@@ -177,42 +183,42 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div>M5</div><div>M6</div><div>M7–9</div><div>M10–12</div>
   </div>
 
-  <div class="phase-sep">Phase 1 — seal the gaps (months 1–3)</div>
+  <div class="phase-sep">Phase 1 — seal the gaps (months 1–3) · ✓ COMPLETED APR 2026</div>
 
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> TMF630 meta-attrs</div>
-    <div style="grid-column:2/4" class="gantt-bar" style="background:var(--p1);opacity:.8"></div>
-    <div style="grid-column:2/4; background:var(--p1); opacity:.85; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> TMF630 meta-attrs</div>
+    <div style="grid-column:2/4" class="gantt-bar" style="background:var(--done);opacity:.8"></div>
+    <div style="grid-column:2/4; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:4/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> href URL generation</div>
-    <div style="grid-column:2/3; background:var(--p1); opacity:.85; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> href URL generation</div>
+    <div style="grid-column:2/3; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:3/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> EntityRefOrValue pattern</div>
-    <div style="grid-column:3/5; background:var(--p1); opacity:.7; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> EntityRefOrValue pattern</div>
+    <div style="grid-column:3/5; background:var(--done); opacity:.7; border-radius:2px; height:14px;"></div>
     <div style="grid-column:5/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> OWL profile selection</div>
-    <div style="grid-column:2/3; background:var(--p1); opacity:.6; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> OWL profile selection</div>
+    <div style="grid-column:2/3; background:var(--done); opacity:.6; border-radius:2px; height:14px;"></div>
     <div style="grid-column:3/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> Reasoner integration</div>
-    <div style="grid-column:3/6; background:var(--p1); opacity:.8; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Reasoner integration</div>
+    <div style="grid-column:3/6; background:var(--done); opacity:.8; border-radius:2px; height:14px;"></div>
     <div style="grid-column:6/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> SPARQL CQ tests</div>
-    <div style="grid-column:4/7; background:var(--p1); border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> SPARQL CQ tests</div>
+    <div style="grid-column:4/7; background:var(--done); border-radius:2px; height:14px;"></div>
     <div style="grid-column:7/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1">P1</span> Full 31-criteria scoring</div>
-    <div style="grid-column:5/7; background:var(--p1); opacity:.75; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Full 31-criteria scoring</div>
+    <div style="grid-column:5/7; background:var(--done); opacity:.75; border-radius:2px; height:14px;"></div>
     <div style="grid-column:7/14"></div>
   </div>
 
@@ -260,6 +266,38 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div class="gantt-label"><span class="badge b-p2">P2</span> Ontology alignment</div>
     <div style="grid-column:11/13; background:var(--p2); opacity:.7; border-radius:2px; height:14px;"></div>
     <div style="grid-column:13/14"></div>
+  </div>
+
+  <div class="phase-sep" style="color:#7c3aed;border-color:#7c3aed">Runtime layer — parallel track (months 3–12, incremental)</div>
+
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span> Ontology flavor registry</div>
+    <div style="grid-column:6/8; background:#7c3aed; opacity:.85; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:8/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span> Data grounding module</div>
+    <div style="grid-column:6/9; background:#7c3aed; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:9/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span> Payload assembler</div>
+    <div style="grid-column:7/10; background:#7c3aed; opacity:.8; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:10/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span> Output SHACL gate</div>
+    <div style="grid-column:8/10; background:#7c3aed; opacity:.75; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:10/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span> PROV-O response stamping</div>
+    <div style="grid-column:9/11; background:#7c3aed; opacity:.7; border-radius:2px; height:14px;"></div>
+    <div style="grid-column:11/14"></div>
+  </div>
+  <div class="gantt-row">
+    <div class="gantt-label"><span class="badge b-p3" style="background:#f0edff;color:#5b21b6">RT</span> Runtime SDK + docs</div>
+    <div style="grid-column:11/14; background:#7c3aed; opacity:.65; border-radius:2px; height:14px;"></div>
   </div>
 
   <div class="phase-sep">Phase 3 — scale &amp; community (months 10–12+)</div>
@@ -310,10 +348,10 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 <tbody>
 
 <!-- PHASE 1 -->
-<tr class="area-row"><td colspan="7">Phase 1 — Seal the gaps &nbsp;·&nbsp; Months 1–3 &nbsp;·&nbsp; ~27 engineering-days</td></tr>
+<tr class="area-row"><td colspan="7">Phase 1 — Seal the gaps &nbsp;·&nbsp; Months 1–3 &nbsp;·&nbsp; ~27 engineering-days &nbsp;·&nbsp; ✓ COMPLETED APR 2026</td></tr>
 
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S1</td>
   <td class="t-feat">TMF630 meta-attributes</td>
   <td class="t-detail">Add <code>@baseType</code>, <code>@schemaLocation</code>, <code>@referredType</code> to <code>tmf-context.json</code> and all 4 sample payloads. Add to MCP tool output schemas. Update CQ-TMF tests to validate presence. Update TMF630 compliance assessment.</td>
@@ -322,7 +360,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">2d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S1</td>
   <td class="t-feat">href URL generation</td>
   <td class="t-detail">Add <code>href</code> as a computed annotation in the JSON-LD context following <code>/{apiRoot}/{resource}/{id}</code> pattern. Populate in all payloads. Document URL pattern per TMF API in <code>TMF_API_MAP</code>.</td>
@@ -331,7 +369,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">1d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S1</td>
   <td class="t-feat">OWL profile selection</td>
   <td class="t-detail">Add profile detection to onboarding wizard (Step 2): if generated axiom count &gt;50K → suggest EL; if role chains or nominals present → require DL. Outputs a <code>profile_recommendation.md</code> alongside the schema.</td>
@@ -340,7 +378,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">2d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S2</td>
   <td class="t-feat">EntityRefOrValue pattern</td>
   <td class="t-detail">Add <code>RefOrValue</code> support to <code>jsonld_generator.py</code>: a reference form (id + href + @referredType only) and a value form (full inline). Update all FK-linked properties in sample payloads to demonstrate both forms. Add SHACL shape for reference form validation.</td>
@@ -349,7 +387,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">5d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S3</td>
   <td class="t-feat">Reasoner integration</td>
   <td class="t-detail">Integrate ROBOT framework: <code>robot reason</code> (ELK for EL profile, HermiT for DL) run after Phases 2 and 3. Class hierarchy snapshot stored; diff fails the build on unexpected hierarchy changes. Unsatisfiable classes reported as CRITICAL findings.</td>
@@ -358,7 +396,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">5d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S4</td>
   <td class="t-feat">SPARQL CQ test suite</td>
   <td class="t-detail">Load generated Turtle into Oxigraph (lightweight, zero-install SPARQL engine). Run all CQ tests as SPARQL SELECT/ASK against the RDF graph. Replace SQL equivalents. Results include graph-path validation that SQL cannot provide (e.g. multi-hop PROV-O chains). New <code>tests/sparql/*.sparql</code> files.</td>
@@ -367,7 +405,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">8d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p1">P1</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S5</td>
   <td class="t-feat">Full 31-criteria auto-score</td>
   <td class="t-detail">Automate the remaining 17 governance criteria by introspecting: shape coverage per class (Criteria: Structural Constraints), CQ coverage per ontology class (Competency Question Coverage), SPARQL test pass rate (Semantic Rule Coverage), sensitivity annotation completeness. Score written into <code>governance_scorecard.csv</code> with evidence links.</td>
@@ -456,6 +494,69 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">12d</td>
 </tr>
 
+<!-- RUNTIME LAYER -->
+<tr class="area-row" style="background:#f5f3ff;color:#5b21b6"><td colspan="7">Runtime Layer &nbsp;·&nbsp; Parallel Track M3–M12 &nbsp;·&nbsp; ~55 engineering-days &nbsp;·&nbsp; The consumption bridge between toolkit artifacts and AI/LLM systems</td></tr>
+
+<tr>
+  <td><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td class="t-sprint" style="color:#5b21b6">S5–S6</td>
+  <td class="t-feat">Ontology flavor registry</td>
+  <td class="t-detail">Configuration layer that defines named agent views over the master ontology. Each flavor specifies: OWL class subset, SHACL shape subset, scoped JSON-LD context terms, and sensitivity-tier access level. Stored as <code>runtime/flavors/{name}.json</code>. Flavors are generated automatically from <code>ontology_metadata</code> sid_domain groupings and can be manually extended. Ships with 5 starter flavors: network-ops, billing, compliance, customer, fault-management.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">OWL ontology<br>SHACL shapes<br>JSON-LD context</td>
+  <td class="t-effort">5d</td>
+</tr>
+
+<tr>
+  <td><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td class="t-sprint" style="color:#5b21b6">S6–S8</td>
+  <td class="t-feat">Data grounding module</td>
+  <td class="t-detail">The critical missing step in most LLM + enterprise data architectures. <code>runtime/grounder.py</code> takes a question and a flavor, queries the enterprise database for relevant records, and serialises those records as JSON-LD using the flavor's scoped context — binding each field value to its ontology IRI. Output: typed, ontology-grounded data ready for LLM payload. Without this step, raw data sits next to the ontology in a prompt without being connected to it. CLI: <code>python3 runtime/grounder.py --flavor network-ops --question "Which NFs are degraded?" --db &lt;connection&gt;</code></td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-eng">Data Eng</span></td>
+  <td class="t-dep">Flavor registry<br>db_connector</td>
+  <td class="t-effort">10d</td>
+</tr>
+
+<tr>
+  <td><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td class="t-sprint" style="color:#5b21b6">S7–S9</td>
+  <td class="t-feat">Payload assembler</td>
+  <td class="t-detail">Assembles the full LLM payload from five components: (1) system prompt — ontology summary + domain rules + agent role description, (2) ontology flavor — relevant class and property definitions in natural language, (3) grounded data — JSON-LD serialised enterprise records from the grounder, (4) PROV-O context — provenance of each data point in the payload, (5) question + output format instructions. Returns a structured payload dict that any LLM API client can consume. LLM-agnostic — works with Anthropic, OpenAI, Google, Llama, or any custom endpoint.</td>
+  <td><span class="role r-eng">Data Eng</span> <span class="role r-ml">AI/ML Eng</span></td>
+  <td class="t-dep">Flavor registry<br>Grounding module<br>PROV-O patterns</td>
+  <td class="t-effort">12d</td>
+</tr>
+
+<tr>
+  <td><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td class="t-sprint" style="color:#5b21b6">S8–S10</td>
+  <td class="t-feat">Output SHACL gate + PROV-O stamping</td>
+  <td class="t-detail">Governs LLM responses — the step missing from almost every production implementation. For structured responses: SHACL validates the output against the relevant ontology shapes before any downstream action. For all responses: stamps PROV-O provenance (agent = LLM identifier + model version, prov:generatedAtTime, confidence extracted from model output, derivation_method = SYNTHESIZED). Stores validated response as an <code>ObservationRecord</code> with <code>source_ref</code> pointing to the payload ID.</td>
+  <td><span class="role r-arch">Ontology Eng</span> <span class="role r-ml">AI/ML Eng</span></td>
+  <td class="t-dep">SHACL shapes<br>PROV-O patterns<br>Payload assembler</td>
+  <td class="t-effort">10d</td>
+</tr>
+
+<tr>
+  <td><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td class="t-sprint" style="color:#5b21b6">S9–S10</td>
+  <td class="t-feat">SHACL input gate (inbound data validation)</td>
+  <td class="t-detail">Validates enterprise data against SHACL shapes <em>before</em> it enters the LLM payload. Rejects malformed, incomplete, or low-confidence records at the acceptance gate rather than letting bad data reach the model. Integrates with the existing <code>agent-gate.ttl</code>. Reports rejected records to <code>semantic_loss_log</code> with <code>loss_type=REJECTED_AT_RUNTIME_GATE</code>.</td>
+  <td><span class="role r-arch">Ontology Eng</span></td>
+  <td class="t-dep">SHACL shapes<br>agent-gate.ttl</td>
+  <td class="t-effort">5d</td>
+</tr>
+
+<tr>
+  <td><span class="badge b-p3" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td class="t-sprint" style="color:#5b21b6">S13–S15</td>
+  <td class="t-feat">Runtime SDK + multi-LLM adapters + documentation</td>
+  <td class="t-detail">Package the runtime layer as a lightweight Python SDK: <code>pip install ontology-toolkit-runtime</code>. Ships with LLM-specific adapters (Anthropic Messages API, OpenAI Chat Completions, Google Vertex, Ollama local). Includes a <code>RuntimeClient</code> class, async support, streaming response handling, and a worked example notebook per industry template.</td>
+  <td><span class="role r-eng">Data Eng</span> <span class="role r-ml">AI/ML Eng</span></td>
+  <td class="t-dep">All RT modules<br>Industry templates</td>
+  <td class="t-effort">13d</td>
+</tr>
+
 <!-- PHASE 3 -->
 <tr class="area-row"><td colspan="7">Phase 3 — Scale &amp; Community &nbsp;·&nbsp; Months 10–12+ &nbsp;·&nbsp; ~161 engineering-days</td></tr>
 
@@ -537,15 +638,25 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 
 <!-- Phase gates -->
 <div class="sec-label" style="margin-top:2.5rem"><h2>Phase exit gates</h2></div>
-<div class="gate-grid">
-  <div class="gate-card" style="border-color:var(--p1)">
-    <h3 style="color:var(--p1)">Phase 1 exit</h3>
+<div class="gate-grid" style="grid-template-columns:repeat(5,1fr)">
+  <div class="gate-card" style="border-color:#7c3aed;background:#faf5ff">
+    <h3 style="color:#7c3aed">Runtime MVP exit</h3>
     <ul>
-      <li>@baseType / @schemaLocation in all payloads</li>
-      <li>SPARQL CQs all passing (not SQL)</li>
-      <li>Reasoner: zero unsatisfiable classes</li>
-      <li>31/31 governance criteria auto-scored</li>
-      <li>Average governance score ≥ 4.2 / 5.0</li>
+      <li>Flavor registry: 5 starter flavors generated</li>
+      <li>Grounder: JSON-LD output verified against context</li>
+      <li>Assembler: payload roundtrip test passing</li>
+      <li>Output gate: SHACL validates LLM response</li>
+      <li>PROV-O stamp: every response has source_ref + timestamp</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--done)">
+    <h3 style="color:var(--done)">Phase 1 ✓ Complete · Apr 2026</h3>
+    <ul>
+      <li>✓ @baseType / @schemaLocation in all payloads</li>
+      <li>✓ SPARQL CQs all passing (not SQL)</li>
+      <li>✓ Reasoner: zero unsatisfiable classes</li>
+      <li>✓ 31/31 governance criteria auto-scored</li>
+      <li>✓ Average governance score ≥ 4.2 / 5.0</li>
     </ul>
   </div>
   <div class="gate-card" style="border-color:var(--p2)">
@@ -619,6 +730,24 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-detail">5G NF logs, BSS/OSS logs, and cloud platform logs are far more heterogeneous than the 4 planned formats. MVP log connector may cover &lt;30% of real log volume.</td>
   <td class="t-detail">Scope the connector to JSON-structured + syslog as the MVP. Build a plugin interface for custom format detectors from day one. Community contributions fill the gaps.</td>
 </tr>
+<tr>
+  <td class="t-feat">Grounding step produces oversized payloads</td>
+  <td><span class="risk-hi">High</span></td>
+  <td class="t-detail">JSON-LD serialisation of enterprise records can expand payload size significantly, potentially exceeding LLM context windows or increasing latency beyond acceptable thresholds.</td>
+  <td class="t-detail">Implement relevance scoring in the grounder — retrieve only records pertinent to the question via semantic similarity. Support chunked payloads and streaming. Expose a <code>max_tokens</code> budget parameter to the assembler.</td>
+</tr>
+<tr>
+  <td class="t-feat">LLM output structure inconsistency</td>
+  <td><span class="risk-med">Medium</span></td>
+  <td class="t-detail">SHACL validation of LLM output requires structured responses. Models often produce semi-structured or free-text that does not conform to the expected shape, causing the output gate to reject valid answers.</td>
+  <td class="t-detail">Use constrained output (JSON mode / structured outputs) where the LLM supports it. For free-text responses, apply PROV-O stamping but skip SHACL shape validation. Design instructions in the payload to guide structured output format.</td>
+</tr>
+<tr>
+  <td class="t-feat">Flavor proliferation management</td>
+  <td><span class="risk-lo">Low</span></td>
+  <td class="t-detail">As teams define more agent-specific flavors, the registry becomes hard to govern — overlapping definitions, conflicting sensitivity assignments, and stale flavors that no longer match the master ontology.</td>
+  <td class="t-detail">Auto-generate flavors from <code>ontology_metadata</code> sid_domain groupings as the canonical source of truth. Manual flavors must pass a validation check against the master OWL ontology on every pipeline run. Deprecate unused flavors via <code>owl:deprecated</code>.</td>
+</tr>
 </tbody>
 </table>
 
@@ -663,7 +792,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 
 <footer>
   <span>Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.3</span>
-  <span>Total estimated effort: 271 engineering-days across 12 months</span>
+  <span>Total estimated effort: 326 engineering-days (271 pipeline + 55 runtime) across 12 months</span>
 </footer>
 
 </div>
