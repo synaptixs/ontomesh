@@ -1,0 +1,2750 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sh:   <https://ontology.example.com/shapes/enterprise/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ontology.example.com/enterprise/>
+  a owl:Ontology ;
+  owl:versionIRI <https://ontology.example.com/enterprise/1.0.0> ;
+  owl:versionInfo "1.0.0" ;
+  rdfs:label "Enterprise Domain Ontology" ;
+  rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
+  dcterms:created "2026-04-18T03:54:21Z"^^xsd:dateTime ;
+  dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
+
+
+# ── Sensitivity Annotation Property ──────────────────────────────────
+:sensitivityTier
+  a owl:AnnotationProperty ;
+  rdfs:label "Sensitivity Tier" ;
+  rdfs:comment "Required on all classes and data properties. Values: Public, Internal, Confidential, Restricted." .
+
+:SensitivityTierValue a owl:Class ;
+  rdfs:label "Sensitivity Tier Value" .
+
+:Public       a :SensitivityTierValue ; rdfs:label "Public" .
+:Internal     a :SensitivityTierValue ; rdfs:label "Internal" .
+:Confidential a :SensitivityTierValue ; rdfs:label "Confidential" .
+:Restricted   a :SensitivityTierValue ; rdfs:label "Restricted" .
+
+
+# ── Base Classes ──────────────────────────────────────────────────────
+:DomainEntity
+  a owl:Class ;
+  rdfs:label "Domain Entity" ;
+  rdfs:comment "Root class for all domain entities." ;
+  :sensitivityTier :Internal .
+
+:DomainEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Domain Event" ;
+  rdfs:comment "A significant occurrence that changes domain state or produces evidence." ;
+  :sensitivityTier :Internal .
+
+:ObservationRecord
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity, prov:Entity ;
+  rdfs:label "Observation Record" ;
+  rdfs:comment "A measured, inferred, or imported fact with full PROV-O provenance." ;
+  :sensitivityTier :Confidential .
+
+
+# ── Domain Classes ──────────────────────────────────────────────────
+
+:AgentRoles
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Agent Roles" ;
+  :sensitivityTier :Internal  .
+
+:Agent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Agent" ;
+  rdfs:comment "A human, system, AI agent, or sensor that produces or acts on domain facts." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Agent" ;
+  skos:altLabel "Actor" ;
+  skos:altLabel "System Agent" ;
+  skos:altLabel "Sensor" ;
+  rdfs:isDefinedBy "CQ-004, CQ-005"  .
+
+:AssetType
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Asset Type" ;
+  rdfs:comment "A classification category for managed assets." ;
+  :sensitivityTier :Public ;
+  skos:prefLabel "Asset Type" ;
+  skos:altLabel "Asset Category" ;
+  skos:altLabel "Resource Class" ;
+  rdfs:isDefinedBy "CQ-002"  .
+
+:Asset
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Asset" ;
+  rdfs:comment "A physical or logical resource managed by the organization." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Asset" ;
+  skos:altLabel "Resource" ;
+  skos:altLabel "Managed Object" ;
+  skos:altLabel "Network Element" ;
+  rdfs:isDefinedBy "CQ-001, CQ-002, CQ-003, CQ-007"  .
+
+:DomainEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Domain Event" ;
+  rdfs:comment "A significant occurrence in the domain that changes state or produces evidence." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Domain Event" ;
+  skos:altLabel "Operation" ;
+  skos:altLabel "Activity" ;
+  skos:altLabel "Incident" ;
+  skos:altLabel "Inspection" ;
+  rdfs:isDefinedBy "CQ-003, CQ-004, CQ-005, CQ-007"  .
+
+:EventParticipants
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Event Participants" ;
+  :sensitivityTier :Internal  .
+
+:ObservationRecord
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Observation" ;
+  rdfs:comment "A measured, computed, or imported fact about an asset or event, with provenance." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Observation" ;
+  skos:altLabel "Measurement" ;
+  skos:altLabel "Reading" ;
+  skos:altLabel "Detection" ;
+  skos:altLabel "Finding" ;
+  rdfs:isDefinedBy "CQ-004, CQ-005, CQ-008"  .
+
+:Organization
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Organization" ;
+  rdfs:comment "A legal or operational entity that owns, operates, or governs assets." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Organization" ;
+  skos:altLabel "Enterprise" ;
+  skos:altLabel "Company" ;
+  skos:altLabel "Entity" ;
+  rdfs:isDefinedBy "CQ-001, CQ-006"  .
+
+:Policy
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Policy" ;
+  rdfs:comment "A rule or constraint that governs asset operations and agent behaviour." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Policy" ;
+  skos:altLabel "Rule" ;
+  skos:altLabel "Standard" ;
+  skos:altLabel "SLA" ;
+  rdfs:isDefinedBy "CQ-007"  .
+
+:PolicyApplication
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Policy Application" ;
+  rdfs:comment "Records the application of a policy to an event or asset with outcome." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Policy Application" ;
+  skos:altLabel "Compliance Check" ;
+  skos:altLabel "Audit Record" ;
+  rdfs:isDefinedBy "CQ-007"  .
+
+:Role
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Role" ;
+  rdfs:comment "A contextual function an agent performs in a specific scope." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Role" ;
+  skos:altLabel "Function" ;
+  skos:altLabel "Responsibility" ;
+  rdfs:isDefinedBy "CQ-006"  .
+
+:Agreement
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Agreement" ;
+  rdfs:comment "A commercial, SLA, or roaming agreement between parties (TMF651)." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Agreement" ;
+  skos:altLabel "SLA" ;
+  skos:altLabel "Contract" ;
+  skos:altLabel "Service Level Agreement" ;
+  rdfs:isDefinedBy "CQ-005, CQ-TMF05"  .
+
+:Alarm
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Alarm" ;
+  rdfs:comment "A network fault notification raised by a network function or element (TMF642)." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Alarm" ;
+  skos:altLabel "Fault" ;
+  skos:altLabel "Notification" ;
+  skos:altLabel "Alert" ;
+  rdfs:isDefinedBy "CQ-007, CQ-TMF06"  .
+
+:Attachment
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Attachment" ;
+  rdfs:comment "A file or URL attachment linked to any TMF entity per SID Common ABE." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Attachment"  .
+
+:Characteristic
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Characteristic" ;
+  rdfs:comment "A key-value attribute pair that extends any entity per SID Characteristic ABE." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Characteristic" ;
+  skos:altLabel "Attribute" ;
+  skos:altLabel "Property" ;
+  skos:altLabel "Feature" ;
+  rdfs:isDefinedBy "CQ-002"  .
+
+:CustomerAccount
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Customer Account" ;
+  rdfs:comment "A billing and service management account per TMF666." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Customer Account" ;
+  skos:altLabel "Account" ;
+  skos:altLabel "Billing Account" ;
+  rdfs:isDefinedBy "CQ-005, CQ-TMF03"  .
+
+:Note
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Note" ;
+  rdfs:comment "A free-text annotation linked to any TMF entity per SID Common ABE." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Note"  .
+
+:Party
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Party" ;
+  rdfs:comment "An individual or organisation that plays a role in the business (TMF632)." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Party" ;
+  skos:altLabel "Individual" ;
+  skos:altLabel "Organization" ;
+  skos:altLabel "Customer" ;
+  skos:altLabel "Partner" ;
+  rdfs:isDefinedBy "CQ-005, CQ-TMF04"  .
+
+:PartyRole
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Party Role" ;
+  rdfs:comment "A contextual role a party plays, such as Customer or Partner (TMF669)." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Party Role" ;
+  skos:altLabel "Role" ;
+  skos:altLabel "Function" ;
+  skos:altLabel "Relationship" ;
+  rdfs:isDefinedBy "CQ-005"  .
+
+:PerformanceIndicator
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Performance Indicator" ;
+  rdfs:comment "A KPI measurement or ML-derived metric with PROV-O provenance." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Performance Indicator" ;
+  skos:altLabel "KPI" ;
+  skos:altLabel "Metric" ;
+  skos:altLabel "Measurement" ;
+  skos:altLabel "Observation" ;
+  rdfs:isDefinedBy "CQ-008, CQ-TMF07"  .
+
+:GeographicLocation
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Geographic Place" ;
+  rdfs:comment "A geographic location, address, or site per TMF673/674/675." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Geographic Place" ;
+  skos:altLabel "Location" ;
+  skos:altLabel "Address" ;
+  skos:altLabel "Site" ;
+  rdfs:isDefinedBy "CQ-001, CQ-002"  .
+
+:Policy
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Policy" ;
+  rdfs:comment "A rule or constraint governing operations, network, or compliance." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Policy" ;
+  skos:altLabel "Rule" ;
+  skos:altLabel "Regulation" ;
+  skos:altLabel "Standard" ;
+  skos:altLabel "SLA Policy" ;
+  rdfs:isDefinedBy "CQ-006"  .
+
+:Product
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Product" ;
+  rdfs:comment "A product instance subscribed to by a party per TMF637." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Product" ;
+  skos:altLabel "Subscribed Product" ;
+  skos:altLabel "Active Subscription" ;
+  rdfs:isDefinedBy "CQ-004, CQ-TMF03"  .
+
+:ProductOffering
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Product Offering" ;
+  rdfs:comment "A commercial offering available to customers per TMF620." ;
+  :sensitivityTier :Public ;
+  skos:prefLabel "Product Offering" ;
+  skos:altLabel "Commercial Offer" ;
+  skos:altLabel "Tariff Plan" ;
+  rdfs:isDefinedBy "CQ-004"  .
+
+:ProductOrder
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Product Order" ;
+  rdfs:comment "A customer request to provision, modify, or terminate a product (TMF622)." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Product Order" ;
+  skos:altLabel "Customer Order" ;
+  skos:altLabel "Service Request" ;
+  rdfs:isDefinedBy "CQ-004, CQ-TMF03"  .
+
+:ProductSpecification
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Product Specification" ;
+  rdfs:comment "Specification of a product type per SID Product domain/TMF620." ;
+  :sensitivityTier :Public ;
+  skos:prefLabel "Product Specification" ;
+  skos:altLabel "Product Template" ;
+  skos:altLabel "Product Catalog Entry" ;
+  rdfs:isDefinedBy "CQ-004"  .
+
+:Resource
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Resource" ;
+  rdfs:comment "A logical or physical telecom resource instance (TMF639). Covers NetworkFunction, Equipment, IPAddress." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Resource" ;
+  skos:altLabel "Network Element" ;
+  skos:altLabel "Network Function" ;
+  skos:altLabel "Physical Asset" ;
+  rdfs:isDefinedBy "CQ-001, CQ-002, CQ-003, CQ-TMF01"  .
+
+:ResourceRelationship
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Resource Relationship" ;
+  rdfs:comment "Typed association between two resources (composedOf, connectsTo, dependsOn)." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Resource Relationship" ;
+  skos:altLabel "Resource Association" ;
+  skos:altLabel "Network Topology Link" ;
+  rdfs:isDefinedBy "CQ-TMF01"  .
+
+:ResourceSpecification
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Resource Specification" ;
+  rdfs:comment "Catalog template for a resource type. Specification pattern per SID/TMF634." ;
+  :sensitivityTier :Public ;
+  skos:prefLabel "Resource Specification" ;
+  skos:altLabel "Resource Template" ;
+  skos:altLabel "Resource Catalog Entry" ;
+  rdfs:isDefinedBy "CQ-001, CQ-002"  .
+
+:Service
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Service" ;
+  rdfs:comment "An active service instance in the service inventory (TMF638). Covers CFS and RFS." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Service" ;
+  skos:altLabel "Customer Facing Service" ;
+  skos:altLabel "Resource Facing Service" ;
+  rdfs:isDefinedBy "CQ-003, CQ-TMF02"  .
+
+:ServiceOrder
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Service Order" ;
+  rdfs:comment "An internal fulfilment order to provision or modify a service (TMF641)." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "Service Order" ;
+  skos:altLabel "Fulfilment Order" ;
+  skos:altLabel "Provisioning Order" ;
+  rdfs:isDefinedBy "CQ-003, CQ-TMF02"  .
+
+:ServiceProblem
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Service Problem" ;
+  rdfs:comment "A service quality or availability problem raised against a customer service (TMF656)." ;
+  :sensitivityTier :Confidential ;
+  skos:prefLabel "Service Problem" ;
+  skos:altLabel "Trouble Ticket" ;
+  skos:altLabel "Incident" ;
+  skos:altLabel "Fault Report" ;
+  rdfs:isDefinedBy "CQ-007, CQ-TMF06"  .
+
+:ServiceSpecification
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Service Specification" ;
+  rdfs:comment "Catalog definition of a service type. Specification pattern per SID/TMF633." ;
+  :sensitivityTier :Public ;
+  skos:prefLabel "Service Specification" ;
+  skos:altLabel "Service Template" ;
+  skos:altLabel "Service Catalog Entry" ;
+  rdfs:isDefinedBy "CQ-003"  .
+
+:UserRole
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "User Role" ;
+  rdfs:comment "A named permission set for users per SID Enterprise ABE / TMF672." ;
+  :sensitivityTier :Internal ;
+  skos:prefLabel "User Role" ;
+  rdfs:isDefinedBy "CQ-006"  .
+
+
+# ── Data Properties ─────────────────────────────────────────────────
+
+:hasValidFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid From" ;
+  rdfs:domain :AgentRoles ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidUntil
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid Until" ;
+  rdfs:domain :AgentRoles ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasAgentIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Agent IRI" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "Persistent IRI for use in PROV-O provenance graphs." ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasAgentType
+  a owl:DatatypeProperty ;
+  rdfs:label "Agent Type" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCredentialExpiry
+  a owl:DatatypeProperty ;
+  rdfs:label "Credential Expiry" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "Expiry timestamp for AI agent credentials." ;
+  :sensitivityTier :Confidential .
+
+:hasAuthorizedTiers
+  a owl:DatatypeProperty ;
+  rdfs:label "Authorized Tiers" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasActive
+  a owl:DatatypeProperty ;
+  rdfs:label "Active" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:boolean ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Agent ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCode
+  a owl:DatatypeProperty ;
+  rdfs:label "Code" ;
+  rdfs:domain :AssetType ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasLabel
+  a owl:DatatypeProperty ;
+  rdfs:label "Label" ;
+  rdfs:domain :AssetType ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :AssetType ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasUnitOfMeasure
+  a owl:DatatypeProperty ;
+  rdfs:label "Unit Of Measure" ;
+  rdfs:domain :AssetType ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :AssetType ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasLocationCode
+  a owl:DatatypeProperty ;
+  rdfs:label "Location Code" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Asset Status" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Current operational lifecycle status of the asset." ;
+  :sensitivityTier :Internal .
+
+:hasCommissionedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Commissioned At" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasDecommissionedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Decommissioned At" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasEventIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Event Iri" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasEventType
+  a owl:DatatypeProperty ;
+  rdfs:label "Event Type" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Subclass discriminator for OWL event class hierarchy." ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasTitle
+  a owl:DatatypeProperty ;
+  rdfs:label "Title" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasOutcome
+  a owl:DatatypeProperty ;
+  rdfs:label "Outcome" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStartedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Started At" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCompletedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Completed At" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasParticipationRole
+  a owl:DatatypeProperty ;
+  rdfs:label "Participation Role" ;
+  rdfs:domain :EventParticipants ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasJoinedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Joined At" ;
+  rdfs:domain :EventParticipants ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasObservationIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Observation Iri" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasObservationType
+  a owl:DatatypeProperty ;
+  rdfs:label "Observation Type" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasNumericValue
+  a owl:DatatypeProperty ;
+  rdfs:label "Numeric Value" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasTextValue
+  a owl:DatatypeProperty ;
+  rdfs:label "Text Value" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasUnitOfMeasure
+  a owl:DatatypeProperty ;
+  rdfs:label "Unit Of Measure" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasConfidenceScore
+  a owl:DatatypeProperty ;
+  rdfs:label "Confidence Score" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Numeric confidence in the observation value between 0.0 and 1.0." ;
+  :sensitivityTier :Confidential .
+
+:hasDerivationMethod
+  a owl:DatatypeProperty ;
+  rdfs:label "Derivation Method" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, or SYNTHESIZED." ;
+  :sensitivityTier :Internal .
+
+:hasSourceRef
+  a owl:DatatypeProperty ;
+  rdfs:label "Source Reference" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "IRI or document reference for the external source of this observation." ;
+  :sensitivityTier :Internal .
+
+:hasObservedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Observed At" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Organization ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasOrgType
+  a owl:DatatypeProperty ;
+  rdfs:label "Org Type" ;
+  rdfs:domain :Organization ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasJurisdiction
+  a owl:DatatypeProperty ;
+  rdfs:label "Jurisdiction" ;
+  rdfs:domain :Organization ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasActive
+  a owl:DatatypeProperty ;
+  rdfs:label "Active" ;
+  rdfs:domain :Organization ;
+  rdfs:range xsd:boolean ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Organization ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :Organization ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCode
+  a owl:DatatypeProperty ;
+  rdfs:label "Code" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasTitle
+  a owl:DatatypeProperty ;
+  rdfs:label "Title" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasPolicyType
+  a owl:DatatypeProperty ;
+  rdfs:label "Policy Type" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Category of policy: OPERATIONAL, COMPLIANCE, SECURITY, SLA, SAFETY." ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasEffectiveFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "Effective From" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasEffectiveUntil
+  a owl:DatatypeProperty ;
+  rdfs:label "Effective Until" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasSensitivityTier
+  a owl:DatatypeProperty ;
+  rdfs:label "Sensitivity Tier" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasActive
+  a owl:DatatypeProperty ;
+  rdfs:label "Active" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:boolean ;
+  :sensitivityTier :Internal .
+
+:hasOutcome
+  a owl:DatatypeProperty ;
+  rdfs:label "Outcome" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasNotes
+  a owl:DatatypeProperty ;
+  rdfs:label "Notes" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasAppliedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Applied At" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCode
+  a owl:DatatypeProperty ;
+  rdfs:label "Code" ;
+  rdfs:domain :Role ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasLabel
+  a owl:DatatypeProperty ;
+  rdfs:label "Label" ;
+  rdfs:domain :Role ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :Role ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasSensitivityTier
+  a owl:DatatypeProperty ;
+  rdfs:label "Sensitivity Tier" ;
+  rdfs:domain :Role ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasAgreementIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Agreement Iri" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasAgreementType
+  a owl:DatatypeProperty ;
+  rdfs:label "Agreement Type" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid From" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidUntil
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid Until" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Agreement ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasAlarmIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Alarm Iri" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasAlarmType
+  a owl:DatatypeProperty ;
+  rdfs:label "Alarm Type" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasPerceivedSeverity
+  a owl:DatatypeProperty ;
+  rdfs:label "Perceived Severity" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:string ;
+  rdfs:comment "ITU-T X.733 / TMF642 alarm severity: Critical, Major, Minor, Warning, Indeterminate, Cleared." ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasProbableCause
+  a owl:DatatypeProperty ;
+  rdfs:label "Probable Cause" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:string ;
+  rdfs:comment "ITU-T probable cause code for the alarm (e.g. softwareError, equipmentFailure)." ;
+  :sensitivityTier :Internal .
+
+:hasSpecificProblem
+  a owl:DatatypeProperty ;
+  rdfs:label "Specific Problem" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasAlarmState
+  a owl:DatatypeProperty ;
+  rdfs:label "Alarm State" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasRaisedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Raised At" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasAcknowledgedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Acknowledged At" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasClearedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Cleared At" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Alarm ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasMimeType
+  a owl:DatatypeProperty ;
+  rdfs:label "Mime Type" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasUrl
+  a owl:DatatypeProperty ;
+  rdfs:label "Url" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasAttachmentType
+  a owl:DatatypeProperty ;
+  rdfs:label "Attachment Type" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasOwnerType
+  a owl:DatatypeProperty ;
+  rdfs:label "Owner Type" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Attachment ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasValue
+  a owl:DatatypeProperty ;
+  rdfs:label "Value" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValueType
+  a owl:DatatypeProperty ;
+  rdfs:label "Value Type" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasUnit
+  a owl:DatatypeProperty ;
+  rdfs:label "Unit" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasOwnerType
+  a owl:DatatypeProperty ;
+  rdfs:label "Owner Type" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasAccountIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Account Iri" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasAccountNumber
+  a owl:DatatypeProperty ;
+  rdfs:label "Account Number" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasAccountType
+  a owl:DatatypeProperty ;
+  rdfs:label "Account Type" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreditLimit
+  a owl:DatatypeProperty ;
+  rdfs:label "Credit Limit" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasCurrencyCode
+  a owl:DatatypeProperty ;
+  rdfs:label "Currency Code" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasText
+  a owl:DatatypeProperty ;
+  rdfs:label "Text" ;
+  rdfs:domain :Note ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasAuthor
+  a owl:DatatypeProperty ;
+  rdfs:label "Author" ;
+  rdfs:domain :Note ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Date" ;
+  rdfs:domain :Note ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasNoteType
+  a owl:DatatypeProperty ;
+  rdfs:label "Note Type" ;
+  rdfs:domain :Note ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasOwnerType
+  a owl:DatatypeProperty ;
+  rdfs:label "Owner Type" ;
+  rdfs:domain :Note ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasPartyIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Party IRI" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:anyURI ;
+  rdfs:comment "Persistent IRI for use in PROV-O provenance graphs and TMF632 external IDs." ;
+  :sensitivityTier :Confidential .
+
+:hasPartyType
+  a owl:DatatypeProperty ;
+  rdfs:label "Party Type" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasGivenName
+  a owl:DatatypeProperty ;
+  rdfs:label "Given Name" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasFamilyName
+  a owl:DatatypeProperty ;
+  rdfs:label "Family Name" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasNationality
+  a owl:DatatypeProperty ;
+  rdfs:label "Nationality" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasTradingName
+  a owl:DatatypeProperty ;
+  rdfs:label "Trading Name" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasOrgType
+  a owl:DatatypeProperty ;
+  rdfs:label "Org Type" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasEmail
+  a owl:DatatypeProperty ;
+  rdfs:label "Email" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasPhone
+  a owl:DatatypeProperty ;
+  rdfs:label "Phone" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasLifecycleStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Lifecycle Status" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :Party ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasRoleName
+  a owl:DatatypeProperty ;
+  rdfs:label "Role Name" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasRoleType
+  a owl:DatatypeProperty ;
+  rdfs:label "Role Type" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid From" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidUntil
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid Until" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasKpiIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Kpi Iri" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasUnitOfMeasure
+  a owl:DatatypeProperty ;
+  rdfs:label "Unit Of Measure" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasKpiType
+  a owl:DatatypeProperty ;
+  rdfs:label "Kpi Type" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasNumericValue
+  a owl:DatatypeProperty ;
+  rdfs:label "Numeric Value" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasStringValue
+  a owl:DatatypeProperty ;
+  rdfs:label "String Value" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasConfidenceScore
+  a owl:DatatypeProperty ;
+  rdfs:label "Confidence Score" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Numeric confidence in the measurement or derived value. Range 0.0–1.0." ;
+  :sensitivityTier :Confidential .
+
+:hasDerivationMethod
+  a owl:DatatypeProperty ;
+  rdfs:label "Derivation Method" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  rdfs:comment "How the value was obtained per PROV-O: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
+  :sensitivityTier :Internal .
+
+:hasSourceRef
+  a owl:DatatypeProperty ;
+  rdfs:label "Source Ref" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasThresholdLow
+  a owl:DatatypeProperty ;
+  rdfs:label "Threshold Low" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasThresholdHigh
+  a owl:DatatypeProperty ;
+  rdfs:label "Threshold High" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasBreachIndicator
+  a owl:DatatypeProperty ;
+  rdfs:label "Breach Indicator" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:integer ;
+  :sensitivityTier :Internal .
+
+:hasObservedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Observed At" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasPlaceIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Place Iri" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasPlaceType
+  a owl:DatatypeProperty ;
+  rdfs:label "Place Type" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStreetNr
+  a owl:DatatypeProperty ;
+  rdfs:label "Street Nr" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStreetName
+  a owl:DatatypeProperty ;
+  rdfs:label "Street Name" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCity
+  a owl:DatatypeProperty ;
+  rdfs:label "City" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStateOrProvince
+  a owl:DatatypeProperty ;
+  rdfs:label "State Or Province" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasPostcode
+  a owl:DatatypeProperty ;
+  rdfs:label "Postcode" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCountry
+  a owl:DatatypeProperty ;
+  rdfs:label "Country" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasLatitude
+  a owl:DatatypeProperty ;
+  rdfs:label "Latitude" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasLongitude
+  a owl:DatatypeProperty ;
+  rdfs:label "Longitude" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasLifecycleStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Lifecycle Status" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasPolicyIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Policy Iri" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasPolicyType
+  a owl:DatatypeProperty ;
+  rdfs:label "Policy Type" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasVersion
+  a owl:DatatypeProperty ;
+  rdfs:label "Version" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasGoverningBody
+  a owl:DatatypeProperty ;
+  rdfs:label "Governing Body" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasEffectiveFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "Effective From" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasEffectiveUntil
+  a owl:DatatypeProperty ;
+  rdfs:label "Effective Until" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Policy ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasProductIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Product Iri" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStartDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Start Date" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasEndDate
+  a owl:DatatypeProperty ;
+  rdfs:label "End Date" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :Product ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasOfferingIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Offering Iri" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasVersion
+  a owl:DatatypeProperty ;
+  rdfs:label "Version" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasIsBundle
+  a owl:DatatypeProperty ;
+  rdfs:label "Is Bundle" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:boolean ;
+  :sensitivityTier :Internal .
+
+:hasLifecycleStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Lifecycle Status" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidForStart
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid For Start" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasValidForEnd
+  a owl:DatatypeProperty ;
+  rdfs:label "Valid For End" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasOrderIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Order Iri" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasOrderDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Order Date" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCompletionDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Completion Date" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasRequestedCompletion
+  a owl:DatatypeProperty ;
+  rdfs:label "Requested Completion" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasOrderType
+  a owl:DatatypeProperty ;
+  rdfs:label "Order Type" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasState
+  a owl:DatatypeProperty ;
+  rdfs:label "State" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasSpecIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Spec Iri" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasVersion
+  a owl:DatatypeProperty ;
+  rdfs:label "Version" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasProductNumber
+  a owl:DatatypeProperty ;
+  rdfs:label "Product Number" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasBrand
+  a owl:DatatypeProperty ;
+  rdfs:label "Brand" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasLifecycleStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Lifecycle Status" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasIsBundle
+  a owl:DatatypeProperty ;
+  rdfs:label "Is Bundle" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:boolean ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ProductSpecification ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasResourceIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Resource Iri" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasResourceType
+  a owl:DatatypeProperty ;
+  rdfs:label "Resource Type" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasNfType
+  a owl:DatatypeProperty ;
+  rdfs:label "Network Function Type" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  rdfs:comment "eTOM/5G network function discriminator: AMF, SMF, UPF, gNB, PCF, UDM, AUSF, NRF." ;
+  :sensitivityTier :Internal .
+
+:hasOperationalState
+  a owl:DatatypeProperty ;
+  rdfs:label "Operational State" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  rdfs:comment "SID OperationalState: Enabled or Disabled (eTOM resource state machine)." ;
+  :sensitivityTier :Internal .
+
+:hasAdminState
+  a owl:DatatypeProperty ;
+  rdfs:label "Administrative State" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  rdfs:comment "SID AdministrativeState: Locked, Unlocked, Shutting Down." ;
+  :sensitivityTier :Internal .
+
+:hasUsageState
+  a owl:DatatypeProperty ;
+  rdfs:label "Usage State" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasExternalSystem
+  a owl:DatatypeProperty ;
+  rdfs:label "External System" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStartOperatingDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Start Operating Date" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasEndOperatingDate
+  a owl:DatatypeProperty ;
+  rdfs:label "End Operating Date" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :Resource ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasRelationshipType
+  a owl:DatatypeProperty ;
+  rdfs:label "Relationship Type" ;
+  rdfs:domain :ResourceRelationship ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ResourceRelationship ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasSpecIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Spec Iri" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasVersion
+  a owl:DatatypeProperty ;
+  rdfs:label "Version" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCategory
+  a owl:DatatypeProperty ;
+  rdfs:label "Resource Category" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:string ;
+  rdfs:comment "SID ResourceCategory discriminator: LOGICAL or PHYSICAL. Drives OWL subclass assignment." ;
+  :sensitivityTier :Public .
+
+:hasLifecycleStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Lifecycle Status" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasIsBundle
+  a owl:DatatypeProperty ;
+  rdfs:label "Is Bundle" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:boolean ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :ResourceSpecification ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasServiceIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Service Iri" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasServiceType
+  a owl:DatatypeProperty ;
+  rdfs:label "Service Type" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasState
+  a owl:DatatypeProperty ;
+  rdfs:label "State" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStartDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Start Date" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasEndDate
+  a owl:DatatypeProperty ;
+  rdfs:label "End Date" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :Service ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasOrderIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Order Iri" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasOrderDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Order Date" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasCompletionDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Completion Date" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasOrderType
+  a owl:DatatypeProperty ;
+  rdfs:label "Order Type" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasState
+  a owl:DatatypeProperty ;
+  rdfs:label "State" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasUpdatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated At" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasProblemIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Problem Iri" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasPriority
+  a owl:DatatypeProperty ;
+  rdfs:label "Priority" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Status" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCategory
+  a owl:DatatypeProperty ;
+  rdfs:label "Problem Category" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Free-text problem category (e.g. CommunicationsDisruption, ResourceDegradation)." ;
+  :sensitivityTier :Internal .
+
+:hasSlaViolated
+  a owl:DatatypeProperty ;
+  rdfs:label "Sla Violated" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:integer ;
+  :sensitivityTier :Internal .
+
+:hasResolutionNotes
+  a owl:DatatypeProperty ;
+  rdfs:label "Resolution Notes" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasSubmittedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Submitted At" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasResolvedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Resolved At" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasSpecIri
+  a owl:DatatypeProperty ;
+  rdfs:label "Spec Iri" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:anyURI ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasVersion
+  a owl:DatatypeProperty ;
+  rdfs:label "Version" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasServiceType
+  a owl:DatatypeProperty ;
+  rdfs:label "Service Type" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasLifecycleStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Lifecycle Status" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :ServiceSpecification ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasName
+  a owl:DatatypeProperty ;
+  rdfs:label "Name" ;
+  rdfs:domain :UserRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal ;
+  # Required property (NOT NULL in schema) .
+
+:hasDescription
+  a owl:DatatypeProperty ;
+  rdfs:label "Description" ;
+  rdfs:domain :UserRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasPermissionSet
+  a owl:DatatypeProperty ;
+  rdfs:label "Permission Set" ;
+  rdfs:domain :UserRole ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created At" ;
+  rdfs:domain :UserRole ;
+  rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+
+# ── Object Properties ───────────────────────────────────────────────
+
+:agentOf
+  a owl:ObjectProperty ;
+  rdfs:label "Agent Id" ;
+  rdfs:domain :AgentRoles ;
+  rdfs:range :Agent ;
+  owl:minCardinality 1  .
+
+:roleOf
+  a owl:ObjectProperty ;
+  rdfs:label "Role Id" ;
+  rdfs:domain :AgentRoles ;
+  rdfs:range :Role ;
+  owl:minCardinality 1  .
+
+:scopeAsset
+  a owl:ObjectProperty ;
+  rdfs:label "Scope Asset Id" ;
+  rdfs:domain :AgentRoles ;
+  rdfs:range :Asset  .
+
+:orgOf
+  a owl:ObjectProperty ;
+  rdfs:label "Org Id" ;
+  rdfs:domain :Agent ;
+  rdfs:range :Organization  .
+
+:parentOf
+  a owl:ObjectProperty ;
+  rdfs:label "Parent Type Id" ;
+  rdfs:domain :AssetType ;
+  rdfs:range :AssetType  .
+
+:externalOf
+  a owl:ObjectProperty ;
+  rdfs:label "External Identifier" ;
+  rdfs:domain :Asset ;
+  rdfs:range owl:Thing ;
+  rdfs:comment "Identifier used in external systems (e.g. OSS/BSS, NMS)."  .
+
+:assetOf
+  a owl:ObjectProperty ;
+  rdfs:label "Asset Type Id" ;
+  rdfs:domain :Asset ;
+  rdfs:range :AssetType ;
+  owl:minCardinality 1  .
+
+:ownerOf
+  a owl:ObjectProperty ;
+  rdfs:label "Owner Org Id" ;
+  rdfs:domain :Asset ;
+  rdfs:range :Organization  .
+
+:operatorOf
+  a owl:ObjectProperty ;
+  rdfs:label "Operator Org Id" ;
+  rdfs:domain :Asset ;
+  rdfs:range :Organization  .
+
+:assetOf
+  a owl:ObjectProperty ;
+  rdfs:label "Asset Id" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Asset  .
+
+:initiatedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Initiated By" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Agent  .
+
+:policyOf
+  a owl:ObjectProperty ;
+  rdfs:label "Policy Id" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Policy  .
+
+:eventOf
+  a owl:ObjectProperty ;
+  rdfs:label "Event Id" ;
+  rdfs:domain :EventParticipants ;
+  rdfs:range :DomainEvent ;
+  owl:minCardinality 1  .
+
+:agentOf
+  a owl:ObjectProperty ;
+  rdfs:label "Agent Id" ;
+  rdfs:domain :EventParticipants ;
+  rdfs:range :Agent ;
+  owl:minCardinality 1  .
+
+:assetOf
+  a owl:ObjectProperty ;
+  rdfs:label "Asset Id" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Asset  .
+
+:eventOf
+  a owl:ObjectProperty ;
+  rdfs:label "Event Id" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :DomainEvent  .
+
+:recordedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Recorded By" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Agent ;
+  owl:minCardinality 1  .
+
+:parentOf
+  a owl:ObjectProperty ;
+  rdfs:label "Parent Org Id" ;
+  rdfs:domain :Organization ;
+  rdfs:range :Organization  .
+
+:governingOf
+  a owl:ObjectProperty ;
+  rdfs:label "Governing Org Id" ;
+  rdfs:domain :Policy ;
+  rdfs:range :Organization  .
+
+:policyOf
+  a owl:ObjectProperty ;
+  rdfs:label "Policy Id" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range :Policy ;
+  owl:minCardinality 1  .
+
+:eventOf
+  a owl:ObjectProperty ;
+  rdfs:label "Event Id" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range :DomainEvent  .
+
+:assetOf
+  a owl:ObjectProperty ;
+  rdfs:label "Asset Id" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range :Asset  .
+
+:appliedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Applied By" ;
+  rdfs:domain :PolicyApplication ;
+  rdfs:range :Agent ;
+  owl:minCardinality 1  .
+
+:partyA
+  a owl:ObjectProperty ;
+  rdfs:label "Party A Id" ;
+  rdfs:domain :Agreement ;
+  rdfs:range :Party  .
+
+:partyB
+  a owl:ObjectProperty ;
+  rdfs:label "Party B Id" ;
+  rdfs:domain :Agreement ;
+  rdfs:range :Party  .
+
+:sourceResource
+  a owl:ObjectProperty ;
+  rdfs:label "Source Resource Id" ;
+  rdfs:domain :Alarm ;
+  rdfs:range :Resource  .
+
+:rootCauseAlarm
+  a owl:ObjectProperty ;
+  rdfs:label "Root Cause Alarm Id" ;
+  rdfs:domain :Alarm ;
+  rdfs:range :Alarm  .
+
+:raisedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Raised By Id" ;
+  rdfs:domain :Alarm ;
+  rdfs:range :Party  .
+
+:acknowledgedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Acknowledged By Id" ;
+  rdfs:domain :Alarm ;
+  rdfs:range :Party  .
+
+:ownerOf
+  a owl:ObjectProperty ;
+  rdfs:label "Owner Id" ;
+  rdfs:domain :Attachment ;
+  rdfs:range owl:Thing ;
+  owl:minCardinality 1  .
+
+:ownerOf
+  a owl:ObjectProperty ;
+  rdfs:label "Owner Id" ;
+  rdfs:domain :Characteristic ;
+  rdfs:range owl:Thing ;
+  owl:minCardinality 1  .
+
+:partyOf
+  a owl:ObjectProperty ;
+  rdfs:label "Party Id" ;
+  rdfs:domain :CustomerAccount ;
+  rdfs:range :Party ;
+  owl:minCardinality 1  .
+
+:ownerOf
+  a owl:ObjectProperty ;
+  rdfs:label "Owner Id" ;
+  rdfs:domain :Note ;
+  rdfs:range owl:Thing ;
+  owl:minCardinality 1  .
+
+:placeOf
+  a owl:ObjectProperty ;
+  rdfs:label "Place Id" ;
+  rdfs:domain :Party ;
+  rdfs:range :GeographicLocation  .
+
+:partyOf
+  a owl:ObjectProperty ;
+  rdfs:label "Party Id" ;
+  rdfs:domain :PartyRole ;
+  rdfs:range :Party ;
+  owl:minCardinality 1  .
+
+:resourceOf
+  a owl:ObjectProperty ;
+  rdfs:label "Resource Id" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range :Resource  .
+
+:serviceOf
+  a owl:ObjectProperty ;
+  rdfs:label "Service Id" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range :Service  .
+
+:recordedByParty
+  a owl:ObjectProperty ;
+  rdfs:label "Recorded By Party Id" ;
+  rdfs:domain :PerformanceIndicator ;
+  rdfs:range :Party  .
+
+:parentPlace
+  a owl:ObjectProperty ;
+  rdfs:label "Parent Place Id" ;
+  rdfs:domain :GeographicLocation ;
+  rdfs:range :GeographicLocation  .
+
+:productOffering
+  a owl:ObjectProperty ;
+  rdfs:label "Product Offering Id" ;
+  rdfs:domain :Product ;
+  rdfs:range :ProductOffering  .
+
+:parentProduct
+  a owl:ObjectProperty ;
+  rdfs:label "Parent Product Id" ;
+  rdfs:domain :Product ;
+  rdfs:range :Product  .
+
+:realisingService
+  a owl:ObjectProperty ;
+  rdfs:label "Realising Service Id" ;
+  rdfs:domain :Product ;
+  rdfs:range :Service  .
+
+:productSpec
+  a owl:ObjectProperty ;
+  rdfs:label "Product Spec Id" ;
+  rdfs:domain :ProductOffering ;
+  rdfs:range :ProductSpecification  .
+
+:customerAccount
+  a owl:ObjectProperty ;
+  rdfs:label "Customer Account Id" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range :CustomerAccount  .
+
+:productOffering
+  a owl:ObjectProperty ;
+  rdfs:label "Product Offering Id" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range :ProductOffering  .
+
+:submittedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Submitted By Id" ;
+  rdfs:domain :ProductOrder ;
+  rdfs:range :Party  .
+
+:resourceSpec
+  a owl:ObjectProperty ;
+  rdfs:label "Resource Spec Id" ;
+  rdfs:domain :Resource ;
+  rdfs:range :ResourceSpecification  .
+
+:parentResource
+  a owl:ObjectProperty ;
+  rdfs:label "Parent Resource Id" ;
+  rdfs:domain :Resource ;
+  rdfs:range :Resource  .
+
+:placeOf
+  a owl:ObjectProperty ;
+  rdfs:label "Place Id" ;
+  rdfs:domain :Resource ;
+  rdfs:range :GeographicLocation  .
+
+:externalOf
+  a owl:ObjectProperty ;
+  rdfs:label "External Id" ;
+  rdfs:domain :Resource ;
+  rdfs:range owl:Thing  .
+
+:resourceOf
+  a owl:ObjectProperty ;
+  rdfs:label "Resource Id" ;
+  rdfs:domain :ResourceRelationship ;
+  rdfs:range :Resource ;
+  owl:minCardinality 1  .
+
+:relatedResource
+  a owl:ObjectProperty ;
+  rdfs:label "Related Resource Id" ;
+  rdfs:domain :ResourceRelationship ;
+  rdfs:range :Resource ;
+  owl:minCardinality 1  .
+
+:serviceSpec
+  a owl:ObjectProperty ;
+  rdfs:label "Service Spec Id" ;
+  rdfs:domain :Service ;
+  rdfs:range :ServiceSpecification  .
+
+:parentService
+  a owl:ObjectProperty ;
+  rdfs:label "Parent Service Id" ;
+  rdfs:domain :Service ;
+  rdfs:range :Service  .
+
+:realisingResource
+  a owl:ObjectProperty ;
+  rdfs:label "Realising Resource Id" ;
+  rdfs:domain :Service ;
+  rdfs:range :Resource  .
+
+:productOrder
+  a owl:ObjectProperty ;
+  rdfs:label "Product Order Id" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range :ProductOrder  .
+
+:serviceSpec
+  a owl:ObjectProperty ;
+  rdfs:label "Service Spec Id" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range :ServiceSpecification  .
+
+:submittedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Submitted By Id" ;
+  rdfs:domain :ServiceOrder ;
+  rdfs:range :Party  .
+
+:serviceOf
+  a owl:ObjectProperty ;
+  rdfs:label "Service Id" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range :Service  .
+
+:alarmOf
+  a owl:ObjectProperty ;
+  rdfs:label "Alarm Id" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range :Alarm  .
+
+:raisedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Raised By Id" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range :Party  .
+
+:resolvedBy
+  a owl:ObjectProperty ;
+  rdfs:label "Resolved By Id" ;
+  rdfs:domain :ServiceProblem ;
+  rdfs:range :Party  .
+
+
+
+# ── PROV-O Integration Patterns ──────────────────────────────────────
+# Aligns ObservationRecord with prov:Entity and agents with prov:Agent.
+
+:wasProducedBy
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf prov:wasGeneratedBy ;
+  rdfs:label "was produced by" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Agent ;
+  rdfs:comment "Links an observation to the agent that produced it." ;
+  :sensitivityTier :Internal .
+
+:hasConfidenceScore
+  a owl:DatatypeProperty ;
+  rdfs:label "Confidence Score" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
+  :sensitivityTier :Confidential .
+
+:derivationMethod
+  a owl:DatatypeProperty ;
+  rdfs:label "Derivation Method" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
+  :sensitivityTier :Internal .
+
+:governedBy
+  a owl:ObjectProperty ;
+  rdfs:label "governed by" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Policy ;
+  rdfs:comment "The policy that governs this event." ;
+  :sensitivityTier :Internal .
+
+:hasParticipant
+  a owl:ObjectProperty ;
+  rdfs:label "has participant" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Agent ;
+  rdfs:comment "An agent that participated in this event." ;
+  :sensitivityTier :Internal .
+
+:refersToAsset
+  a owl:ObjectProperty ;
+  rdfs:label "refers to asset" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Asset ;
+  rdfs:comment "The asset this observation is about." ;
+  :sensitivityTier :Internal .
+

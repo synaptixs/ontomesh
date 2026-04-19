@@ -1,0 +1,12 @@
+ontology:
+  base:   "https://ontology.acme.com/enterprise/"
+  shapes: "https://ontology.acme.com/shapes/enterprise/"
+  vocab:  "https://ontology.acme.com/vocab/enterprise/"
+  tmf:    "https://ontology.acme.com/tmf/"
+  org_domain: "ontology.acme.com"
+
+instance:
+  base:  "https://id.acme.com/"
+  oss:   "https://oss.acme.com/"
+  ml:    "https://ml.acme.com/"
+  audit: "https://audit.acme.com/"

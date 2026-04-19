@@ -1,0 +1,345 @@
+"""
+ontology_generator.py — Phase 2
+────────────────────────────────
+Generates a valid OWL 2 Turtle (.ttl) ontology from the introspected
+database model and ontology_metadata annotations.
+
+Produces:
+  output/ontology/enterprise.ttl     — primary OWL ontology
+  output/ontology/events.ttl         — event subclass hierarchy
+  output/ontology/provenance.ttl     — PROV-O provenance patterns
+
+No external dependencies.
+"""
+
+import os
+from datetime import datetime
+from typing import List
+from db_introspector import (
+    DBIntrospector, TableModel, ColumnModel,
+    BASE_IRI, SHAPES_IRI, VOCAB_IRI, snake_to_lower_camel, snake_to_camel
+)
+
+VERSION = "1.0.0"
+NOW = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+PREFIXES = f"""\
+@prefix :     <{BASE_IRI}> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sh:   <{SHAPES_IRI}> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+"""
+
+
+def _str(s):
+    if s is None:
+        return None
+    return s.replace('"', '\\"').replace('\n', ' ')
+
+
+def _ontology_header(label: str, comment: str, version: str, iri: str) -> str:
+    return f"""\
+<{iri}>
+  a owl:Ontology ;
+  owl:versionIRI <{iri}{version}> ;
+  owl:versionInfo "{version}" ;
+  rdfs:label "{label}" ;
+  rdfs:comment "{comment}" ;
+  dcterms:created "{NOW}"^^xsd:dateTime ;
+  dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
+
+"""
+
+
+def _sensitivity_property() -> str:
+    return """\
+# ── Sensitivity Annotation Property ──────────────────────────────────
+:sensitivityTier
+  a owl:AnnotationProperty ;
+  rdfs:label "Sensitivity Tier" ;
+  rdfs:comment "Required on all classes and data properties. Values: Public, Internal, Confidential, Restricted." .
+
+:SensitivityTierValue a owl:Class ;
+  rdfs:label "Sensitivity Tier Value" .
+
+:Public       a :SensitivityTierValue ; rdfs:label "Public" .
+:Internal     a :SensitivityTierValue ; rdfs:label "Internal" .
+:Confidential a :SensitivityTierValue ; rdfs:label "Confidential" .
+:Restricted   a :SensitivityTierValue ; rdfs:label "Restricted" .
+
+"""
+
+
+def _base_classes() -> str:
+    return """\
+# ── Base Classes ──────────────────────────────────────────────────────
+:DomainEntity
+  a owl:Class ;
+  rdfs:label "Domain Entity" ;
+  rdfs:comment "Root class for all domain entities." ;
+  :sensitivityTier :Internal .
+
+:DomainEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Domain Event" ;
+  rdfs:comment "A significant occurrence that changes domain state or produces evidence." ;
+  :sensitivityTier :Internal .
+
+:ObservationRecord
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity, prov:Entity ;
+  rdfs:label "Observation Record" ;
+  rdfs:comment "A measured, inferred, or imported fact with full PROV-O provenance." ;
+  :sensitivityTier :Confidential .
+
+"""
+
+
+def _class_block(t: TableModel) -> str:
+    parent = ":DomainEvent" if t.is_event_class else ":DomainEntity"
+    lines = [
+        f":{t.class_name}",
+        f"  a owl:Class ;",
+        f"  rdfs:subClassOf {parent} ;",
+        f'  rdfs:label "{_str(t.effective_label)}" ;',
+    ]
+    if t.description:
+        lines.append(f'  rdfs:comment "{_str(t.description)}" ;')
+    lines.append(f"  :sensitivityTier :{t.sensitivity_tier} ;")
+    if t.skos_pref_label:
+        lines.append(f'  skos:prefLabel "{_str(t.skos_pref_label)}" ;')
+    for alt in t.skos_alt_labels:
+        lines.append(f'  skos:altLabel "{_str(alt)}" ;')
+    if t.cq_coverage:
+        lines.append(f'  rdfs:isDefinedBy "{", ".join(t.cq_coverage)}" ;')
+    # Close — replace last ; with .
+    lines[-1] = lines[-1][:-1] + " ."
+    return "\n".join(lines) + "\n"
+
+
+def _data_property_block(col: ColumnModel, table: TableModel) -> str:
+    prop_name = f"has{snake_to_camel(col.name)}"
+    lines = [
+        f":{prop_name}",
+        f"  a owl:DatatypeProperty ;",
+        f'  rdfs:label "{_str(col.effective_label)}" ;',
+        f"  rdfs:domain :{table.class_name} ;",
+        f"  rdfs:range {col.effective_xsd_type} ;",
+    ]
+    if col.description:
+        lines.append(f'  rdfs:comment "{_str(col.description)}" ;')
+    lines.append(f"  :sensitivityTier :{col.sensitivity_tier} ;")
+    if col.not_null:
+        lines.append(f"  # Required property (NOT NULL in schema)")
+    lines[-1] = lines[-1].rstrip(" ;") + " ."
+    if lines[-1].endswith("# Required property (NOT NULL in schema)."):
+        # fix comment becoming part of triple
+        lines[-1] = lines[-2][:-1] + " ."
+        lines.pop(-2)
+        lines.append("  # Required property (NOT NULL in schema)")
+    return "\n".join(lines) + "\n"
+
+
+def _object_property_block(col: ColumnModel, table: TableModel,
+                            all_tables: List[TableModel]) -> str:
+    # Determine range class from FK target table
+    ref_table_name = col.fk_references.split(".")[0] if col.fk_references else None
+    range_class = "owl:Thing"
+    if ref_table_name:
+        for t in all_tables:
+            if t.name == ref_table_name:
+                range_class = f":{t.class_name}"
+                break
+
+    # Derive property name: owner_org_id → isOwnedBy
+    col_stripped = col.name.replace("_id", "").replace("_org", "").replace("_type", "")
+    parts = col_stripped.split("_")
+    prop_name = snake_to_lower_camel(col_stripped) + "Of" \
+        if len(parts) == 1 else snake_to_lower_camel(col_stripped)
+
+    lines = [
+        f":{prop_name}",
+        f"  a owl:ObjectProperty ;",
+        f'  rdfs:label "{_str(col.effective_label)}" ;',
+        f"  rdfs:domain :{table.class_name} ;",
+        f"  rdfs:range {range_class} ;",
+    ]
+    if col.description:
+        lines.append(f'  rdfs:comment "{_str(col.description)}" ;')
+    if col.not_null:
+        lines.append(f"  owl:minCardinality 1 ;")
+    lines[-1] = lines[-1][:-1] + " ."
+    return "\n".join(lines) + "\n"
+
+
+def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
+    """Generate OWL subclasses for distinct event_type values."""
+    event_tables = [t for t in tables if t.is_event_class]
+    if not event_tables:
+        return ""
+
+    blocks = ["# ── Event Subclass Hierarchy ────────────────────────────────────────\n"]
+    seen = set()
+    for et in event_tables:
+        distinct = intro.get_distinct_values(et.name, "event_type")
+        for val in distinct:
+            class_name = snake_to_camel(val.lower()) + "Event"
+            if class_name in seen:
+                continue
+            seen.add(class_name)
+            label = val.replace("_", " ").title() + " Event"
+            blocks.append(
+                f":{class_name}\n"
+                f"  a owl:Class ;\n"
+                f"  rdfs:subClassOf :{et.class_name} ;\n"
+                f'  rdfs:label "{label}" ;\n'
+                f'  rdfs:comment "Subclass of {et.class_name} for event_type = {val}." ;\n'
+                f"  :sensitivityTier :{et.sensitivity_tier} .\n"
+            )
+    return "\n".join(blocks)
+
+
+def _prov_patterns() -> str:
+    return f"""\
+# ── PROV-O Integration Patterns ──────────────────────────────────────
+# Aligns ObservationRecord with prov:Entity and agents with prov:Agent.
+
+:wasProducedBy
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf prov:wasGeneratedBy ;
+  rdfs:label "was produced by" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Agent ;
+  rdfs:comment "Links an observation to the agent that produced it." ;
+  :sensitivityTier :Internal .
+
+:hasConfidenceScore
+  a owl:DatatypeProperty ;
+  rdfs:label "Confidence Score" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
+  :sensitivityTier :Confidential .
+
+:derivationMethod
+  a owl:DatatypeProperty ;
+  rdfs:label "Derivation Method" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
+  :sensitivityTier :Internal .
+
+:governedBy
+  a owl:ObjectProperty ;
+  rdfs:label "governed by" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Policy ;
+  rdfs:comment "The policy that governs this event." ;
+  :sensitivityTier :Internal .
+
+:hasParticipant
+  a owl:ObjectProperty ;
+  rdfs:label "has participant" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Agent ;
+  rdfs:comment "An agent that participated in this event." ;
+  :sensitivityTier :Internal .
+
+:refersToAsset
+  a owl:ObjectProperty ;
+  rdfs:label "refers to asset" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Asset ;
+  rdfs:comment "The asset this observation is about." ;
+  :sensitivityTier :Internal .
+
+"""
+
+
+# ── Main generator ───────────────────────────────────────────────────────
+
+def generate_ontology(intro: DBIntrospector, output_dir: str):
+    tables = intro.introspect_all()
+    os.makedirs(output_dir, exist_ok=True)
+
+    # ── Primary ontology ──────────────────────────────────────────────
+    lines = [
+        PREFIXES,
+        _ontology_header(
+            "Enterprise Domain Ontology",
+            "Auto-generated from relational schema + ontology_metadata. "
+            "Covers all operational domain entities, events, agents, "
+            "policies, observations, and provenance patterns.",
+            VERSION,
+            BASE_IRI
+        ),
+        _sensitivity_property(),
+        _base_classes(),
+    ]
+
+    lines.append("# ── Domain Classes ──────────────────────────────────────────────────\n")
+    for t in tables:
+        # Skip tables that are pure junction/log tables not needing a top-level class
+        lines.append(_class_block(t))
+
+    lines.append("\n# ── Data Properties ─────────────────────────────────────────────────\n")
+    for t in tables:
+        for col in t.data_properties:
+            lines.append(_data_property_block(col, t))
+
+    lines.append("\n# ── Object Properties ───────────────────────────────────────────────\n")
+    for t in tables:
+        for col in t.object_properties:
+            lines.append(_object_property_block(col, t, tables))
+
+    lines.append("\n")
+    lines.append(_prov_patterns())
+
+    ontology_path = os.path.join(output_dir, "enterprise.ttl")
+    with open(ontology_path, "w") as f:
+        f.write("\n".join(lines))
+    print(f"  ✓ Ontology written      → {ontology_path}")
+    _report_stats(tables, ontology_path)
+
+    # ── Events sub-module ────────────────────────────────────────────
+    event_content = (
+        PREFIXES + "\n"
+        f'<{BASE_IRI}events/>\n'
+        f'  a owl:Ontology ;\n'
+        f'  owl:imports <{BASE_IRI}> ;\n'
+        f'  rdfs:label "Enterprise Event Subclass Hierarchy" .\n\n'
+        + _event_subclasses(tables, intro)
+    )
+    events_path = os.path.join(output_dir, "events.ttl")
+    with open(events_path, "w") as f:
+        f.write(event_content)
+    print(f"  ✓ Event hierarchy       → {events_path}")
+
+    # ── Provenance patterns sub-module ───────────────────────────────
+    prov_content = (
+        PREFIXES + "\n"
+        f'<{BASE_IRI}provenance/>\n'
+        f'  a owl:Ontology ;\n'
+        f'  owl:imports <{BASE_IRI}> ;\n'
+        f'  rdfs:label "Enterprise Provenance Profile" .\n\n'
+        + _prov_patterns()
+    )
+    prov_path = os.path.join(output_dir, "provenance.ttl")
+    with open(prov_path, "w") as f:
+        f.write(prov_content)
+    print(f"  ✓ Provenance profile    → {prov_path}")
+
+
+def _report_stats(tables, path):
+    classes = len(tables)
+    data_props = sum(len(t.data_properties) for t in tables)
+    obj_props  = sum(len(t.object_properties) for t in tables)
+    event_classes = sum(1 for t in tables if t.is_event_class)
+    print(f"    Classes: {classes}  |  Data properties: {data_props}  "
+          f"|  Object properties: {obj_props}  |  Event tables: {event_classes}")

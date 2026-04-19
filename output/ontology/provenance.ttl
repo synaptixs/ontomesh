@@ -1,0 +1,67 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sh:   <https://ontology.example.com/shapes/enterprise/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ontology.example.com/enterprise/provenance/>
+  a owl:Ontology ;
+  owl:imports <https://ontology.example.com/enterprise/> ;
+  rdfs:label "Enterprise Provenance Profile" .
+
+# ── PROV-O Integration Patterns ──────────────────────────────────────
+# Aligns ObservationRecord with prov:Entity and agents with prov:Agent.
+
+:wasProducedBy
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf prov:wasGeneratedBy ;
+  rdfs:label "was produced by" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Agent ;
+  rdfs:comment "Links an observation to the agent that produced it." ;
+  :sensitivityTier :Internal .
+
+:hasConfidenceScore
+  a owl:DatatypeProperty ;
+  rdfs:label "Confidence Score" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
+  :sensitivityTier :Confidential .
+
+:derivationMethod
+  a owl:DatatypeProperty ;
+  rdfs:label "Derivation Method" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range xsd:string ;
+  rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
+  :sensitivityTier :Internal .
+
+:governedBy
+  a owl:ObjectProperty ;
+  rdfs:label "governed by" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Policy ;
+  rdfs:comment "The policy that governs this event." ;
+  :sensitivityTier :Internal .
+
+:hasParticipant
+  a owl:ObjectProperty ;
+  rdfs:label "has participant" ;
+  rdfs:domain :DomainEvent ;
+  rdfs:range :Agent ;
+  rdfs:comment "An agent that participated in this event." ;
+  :sensitivityTier :Internal .
+
+:refersToAsset
+  a owl:ObjectProperty ;
+  rdfs:label "refers to asset" ;
+  rdfs:domain :ObservationRecord ;
+  rdfs:range :Asset ;
+  rdfs:comment "The asset this observation is about." ;
+  :sensitivityTier :Internal .
+

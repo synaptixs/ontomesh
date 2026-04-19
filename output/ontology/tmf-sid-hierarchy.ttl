@@ -1,0 +1,533 @@
+@prefix :       <https://ontology.example.com/tmf/> .
+@prefix tmf:    <https://www.tmforum.org/sid/> .
+@prefix etom:   <https://www.tmforum.org/etom/> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov:   <http://www.w3.org/ns/prov#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+<https://ontology.example.com/tmf/sid/>
+  a owl:Ontology ;
+  rdfs:label "TM Forum SID-Aligned Ontology" ;
+  rdfs:comment "OWL 2 representation of the TM Forum Information Framework (SID) v23.0 domains and ABEs." ;
+  dcterms:source "https://www.tmforum.org/open-digital-architecture/information-framework-sid/" ;
+  owl:versionInfo "23.0" .
+
+# ── Annotation Properties ──────────────────────────────────────────
+:sidDomain a owl:AnnotationProperty ;
+  rdfs:label "SID Domain" ;
+  rdfs:comment "The TM Forum SID domain this class belongs to." .
+
+:Alarm
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Alarm" ;
+  rdfs:comment "A network fault event per TMF642 / ITU-T X.733." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+
+:sidABE a owl:AnnotationProperty ;
+  rdfs:label "SID ABE" ;
+  rdfs:comment "The SID Aggregate Business Entity (ABE) this class maps to." .
+:tmfApiId a owl:AnnotationProperty ;
+  rdfs:label "TMF Open API ID" ;
+  rdfs:comment "The primary TM Forum Open API that manages instances of this class." .
+:tmfApiVersion a owl:AnnotationProperty ;
+  rdfs:label "TMF API Version" .
+
+# ── SID Domain: Common ──────────────────────────────────────
+:TmfEntity
+  a owl:Class ;
+  rdfs:subClassOf owl:Thing ;
+  rdfs:label "TmfEntity" ;
+  rdfs:comment "Root class for all TM Forum SID entities. Carries @type, @baseType, @schemaLocation." ;
+  :sidDomain "Common" ;
+  :sidABE "Root BE"  .
+:Characteristic
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Characteristic" ;
+  rdfs:comment "SID Characteristic ABE — extensible key-value pair for any entity." ;
+  :sidDomain "Common" ;
+  :sidABE "Characteristic"  .
+:TimePeriod
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TimePeriod" ;
+  rdfs:comment "A specific period of time bounded by start and end datetime." ;
+  :sidDomain "Common" ;
+  :sidABE "TimePeriod"  .
+:Note
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Note" ;
+  rdfs:comment "Free-text annotation attached to any entity." ;
+  :sidDomain "Common" ;
+  :sidABE "Note"  .
+:Attachment
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Attachment" ;
+  rdfs:comment "A file or URL attachment linked to any entity." ;
+  :sidDomain "Common" ;
+  :sidABE "Attachment"  .
+:GeographicPlace
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "GeographicPlace" ;
+  rdfs:comment "A geographic address, site, or location per TMF673/674/675." ;
+  :sidDomain "Common" ;
+  :sidABE "Location" ;
+  :tmfApiId "TMF673" ;
+  :tmfApiVersion "v4.0"  .
+:RelatedParty
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "RelatedParty" ;
+  rdfs:comment "A reference to a party and their role in relation to an entity." ;
+  :sidDomain "Common" ;
+  :sidABE "Party" ;
+  :tmfApiId "TMF632" ;
+  :tmfApiVersion "v5.0"  .
+
+# ── SID Domain: Resource ────────────────────────────────────
+:Resource
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Resource" ;
+  rdfs:comment "Base resource entity per SID Resource ABE / TMF639." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource" ;
+  :tmfApiId "TMF639" ;
+  :tmfApiVersion "v5.0"  .
+:LogicalResource
+  a owl:Class ;
+  rdfs:subClassOf :Resource ;
+  rdfs:label "LogicalResource" ;
+  rdfs:comment "A non-physical resource: IP address, MSISDN, NetworkSlice, NetworkFunction." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" ;
+  :tmfApiVersion "v5.0"  .
+:PhysicalResource
+  a owl:Class ;
+  rdfs:subClassOf :Resource ;
+  rdfs:label "PhysicalResource" ;
+  rdfs:comment "A physical resource: equipment, antenna, server, card." ;
+  :sidDomain "Resource" ;
+  :sidABE "Physical Resource" ;
+  :tmfApiId "TMF639" ;
+  :tmfApiVersion "v5.0"  .
+:NetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :LogicalResource ;
+  rdfs:label "NetworkFunction" ;
+  rdfs:comment "A 3GPP or ETSI NFV virtualised network function instance (AMF, SMF, UPF, gNB, etc.)." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" ;
+  :tmfApiVersion "v5.0"  .
+:NetworkSlice
+  a owl:Class ;
+  rdfs:subClassOf :LogicalResource ;
+  rdfs:label "NetworkSlice" ;
+  rdfs:comment "An end-to-end 3GPP network slice instance (eMBB, URLLC, mMTC)." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" ;
+  :tmfApiVersion "v5.0"  .
+:ResourceSpecification
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ResourceSpecification" ;
+  rdfs:comment "Specification / catalog template for a resource type per TMF634." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Specification" ;
+  :tmfApiId "TMF634" ;
+  :tmfApiVersion "v4.0"  .
+:ResourceRelationship
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ResourceRelationship" ;
+  rdfs:comment "A typed association between two resource instances (composedOf, connectsTo, dependsOn)." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Topology" ;
+  :tmfApiId "TMF639" ;
+  :tmfApiVersion "v5.0"  .
+
+# ── SID Domain: Service ─────────────────────────────────────
+:Service
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Service" ;
+  rdfs:comment "Base service entity per SID Service ABE / TMF638." ;
+  :sidDomain "Service" ;
+  :sidABE "Service" ;
+  :tmfApiId "TMF638" ;
+  :tmfApiVersion "v4.0"  .
+:CustomerFacingService
+  a owl:Class ;
+  rdfs:subClassOf :Service ;
+  rdfs:label "CustomerFacingService" ;
+  rdfs:comment "A service directly perceived by the customer. Maps to TMF638 CFS subtype." ;
+  :sidDomain "Service" ;
+  :sidABE "Customer Facing Service" ;
+  :tmfApiId "TMF638" ;
+  :tmfApiVersion "v4.0"  .
+:ResourceFacingService
+  a owl:Class ;
+  rdfs:subClassOf :Service ;
+  rdfs:label "ResourceFacingService" ;
+  rdfs:comment "An internal service that realises a CFS using resources. Maps to TMF638 RFS subtype." ;
+  :sidDomain "Service" ;
+  :sidABE "Resource Facing Service" ;
+  :tmfApiId "TMF638" ;
+  :tmfApiVersion "v4.0"  .
+:ServiceSpecification
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ServiceSpecification" ;
+  rdfs:comment "Catalog template for a service type per TMF633." ;
+  :sidDomain "Service" ;
+  :sidABE "Service Specification" ;
+  :tmfApiId "TMF633" ;
+  :tmfApiVersion "v4.0"  .
+:ServiceOrder
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ServiceOrder" ;
+  rdfs:comment "An internal fulfilment order to provision or modify a service per TMF641." ;
+  :sidDomain "Service" ;
+  :sidABE "Service Order" ;
+  :tmfApiId "TMF641" ;
+  :tmfApiVersion "v4.0"  .
+:ServiceProblem
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ServiceProblem" ;
+  rdfs:comment "A service quality or availability problem per SID ServiceProblem / TMF656." ;
+  :sidDomain "Service" ;
+  :sidABE "Service Trouble" ;
+  :tmfApiId "TMF656" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: Product ─────────────────────────────────────
+:Product
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Product" ;
+  rdfs:comment "A product instance subscribed to by a party per SID Product ABE / TMF637." ;
+  :sidDomain "Product" ;
+  :sidABE "Product" ;
+  :tmfApiId "TMF637" ;
+  :tmfApiVersion "v4.0"  .
+:ProductOffering
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ProductOffering" ;
+  rdfs:comment "A commercial product offering available in the catalog per TMF620." ;
+  :sidDomain "Product" ;
+  :sidABE "Product Offering" ;
+  :tmfApiId "TMF620" ;
+  :tmfApiVersion "v5.0"  .
+:ProductSpecification
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ProductSpecification" ;
+  rdfs:comment "Specification of a product type per TMF620." ;
+  :sidDomain "Product" ;
+  :sidABE "Product Specification" ;
+  :tmfApiId "TMF620" ;
+  :tmfApiVersion "v5.0"  .
+:ProductOrder
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ProductOrder" ;
+  rdfs:comment "A customer order for a product per TMF622." ;
+  :sidDomain "Product" ;
+  :sidABE "Customer Order" ;
+  :tmfApiId "TMF622" ;
+  :tmfApiVersion "v5.0"  .
+:BundledProductOffering
+  a owl:Class ;
+  rdfs:subClassOf :ProductOffering ;
+  rdfs:label "BundledProductOffering" ;
+  rdfs:comment "A product offering composed of multiple component offerings (bundle)." ;
+  :sidDomain "Product" ;
+  :sidABE "Product Offering" ;
+  :tmfApiId "TMF620" ;
+  :tmfApiVersion "v5.0"  .
+
+# ── SID Domain: EngagedParty ────────────────────────────────
+:Party
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Party" ;
+  rdfs:comment "An individual or organisation that plays a role per SID EngagedParty / TMF632." ;
+  :sidDomain "EngagedParty" ;
+  :sidABE "Party" ;
+  :tmfApiId "TMF632" ;
+  :tmfApiVersion "v5.0"  .
+:Individual
+  a owl:Class ;
+  rdfs:subClassOf :Party ;
+  rdfs:label "Individual" ;
+  rdfs:comment "A natural person — customer, employee, or contact." ;
+  :sidDomain "EngagedParty" ;
+  :sidABE "Party" ;
+  :tmfApiId "TMF632" ;
+  :tmfApiVersion "v5.0"  .
+:Organization
+  a owl:Class ;
+  rdfs:subClassOf :Party ;
+  rdfs:label "Organization" ;
+  rdfs:comment "A legal or operational entity — operator, vendor, regulator, partner." ;
+  :sidDomain "EngagedParty" ;
+  :sidABE "Party" ;
+  :tmfApiId "TMF632" ;
+  :tmfApiVersion "v5.0"  .
+:PartyRole
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "PartyRole" ;
+  rdfs:comment "A contextual role a party plays (Customer, Partner, Supplier) per TMF669." ;
+  :sidDomain "EngagedParty" ;
+  :sidABE "Party Role" ;
+  :tmfApiId "TMF669" ;
+  :tmfApiVersion "v5.0"  .
+:CustomerAccount
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "CustomerAccount" ;
+  rdfs:comment "A billing and service management account per TMF666." ;
+  :sidDomain "EngagedParty" ;
+  :sidABE "Customer Account" ;
+  :tmfApiId "TMF666" ;
+  :tmfApiVersion "v5.0"  .
+:Agreement
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Agreement" ;
+  rdfs:comment "A commercial, SLA, or roaming agreement between parties per TMF651." ;
+  :sidDomain "EngagedParty" ;
+  :sidABE "Agreement" ;
+  :tmfApiId "TMF651" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: MarketSales ─────────────────────────────────
+:MarketSegment
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "MarketSegment" ;
+  rdfs:comment "A defined segment of the market targeted by products and campaigns." ;
+  :sidDomain "MarketSales" ;
+  :sidABE "Market Segment"  .
+:ProductCatalog
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ProductCatalog" ;
+  rdfs:comment "The catalog of all product offerings available to customers per TMF620." ;
+  :sidDomain "MarketSales" ;
+  :sidABE "Product Offering" ;
+  :tmfApiId "TMF620" ;
+  :tmfApiVersion "v5.0"  .
+:SalesChannel
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "SalesChannel" ;
+  rdfs:comment "A channel through which products are sold (retail, online, partner)." ;
+  :sidDomain "MarketSales" ;
+  :sidABE "Sales Channel"  .
+
+# ── SID Domain: Enterprise ──────────────────────────────────
+:Policy
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "Policy" ;
+  rdfs:comment "A rule or constraint governing network, operations, or compliance." ;
+  :sidDomain "Enterprise" ;
+  :sidABE "Policy" ;
+  :tmfApiId "TMF672" ;
+  :tmfApiVersion "v4.0"  .
+:UserRole
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "UserRole" ;
+  rdfs:comment "A named set of permissions for a user per TMF672." ;
+  :sidDomain "Enterprise" ;
+  :sidABE "User Role" ;
+  :tmfApiId "TMF672" ;
+  :tmfApiVersion "v4.0"  .
+:BusinessInteraction
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "BusinessInteraction" ;
+  rdfs:comment "An interaction between enterprise entities (e.g. order, complaint, request)." ;
+  :sidDomain "Enterprise" ;
+  :sidABE "Business Interaction"  .
+
+# ── SID Domain: SupplierPartner ─────────────────────────────
+:SupplierAccount
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "SupplierAccount" ;
+  rdfs:comment "A supplier or partner account managed in the supplier/partner domain." ;
+  :sidDomain "SupplierPartner" ;
+  :sidABE "S/P Account"  .
+:SupplierOrder
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "SupplierOrder" ;
+  rdfs:comment "An order placed with a supplier or partner." ;
+  :sidDomain "SupplierPartner" ;
+  :sidABE "S/P Order"  .
+:SupplierSLA
+  a owl:Class ;
+  rdfs:subClassOf :Agreement ;
+  rdfs:label "SupplierSLA" ;
+  rdfs:comment "A service level agreement with a supplier or partner." ;
+  :sidDomain "SupplierPartner" ;
+  :sidABE "S/P SLA" ;
+  :tmfApiId "TMF651" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── 5G Network Function Subclasses (3GPP TS 23.501) ─────────────────
+:AMFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "AMF" ;
+  rdfs:comment "Access and Mobility Function — handles UE registration, mobility, and connection management." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:SMFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "SMF" ;
+  rdfs:comment "Session Management Function — handles PDU session establishment and IP address assignment." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:UPFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "UPF" ;
+  rdfs:comment "User Plane Function — handles user data forwarding, QoS enforcement, and traffic reporting." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:PCFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "PCF" ;
+  rdfs:comment "Policy Control Function — provides policy rules for session and service data flows." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:UDMNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "UDM" ;
+  rdfs:comment "Unified Data Management — manages subscriber data and authentication credentials." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:AUSFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "AUSF" ;
+  rdfs:comment "Authentication Server Function — provides EAP-based authentication for 5G subscribers." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:NRFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "NRF" ;
+  rdfs:comment "Network Repository Function — NF service registration and discovery." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:NEFNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "NEF" ;
+  rdfs:comment "Network Exposure Function — exposes 5G network capabilities to external applications." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+:gNBNetworkFunction
+  a owl:Class ;
+  rdfs:subClassOf :NetworkFunction ;
+  rdfs:label "gNB" ;
+  rdfs:comment "5G NR gNodeB — base station for 5G New Radio access network." ;
+  :sidDomain "Resource" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF639" .
+
+# ── Alarm Subclasses (ITU-T X.733 / TMF642) ─────────────────────────
+:CommunicationsAlarm
+  a owl:Class ;
+  rdfs:subClassOf :Alarm ;
+  rdfs:label "CommunicationsAlarm" ;
+  rdfs:comment "Failures in communication paths, interfaces, or protocols." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+
+:EquipmentAlarm
+  a owl:Class ;
+  rdfs:subClassOf :Alarm ;
+  rdfs:label "EquipmentAlarm" ;
+  rdfs:comment "Hardware faults in network equipment or servers." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+
+:EnvironmentalAlarm
+  a owl:Class ;
+  rdfs:subClassOf :Alarm ;
+  rdfs:label "EnvironmentalAlarm" ;
+  rdfs:comment "Physical environment issues: temperature, power, humidity." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+
+:ProcessingErrorAlarm
+  a owl:Class ;
+  rdfs:subClassOf :Alarm ;
+  rdfs:label "ProcessingErrorAlarm" ;
+  rdfs:comment "Software errors, process failures, or configuration faults." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+
+:QualityOfServiceAlarm
+  a owl:Class ;
+  rdfs:subClassOf :Alarm ;
+  rdfs:label "QualityOfServiceAlarm" ;
+  rdfs:comment "KPI breaches: packet loss, latency, throughput, availability." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+
+:SecurityViolation
+  a owl:Class ;
+  rdfs:subClassOf :Alarm ;
+  rdfs:label "SecurityViolation" ;
+  rdfs:comment "Security policy violations or unauthorised access attempts." ;
+  :sidDomain "Resource" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF642" .
+

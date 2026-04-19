@@ -1,0 +1,40 @@
+{
+  "@context": "https://ontology.example.com/enterprise/jsonld/enterprise-context.json",
+  "@type": "ObservationRecord",
+  "@id": "https://gtc.example.com/obs/obs-001",
+  "observationType": "PACKET_LOSS_RATE",
+  "numericValue": 18.7,
+  "unitOfMeasure": "percent",
+  "confidence": 0.98,
+  "derivedBy": "MEASURED",
+  "sourceRef": "https://oss.gtc.example.com/metrics/ran043",
+  "observedAsset": {
+    "@type": "Asset",
+    "@id": "https://gtc.example.com/assets/NE-RAN-043",
+    "name": "gNB Site 043",
+    "sensitivityTier": "https://ontology.example.com/enterprise/Internal"
+  },
+  "generatedBy": {
+    "@type": [
+      "Agent",
+      "prov:Activity"
+    ],
+    "@id": "https://gtc.example.com/events/measure-activity-obs-001",
+    "wasAssociatedWith": {
+      "@type": "Agent",
+      "@id": "https://gtc.example.com/agents/ml-monitor-agent",
+      "name": "ML Monitor Agent",
+      "agentType": "AI_AGENT",
+      "agentIri": "https://gtc.example.com/agents/ml-monitor-agent",
+      "credentialExpiry": "2026-12-31T23:59:59Z",
+      "sensitivityTier": "https://ontology.example.com/enterprise/Internal"
+    }
+  },
+  "generatedAt": "2026-04-10T02:14:00Z",
+  "sensitivityTier": "https://ontology.example.com/enterprise/Confidential",
+  "_validation": {
+    "shacl_gate": "enterprise-shapes.ttl#ObservationAcceptanceGate",
+    "status": "PASS",
+    "validated_at": "2026-04-10T02:14:01Z"
+  }
+}

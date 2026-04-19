@@ -1,0 +1,51 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sh:   <https://ontology.example.com/shapes/enterprise/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ontology.example.com/enterprise/events/>
+  a owl:Ontology ;
+  owl:imports <https://ontology.example.com/enterprise/> ;
+  rdfs:label "Enterprise Event Subclass Hierarchy" .
+
+# ── Event Subclass Hierarchy ────────────────────────────────────────
+
+:ComplianceAuditEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Compliance Audit Event" ;
+  rdfs:comment "Subclass of DomainEvent for event_type = COMPLIANCE_AUDIT." ;
+  :sensitivityTier :Internal .
+
+:IncidentEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Incident Event" ;
+  rdfs:comment "Subclass of DomainEvent for event_type = INCIDENT." ;
+  :sensitivityTier :Internal .
+
+:InspectionEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Inspection Event" ;
+  rdfs:comment "Subclass of DomainEvent for event_type = INSPECTION." ;
+  :sensitivityTier :Internal .
+
+:MaintenanceEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Maintenance Event" ;
+  rdfs:comment "Subclass of DomainEvent for event_type = MAINTENANCE." ;
+  :sensitivityTier :Internal .
+
+:EventTypeEvent
+  a owl:Class ;
+  rdfs:subClassOf :PolicyApplication ;
+  rdfs:label "Event Type Event" ;
+  rdfs:comment "Subclass of PolicyApplication for event_type = event_type." ;
+  :sensitivityTier :Internal .

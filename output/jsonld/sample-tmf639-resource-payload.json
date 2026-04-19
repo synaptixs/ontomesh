@@ -1,0 +1,37 @@
+{
+  "@context": "https://ontology.example.com/tmf/jsonld/tmf-context.json",
+  "@type": [
+    "Resource",
+    "NetworkFunction"
+  ],
+  "@id": "https://gtc.example.com/resources/amf-east-01",
+  "name": "AMF East 01",
+  "nfType": "AMF",
+  "operationalState": "Enabled",
+  "adminState": "Unlocked",
+  "resourceSpecification": {
+    "@type": "ResourceSpecification",
+    "@id": "https://gtc.example.com/catalog/spec/amf-5g-v2",
+    "name": "AMF 5G Specification",
+    "version": "2.0"
+  },
+  "place": {
+    "@type": "GeographicPlace",
+    "@id": "https://gtc.example.com/places/dc-east",
+    "name": "Data Centre East"
+  },
+  "resourceRelationship": [
+    {
+      "relationshipType": "relies-on",
+      "resource": {
+        "@id": "https://gtc.example.com/resources/nrf-east-01"
+      }
+    }
+  ],
+  "_tmf": {
+    "apiId": "TMF639",
+    "apiVersion": "v5.0",
+    "sidDomain": "Resource",
+    "sidABE": "Logical Resource"
+  }
+}
