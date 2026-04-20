@@ -125,6 +125,52 @@ SID_DOMAINS = {
         "SupplierSLA": ("Agreement",
             "A service level agreement with a supplier or partner.", "TMF651", "S/P SLA"),
     },
+    # ── Phase 2B — TMF Remaining Domains ────────────────────
+    "TroubleMgmt": {
+        "TroubleTicket": ("TmfEntity",
+            "A customer or resource trouble ticket per TMF621. Tracks issue lifecycle from New to Closed.", "TMF621", "Service Trouble"),
+        "ResourceTroubleTicket": ("TroubleTicket",
+            "A trouble ticket specifically associated with a resource fault or outage.", "TMF621", "Resource Trouble"),
+        "CustomerTroubleTicket": ("TroubleTicket",
+            "A trouble ticket raised by or on behalf of a customer.", "TMF621", "Customer Problem"),
+    },
+    "NetworkSliceMgmt": {
+        "NetworkSliceProfile": ("TmfEntity",
+            "A 3GPP S-NSSAI-aligned network slice profile with SLA parameters per TMF645.", "TMF645", "Logical Resource"),
+    },
+    "ServiceQuality": {
+        "ServiceQualityReport": ("TmfEntity",
+            "An SLA compliance or KQI quality assessment report per TMF657.", "TMF657", "Service Quality"),
+    },
+    "GeographicSite": {
+        "GeographicSite": ("TmfEntity",
+            "A structured physical site record (data centre, cell tower, PoP) per TMF674.", "TMF674", "Location"),
+    },
+    "Billing": {
+        "CustomerBill": ("TmfEntity",
+            "A customer invoice per TMF678 Customer Bill Management.", "TMF678", "Customer Account"),
+        "BillingAccount": ("TmfEntity",
+            "The billing account that owns the bill relationship per TMF678.", "TMF678", "Customer Account"),
+    },
+    "Qualification": {
+        "ProductOfferingQualification": ("TmfEntity",
+            "An eligibility/feasibility check for a product offering at a customer site per TMF679.", "TMF679", "Product Offering"),
+        "QualificationItem": ("ProductOfferingQualification",
+            "A single line item within a product offering qualification request.", "TMF679", "Product Offering"),
+    },
+    # ── Event Hub & Conflict Resolution ─────────────────────
+    "EventHub": {
+        "EventSubscription": ("TmfEntity",
+            "An async notification subscription per TMF630 §5 event hub pattern.", "TMF688", "Business Interaction"),
+        "EventNotification": ("TmfEntity",
+            "An event notification payload delivered to a subscriber's callback URL.", "TMF688", "Business Interaction"),
+    },
+    "ConflictResolution": {
+        "ConflictEvent": ("TmfEntity",
+            "A multi-agent assertion conflict record with 3-tier resolution chain per framework §10.1.", None, "Policy"),
+        "AssertionResolution": ("ConflictEvent",
+            "The winning assertion and resolution rationale for a resolved conflict event.", None, "Policy"),
+    },
 }
 
 # ── TMF Open API Reference Map ─────────────────────────────────────────────
@@ -310,6 +356,67 @@ TMF_API_MAP = {
         "resource_name": "event",
         "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF688-Event-v4.0.0.swagger.json",
         "description": "Manages asynchronous event publication and subscription.",
+    },
+    # ── Phase 2B — New APIs ──────────────────────────────────
+    "TMF621": {
+        "name": "Trouble Ticket Management API",
+        "version": "v4.0",
+        "sid_class": "TroubleTicket",
+        "sid_domain": "TroubleMgmt",
+        "url_pattern": "/tmf-api/troubleTicket/v4/troubleTicket",
+        "resource_name": "troubleTicket",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF621-TroubleTicket-v4.0.0.swagger.json",
+        "description": "Manages customer and resource trouble tickets from creation through resolution.",
+    },
+    "TMF645": {
+        "name": "Service Qualification Management API",
+        "version": "v4.0",
+        "sid_class": "NetworkSliceProfile",
+        "sid_domain": "NetworkSliceMgmt",
+        "url_pattern": "/tmf-api/serviceQualificationManagement/v4/checkServiceQualification",
+        "resource_name": "checkServiceQualification",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF645-ServiceQualification-v4.0.0.swagger.json",
+        "description": "Manages network slice profiles and service qualification checks (3GPP S-NSSAI).",
+    },
+    "TMF657": {
+        "name": "Service Quality Management API",
+        "version": "v4.0",
+        "sid_class": "ServiceQualityReport",
+        "sid_domain": "ServiceQuality",
+        "url_pattern": "/tmf-api/serviceQualityManagement/v4/serviceLevelObjective",
+        "resource_name": "serviceLevelObjective",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF657-ServiceQuality-v4.0.0.swagger.json",
+        "description": "Manages service quality reports, SLA compliance checks, and KQI assessments.",
+    },
+    "TMF674": {
+        "name": "Geographic Site Management API",
+        "version": "v4.0",
+        "sid_class": "GeographicSite",
+        "sid_domain": "GeographicSite",
+        "url_pattern": "/tmf-api/geographicSiteManagement/v4/geographicSite",
+        "resource_name": "geographicSite",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF674-GeographicSite-v4.0.0.swagger.json",
+        "description": "Manages geographic sites (data centres, cell towers, PoP sites) with full operational attributes.",
+    },
+    "TMF678": {
+        "name": "Customer Bill Management API",
+        "version": "v4.0",
+        "sid_class": "CustomerBill",
+        "sid_domain": "Billing",
+        "url_pattern": "/tmf-api/customerBillManagement/v4/customerBill",
+        "resource_name": "customerBill",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF678-CustomerBill-v4.0.0.swagger.json",
+        "description": "Manages customer bills, invoices, and credit notes with dispute tracking.",
+    },
+    "TMF679": {
+        "name": "Product Offering Qualification API",
+        "version": "v4.0",
+        "sid_class": "ProductOfferingQualification",
+        "sid_domain": "Qualification",
+        "url_pattern": "/tmf-api/productOfferingQualification/v4/productOfferingQualification",
+        "resource_name": "productOfferingQualification",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF679-ProductOfferingQualification-v4.0.0.swagger.json",
+        "description": "Checks eligibility and technical feasibility for product offerings at a given customer location.",
     },
 }
 
@@ -555,6 +662,121 @@ TMF_COMPETENCY_QUESTIONS = [
         "expected_non_empty": False,
         "validates": "TMF641 ServiceOrder lifecycle, ProductOrder→ServiceOrder link",
     },
+    # ── Phase 2B CQs ─────────────────────────────────────────────────────
+    {
+        "id": "CQ-TMF10",
+        "question": "Which trouble tickets are open or in-progress, what resources or services are affected, and which have breached SLA?",
+        "priority": "Critical",
+        "sparql_equiv": (
+            "SELECT ?ticket ?severity ?resource ?service ?sla_violated WHERE { "
+            "?ticket a :TroubleTicket ; :hasStatus ?status "
+            "FILTER(?status NOT IN ('Resolved','Closed','Cancelled')) "
+            "OPTIONAL { ?ticket :affectsResource ?resource } "
+            "OPTIONAL { ?ticket :affectsService ?service } "
+            "OPTIONAL { ?ticket :slaViolated ?sla_violated } }"
+        ),
+        "sql": """
+            SELECT tt.ticket_iri, tt.ticket_type, tt.severity, tt.priority,
+                   tt.status, tt.category,
+                   r.name AS affected_resource, r.nf_type,
+                   s.name AS affected_service,
+                   al.perceived_severity AS alarm_severity,
+                   tt.sla_violated, tt.submitted_at
+            FROM tmf_trouble_ticket tt
+            LEFT JOIN tmf_resource r ON tt.affected_resource_id = r.id
+            LEFT JOIN tmf_service s ON tt.affected_service_id = s.id
+            LEFT JOIN tmf_alarm al ON tt.related_alarm_id = al.id
+            WHERE tt.status NOT IN ('Resolved','Closed','Cancelled')
+            ORDER BY
+              CASE tt.severity
+                WHEN '1-Critical' THEN 1 WHEN '2-High' THEN 2
+                WHEN '3-Medium' THEN 3 ELSE 4
+              END
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF621 TroubleTicket lifecycle, resource and service fault linkage, SLA breach tracking",
+    },
+    {
+        "id": "CQ-TMF11",
+        "question": "Which network slice profiles are active, what are their SLA parameters, and which resource instances back them?",
+        "priority": "High",
+        "sparql_equiv": (
+            "SELECT ?profile ?sliceType ?latency ?reliability ?resource WHERE { "
+            "?profile a :NetworkSliceProfile ; :sliceType ?sliceType ; "
+            ":latencyTargetMs ?latency ; :reliabilityTarget ?reliability . "
+            "OPTIONAL { ?profile :backedByResource ?resource } "
+            "FILTER(?profile :lifecycleStatus 'Active') }"
+        ),
+        "sql": """
+            SELECT nsp.profile_iri, nsp.name AS profile_name,
+                   nsp.slice_type, nsp.sst, nsp.sd,
+                   nsp.max_dl_throughput, nsp.max_ul_throughput,
+                   nsp.latency_target_ms, nsp.reliability_target,
+                   nsp.max_devices, nsp.lifecycle_status,
+                   r.name AS resource_name, r.operational_state,
+                   a.name AS covered_by_sla
+            FROM tmf_network_slice_profile nsp
+            LEFT JOIN tmf_resource r ON nsp.resource_id = r.id
+            LEFT JOIN tmf_agreement a ON nsp.agreement_id = a.id
+            WHERE nsp.lifecycle_status = 'Active'
+            ORDER BY nsp.slice_type
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF645 NetworkSliceProfile, 3GPP S-NSSAI parameters, Resource-Slice linkage",
+    },
+    {
+        "id": "CQ-TMF12",
+        "question": "Which service quality reports show SLA non-compliance, and what metrics breached their thresholds?",
+        "priority": "Critical",
+        "sparql_equiv": (
+            "SELECT ?report ?service ?agreement ?score WHERE { "
+            "?report a :ServiceQualityReport ; :slaCompliant false ; "
+            ":overallQualityScore ?score ; "
+            ":coversService ?service ; :coversAgreement ?agreement }"
+        ),
+        "sql": """
+            SELECT sqr.report_iri, sqr.report_type,
+                   sqr.period_start, sqr.period_end,
+                   sqr.overall_quality_score, sqr.sla_compliant,
+                   sqr.quality_metrics,
+                   s.name AS service_name,
+                   a.name AS agreement_name, a.valid_until
+            FROM tmf_service_quality_report sqr
+            LEFT JOIN tmf_service s ON sqr.service_id = s.id
+            LEFT JOIN tmf_agreement a ON sqr.agreement_id = a.id
+            WHERE sqr.sla_compliant = 0
+            ORDER BY sqr.overall_quality_score ASC
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF657 ServiceQualityReport, SLA compliance tracking, KQI threshold breach",
+    },
+    {
+        "id": "CQ-TMF13",
+        "question": "Which customer bills are outstanding or disputed, and what is the total amount due per account?",
+        "priority": "High",
+        "sparql_equiv": (
+            "SELECT ?bill ?account ?amount ?state ?disputed WHERE { "
+            "?bill a :CustomerBill ; :billedAccount ?account ; "
+            ":amountDue ?amount ; :billState ?state . "
+            "OPTIONAL { ?bill :disputed ?disputed } "
+            "FILTER(?state NOT IN ('Settled','Cancelled')) }"
+        ),
+        "sql": """
+            SELECT cb.bill_number, cb.bill_type, cb.bill_date,
+                   cb.payment_due_date, cb.amount_due, cb.tax_amount,
+                   cb.currency_code, cb.state, cb.disputed,
+                   cb.dispute_reason,
+                   ca.account_number, ca.name AS account_name,
+                   p.name AS party_name
+            FROM tmf_customer_bill cb
+            JOIN tmf_customer_account ca ON cb.customer_account_id = ca.id
+            JOIN tmf_party p ON ca.party_id = p.id
+            WHERE cb.state NOT IN ('Settled','Cancelled')
+            ORDER BY cb.payment_due_date ASC
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF678 CustomerBill, outstanding invoices and dispute tracking",
+    },
 ]
 
 # ── SID Ontology Turtle Generator ──────────────────────────────────────────
@@ -755,6 +977,32 @@ def generate_tmf_jsonld(output_dir: str):
             "thresholdHigh": {"@id": f"{BASE_IRI}thresholdHigh", "@type": "xsd:decimal"},
             "sidDomain": {"@id": f"{BASE_IRI}sidDomain", "@type": "xsd:string"},
             "tmfApiId": {"@id": f"{BASE_IRI}tmfApiId", "@type": "xsd:string"},
+            # Phase 2B — additional SID class shorthands
+            "TroubleTicket": {"@id": f"{BASE_IRI}TroubleTicket"},
+            "NetworkSliceProfile": {"@id": f"{BASE_IRI}NetworkSliceProfile"},
+            "ServiceQualityReport": {"@id": f"{BASE_IRI}ServiceQualityReport"},
+            "GeographicSite": {"@id": f"{BASE_IRI}GeographicSite"},
+            "CustomerBill": {"@id": f"{BASE_IRI}CustomerBill"},
+            "ProductOfferingQualification": {"@id": f"{BASE_IRI}ProductOfferingQualification"},
+            "EventSubscription": {"@id": f"{BASE_IRI}EventSubscription"},
+            "ConflictEvent": {"@id": f"{BASE_IRI}ConflictEvent"},
+            # Phase 2B property shorthands
+            "ticketType": {"@id": f"{BASE_IRI}hasTicketType", "@type": "xsd:string"},
+            "ticketStatus": {"@id": f"{BASE_IRI}hasTicketStatus", "@type": "xsd:string"},
+            "sliceType": {"@id": f"{BASE_IRI}hasSliceType", "@type": "xsd:string"},
+            "sst": {"@id": f"{BASE_IRI}hasSst", "@type": "xsd:integer"},
+            "latencyTargetMs": {"@id": f"{BASE_IRI}latencyTargetMs", "@type": "xsd:decimal"},
+            "slaCompliant": {"@id": f"{BASE_IRI}slaCompliant", "@type": "xsd:boolean"},
+            "qualityScore": {"@id": f"{BASE_IRI}overallQualityScore", "@type": "xsd:decimal"},
+            "billState": {"@id": f"{BASE_IRI}hasBillState", "@type": "xsd:string"},
+            "amountDue": {"@id": f"{BASE_IRI}amountDue", "@type": "xsd:decimal"},
+            "callbackUrl": {"@id": f"{BASE_IRI}callbackUrl", "@type": "xsd:anyURI"},
+            "eventType": {"@id": f"{BASE_IRI}eventType", "@type": "xsd:string"},
+            "conflictType": {"@id": f"{BASE_IRI}conflictType", "@type": "xsd:string"},
+            "resolutionTier": {"@id": f"{BASE_IRI}resolutionTier", "@type": "xsd:integer"},
+            # PROV-O wasInvalidatedBy (conflict resolution)
+            "wasInvalidatedBy": {"@id": "prov:wasInvalidatedBy", "@type": "@id"},
+            "invalidatedAt": {"@id": "prov:invalidatedAtTime", "@type": "xsd:dateTime"},
         }
     }
     ctx_path = os.path.join(output_dir, "tmf-context.json")

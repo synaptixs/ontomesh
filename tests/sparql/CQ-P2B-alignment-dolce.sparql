@@ -1,0 +1,25 @@
+# CQ-P2B-03: Verify alignment axioms — check that aligned classes
+#            are reachable via owl:equivalentClass to DOLCE/FOAF/Schema.org/SOSA.
+# Phase 2B Ontology Alignment
+PREFIX :     <https://ontology.example.com/tmf/>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?localClass ?alignPredicate ?externalClass
+WHERE {
+  { ?localClass owl:equivalentClass ?externalClass }
+  UNION
+  { ?localClass skos:exactMatch ?externalClass }
+  UNION
+  { ?localClass skos:closeMatch ?externalClass }
+  FILTER(STRSTARTS(STR(?localClass), "https://ontology.example.com/tmf/"))
+  BIND(
+    IF(EXISTS { ?localClass owl:equivalentClass ?externalClass },
+       "owl:equivalentClass",
+       IF(EXISTS { ?localClass skos:exactMatch ?externalClass },
+          "skos:exactMatch",
+          "skos:closeMatch"))
+    AS ?alignPredicate
+  )
+}
+ORDER BY ?localClass

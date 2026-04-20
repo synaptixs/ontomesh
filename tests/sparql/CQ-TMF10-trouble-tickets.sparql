@@ -1,0 +1,16 @@
+# CQ-TMF10: Which trouble tickets are open or in-progress,
+#           what resources or services are affected,
+#           and which have breached SLA?
+# TMF621 TroubleTicket — Phase 2B
+PREFIX : <https://ontology.example.com/tmf/>
+
+SELECT ?ticket ?severity ?resource ?slaViolated
+WHERE {
+  ?ticket a :TroubleTicket ;
+          :hasTicketStatus ?status ;
+          :ticketSeverity ?severity .
+  FILTER(?status NOT IN ("Resolved","Closed","Cancelled"))
+  OPTIONAL { ?ticket :affectsResource ?resource }
+  OPTIONAL { ?ticket :slaViolated ?slaViolated }
+}
+ORDER BY ?severity
