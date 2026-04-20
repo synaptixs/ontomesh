@@ -77,7 +77,20 @@ def run_reasoner(ontology_path: str, output_path: str,
         "--input", ontology_path,
         "--output", output_path,
     ]
-    result = _run(cmd)
+    try:
+        result = _run(cmd)
+    except (FileNotFoundError, OSError) as exc:
+        return {
+            "status": "SKIPPED",
+            "reasoner": reasoner,
+            "output_path": None,
+            "message": (
+                f"ROBOT binary could not be executed ({exc}). "
+                "The wrapper script may have a bad shebang or Java is not installed. "
+                "Structural checks will be used instead."
+            ),
+            "findings": [],
+        }
 
     findings = []
     if result.returncode != 0:

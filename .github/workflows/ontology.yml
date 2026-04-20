@@ -96,8 +96,8 @@ jobs:
         if: steps.robot_check.outputs.available == 'false'
         run: |
           mkdir -p bin
-          curl -L https://github.com/ontodev/robot/releases/latest/download/robot.jar -o bin/robot.jar
-          echo '#!/bin/bash\njava -jar "$(dirname "$0")/robot.jar" "$@"' > bin/robot
+          curl -fsSL https://github.com/ontodev/robot/releases/latest/download/robot.jar -o bin/robot.jar
+          printf '#!/bin/bash\njava -jar "$(dirname "$0")/robot.jar" "$@"\n' > bin/robot
           chmod +x bin/robot
         continue-on-error: true
 
