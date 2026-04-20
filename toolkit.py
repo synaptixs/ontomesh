@@ -292,7 +292,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security"],
+                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment"],
                         help="Run a specific phase only")
     parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
     parser.add_argument("--log-format", default="auto",
@@ -350,6 +350,22 @@ def main():
         generate_rbac(intro, os.path.join(out_path, "security"), store=args.store)
         intro.close()
 
+    def phase_conflict(db_path: str, out_path: str):
+        step(0, "Multi-Agent Conflict Resolution — 3-Tier Chain")
+        from conflict_resolver import (
+            run_conflict_resolution,
+            generate_conflict_shacl,
+            generate_conflict_mcp_tools,
+        )
+        run_conflict_resolution(db_path, out_path)
+        generate_conflict_shacl(os.path.join(out_path, "shapes"))
+        generate_conflict_mcp_tools(os.path.join(out_path, "jsonld"))
+
+    def phase_alignment(db_path: str, out_path: str):
+        step(0, "Ontology Alignment & Federation — DOLCE/FOAF/Schema.org/SOSA")
+        from alignment_generator import run_alignment
+        run_alignment(out_path)
+
     phases = {
         "1":       [(phase1_foundation, [args.db, args.out])],
         "2":       [(phase2_ontology,   [args.db, args.out])],
@@ -361,8 +377,10 @@ def main():
         "report":  [(phase_report,      [args.out])],
         "reasoner": [(phase_reasoner,  [args.db, args.out])],
         "sparql":   [(phase_sparql,    [args.db, args.out])],
-        "log":      [(phase_log,       [args.db, args.out])],
-        "security": [(phase_security,  [args.db, args.out])],
+        "log":       [(phase_log,       [args.db, args.out])],
+        "security":  [(phase_security,  [args.db, args.out])],
+        "conflict":  [(phase_conflict,  [args.db, args.out])],
+        "alignment": [(phase_alignment, [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
@@ -370,6 +388,8 @@ def main():
             (phase4_mapping,    [args.db, args.out]),
             (phase5_exchange,   [args.db, args.out]),
             (phase_tmf,         [args.db, args.out]),
+            (phase_conflict,    [args.db, args.out]),
+            (phase_alignment,   [args.db, args.out]),
             (phase_test,        [args.db, args.out]),
             (phase_report,      [args.out]),
         ]

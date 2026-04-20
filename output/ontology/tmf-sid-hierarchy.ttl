@@ -394,6 +394,144 @@
   :tmfApiId "TMF651" ;
   :tmfApiVersion "v4.0"  .
 
+# ── SID Domain: TroubleMgmt ─────────────────────────────────
+:TroubleTicket
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TroubleTicket" ;
+  rdfs:comment "A customer or resource trouble ticket per TMF621. Tracks issue lifecycle from New to Closed." ;
+  :sidDomain "TroubleMgmt" ;
+  :sidABE "Service Trouble" ;
+  :tmfApiId "TMF621" ;
+  :tmfApiVersion "v4.0"  .
+:ResourceTroubleTicket
+  a owl:Class ;
+  rdfs:subClassOf :TroubleTicket ;
+  rdfs:label "ResourceTroubleTicket" ;
+  rdfs:comment "A trouble ticket specifically associated with a resource fault or outage." ;
+  :sidDomain "TroubleMgmt" ;
+  :sidABE "Resource Trouble" ;
+  :tmfApiId "TMF621" ;
+  :tmfApiVersion "v4.0"  .
+:CustomerTroubleTicket
+  a owl:Class ;
+  rdfs:subClassOf :TroubleTicket ;
+  rdfs:label "CustomerTroubleTicket" ;
+  rdfs:comment "A trouble ticket raised by or on behalf of a customer." ;
+  :sidDomain "TroubleMgmt" ;
+  :sidABE "Customer Problem" ;
+  :tmfApiId "TMF621" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: NetworkSliceMgmt ────────────────────────────
+:NetworkSliceProfile
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "NetworkSliceProfile" ;
+  rdfs:comment "A 3GPP S-NSSAI-aligned network slice profile with SLA parameters per TMF645." ;
+  :sidDomain "NetworkSliceMgmt" ;
+  :sidABE "Logical Resource" ;
+  :tmfApiId "TMF645" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: ServiceQuality ──────────────────────────────
+:ServiceQualityReport
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ServiceQualityReport" ;
+  rdfs:comment "An SLA compliance or KQI quality assessment report per TMF657." ;
+  :sidDomain "ServiceQuality" ;
+  :sidABE "Service Quality" ;
+  :tmfApiId "TMF657" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: GeographicSite ──────────────────────────────
+:GeographicSite
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "GeographicSite" ;
+  rdfs:comment "A structured physical site record (data centre, cell tower, PoP) per TMF674." ;
+  :sidDomain "GeographicSite" ;
+  :sidABE "Location" ;
+  :tmfApiId "TMF674" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: Billing ─────────────────────────────────────
+:CustomerBill
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "CustomerBill" ;
+  rdfs:comment "A customer invoice per TMF678 Customer Bill Management." ;
+  :sidDomain "Billing" ;
+  :sidABE "Customer Account" ;
+  :tmfApiId "TMF678" ;
+  :tmfApiVersion "v4.0"  .
+:BillingAccount
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "BillingAccount" ;
+  rdfs:comment "The billing account that owns the bill relationship per TMF678." ;
+  :sidDomain "Billing" ;
+  :sidABE "Customer Account" ;
+  :tmfApiId "TMF678" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: Qualification ───────────────────────────────
+:ProductOfferingQualification
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ProductOfferingQualification" ;
+  rdfs:comment "An eligibility/feasibility check for a product offering at a customer site per TMF679." ;
+  :sidDomain "Qualification" ;
+  :sidABE "Product Offering" ;
+  :tmfApiId "TMF679" ;
+  :tmfApiVersion "v4.0"  .
+:QualificationItem
+  a owl:Class ;
+  rdfs:subClassOf :ProductOfferingQualification ;
+  rdfs:label "QualificationItem" ;
+  rdfs:comment "A single line item within a product offering qualification request." ;
+  :sidDomain "Qualification" ;
+  :sidABE "Product Offering" ;
+  :tmfApiId "TMF679" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: EventHub ────────────────────────────────────
+:EventSubscription
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "EventSubscription" ;
+  rdfs:comment "An async notification subscription per TMF630 §5 event hub pattern." ;
+  :sidDomain "EventHub" ;
+  :sidABE "Business Interaction" ;
+  :tmfApiId "TMF688" ;
+  :tmfApiVersion "v4.0"  .
+:EventNotification
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "EventNotification" ;
+  rdfs:comment "An event notification payload delivered to a subscriber's callback URL." ;
+  :sidDomain "EventHub" ;
+  :sidABE "Business Interaction" ;
+  :tmfApiId "TMF688" ;
+  :tmfApiVersion "v4.0"  .
+
+# ── SID Domain: ConflictResolution ──────────────────────────
+:ConflictEvent
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "ConflictEvent" ;
+  rdfs:comment "A multi-agent assertion conflict record with 3-tier resolution chain per framework §10.1." ;
+  :sidDomain "ConflictResolution" ;
+  :sidABE "Policy"  .
+:AssertionResolution
+  a owl:Class ;
+  rdfs:subClassOf :ConflictEvent ;
+  rdfs:label "AssertionResolution" ;
+  rdfs:comment "The winning assertion and resolution rationale for a resolved conflict event." ;
+  :sidDomain "ConflictResolution" ;
+  :sidABE "Policy"  .
+
 # ── 5G Network Function Subclasses (3GPP TS 23.501) ─────────────────
 :AMFNetworkFunction
   a owl:Class ;

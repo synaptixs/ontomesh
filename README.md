@@ -1,4 +1,4 @@
-# Ontology Engineering Toolkit — v1.3
+# Ontology Engineering Toolkit — v1.4
 
 **Domain-agnostic · Zero core dependencies · Runs in under 2 seconds**
 
@@ -42,7 +42,9 @@ It reads your relational schema and a thin annotation table, then generates ever
 | 3 — Validation | SHACL generator | enterprise-shapes.ttl, agent-gate.ttl |
 | 4 — Mapping | Semantic loss detector | Mapping workbook, semantic loss report, orphan analysis |
 | 5 — Exchange | JSON-LD + SKOS + MCP | Context file, sample payloads, MCP tool definitions, vocabulary |
-| TMF | TM Forum alignment | SID OWL hierarchy, TMF API coverage, TMF CQ tests |
+| TMF | TM Forum alignment | SID OWL hierarchy (24 APIs, 13 CQs), TMF API coverage |
+| conflict | Multi-agent conflict resolution ✓ Phase 2B | 3-tier resolution chain, SHACL shapes, MCP tools, PROV-O invalidation |
+| alignment | Ontology alignment & federation ✓ Phase 2B | alignment.ttl (DOLCE/FOAF/Schema.org/SOSA), federation-config.ttl, federated SPARQL queries |
 | Test | CQ test runner | 17 competency question tests, governance scorecard |
 | Report | HTML reporter | Self-contained visual summary report |
 | **Runtime** | **AI consumption layer** | **Payload assembler, grounding module, output gate, PROV-O stamping** |
@@ -244,8 +246,10 @@ python3 toolkit.py --phase 5        # JSON-LD, SKOS, MCP tools only
 python3 toolkit.py --phase tmf      # TM Forum SID alignment + TMF CQ tests
 python3 toolkit.py --phase test     # CQ tests + governance scorecard
 python3 toolkit.py --phase report   # HTML report only (from existing CSVs)
-python3 toolkit.py --phase log      # Structured log ingestion (requires --log-path)
-python3 toolkit.py --phase security # Named-graph RBAC config generation
+python3 toolkit.py --phase log       # Structured log ingestion (requires --log-path)
+python3 toolkit.py --phase security  # Named-graph RBAC config generation
+python3 toolkit.py --phase conflict  # Multi-agent conflict resolution (Phase 2B)
+python3 toolkit.py --phase alignment # Ontology alignment + federation config (Phase 2B)
 ```
 
 ### Log ingestion
@@ -297,7 +301,7 @@ python3 toolkit.py [options]
 
   --phase PHASE       Run a specific phase:
                       all | 1 | 2 | 3 | 4 | 5 | tmf | test | report |
-                      reasoner | sparql | log | security
+                      reasoner | sparql | log | security | conflict | alignment
                       Default: all
 
   --industry STR      Label for the industry context (used in report header)
@@ -352,6 +356,8 @@ ontology-toolkit/
 │   ├── reasoner.py              ← ROBOT OWL 2 reasoner integration (ELK / HermiT)
 │   ├── log_connector.py         ← Phase 2A: structured log ingestion (JSON/syslog/CEF/OTLP)
 │   ├── rbac_generator.py        ← Phase 2A: named-graph RBAC config generator
+│   ├── conflict_resolver.py     ← Phase 2B: multi-agent conflict resolution (3-tier chain)
+│   ├── alignment_generator.py   ← Phase 2B: ontology alignment (DOLCE/FOAF/Schema.org/SOSA) + federation
 │   └── reporter.py              ← Report phase: HTML report generator
 │
 ├── db/
@@ -581,18 +587,23 @@ The included telecom + TMF example scores **4.0 / 5.0** with **17/17 CQ tests pa
 
 Run with `--phase tmf` or as part of the full pipeline.
 
-### The 8 SID domains
+### The SID domains (Phase 2B complete — 24 Open APIs)
 
-| Domain | Key ABEs | Primary APIs |
-|---|---|---|
-| Resource | LogicalResource, PhysicalResource, NetworkFunction, NetworkSlice | TMF634, TMF639 |
-| Service | CustomerFacingService, ResourceFacingService, ServiceOrder, ServiceProblem | TMF633, TMF638, TMF641, TMF656 |
-| Product | Product, ProductOffering, ProductSpecification, ProductOrder | TMF620, TMF622, TMF637 |
-| EngagedParty | Party, Individual, Organization, PartyRole, CustomerAccount, Agreement | TMF629, TMF632, TMF651, TMF666, TMF669 |
-| Market/Sales | MarketSegment, ProductCatalog, SalesChannel | TMF620 |
-| Supplier/Partner | SupplierAccount, SupplierOrder, SupplierSLA | TMF651 |
-| Enterprise | Policy, UserRole, BusinessInteraction | TMF672 |
-| Common | Characteristic, Note, Attachment, GeographicPlace | TMF673, TMF674, TMF675 |
+| Domain | Key ABEs | Primary APIs | Phase |
+|---|---|---|---|
+| Resource | LogicalResource, PhysicalResource, NetworkFunction, NetworkSlice | TMF634, TMF639 | 1 |
+| Service | CustomerFacingService, ResourceFacingService, ServiceOrder, ServiceProblem | TMF633, TMF638, TMF641, TMF656 | 1 |
+| Product | Product, ProductOffering, ProductSpecification, ProductOrder | TMF620, TMF622, TMF637 | 1 |
+| EngagedParty | Party, Individual, Organization, PartyRole, CustomerAccount, Agreement | TMF629, TMF632, TMF651, TMF666, TMF669 | 1 |
+| Market/Sales | MarketSegment, ProductCatalog, SalesChannel | TMF620 | 1 |
+| Supplier/Partner | SupplierAccount, SupplierOrder, SupplierSLA | TMF651 | 1 |
+| Enterprise | Policy, UserRole, BusinessInteraction, EventSubscription, ConflictEvent | TMF672, TMF688 | 1 + 2B |
+| Common | Characteristic, Note, Attachment, GeographicPlace, GeographicSite | TMF673, TMF674, TMF675 | 1 + 2B |
+| **TroubleMgmt** ✓ | **TroubleTicket, ResourceTroubleTicket, CustomerTroubleTicket** | **TMF621** | **2B** |
+| **NetworkSliceMgmt** ✓ | **NetworkSliceProfile (3GPP S-NSSAI)** | **TMF645** | **2B** |
+| **ServiceQuality** ✓ | **ServiceQualityReport, SLA compliance, KQI** | **TMF657** | **2B** |
+| **Billing** ✓ | **CustomerBill, BillingAccount** | **TMF678** | **2B** |
+| **Qualification** ✓ | **ProductOfferingQualification, QualificationItem** | **TMF679** | **2B** |
 
 ### 5G network functions (3GPP TS 23.501)
 
@@ -612,25 +623,56 @@ Six subtypes: CommunicationsAlarm, EquipmentAlarm, EnvironmentalAlarm, Processin
 
 **Characteristic** — polymorphic key-value extensibility table for any entity without schema changes.
 
-### TMF CQ tests (9 tests, all passing)
+### TMF CQ tests (13 tests, all passing)
 
-| CQ | Question |
-|---|---|
-| CQ-TMF01 | Which 5G NFs are Disabled/Locked and what resources depend on them? |
-| CQ-TMF02 | Which services are Active and which resources realise them? |
-| CQ-TMF03 | Which products are Active and which accounts and orders cover them? |
-| CQ-TMF04 | Which parties hold which roles and which agreements cover those relationships? |
-| CQ-TMF05 | Which SLA agreements are at risk from active alarms or service problems? |
-| CQ-TMF06 | Which Active or uncleared alarms exist by severity and root cause? |
-| CQ-TMF07 | Which KPIs breach thresholds with confidence score and derivation method? |
-| CQ-TMF08 | Full Resource to Service to Product to Customer traceability chain |
-| CQ-TMF09 | Which service orders are incomplete and what product orders triggered them? |
+| CQ | Question | Phase |
+|---|---|---|
+| CQ-TMF01 | Which 5G NFs are Disabled/Locked and what resources depend on them? | 1 |
+| CQ-TMF02 | Which services are Active and which resources realise them? | 1 |
+| CQ-TMF03 | Which products are Active and which accounts and orders cover them? | 1 |
+| CQ-TMF04 | Which parties hold which roles and which agreements cover those relationships? | 1 |
+| CQ-TMF05 | Which SLA agreements are at risk from active alarms or service problems? | 1 |
+| CQ-TMF06 | Which Active or uncleared alarms exist by severity and root cause? | 1 |
+| CQ-TMF07 | Which KPIs breach thresholds with confidence score and derivation method? | 1 |
+| CQ-TMF08 | Full Resource to Service to Product to Customer traceability chain | 1 |
+| CQ-TMF09 | Which service orders are incomplete and what product orders triggered them? | 1 |
+| **CQ-TMF10** | **Open trouble tickets with resource/service impact and SLA breach status** | **2B** |
+| **CQ-TMF11** | **Active network slice profiles with 3GPP S-NSSAI parameters and backing resources** | **2B** |
+| **CQ-TMF12** | **Service quality reports showing SLA non-compliance with breached metrics** | **2B** |
+| **CQ-TMF13** | **Outstanding and disputed customer bills per account** | **2B** |
 
-### 18 TMF Open APIs mapped
+### 24 TMF Open APIs mapped
 
-TMF620 · TMF622 · TMF629 · TMF632 · TMF633 · TMF634 · TMF637 · TMF638 · TMF639 · TMF641 · TMF642 · TMF651 · TMF656 · TMF666 · TMF669 · TMF672 · TMF673 · TMF688
+**Phase 1:** TMF620 · TMF622 · TMF629 · TMF632 · TMF633 · TMF634 · TMF637 · TMF638 · TMF639 · TMF641 · TMF642 · TMF651 · TMF656 · TMF666 · TMF669 · TMF672 · TMF673 · TMF688
+
+**Phase 2B:** TMF621 · TMF645 · TMF657 · TMF674 · TMF678 · TMF679
 
 All Apache 2.0. Specifications: [github.com/tmforum-apis](https://github.com/tmforum-apis).
+
+### Phase 2B: Multi-agent conflict resolution (`--phase conflict`)
+
+Implements the 3-tier resolution chain from framework Section 10.1:
+
+- **Tier 1 — SHACL axiom check**: SQL-equivalent consistency rules that catch logically invalid states (e.g. `operational_state=Disabled` + `admin_state=Unlocked`). Escalates violations to Tier 3 automatically.
+- **Tier 2 — Derivation-method priority**: When two agents report conflicting values, the higher-priority derivation method wins: `measured > inferred > imported > synthesized > default`. Records PROV-O `wasInvalidatedBy` on the losing assertion.
+- **Tier 3 — Human escalation queue**: Unresolvable conflicts are inserted into `tmf_conflict_event` with `escalated_to_human=1` and await review.
+
+Produces: `output/reports/conflict_resolution_report.json`, `output/shapes/conflict-resolution-shapes.ttl`, `output/jsonld/conflict-resolution-mcp-tools.json`.
+
+Three MCP tools: `subscribe_to_events`, `resolve_assertion_conflict`, `get_conflict_queue`.
+
+### Phase 2B: Ontology alignment & federation (`--phase alignment`)
+
+Generates alignment axioms from the toolkit ontology to four external standards:
+
+| Standard | Alignment type | Classes aligned |
+|---|---|---|
+| DOLCE | `owl:equivalentClass`, `skos:closeMatch` | TmfEntity, DomainEvent, Party, Resource, Service, Agreement |
+| FOAF | `owl:equivalentClass` | Party↔foaf:Agent, Individual↔foaf:Person, Organization↔foaf:Organization |
+| Schema.org | `owl:equivalentClass`, `skos:closeMatch` | Organization, Product, ProductOrder, GeographicSite, CustomerBill, and 9 more |
+| SOSA/SSN | `owl:equivalentClass`, `skos:closeMatch` | ObservationRecord↔sosa:Observation, Resource↔sosa:FeatureOfInterest, Agent↔sosa:Sensor |
+
+Produces: `output/ontology/alignment.ttl` (44 axioms), `output/ontology/federation-config.ttl` (5 named graph endpoints), `output/ontology/federation-queries.sparql` (5 multi-domain federated SPARQL examples).
 
 ### Adding more TMF domains
 

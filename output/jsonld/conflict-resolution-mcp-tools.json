@@ -1,0 +1,91 @@
+{
+  "tools": [
+    {
+      "name": "subscribe_to_events",
+      "description": "Register a callback URL for async event notifications per TMF630 \u00a75. Supported event types: AlarmStateChange, ServiceOrderStateChange, KPIThresholdBreach, TroubleTicketUpdate, ConflictEscalation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "description": "Event type to subscribe to."
+          },
+          "event_domain": {
+            "type": "string",
+            "description": "SID domain (Resource, Service, Product, EngagedParty)."
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Webhook URL."
+          },
+          "filter_criteria": {
+            "type": "object",
+            "description": "Optional JSON filter (e.g. {severity: 'Critical'})."
+          },
+          "subscriber_party_iri": {
+            "type": "string",
+            "description": "IRI of the subscribing party."
+          }
+        },
+        "required": [
+          "event_type",
+          "callback_url"
+        ]
+      }
+    },
+    {
+      "name": "resolve_assertion_conflict",
+      "description": "Trigger the 3-tier conflict resolution chain for two conflicting assertions. Tier 1: SHACL consistency. Tier 2: derivation-method priority. Tier 3: human escalation. Returns the winning assertion IRI and PROV-O wasInvalidatedBy stamp for the loser.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "assertion_a_iri": {
+            "type": "string",
+            "description": "IRI of the first assertion."
+          },
+          "assertion_b_iri": {
+            "type": "string",
+            "description": "IRI of the conflicting assertion."
+          },
+          "conflict_type": {
+            "type": "string",
+            "enum": [
+              "VALUE_CONFLICT",
+              "STATE_CONFLICT",
+              "PROVENANCE_CONFLICT",
+              "SHACL_VIOLATION"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assertion_a_iri",
+          "assertion_b_iri",
+          "conflict_type"
+        ]
+      }
+    },
+    {
+      "name": "get_conflict_queue",
+      "description": "Return all open conflict events in the human escalation queue (Tier-3). Includes conflict type, description, and involved assertion IRIs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status_filter": {
+            "type": "string",
+            "enum": [
+              "Open",
+              "Escalated",
+              "Resolved",
+              "All"
+            ],
+            "default": "Escalated"
+          }
+        }
+      }
+    }
+  ]
+}
