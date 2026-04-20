@@ -1,0 +1,16 @@
+# CQ-TMF13: Which customer bills are outstanding or disputed,
+#           and what is the total amount due per account?
+# TMF678 CustomerBill — Phase 2B
+PREFIX : <https://ontology.example.com/tmf/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?bill ?account ?amountDue ?state ?disputed
+WHERE {
+  ?bill a :CustomerBill ;
+        :hasBillState ?state ;
+        :amountDue ?amountDue .
+  FILTER(?state NOT IN ("Settled","Cancelled"))
+  OPTIONAL { ?bill :billedToAccount ?account }
+  OPTIONAL { ?bill :disputed ?disputed }
+}
+ORDER BY ?account DESC(?amountDue)

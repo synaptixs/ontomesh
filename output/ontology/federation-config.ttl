@@ -1,0 +1,68 @@
+@prefix :       <https://ontology.example.com/tmf/> .
+@prefix dolce:  <http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#> .
+@prefix foaf:   <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <https://schema.org/> .
+@prefix sosa:   <http://www.w3.org/ns/sosa/> .
+@prefix ssn:    <http://www.w3.org/ns/ssn/> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix tmf:    <https://www.tmforum.org/sid/> .
+@prefix prov:   <http://www.w3.org/ns/prov#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+@prefix fed:    <https://ontology.example.com/tmf/federation/> .
+
+<https://ontology.example.com/tmf/federation/>
+  a owl:Ontology ;
+  rdfs:label "SPARQL Federation Configuration" ;
+  rdfs:comment "Named graph federation endpoints for multi-domain SPARQL SERVICE queries." .
+
+# ── Federation Endpoints ────────────────────────────────────────
+
+<https://ontology.example.com/tmf/federation/local-resource>
+  a fed:FederationEndpoint ;
+  rdfs:label "local-resource" ;
+  rdfs:comment "Resource domain named graph — NFs, slices, equipment." ;
+  fed:sparqlEndpoint <http://localhost:3030/ontology/sparql> ;
+  fed:namedGraph <https://gtc.example.com/graphs/resource> ;
+  fed:sidDomain "Resource" ;
+  fed:sensitivityTier "Internal" .
+
+<https://ontology.example.com/tmf/federation/local-service>
+  a fed:FederationEndpoint ;
+  rdfs:label "local-service" ;
+  rdfs:comment "Service domain named graph — CFS, RFS, service orders." ;
+  fed:sparqlEndpoint <http://localhost:3030/ontology/sparql> ;
+  fed:namedGraph <https://gtc.example.com/graphs/service> ;
+  fed:sidDomain "Service" ;
+  fed:sensitivityTier "Internal" .
+
+<https://ontology.example.com/tmf/federation/local-party>
+  a fed:FederationEndpoint ;
+  rdfs:label "local-party" ;
+  rdfs:comment "Party/EngagedParty domain named graph — customers, agreements." ;
+  fed:sparqlEndpoint <http://localhost:3030/ontology/sparql> ;
+  fed:namedGraph <https://gtc.example.com/graphs/party> ;
+  fed:sidDomain "EngagedParty" ;
+  fed:sensitivityTier "Confidential" .
+
+<https://ontology.example.com/tmf/federation/local-billing>
+  a fed:FederationEndpoint ;
+  rdfs:label "local-billing" ;
+  rdfs:comment "Billing domain named graph — bills, accounts." ;
+  fed:sparqlEndpoint <http://localhost:3030/ontology/sparql> ;
+  fed:namedGraph <https://gtc.example.com/graphs/billing> ;
+  fed:sidDomain "Billing" ;
+  fed:sensitivityTier "Confidential" .
+
+<https://ontology.example.com/tmf/federation/local-trouble>
+  a fed:FederationEndpoint ;
+  rdfs:label "local-trouble" ;
+  rdfs:comment "Trouble/alarm domain named graph — tickets, alarms, problems." ;
+  fed:sparqlEndpoint <http://localhost:3030/ontology/sparql> ;
+  fed:namedGraph <https://gtc.example.com/graphs/trouble> ;
+  fed:sidDomain "TroubleMgmt" ;
+  fed:sensitivityTier "Internal" .
+

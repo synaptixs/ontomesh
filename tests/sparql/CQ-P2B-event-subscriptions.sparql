@@ -1,0 +1,15 @@
+# CQ-P2B-02: Which event subscriptions are active, what event types
+#            do they cover, and which parties are subscribed?
+# Phase 2B TMF Event Hub — TMF630 §5
+PREFIX : <https://ontology.example.com/tmf/>
+
+SELECT ?subscription ?eventType ?eventDomain ?subscriber ?callbackUrl
+WHERE {
+  ?subscription a :EventSubscription ;
+                :eventType ?eventType ;
+                :callbackUrl ?callbackUrl .
+  FILTER NOT EXISTS { ?subscription :hasTicketStatus "Cancelled" }
+  OPTIONAL { ?subscription :eventDomain ?eventDomain }
+  OPTIONAL { ?subscription :subscriberParty ?subscriber }
+}
+ORDER BY ?eventType
