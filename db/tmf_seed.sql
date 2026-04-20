@@ -442,3 +442,218 @@ WHERE name = 'Enterprise 5G Service — Acme Corp';
 UPDATE tmf_service
 SET parent_service_id = (SELECT id FROM tmf_service WHERE name = 'eMBB RFS East 01')
 WHERE name = 'IoT Connectivity — SmartCity';
+
+-- ============================================================
+-- PHASE 2B SEED DATA
+-- ============================================================
+
+-- ── ONTOLOGY METADATA for Phase 2B tables ──────────────────
+INSERT INTO ontology_metadata (
+    target_type, table_name, semantic_type, label, description,
+    sensitivity_tier, is_event_class,
+    skos_pref_label, skos_alt_labels, cq_coverage,
+    sid_domain, sid_abe, tmf_api_id, tmf_api_version, tmf_entity_name, etom_process
+) VALUES
+('TABLE','tmf_trouble_ticket','TroubleTicket',
+ 'Trouble Ticket','A customer or resource trouble ticket per TMF621. Tracks issue lifecycle from New to Closed.',
+ 'Confidential',1,'Trouble Ticket','Incident,Issue,Problem Ticket','CQ-007,CQ-TMF06,CQ-TMF10',
+ 'Service','Service Trouble','TMF621','v4.0','TroubleTicket','1.4.2'),
+
+('TABLE','tmf_network_slice_profile','NetworkSliceProfile',
+ 'Network Slice Profile','A 3GPP S-NSSAI-aligned network slice profile with SLA parameters per TMF645.',
+ 'Internal',0,'Network Slice Profile','Slice Template,NST,Network Slice Specification','CQ-TMF01,CQ-TMF11',
+ 'Resource','Logical Resource','TMF645','v4.0','NetworkSliceProfile','1.1.1'),
+
+('TABLE','tmf_service_quality_report','ServiceQualityReport',
+ 'Service Quality Report','An SLA compliance or KQI quality report per TMF657.',
+ 'Confidential',0,'Service Quality Report','SLA Report,KQI Report,QoS Assessment','CQ-TMF05,CQ-TMF12',
+ 'Service','Service Quality','TMF657','v4.0','ServiceQualityReport','1.4.3'),
+
+('TABLE','tmf_geographic_site','GeographicSite',
+ 'Geographic Site','A structured physical site record (data centre, cell tower, pop) per TMF674.',
+ 'Internal',0,'Geographic Site','Site,Location,Data Centre,Cell Site','CQ-001,CQ-002',
+ 'Common','Location','TMF674','v4.0','GeographicSite','1.1.1'),
+
+('TABLE','tmf_customer_bill','CustomerBill',
+ 'Customer Bill','A customer invoice per TMF678 Customer Bill Management.',
+ 'Confidential',0,'Customer Bill','Invoice,Bill,Statement','CQ-TMF03,CQ-TMF13',
+ 'EngagedParty','Customer Account','TMF678','v4.0','CustomerBill','1.3.1'),
+
+('TABLE','tmf_product_offering_qualification','ProductOfferingQualification',
+ 'Product Offering Qualification','Eligibility check for a product offering at a given location per TMF679.',
+ 'Internal',0,'Product Offering Qualification','Eligibility Check,Feasibility Check','CQ-TMF03',
+ 'Product','Product Offering','TMF679','v4.0','ProductOfferingQualification','1.2.1'),
+
+('TABLE','tmf_event_subscription','EventSubscription',
+ 'Event Subscription','An async event subscription per TMF630 §5 notification pattern.',
+ 'Internal',0,'Event Subscription','Notification Subscription,Hub Subscription','CQ-002',
+ 'Enterprise','Business Interaction','TMF688','v4.0','EventSubscription','1.5.1'),
+
+('TABLE','tmf_conflict_event','ConflictEvent',
+ 'Conflict Event','A multi-agent assertion conflict record with 3-tier resolution chain (framework §10.1).',
+ 'Internal',1,'Conflict Event','Assertion Conflict,Resolution Event','CQ-002',
+ 'Enterprise','Policy','TMF672','v4.0','ConflictEvent','1.4.1');
+
+-- ── GEOGRAPHIC SITES (TMF674) ─────────────────────────────────
+INSERT INTO tmf_geographic_site (site_iri, name, site_type, description, place_id,
+    site_category, power_supply, cooling_type, rack_capacity,
+    operational_status, latitude, longitude, owner_party_id) VALUES
+('https://gtc.example.com/sites/DC-EAST-01','Data Centre East 01','DataCentre',
+ 'Primary Tier-3 data centre — East US. Hosts AMF, SMF, UPF, NRF, PCF.',
+ 1,'Owned','Mains','Liquid',400,'Operational',40.7128,-74.0060,
+ (SELECT id FROM tmf_party WHERE name='Global Telecom Corp')),
+('https://gtc.example.com/sites/DC-WEST-01','Data Centre West 01','DataCentre',
+ 'Secondary data centre — West US. Disaster recovery site.',
+ 2,'Owned','Mains','Air',200,'Operational',37.3382,-121.8863,
+ (SELECT id FROM tmf_party WHERE name='Global Telecom Corp')),
+('https://gtc.example.com/sites/RAN-042','RAN Site 042','CellTower',
+ '5G NR gNB site. Sector 1–3, MIMO 64T64R.',
+ 3,'Leased','Mains','Natural',4,'Operational',40.6501,-73.9496,
+ (SELECT id FROM tmf_party WHERE name='Global Telecom Corp')),
+('https://gtc.example.com/sites/RAN-043','RAN Site 043','CellTower',
+ '5G NR gNB site. Currently Locked — maintenance.',
+ 4,'Leased','Generator','Natural',4,'Operational',40.7282,-73.7949,
+ (SELECT id FROM tmf_party WHERE name='Global Telecom Corp'));
+
+-- ── NETWORK SLICE PROFILES (TMF645) ──────────────────────────
+INSERT INTO tmf_network_slice_profile (profile_iri, name, slice_type,
+    sst, sd, max_dl_throughput, max_ul_throughput,
+    latency_target_ms, reliability_target, max_devices,
+    lifecycle_status, resource_id, agreement_id) VALUES
+('https://gtc.example.com/slice-profiles/EMBB-EAST-01','eMBB East 01 Profile','eMBB',
+ 1,'000001',1000.0,500.0,20.0,99.9,10000,'Active',
+ (SELECT id FROM tmf_resource WHERE name='eMBB Slice East 01'),
+ (SELECT id FROM tmf_agreement WHERE name='Acme 5G Service SLA 2024')),
+('https://gtc.example.com/slice-profiles/URLLC-EAST-01','URLLC East 01 Profile','URLLC',
+ 2,'000002',100.0,50.0,1.0,99.9999,500,'Active',
+ (SELECT id FROM tmf_resource WHERE name='URLLC Slice East 01'),
+ NULL);
+
+-- ── SERVICE QUALITY REPORTS (TMF657) ──────────────────────────
+INSERT INTO tmf_service_quality_report (report_iri, report_type, description,
+    status, service_id, agreement_id, period_start, period_end,
+    quality_metrics, sla_compliant, overall_quality_score, submitted_by_id) VALUES
+('https://gtc.example.com/sqr/SQR-ACME-2026-04','SLAComplianceReport',
+ 'Monthly SLA compliance report for Acme Corp 5G Enterprise service — April 2026.',
+ 'Active',
+ (SELECT id FROM tmf_service WHERE name='Enterprise 5G Service — Acme Corp'),
+ (SELECT id FROM tmf_agreement WHERE name='Acme 5G Service SLA 2024'),
+ '2026-04-01','2026-04-30',
+ '[{"name":"Availability","value":99.91,"unit":"percent","threshold":99.95,"compliant":false},{"name":"Throughput","value":1050,"unit":"Mbps","threshold":1000,"compliant":true}]',
+ 0,4.2,
+ (SELECT id FROM tmf_party WHERE name='Global Telecom Corp')),
+('https://gtc.example.com/sqr/SQR-IOT-2026-04','KQIReport',
+ 'Monthly KQI report for SmartCity IoT connectivity service — April 2026.',
+ 'Active',
+ (SELECT id FROM tmf_service WHERE name='IoT Connectivity — SmartCity'),
+ (SELECT id FROM tmf_agreement WHERE name='SmartCity IoT SLA 2024'),
+ '2026-04-01','2026-04-30',
+ '[{"name":"Availability","value":99.97,"unit":"percent","threshold":99.9,"compliant":true},{"name":"DeviceCount","value":48200,"unit":"devices","threshold":50000,"compliant":true}]',
+ 1,4.8,
+ (SELECT id FROM tmf_party WHERE name='Global Telecom Corp'));
+
+-- ── TROUBLE TICKETS (TMF621) ──────────────────────────────────
+INSERT INTO tmf_trouble_ticket (ticket_iri, ticket_type, description, severity, priority,
+    status, category, affected_resource_id, related_alarm_id,
+    raised_by_id, assigned_to_id, sla_violated, submitted_at, resolved_at) VALUES
+('https://gtc.example.com/tickets/TT-2026-0042','TroubleTicket',
+ 'UPF East 01 memory pressure — potential service impact. Threshold exceeded at 91.4%.',
+ '2-High','2-High','In Progress','ResourceDegradation',
+ (SELECT id FROM tmf_resource WHERE name='UPF East 01'),
+ (SELECT id FROM tmf_alarm WHERE specific_problem LIKE 'UPF East%'),
+ (SELECT id FROM tmf_party WHERE name='NOC Engineer 01'),
+ (SELECT id FROM tmf_party WHERE name='NOC Engineer 01'),
+ 0,'2026-04-15T01:15:00Z',NULL),
+('https://gtc.example.com/tickets/TT-2026-0039','ResourceTroubleTicket',
+ 'gNB Site 043 locked — connectivity loss to AMF resolved after maintenance window.',
+ '1-Critical','1-Critical','Resolved','CommunicationsDisruption',
+ (SELECT id FROM tmf_resource WHERE name='gNB Site 043'),
+ (SELECT id FROM tmf_alarm WHERE specific_problem LIKE 'gNB 043%'),
+ (SELECT id FROM tmf_party WHERE name='NOC Engineer 01'),
+ (SELECT id FROM tmf_party WHERE name='NOC Engineer 01'),
+ 1,'2026-04-10T02:20:00Z','2026-04-10T06:00:00Z');
+
+-- ── CUSTOMER BILLS (TMF678) ───────────────────────────────────
+INSERT INTO tmf_customer_bill (bill_iri, bill_number, bill_type,
+    customer_account_id, billing_period_start, billing_period_end,
+    bill_date, payment_due_date, amount_due, tax_amount, currency_code,
+    state, disputed) VALUES
+('https://gtc.example.com/bills/BILL-ACC001-202604','BILL-ACC001-202604','Regular',
+ (SELECT id FROM tmf_customer_account WHERE account_number='ACC-001001'),
+ '2026-04-01','2026-04-30',
+ '2026-05-01','2026-05-15',
+ 18500.00,1850.00,'USD','Sent',0),
+('https://gtc.example.com/bills/BILL-ACC002-202604','BILL-ACC002-202604','Regular',
+ (SELECT id FROM tmf_customer_account WHERE account_number='ACC-001002'),
+ '2026-04-01','2026-04-30',
+ '2026-05-01','2026-05-15',
+ 4200.00,420.00,'USD','Sent',0),
+('https://gtc.example.com/bills/BILL-ACC001-202603-CREDIT','BILL-ACC001-202603-CR','CreditNote',
+ (SELECT id FROM tmf_customer_account WHERE account_number='ACC-001001'),
+ '2026-03-01','2026-03-31',
+ '2026-04-05','2026-04-05',
+ -925.00,0.00,'USD','Settled',0);
+
+-- ── PRODUCT OFFERING QUALIFICATIONS (TMF679) ──────────────────
+INSERT INTO tmf_product_offering_qualification (poq_iri, description,
+    requested_product_offering_id, customer_account_id, install_address_id,
+    state, qualification_result, eligibility_reason,
+    feasibility_check, feasibility_notes,
+    valid_for_start, valid_for_end, requested_at) VALUES
+('https://gtc.example.com/poq/POQ-2026-0101',
+ 'Eligibility check for URLLC Network Slice Premium — Acme Corp HQ',
+ (SELECT id FROM tmf_product_offering WHERE name='Network Slice Premium 2024'),
+ (SELECT id FROM tmf_customer_account WHERE account_number='ACC-001001'),
+ (SELECT id FROM tmf_place WHERE name='HQ Office'),
+ 'Approved','ELIGIBLE',
+ 'Customer location within URLLC slice coverage area. Coverage confirmed for Data Centre East.',
+ 1,'URLLC slice resource available. Latency <1ms at customer site confirmed.',
+ '2026-04-20','2026-07-20','2026-04-15T09:00:00Z');
+
+-- ── EVENT SUBSCRIPTIONS (TMF Event Hub) ───────────────────────
+INSERT INTO tmf_event_subscription (subscription_iri, subscriber_party_id,
+    event_type, event_domain, filter_criteria,
+    callback_url, callback_method, status,
+    retry_policy, valid_for_start) VALUES
+('https://gtc.example.com/hub/SUB-ACME-ALARM-001',
+ (SELECT id FROM tmf_party WHERE name='Acme Corporation'),
+ 'AlarmStateChange','Resource',
+ '{"perceived_severity":["Critical","Major"],"affected_service_type":"CUSTOMER_FACING_SERVICE"}',
+ 'https://api.acme.example.com/webhooks/network-events','POST','Active',
+ '{"max_retries":3,"backoff_seconds":30}','2024-04-01'),
+('https://gtc.example.com/hub/SUB-ACME-ORDER-001',
+ (SELECT id FROM tmf_party WHERE name='Acme Corporation'),
+ 'ServiceOrderStateChange','Service',
+ '{"account_id":"ACC-001001"}',
+ 'https://api.acme.example.com/webhooks/order-updates','POST','Active',
+ '{"max_retries":3,"backoff_seconds":10}','2024-04-01'),
+('https://gtc.example.com/hub/SUB-ML-KPI-001',
+ (SELECT id FROM tmf_party WHERE name='ML Monitor Agent'),
+ 'KPIThresholdBreach','Resource',
+ '{"kpi_type":["PSI_SCORE","DRIFT_SCORE","CAPACITY"],"breach_indicator":true}',
+ 'https://ml.gtc.example.com/events/kpi-breach','POST','Active',
+ '{"max_retries":5,"backoff_seconds":5}','2024-03-01');
+
+-- ── CONFLICT EVENTS (Multi-Agent Conflict Resolution) ─────────
+INSERT INTO tmf_conflict_event (conflict_iri, assertion_a_iri, assertion_b_iri,
+    conflict_type, description, shacl_violation_msg,
+    resolution_tier, winning_assertion_iri, resolution_rule,
+    escalated_to_human, invalidation_recorded,
+    status, detected_at, resolved_at) VALUES
+('https://gtc.example.com/conflicts/CONF-2026-0001',
+ 'https://gtc.example.com/kpi/UPF-E01-MEM-20260415',
+ 'https://gtc.example.com/kpi/UPF-E01-MEM-AGENT-ESTIMATE',
+ 'VALUE_CONFLICT',
+ 'Two agents reported conflicting memory utilization for UPF East 01: measured 91.4% vs. inferred 78.2%.',
+ NULL,
+ 2,'https://gtc.example.com/kpi/UPF-E01-MEM-20260415',
+ 'measured > inferred (derivation_method priority chain)',
+ 0,1,'Resolved','2026-04-15T01:05:00Z','2026-04-15T01:05:01Z'),
+('https://gtc.example.com/conflicts/CONF-2026-0002',
+ 'https://gtc.example.com/resources/gnb-043',
+ 'https://gtc.example.com/resources/gnb-043-state-imported',
+ 'STATE_CONFLICT',
+ 'SHACL validation rejected imported state assertion: admin_state=Unlocked conflicts with measured operational_state=Disabled. Disabled+Unlocked is not a valid state combination per eTOM.',
+ 'sh:Violation: OperationalAndAdminStateConsistency — Disabled resource must not be Unlocked.',
+ 1,NULL,NULL,
+ 1,0,'Escalated','2026-04-10T02:14:00Z',NULL);

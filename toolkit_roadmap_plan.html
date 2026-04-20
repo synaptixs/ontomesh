@@ -57,7 +57,7 @@ code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--off
 .b-grey { background: var(--off);   color: var(--muted); }
 
 /* Stats row */
-.stats { display: grid; grid-template-columns: repeat(5,1fr); gap: 0; border: 1px solid var(--rule); margin: 1.5rem 0 2.5rem; }
+.stats { display: grid; grid-template-columns: repeat(6,1fr); gap: 0; border: 1px solid var(--rule); margin: 1.5rem 0 2.5rem; }
 .stat { padding: 1.1rem 1.25rem; border-right: 1px solid var(--rule); }
 .stat:last-child { border-right: none; }
 .stat-n { font-size: 1.8rem; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
@@ -133,6 +133,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <div class="stat"><div class="stat-n">32</div><div class="stat-l">Roadmap items<br>3 phases + runtime layer</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--done)">7</div><div class="stat-l">Phase 1 ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--done)">4</div><div class="stat-l">Phase 2A ✓ Done<br>Completed Apr 2026</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--done)">4</div><div class="stat-l">Phase 2B ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--p3)">9</div><div class="stat-l">P3 — strategic<br>~16 sprints</div></div>
   <div class="stat"><div class="stat-n">326</div><div class="stat-l">Engineering-days<br>estimated total (incl. runtime)</div></div>
 </div>
@@ -147,16 +148,16 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div class="ph-bar" style="background:var(--done)"></div>
   </div>
   <div class="phase-card">
-    <div class="ph-num">PHASE 2A · M4–M6</div>
+    <div class="ph-num">PHASE 2A · M4–M6 · ✓ COMPLETED APR 2026</div>
     <h3>Data &amp; CI/CD</h3>
     <div class="ph-sub">Log connector, CI/CD pipeline, LLM wizard assist. Broadens data sources and automates quality enforcement.</div>
-    <div class="ph-bar" style="background:var(--p2)"></div>
+    <div class="ph-bar" style="background:var(--done)"></div>
   </div>
   <div class="phase-card">
-    <div class="ph-num">PHASE 2B · M7–M9</div>
+    <div class="ph-num">PHASE 2B · M7–M9 · ✓ COMPLETED APR 2026</div>
     <h3>TMF &amp; federation</h3>
     <div class="ph-sub">Remaining TMF domains, conflict resolution, ontology alignment. Completes the telecom vertical and enables multi-domain operation.</div>
-    <div class="ph-bar" style="background:var(--p2)"></div>
+    <div class="ph-bar" style="background:var(--done)"></div>
   </div>
   <div class="phase-card">
     <div class="ph-num">PHASE 3 · M10–M12+</div>
@@ -245,26 +246,26 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div style="grid-column:11/14"></div>
   </div>
 
-  <div class="phase-sep">Phase 2B — TMF &amp; federation (months 7–9)</div>
+  <div class="phase-sep">Phase 2B — TMF &amp; federation (months 7–9) · ✓ COMPLETED APR 2026</div>
 
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> TMF remaining domains</div>
-    <div style="grid-column:11/12; background:var(--p2); border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> TMF remaining domains</div>
+    <div style="grid-column:11/12; background:var(--done); border-radius:2px; height:14px;"></div>
     <div style="grid-column:12/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> TMF Event Hub</div>
-    <div style="grid-column:11/12; background:var(--p2); opacity:.7; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> TMF Event Hub</div>
+    <div style="grid-column:11/12; background:var(--done); opacity:.8; border-radius:2px; height:14px;"></div>
     <div style="grid-column:12/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> Conflict resolution</div>
-    <div style="grid-column:11/13; background:var(--p2); opacity:.85; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Conflict resolution</div>
+    <div style="grid-column:11/13; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:13/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> Ontology alignment</div>
-    <div style="grid-column:11/13; background:var(--p2); opacity:.7; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Ontology alignment</div>
+    <div style="grid-column:11/13; background:var(--done); opacity:.75; border-radius:2px; height:14px;"></div>
     <div style="grid-column:13/14"></div>
   </div>
 
@@ -455,10 +456,10 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <!-- PHASE 2B -->
-<tr class="area-row"><td colspan="7">Phase 2B — TMF &amp; Federation &nbsp;·&nbsp; Months 7–9 &nbsp;·&nbsp; ~49 engineering-days</td></tr>
+<tr class="area-row"><td colspan="7">Phase 2B — TMF &amp; Federation &nbsp;·&nbsp; Months 7–9 &nbsp;·&nbsp; ~49 engineering-days &nbsp;·&nbsp; <span style="color:var(--done);font-weight:700;">✓ COMPLETED APR 2026</span></td></tr>
 
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S9–S11</td>
   <td class="t-feat">TMF remaining domains</td>
   <td class="t-detail">Add ~8 tables and ~15 TMF Open APIs not yet in schema: Revenue Management (TMF678 Customer Bill, TMF679 Product Offering Qualification), Trouble (TMF621), Network Slice Mgmt (TMF645), Service Quality (TMF657), Geographic Site (TMF674). Update SID hierarchy, seed data, CQ catalog, TMF API coverage map.</td>
@@ -467,7 +468,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">20d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S9</td>
   <td class="t-feat">TMF Event Hub</td>
   <td class="t-detail">Model TMF630 Part 1 §5 notification pattern: <code>EventSubscription</code> OWL class, <code>tmf_event_subscription</code> table (callback_url, event_type, status), SHACL shape, MCP tool <code>subscribe_to_events</code>. Enables async agent notification in ODA-compliant deployments.</td>
@@ -476,7 +477,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">5d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S10–S11</td>
   <td class="t-feat">Multi-agent conflict resolution</td>
   <td class="t-detail">Implement the 3-tier resolution chain (framework Section 10.1): Tier 1 — SHACL axiom check rejects logically inconsistent assertion. Tier 2 — priority chain (measured &gt; derived &gt; imported &gt; default). Tier 3 — human escalation queue (<code>tmf_conflict_event</code> table). SPARQL ASK conflict detection query. PROV-O <code>wasInvalidatedBy</code> on losing assertions.</td>
@@ -485,7 +486,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">10d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S11–S12</td>
   <td class="t-feat">Ontology alignment &amp; federation</td>
   <td class="t-detail">Generate <code>owl:equivalentClass</code> and <code>skos:exactMatch</code> axioms aligning the generated ontology with DOLCE, FOAF, Schema.org, and SOSA (W3C Sensor ontology for observations). Produce alignment ontology as separate Turtle module. SPARQL SERVICE federation endpoint configuration for multi-domain queries across named graphs.</td>
@@ -668,13 +669,13 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
       <li>✓ Onboarding time ≤ 5 min (LLM-assisted)</li>
     </ul>
   </div>
-  <div class="gate-card" style="border-color:var(--p2)">
-    <h3 style="color:var(--p2)">Phase 2B exit</h3>
+  <div class="gate-card" style="border-color:var(--done)">
+    <h3 style="color:var(--done)">Phase 2B ✓ Complete · Apr 2026</h3>
     <ul>
-      <li>TMF API coverage ≥ 30 APIs</li>
-      <li>Conflict resolution: all 3 tiers tested</li>
-      <li>Alignment axioms to DOLCE + FOAF</li>
-      <li>Multi-domain SPARQL federation working</li>
+      <li>✓ 24 TMF APIs integrated (6 new in 2B)</li>
+      <li>✓ Conflict resolution: all 3 tiers implemented</li>
+      <li>✓ Alignment axioms: DOLCE, FOAF, Schema.org, SOSA</li>
+      <li>✓ Multi-domain SPARQL federation configured</li>
     </ul>
   </div>
   <div class="gate-card" style="border-color:var(--p3)">
@@ -716,7 +717,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-feat">TMF membership paywall on API specs</td>
   <td><span class="risk-med">Medium</span></td>
   <td class="t-detail">Some TMF specifications require membership to access. Blocks complete TMF630 conformance work.</td>
-  <td class="t-detail">All 18 current Open APIs are Apache 2.0 on GitHub. TMF630 design guidelines are available as older versions (4.2.0). Work from public sources; flag where v5.0 paywall blocks.</td>
+  <td class="t-detail">All 24 current Open APIs are Apache 2.0 on GitHub. TMF630 design guidelines are available as older versions (4.2.0). Work from public sources; flag where v5.0 paywall blocks.</td>
 </tr>
 <tr>
   <td class="t-feat">W3C Community Group consensus overhead</td>
@@ -791,7 +792,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </table>
 
 <footer>
-  <span>Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.3</span>
+  <span>Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.4</span>
   <span>Total estimated effort: 326 engineering-days (271 pipeline + 55 runtime) across 12 months</span>
 </footer>
 

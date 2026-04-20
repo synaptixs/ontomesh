@@ -1,0 +1,16 @@
+# CQ-P2B-01: Which conflict events are unresolved or escalated to humans,
+#            what is the conflict type, and what is the resolution tier?
+# Phase 2B Multi-Agent Conflict Resolution
+PREFIX : <https://ontology.example.com/tmf/>
+
+SELECT ?conflict ?conflictType ?tier ?assertionA ?assertionB ?status
+WHERE {
+  ?conflict a :ConflictEvent ;
+            :conflictType ?conflictType ;
+            :hasTicketStatus ?status .
+  FILTER(?status IN ("Open","Escalated"))
+  OPTIONAL { ?conflict :assertionAIri ?assertionA }
+  OPTIONAL { ?conflict :assertionBIri ?assertionB }
+  OPTIONAL { ?conflict :resolutionTier ?tier }
+}
+ORDER BY ?tier ?conflictType
