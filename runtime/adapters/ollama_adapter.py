@@ -22,8 +22,9 @@ class OllamaAdapter(BaseAdapter):
     Uses only Python stdlib (``urllib``) for the sync path; the async path
     uses ``aiohttp`` if available, falling back to ``asyncio``'s executor.
 
-    If the Ollama server is unreachable, degrades gracefully and returns
-    a descriptive error message rather than raising an unhandled exception.
+    Raises ``RuntimeError`` on any network or API failure so that callers
+    (e.g. ``RuntimeClient``) can distinguish a real error from an empty
+    model response and avoid writing error strings into PROV-O records.
     """
 
     def __init__(
@@ -70,8 +71,11 @@ class OllamaAdapter(BaseAdapter):
             payload: The assembled payload dict from PayloadAssembler.
 
         Returns:
-            The response text string, or an error message if the server is
-            unreachable.
+            The response text string from the model.
+
+        Raises:
+            RuntimeError: If the Ollama server is unreachable, returns an HTTP
+                error, or the response cannot be decoded.
         """
         url = f"{self._base_url}/api/chat"
         messages = self._build_messages(payload)
@@ -95,12 +99,16 @@ class OllamaAdapter(BaseAdapter):
                 # Ollama response: {"message": {"role": "assistant", "content": "..."}}
                 return data.get("message", {}).get("content", "")
         except urllib.error.URLError as exc:
-            return (
-                f"[OllamaAdapter] Server unreachable at {self._base_url}: {exc}. "
+            raise RuntimeError(
+                f"Ollama server unreachable at {self._base_url}: {exc}. "
                 "Ensure Ollama is running and the model is pulled."
-            )
+            ) from exc
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                f"Ollama returned non-JSON response from {url}: {exc}"
+            ) from exc
         except Exception as exc:
-            return f"[OllamaAdapter] Error: {exc}"
+            raise RuntimeError(f"Ollama API call failed: {exc}") from exc
 
     async def complete_async(self, payload: dict) -> str:
         """Async version of :meth:`complete`.
@@ -112,7 +120,11 @@ class OllamaAdapter(BaseAdapter):
             payload: The assembled payload dict.
 
         Returns:
-            The response text string.
+            The response text string from the model.
+
+        Raises:
+            RuntimeError: Propagated from the underlying sync or aiohttp call
+                on any network or API failure.
         """
         try:
             import aiohttp
@@ -147,7 +159,7 @@ class OllamaAdapter(BaseAdapter):
                     data = await resp.json()
                     return data.get("message", {}).get("content", "")
         except Exception as exc:
-            return (
-                f"[OllamaAdapter] Server unreachable at {self._base_url}: {exc}. "
+            raise RuntimeError(
+                f"Ollama async API call failed at {self._base_url}: {exc}. "
                 "Ensure Ollama is running and the model is pulled."
-            )
+            ) from exc
