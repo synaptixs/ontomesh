@@ -236,14 +236,48 @@ open output/reports/toolkit_report.html
 ### Running individual phases
 
 ```bash
-python3 toolkit.py --phase 1       # Introspect schema and print inventory
-python3 toolkit.py --phase 2       # OWL 2 ontology generation only
-python3 toolkit.py --phase 3       # SHACL shape generation only
-python3 toolkit.py --phase 4       # Mapping workbook + semantic loss only
-python3 toolkit.py --phase 5       # JSON-LD, SKOS, MCP tools only
-python3 toolkit.py --phase tmf     # TM Forum SID alignment + TMF CQ tests
-python3 toolkit.py --phase test    # CQ tests + governance scorecard
-python3 toolkit.py --phase report  # HTML report only (from existing CSVs)
+python3 toolkit.py --phase 1        # Introspect schema and print inventory
+python3 toolkit.py --phase 2        # OWL 2 ontology generation only
+python3 toolkit.py --phase 3        # SHACL shape generation only
+python3 toolkit.py --phase 4        # Mapping workbook + semantic loss only
+python3 toolkit.py --phase 5        # JSON-LD, SKOS, MCP tools only
+python3 toolkit.py --phase tmf      # TM Forum SID alignment + TMF CQ tests
+python3 toolkit.py --phase test     # CQ tests + governance scorecard
+python3 toolkit.py --phase report   # HTML report only (from existing CSVs)
+python3 toolkit.py --phase log      # Structured log ingestion (requires --log-path)
+python3 toolkit.py --phase security # Named-graph RBAC config generation
+```
+
+### Log ingestion
+
+```bash
+# Ingest a JSON-lines log file
+python3 toolkit.py --phase log --log-path /var/log/app.log --log-format jsonl
+
+# Auto-detect format from a glob
+python3 toolkit.py --phase log --log-path "/var/log/*.log"
+
+# Dry-run — parse and report without writing to DB
+python3 toolkit.py --phase log --log-path /var/log/app.log --dry-run
+
+# Syslog RFC5424
+python3 toolkit.py --phase log --log-path /var/log/syslog --log-format syslog
+
+# Named-group regex (custom format)
+python3 toolkit.py --phase log --log-path /var/log/app.log --log-format regex \
+    --log-regex "(?P<timestamp>\S+) (?P<severity>\w+) (?P<message>.+)"
+```
+
+### Named-graph RBAC
+
+```bash
+# Generate all three store configs (Stardog, Fuseki, Neptune)
+python3 toolkit.py --phase security --store all
+
+# Single store target
+python3 toolkit.py --phase security --store stardog
+python3 toolkit.py --phase security --store fuseki
+python3 toolkit.py --phase security --store neptune
 ```
 
 ---
@@ -255,16 +289,28 @@ python3 toolkit.py --phase report  # HTML report only (from existing CSVs)
 ```
 python3 toolkit.py [options]
 
-  --db PATH       Database connection string or SQLite file path
-                  Default: db/enterprise.db
+  --db PATH           Database connection string or SQLite file path
+                      Default: db/enterprise.db
 
-  --out PATH      Output directory for generated artifacts
-                  Default: output/
+  --out PATH          Output directory for generated artifacts
+                      Default: output/
 
-  --phase PHASE   Run a specific phase: all | 1 | 2 | 3 | 4 | 5 | tmf | test | report
-                  Default: all
+  --phase PHASE       Run a specific phase:
+                      all | 1 | 2 | 3 | 4 | 5 | tmf | test | report |
+                      reasoner | sparql | log | security
+                      Default: all
 
-  --industry STR  Label for the industry context (used in report header)
+  --industry STR      Label for the industry context (used in report header)
+
+  --log-path PATH     Log file path or glob pattern (for --phase log)
+  --log-format FMT    Log format: auto | jsonl | syslog | cef | otlp | regex
+                      Default: auto
+  --log-regex PATTERN Named-group regex (for --log-format regex)
+  --dry-run           Parse logs without writing to DB (for --phase log)
+
+  --store TARGET      Graph store for --phase security:
+                      all | stardog | fuseki | neptune
+                      Default: all
 ```
 
 ### onboard.py
@@ -277,6 +323,10 @@ python3 onboard.py [options]
   --from FILE     Load a saved session JSON and skip the interview
 
   --dry-run       Generate files without running the pipeline
+
+  --llm           Use Claude Sonnet to auto-suggest entities, events, relationships,
+                  and CQs from your domain description.
+                  Requires ANTHROPIC_API_KEY environment variable.
 ```
 
 ---
@@ -297,7 +347,11 @@ ontology-toolkit/
 │   ├── mapping_generator.py     ← Phase 4: mapping workbook + semantic loss detector
 │   ├── jsonld_generator.py      ← Phase 5: JSON-LD context, SKOS vocabulary, MCP tools
 │   ├── tmf_mapper.py            ← TMF phase: SID hierarchy, Open API map, TMF CQ tests
-│   ├── cq_tester.py             ← Test phase: CQ runner + governance auto-scorer
+│   ├── cq_tester.py             ← Test phase: CQ runner + governance auto-scorer (31 criteria)
+│   ├── sparql_tester.py         ← SPARQL CQ test runner (Oxigraph / rdflib backends)
+│   ├── reasoner.py              ← ROBOT OWL 2 reasoner integration (ELK / HermiT)
+│   ├── log_connector.py         ← Phase 2A: structured log ingestion (JSON/syslog/CEF/OTLP)
+│   ├── rbac_generator.py        ← Phase 2A: named-graph RBAC config generator
 │   └── reporter.py              ← Report phase: HTML report generator
 │
 ├── db/
@@ -357,6 +411,10 @@ ontology-toolkit/
 │   ├── assembler.py             ← Assembles complete LLM payload from 5 components
 │   ├── output_gate.py           ← SHACL-validates LLM responses + stamps PROV-O provenance
 │   └── client.py                ← RuntimeClient — end-to-end helper with multi-LLM adapters
+│
+├── .github/
+│   └── workflows/
+│       └── ontology.yml         ← Phase 2A: CI/CD pipeline (5 stages, PR governance comment)
 │
 └── docs/
     ├── framework-whitepaper.md
