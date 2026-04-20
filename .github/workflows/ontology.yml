@@ -82,23 +82,21 @@ jobs:
       - name: Install rdflib
         run: pip install rdflib
 
-      - name: Check for ROBOT binary
-        id: robot_check
-        run: |
-          if [ -f "bin/robot" ]; then
-            echo "available=true" >> $GITHUB_OUTPUT
-          else
-            echo "available=false" >> $GITHUB_OUTPUT
-            echo "::notice::ROBOT not found in bin/ — reasoner stage will use structural checks only"
-          fi
+      - name: Install Java (required for ROBOT)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-      - name: Download ROBOT (if not in bin/)
-        if: steps.robot_check.outputs.available == 'false'
+      - name: Download ROBOT
         run: |
           mkdir -p bin
-          curl -fsSL https://github.com/ontodev/robot/releases/latest/download/robot.jar -o bin/robot.jar
-          printf '#!/bin/bash\njava -jar "$(dirname "$0")/robot.jar" "$@"\n' > bin/robot
+          curl -fsSL https://github.com/ontodev/robot/releases/download/v1.9.5/robot.jar \
+            -o bin/robot.jar
+          printf '#!/bin/bash\nexec java -jar "$(dirname "$(readlink -f "$0")")/robot.jar" "$@"\n' \
+            > bin/robot
           chmod +x bin/robot
+          bin/robot --version
         continue-on-error: true
 
       - name: Run reasoner check
