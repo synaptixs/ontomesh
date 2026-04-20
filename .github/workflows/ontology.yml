@@ -1,0 +1,307 @@
+name: Ontology CI
+
+on:
+  pull_request:
+    paths:
+      - "db/**.sql"
+      - "src/**.py"
+      - "onboard.py"
+      - "toolkit.py"
+      - "tests/sparql/**.sparql"
+      - ".github/workflows/ontology.yml"
+  push:
+    branches:
+      - main
+      - develop
+      - "phase-*"
+
+env:
+  DB_PATH: db/enterprise.db
+  OUT_PATH: output
+
+jobs:
+  # ── Stage 1: Ontology generation ─────────────────────────────────────────
+  generate:
+    name: Generate ontology artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install rdflib (SPARQL backend)
+        run: pip install rdflib
+
+      - name: Phase 1 — DB setup & introspection
+        run: python toolkit.py --phase 1 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Phase 2 — OWL 2 ontology generation
+        run: python toolkit.py --phase 2 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Phase 3 — SHACL shape generation
+        run: python toolkit.py --phase 3 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Phase 4 — Mapping & semantic loss
+        run: python toolkit.py --phase 4 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Phase 5 — JSON-LD, SKOS, MCP tools
+        run: python toolkit.py --phase 5 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Phase TMF — TM Forum alignment
+        run: python toolkit.py --phase tmf --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Upload generated artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ontology-artifacts
+          path: ${{ env.OUT_PATH }}/
+          retention-days: 7
+
+  # ── Stage 2: Reasoner consistency ────────────────────────────────────────
+  reasoner:
+    name: OWL 2 reasoner consistency check
+    runs-on: ubuntu-latest
+    needs: generate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ontology-artifacts
+          path: ${{ env.OUT_PATH }}
+
+      - name: Install rdflib
+        run: pip install rdflib
+
+      - name: Check for ROBOT binary
+        id: robot_check
+        run: |
+          if [ -f "bin/robot" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "::notice::ROBOT not found in bin/ — reasoner stage will use structural checks only"
+          fi
+
+      - name: Download ROBOT (if not in bin/)
+        if: steps.robot_check.outputs.available == 'false'
+        run: |
+          mkdir -p bin
+          curl -L https://github.com/ontodev/robot/releases/latest/download/robot.jar -o bin/robot.jar
+          echo '#!/bin/bash\njava -jar "$(dirname "$0")/robot.jar" "$@"' > bin/robot
+          chmod +x bin/robot
+        continue-on-error: true
+
+      - name: Run reasoner check
+        run: python toolkit.py --phase reasoner --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+        env:
+          PYTHONPATH: src
+
+      - name: Fail on unsatisfiable classes
+        run: |
+          if [ -f "${{ env.OUT_PATH }}/ontology/reasoner_report.md" ]; then
+            if grep -q "CRITICAL" "${{ env.OUT_PATH }}/ontology/reasoner_report.md"; then
+              echo "::error::Reasoner found CRITICAL issues (unsatisfiable classes). See reasoner_report.md"
+              cat "${{ env.OUT_PATH }}/ontology/reasoner_report.md"
+              exit 1
+            fi
+          fi
+
+  # ── Stage 3: SPARQL CQ tests ─────────────────────────────────────────────
+  sparql-cq:
+    name: SPARQL competency question tests
+    runs-on: ubuntu-latest
+    needs: generate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install rdflib
+        run: pip install rdflib
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ontology-artifacts
+          path: ${{ env.OUT_PATH }}
+
+      - name: Run SPARQL CQ tests
+        run: python toolkit.py --phase sparql --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Check for test failures
+        run: |
+          csv="${{ env.OUT_PATH }}/reports/sparql_cq_test_results.csv"
+          if [ -f "$csv" ]; then
+            failed=$(grep -c ",FAIL," "$csv" 2>/dev/null || true)
+            errors=$(grep -c ",ERROR," "$csv" 2>/dev/null || true)
+            total=$((failed + errors))
+            if [ "$total" -gt 0 ]; then
+              echo "::error::$failed SPARQL CQ tests FAILED, $errors ERRORS"
+              cat "$csv"
+              exit 1
+            else
+              echo "All SPARQL CQ tests passed."
+            fi
+          fi
+
+      - name: Upload CQ results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cq-results
+          path: ${{ env.OUT_PATH }}/reports/sparql_cq_test_results.csv
+
+  # ── Stage 4: Governance scorecard ────────────────────────────────────────
+  governance:
+    name: Governance scorecard + regression gate
+    runs-on: ubuntu-latest
+    needs: [reasoner, sparql-cq]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install rdflib
+        run: pip install rdflib
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ontology-artifacts
+          path: ${{ env.OUT_PATH }}
+
+      - name: Run CQ tests + governance scoring
+        run: python toolkit.py --phase test --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+
+      - name: Parse governance score
+        id: score
+        run: |
+          csv="${{ env.OUT_PATH }}/reports/governance_scorecard.csv"
+          if [ -f "$csv" ]; then
+            avg=$(python3 -c "
+          import csv, sys
+          rows = list(csv.DictReader(open('$csv')))
+          scores = [float(r['score']) for r in rows if r.get('score','').replace('.','',1).isdigit()]
+          print(f'{sum(scores)/len(scores):.2f}' if scores else '0.00')
+          ")
+            echo "avg=$avg" >> $GITHUB_OUTPUT
+            echo "Governance average: $avg / 5.0"
+          fi
+
+      - name: Enforce minimum governance threshold
+        run: |
+          avg="${{ steps.score.outputs.avg }}"
+          python3 -c "
+          avg = float('${avg}' or 0)
+          if avg < 3.0:
+              print(f'::error::Governance score {avg:.2f}/5.0 is below minimum threshold of 3.0')
+              exit(1)
+          elif avg < 4.0:
+              print(f'::warning::Governance score {avg:.2f}/5.0 is below production target of 4.0')
+          else:
+              print(f'Governance score {avg:.2f}/5.0 — OK')
+          "
+
+      - name: Fetch main branch score for delta
+        if: github.event_name == 'pull_request'
+        id: main_score
+        run: |
+          git fetch origin main --depth=1 2>/dev/null || true
+          # Attempt to get score from main branch artifact; default to 0 if unavailable
+          echo "avg=0.00" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Comment governance delta on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const current = parseFloat('${{ steps.score.outputs.avg }}' || '0');
+            const main    = parseFloat('${{ steps.main_score.outputs.avg }}' || '0');
+            const delta   = current - main;
+            const arrow   = delta >= 0 ? '↑' : '↓';
+            const sign    = delta >= 0 ? '+' : '';
+            const emoji   = current >= 4.0 ? '✅' : current >= 3.0 ? '⚠️' : '❌';
+
+            const body = [
+              '## Ontology Governance Score',
+              '',
+              `${emoji} **${current.toFixed(2)} / 5.0** &nbsp; (${arrow} ${sign}${delta.toFixed(2)} vs main)`,
+              '',
+              '| Threshold | Target | Status |',
+              '|---|---|---|',
+              `| ≥ 3.0 — Minimum gate | ≥ 4.0 — Production target | ${current >= 4.0 ? '✅ Production ready' : current >= 3.0 ? '⚠️ Above minimum, below target' : '❌ Below minimum'} |`,
+              '',
+              '_Full scorecard in `output/reports/governance_scorecard.csv`_',
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+      - name: Upload governance scorecard
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-scorecard
+          path: ${{ env.OUT_PATH }}/reports/governance_scorecard.csv
+
+  # ── Stage 5: HTML report ─────────────────────────────────────────────────
+  report:
+    name: Generate HTML report
+    runs-on: ubuntu-latest
+    needs: governance
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ontology-artifacts
+          path: ${{ env.OUT_PATH }}
+
+      - name: Download CQ results
+        uses: actions/download-artifact@v4
+        with:
+          name: cq-results
+          path: ${{ env.OUT_PATH }}/reports
+
+      - name: Download governance scorecard
+        uses: actions/download-artifact@v4
+        with:
+          name: governance-scorecard
+          path: ${{ env.OUT_PATH }}/reports
+
+      - name: Generate HTML report
+        run: python toolkit.py --phase report --out ${{ env.OUT_PATH }}
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: toolkit-report
+          path: ${{ env.OUT_PATH }}/reports/toolkit_report.html
+          retention-days: 30

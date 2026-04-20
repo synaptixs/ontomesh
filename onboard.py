@@ -37,7 +37,7 @@ import textwrap
 import argparse
 import subprocess
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "src"))
@@ -269,6 +269,152 @@ class DomainSession:
         for k, v in d.items():
             setattr(s, k, v)
         return s
+
+
+# ── LLM-assisted suggestions ─────────────────────────────────────────────
+
+def _llm_suggest(domain_name: str, domain_description: str) -> Optional[Dict]:
+    """
+    Call Claude to generate ontology structure suggestions for the domain.
+    Returns a template-compatible dict or None if the API is unavailable.
+    """
+    try:
+        import anthropic  # type: ignore
+    except ImportError:
+        print(yellow("  ⚠ anthropic package not installed — run: pip install anthropic"))
+        return None
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        print(yellow("  ⚠ ANTHROPIC_API_KEY not set — skipping LLM suggestions."))
+        return None
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    prompt = f"""You are an ontology engineering assistant. A user is building a domain ontology.
+
+Domain name: {domain_name}
+Domain description: {domain_description}
+
+Suggest a structured ontology foundation. Return ONLY valid JSON (no markdown, no explanation) in this exact schema:
+
+{{
+  "entities": [
+    {{"name": "EntityName", "description": "One sentence description."}}
+  ],
+  "events": [
+    {{"name": "EventName", "description": "One sentence description."}}
+  ],
+  "relationships": [
+    ["FromEntity", "verb phrase", "ToEntity"]
+  ],
+  "cqs": [
+    "Competency question 1?",
+    "Competency question 2?"
+  ]
+}}
+
+Rules:
+- entities: 5–8 persistent things (nouns) that the domain manages
+- events: 3–5 things that happen (verbs / occurrences)
+- relationships: 4–6 triples as [from, verb, to] — use entity names from above
+- cqs: exactly 8 plain-English questions an AI agent must be able to answer from this ontology
+- Use PascalCase for entity/event names, lowercase verb phrases for relationships
+- Return only the JSON object, nothing else."""
+
+    print(f"  {dim('Calling Claude for suggestions...')}", end="", flush=True)
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = response.content[0].text.strip()
+        # Strip any accidental markdown fences
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+        suggestions = json.loads(raw)
+        print(f" {green('✓')}")
+        return suggestions
+    except json.JSONDecodeError as e:
+        print(f" {red('✗ JSON parse error')}: {e}")
+        return None
+    except Exception as e:
+        print(f" {red('✗')}: {e}")
+        return None
+
+
+def _present_llm_suggestions(suggestions: Dict, session: DomainSession) -> Tuple[List, List, List, List]:
+    """Display LLM suggestions and return user-confirmed lists."""
+    print(f"\n  {bold(cyan('Claude suggestions:'))}")
+
+    # Entities
+    raw_entities = [e["name"] for e in suggestions.get("entities", [])]
+    print(f"\n  {bold('Entities')} ({len(raw_entities)}):")
+    for i, e in enumerate(suggestions.get("entities", []), 1):
+        print(f"    {dim(str(i)+'.')} {e['name']} — {dim(e.get('description',''))}")
+    if not confirm("  Use these entities?", default=True):
+        raw_entities = ask_list(bold("  Enter your entities"), min_items=2)
+
+    # Events
+    raw_events = [e["name"] for e in suggestions.get("events", [])]
+    print(f"\n  {bold('Events')} ({len(raw_events)}):")
+    for i, e in enumerate(suggestions.get("events", []), 1):
+        print(f"    {dim(str(i)+'.')} {e['name']} — {dim(e.get('description',''))}")
+    if not confirm("  Use these events?", default=True):
+        raw_events = []
+
+    # Relationships
+    raw_rels = suggestions.get("relationships", [])
+    print(f"\n  {bold('Relationships')} ({len(raw_rels)}):")
+    for r in raw_rels:
+        if len(r) == 3:
+            print(f"    {dim(f'{r[0]}  →  {r[1]}  →  {r[2]}')}")
+    if not confirm("  Use these relationships?", default=True):
+        raw_rels = []
+
+    # CQs
+    cqs = suggestions.get("cqs", [])
+    print(f"\n  {bold('Competency questions')} ({len(cqs)}):")
+    for i, q in enumerate(cqs, 1):
+        print(f"    {dim(str(i)+'.')} {q}")
+    if not confirm("  Use these competency questions?", default=True):
+        cqs = []
+
+    return raw_entities, raw_events, raw_rels, cqs
+
+
+def step_llm_suggest(session: DomainSession) -> Optional[Dict]:
+    """
+    Called after step_domain when --llm is active.
+    Returns a template-compatible dict that subsequent steps use as defaults,
+    or None if suggestions were declined / unavailable.
+    """
+    section("Step 1b — LLM-assisted suggestions (Claude)")
+    print("  Based on your domain description, Claude will suggest entities,")
+    print("  events, relationships, and competency questions.\n")
+    print(f"  {dim('Domain:')} {session.domain_name}")
+    print(f"  {dim('Description:')} {session.domain_description}\n")
+
+    suggestions = _llm_suggest(session.domain_name, session.domain_description)
+    if suggestions is None:
+        print(f"  {yellow('Continuing without LLM suggestions.')}")
+        return None
+
+    entities, events, rels, cqs = _present_llm_suggestions(suggestions, session)
+
+    # Build template dict compatible with step_entities / step_events / step_relationships / step_cqs
+    template = {
+        "entities":      entities,
+        "events":        events,
+        "relationships": [tuple(r) for r in rels if len(r) == 3],
+        "cqs":           cqs,
+    }
+    entity_descs = {e["name"]: e.get("description", "") for e in suggestions.get("entities", [])}
+    template["_entity_descs"] = entity_descs
+
+    print(f"\n  {green('✓')} LLM suggestions ready — you can refine each step interactively.")
+    return template
 
 
 # ── Interview steps ───────────────────────────────────────────────────────
@@ -816,6 +962,9 @@ def main():
     parser.add_argument("--from",     dest="from_file", help="Load a saved session (JSON)")
     parser.add_argument("--industry", help=f"Pre-load an industry template: {', '.join(INDUSTRY_TEMPLATES.keys())}")
     parser.add_argument("--dry-run",  action="store_true", help="Generate artifacts without running the pipeline")
+    parser.add_argument("--llm",      action="store_true",
+                        help="Use Claude Sonnet to auto-suggest entities, events, relationships, and CQs "
+                             "(requires ANTHROPIC_API_KEY env var)")
     args = parser.parse_args()
 
     banner()
@@ -850,6 +999,13 @@ def main():
 
     try:
         step_domain(session, template)
+
+        # LLM-assisted suggestions — runs after domain description, before entity steps
+        if args.llm and not template:
+            llm_template = step_llm_suggest(session)
+            if llm_template:
+                template = llm_template
+
         step_entities(session, template)
         step_events(session, template)
         step_relationships(session, template)
