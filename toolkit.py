@@ -292,8 +292,17 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql"],
+                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security"],
                         help="Run a specific phase only")
+    parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
+    parser.add_argument("--log-format", default="auto",
+                        choices=["auto","jsonl","syslog","cef","otlp","regex"],
+                        help="Log format for --phase log (default: auto-detect)")
+    parser.add_argument("--log-regex",  default=None, help="Named-group regex for --log-format regex")
+    parser.add_argument("--dry-run",    action="store_true", help="Log ingest dry-run (no DB writes)")
+    parser.add_argument("--store",      default="all",
+                        choices=["all","stardog","fuseki","neptune"],
+                        help="Graph store target for --phase security")
     parser.add_argument("--industry", default="Enterprise", help="Industry label for output")
     args = parser.parse_args()
 
@@ -316,6 +325,31 @@ def main():
             os.path.join(out_path, "reports"),
         )
 
+    def phase_log(db_path: str, out_path: str):
+        step(0, "Structured Log Ingestion")
+        from log_connector import run_log_ingest
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase log")
+            print("    Example: python3 toolkit.py --phase log --log-path /var/log/app.log")
+            return
+        run_log_ingest(
+            db_path=db_path,
+            out_path=out_path,
+            log_path=log_path,
+            fmt=args.log_format,
+            custom_regex=args.log_regex,
+            dry_run=args.dry_run,
+        )
+
+    def phase_security(db_path: str, out_path: str):
+        step(0, "Named-Graph RBAC Config Generation")
+        from db_introspector import DBIntrospector
+        from rbac_generator import generate_rbac
+        intro = DBIntrospector(db_path)
+        generate_rbac(intro, os.path.join(out_path, "security"), store=args.store)
+        intro.close()
+
     phases = {
         "1":       [(phase1_foundation, [args.db, args.out])],
         "2":       [(phase2_ontology,   [args.db, args.out])],
@@ -325,8 +359,10 @@ def main():
         "tmf":     [(phase_tmf,         [args.db, args.out])],
         "test":    [(phase_test,        [args.db, args.out])],
         "report":  [(phase_report,      [args.out])],
-        "reasoner":[(phase_reasoner,    [args.db, args.out])],
-        "sparql":  [(phase_sparql,      [args.db, args.out])],
+        "reasoner": [(phase_reasoner,  [args.db, args.out])],
+        "sparql":   [(phase_sparql,    [args.db, args.out])],
+        "log":      [(phase_log,       [args.db, args.out])],
+        "security": [(phase_security,  [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
