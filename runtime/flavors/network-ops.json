@@ -1,0 +1,29 @@
+{
+  "name": "network-ops",
+  "description": "Network Operations domain — covers resource inventory, network function management, alarm surveillance, performance monitoring, and 5G slice management for telecom operators.",
+  "sensitivity_tier": "Internal",
+  "owl_classes": ["Resource", "NetworkFunction", "NetworkSlice", "Alarm", "PerformanceIndicator"],
+  "shacl_shapes": ["ResourceShape", "AlarmShape", "PerformanceIndicatorShape", "NetworkFunctionShape"],
+  "context_terms": {
+    "Resource": "https://ontology.example.com/tmf/Resource",
+    "NetworkFunction": "https://ontology.example.com/tmf/NetworkFunction",
+    "NetworkSlice": "https://ontology.example.com/tmf/NetworkSlice",
+    "Alarm": "https://ontology.example.com/tmf/Alarm",
+    "PerformanceIndicator": "https://ontology.example.com/tmf/PerformanceIndicator",
+    "resourceType": "https://ontology.example.com/tmf/resourceType",
+    "operationalState": "https://ontology.example.com/tmf/operationalState",
+    "adminState": "https://ontology.example.com/tmf/adminState",
+    "usageState": "https://ontology.example.com/tmf/usageState",
+    "nfType": "https://ontology.example.com/tmf/nfType",
+    "alarmType": "https://ontology.example.com/tmf/alarmType",
+    "perceivedSeverity": "https://ontology.example.com/tmf/perceivedSeverity",
+    "alarmState": "https://ontology.example.com/tmf/alarmState",
+    "kpiType": "https://ontology.example.com/tmf/kpiType",
+    "numericValue": "https://ontology.example.com/tmf/numericValue",
+    "confidenceScore": "https://ontology.example.com/tmf/confidenceScore",
+    "derivationMethod": "https://ontology.example.com/tmf/derivationMethod"
+  },
+  "db_tables": ["tmf_resource", "tmf_alarm", "tmf_performance_indicator"],
+  "system_prompt_hint": "You are a network operations AI assistant. Focus on resource operational states, alarm severity and correlation, KPI threshold breaches, and 5G network function health. Prioritise Critical and Major alarms. Use TMF639 and TMF642 terminology.",
+  "cq_ids": ["CQ-TMF1", "CQ-TMF2", "CQ-TMF3", "CQ-TMF4", "CQ-TMF5"]
+}

@@ -57,7 +57,7 @@ code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--off
 .b-grey { background: var(--off);   color: var(--muted); }
 
 /* Stats row */
-.stats { display: grid; grid-template-columns: repeat(6,1fr); gap: 0; border: 1px solid var(--rule); margin: 1.5rem 0 2.5rem; }
+.stats { display: grid; grid-template-columns: repeat(7,1fr); gap: 0; border: 1px solid var(--rule); margin: 1.5rem 0 2.5rem; }
 .stat { padding: 1.1rem 1.25rem; border-right: 1px solid var(--rule); }
 .stat:last-child { border-right: none; }
 .stat-n { font-size: 1.8rem; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
@@ -135,6 +135,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <div class="stat"><div class="stat-n" style="color:var(--done)">4</div><div class="stat-l">Phase 2A ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--done)">4</div><div class="stat-l">Phase 2B ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--p3)">9</div><div class="stat-l">P3 — strategic<br>~16 sprints</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--done)">6</div><div class="stat-l">Runtime ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n">326</div><div class="stat-l">Engineering-days<br>estimated total (incl. runtime)</div></div>
 </div>
 
@@ -165,11 +166,11 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div class="ph-sub">Graph store deploy, Docker kit, browser wizard, additional templates, W3C community group, drift detection.</div>
     <div class="ph-bar" style="background:var(--p3)"></div>
   </div>
-  <div class="phase-card" style="border-top:3px solid #7c3aed;margin-top:12px;grid-column:1/-1;background:#faf5ff">
-    <div class="ph-num" style="color:#7c3aed">RUNTIME LAYER · PARALLEL TRACK</div>
+  <div class="phase-card" style="border-top:3px solid var(--done);margin-top:12px;grid-column:1/-1;background:#f0fdf4">
+    <div class="ph-num" style="color:var(--done)">RUNTIME LAYER · PARALLEL TRACK · ✓ COMPLETED APR 2026</div>
     <h3>Ontology-augmented AI runtime</h3>
     <div class="ph-sub">The consumption layer that connects toolkit artifacts to LLMs. Payload assembler, flavor registry, SHACL output gate, PROV-O response stamping, ObservationRecord feedback loop. Runs alongside all pipeline phases — not after them.</div>
-    <div class="ph-bar" style="background:#7c3aed"></div>
+    <div class="ph-bar" style="background:var(--done)"></div>
   </div>
 </div>
 
@@ -269,36 +270,36 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div style="grid-column:13/14"></div>
   </div>
 
-  <div class="phase-sep" style="color:#7c3aed;border-color:#7c3aed">Runtime layer — parallel track (months 3–12, incremental)</div>
+  <div class="phase-sep" style="color:var(--done);border-color:var(--done)">Runtime layer — parallel track (months 3–12) · ✓ COMPLETED APR 2026</div>
 
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span> Ontology flavor registry</div>
-    <div style="grid-column:6/8; background:#7c3aed; opacity:.85; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Ontology flavor registry</div>
+    <div style="grid-column:6/8; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:8/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span> Data grounding module</div>
-    <div style="grid-column:6/9; background:#7c3aed; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Data grounding module</div>
+    <div style="grid-column:6/9; background:var(--done); border-radius:2px; height:14px;"></div>
     <div style="grid-column:9/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span> Payload assembler</div>
-    <div style="grid-column:7/10; background:#7c3aed; opacity:.8; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Payload assembler</div>
+    <div style="grid-column:7/10; background:var(--done); opacity:.8; border-radius:2px; height:14px;"></div>
     <div style="grid-column:10/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span> Output SHACL gate</div>
-    <div style="grid-column:8/10; background:#7c3aed; opacity:.75; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Output SHACL gate</div>
+    <div style="grid-column:8/10; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:10/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span> PROV-O response stamping</div>
-    <div style="grid-column:9/11; background:#7c3aed; opacity:.7; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> PROV-O response stamping</div>
+    <div style="grid-column:9/11; background:var(--done); opacity:.8; border-radius:2px; height:14px;"></div>
     <div style="grid-column:11/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p3" style="background:#f0edff;color:#5b21b6">RT</span> Runtime SDK + docs</div>
-    <div style="grid-column:11/14; background:#7c3aed; opacity:.65; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Runtime SDK + docs</div>
+    <div style="grid-column:11/14; background:var(--done); opacity:.75; border-radius:2px; height:14px;"></div>
   </div>
 
   <div class="phase-sep">Phase 3 — scale &amp; community (months 10–12+)</div>
@@ -496,10 +497,10 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <!-- RUNTIME LAYER -->
-<tr class="area-row" style="background:#f5f3ff;color:#5b21b6"><td colspan="7">Runtime Layer &nbsp;·&nbsp; Parallel Track M3–M12 &nbsp;·&nbsp; ~55 engineering-days &nbsp;·&nbsp; The consumption bridge between toolkit artifacts and AI/LLM systems</td></tr>
+<tr class="area-row" style="background:#f0fdf4;color:#15803d"><td colspan="7">Runtime Layer &nbsp;·&nbsp; Parallel Track M3–M12 &nbsp;·&nbsp; ~55 engineering-days &nbsp;·&nbsp; <span style="font-weight:700;">✓ COMPLETED APR 2026</span> &nbsp;·&nbsp; The consumption bridge between toolkit artifacts and AI/LLM systems</td></tr>
 
 <tr>
-  <td><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td><span class="badge b-done">&#10003;</span></td>
   <td class="t-sprint" style="color:#5b21b6">S5–S6</td>
   <td class="t-feat">Ontology flavor registry</td>
   <td class="t-detail">Configuration layer that defines named agent views over the master ontology. Each flavor specifies: OWL class subset, SHACL shape subset, scoped JSON-LD context terms, and sensitivity-tier access level. Stored as <code>runtime/flavors/{name}.json</code>. Flavors are generated automatically from <code>ontology_metadata</code> sid_domain groupings and can be manually extended. Ships with 5 starter flavors: network-ops, billing, compliance, customer, fault-management.</td>
@@ -509,7 +510,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <tr>
-  <td><span class="badge b-p1" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td><span class="badge b-done">&#10003;</span></td>
   <td class="t-sprint" style="color:#5b21b6">S6–S8</td>
   <td class="t-feat">Data grounding module</td>
   <td class="t-detail">The critical missing step in most LLM + enterprise data architectures. <code>runtime/grounder.py</code> takes a question and a flavor, queries the enterprise database for relevant records, and serialises those records as JSON-LD using the flavor's scoped context — binding each field value to its ontology IRI. Output: typed, ontology-grounded data ready for LLM payload. Without this step, raw data sits next to the ontology in a prompt without being connected to it. CLI: <code>python3 runtime/grounder.py --flavor network-ops --question "Which NFs are degraded?" --db &lt;connection&gt;</code></td>
@@ -519,7 +520,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <tr>
-  <td><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td><span class="badge b-done">&#10003;</span></td>
   <td class="t-sprint" style="color:#5b21b6">S7–S9</td>
   <td class="t-feat">Payload assembler</td>
   <td class="t-detail">Assembles the full LLM payload from five components: (1) system prompt — ontology summary + domain rules + agent role description, (2) ontology flavor — relevant class and property definitions in natural language, (3) grounded data — JSON-LD serialised enterprise records from the grounder, (4) PROV-O context — provenance of each data point in the payload, (5) question + output format instructions. Returns a structured payload dict that any LLM API client can consume. LLM-agnostic — works with Anthropic, OpenAI, Google, Llama, or any custom endpoint.</td>
@@ -529,7 +530,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <tr>
-  <td><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td><span class="badge b-done">&#10003;</span></td>
   <td class="t-sprint" style="color:#5b21b6">S8–S10</td>
   <td class="t-feat">Output SHACL gate + PROV-O stamping</td>
   <td class="t-detail">Governs LLM responses — the step missing from almost every production implementation. For structured responses: SHACL validates the output against the relevant ontology shapes before any downstream action. For all responses: stamps PROV-O provenance (agent = LLM identifier + model version, prov:generatedAtTime, confidence extracted from model output, derivation_method = SYNTHESIZED). Stores validated response as an <code>ObservationRecord</code> with <code>source_ref</code> pointing to the payload ID.</td>
@@ -539,7 +540,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <tr>
-  <td><span class="badge b-p2" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td><span class="badge b-done">&#10003;</span></td>
   <td class="t-sprint" style="color:#5b21b6">S9–S10</td>
   <td class="t-feat">SHACL input gate (inbound data validation)</td>
   <td class="t-detail">Validates enterprise data against SHACL shapes <em>before</em> it enters the LLM payload. Rejects malformed, incomplete, or low-confidence records at the acceptance gate rather than letting bad data reach the model. Integrates with the existing <code>agent-gate.ttl</code>. Reports rejected records to <code>semantic_loss_log</code> with <code>loss_type=REJECTED_AT_RUNTIME_GATE</code>.</td>
@@ -549,7 +550,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <tr>
-  <td><span class="badge b-p3" style="background:#f0edff;color:#5b21b6">RT</span></td>
+  <td><span class="badge b-done">&#10003;</span></td>
   <td class="t-sprint" style="color:#5b21b6">S13–S15</td>
   <td class="t-feat">Runtime SDK + multi-LLM adapters + documentation</td>
   <td class="t-detail">Package the runtime layer as a lightweight Python SDK: <code>pip install ontology-toolkit-runtime</code>. Ships with LLM-specific adapters (Anthropic Messages API, OpenAI Chat Completions, Google Vertex, Ollama local). Includes a <code>RuntimeClient</code> class, async support, streaming response handling, and a worked example notebook per industry template.</td>
@@ -640,14 +641,15 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 <!-- Phase gates -->
 <div class="sec-label" style="margin-top:2.5rem"><h2>Phase exit gates</h2></div>
 <div class="gate-grid" style="grid-template-columns:repeat(5,1fr)">
-  <div class="gate-card" style="border-color:#7c3aed;background:#faf5ff">
-    <h3 style="color:#7c3aed">Runtime MVP exit</h3>
+  <div class="gate-card" style="border-color:var(--done)">
+    <h3 style="color:var(--done)">Runtime Layer ✓ Complete · Apr 2026</h3>
     <ul>
-      <li>Flavor registry: 5 starter flavors generated</li>
-      <li>Grounder: JSON-LD output verified against context</li>
-      <li>Assembler: payload roundtrip test passing</li>
-      <li>Output gate: SHACL validates LLM response</li>
-      <li>PROV-O stamp: every response has source_ref + timestamp</li>
+      <li>✓ 5 flavors loaded + validated (network-ops, billing, compliance, customer, fault-mgmt)</li>
+      <li>✓ Grounder: JSON-LD with @type + ontology IRI bindings</li>
+      <li>✓ InputGate: SHACL acceptance screen; rejections → semantic_loss_log</li>
+      <li>✓ Assembler: 5-component payload, LLM-agnostic</li>
+      <li>✓ OutputGate: SHACL + PROV-O stamp → ObservationRecord</li>
+      <li>✓ RuntimeClient: 4 adapters (Anthropic, OpenAI, Vertex, Ollama)</li>
     </ul>
   </div>
   <div class="gate-card" style="border-color:var(--done)">
@@ -792,7 +794,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </table>
 
 <footer>
-  <span>Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.4</span>
+  <span>Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.5</span>
   <span>Total estimated effort: 326 engineering-days (271 pipeline + 55 runtime) across 12 months</span>
 </footer>
 

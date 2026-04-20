@@ -1,0 +1,29 @@
+{
+  "name": "fault-management",
+  "description": "Fault Management domain — covers alarm lifecycle management, trouble ticket triage, affected resource identification, and service quality reporting per TMF642, TMF621, and TMF657.",
+  "sensitivity_tier": "Internal",
+  "owl_classes": ["Alarm", "TroubleTicket", "Resource", "ServiceQualityReport"],
+  "shacl_shapes": ["AlarmShape", "TroubleTicketShape", "ResourceShape", "ServiceQualityReportShape"],
+  "context_terms": {
+    "Alarm": "https://ontology.example.com/tmf/Alarm",
+    "TroubleTicket": "https://ontology.example.com/tmf/TroubleTicket",
+    "Resource": "https://ontology.example.com/tmf/Resource",
+    "ServiceQualityReport": "https://ontology.example.com/tmf/ServiceQualityReport",
+    "alarmType": "https://ontology.example.com/tmf/alarmType",
+    "perceivedSeverity": "https://ontology.example.com/tmf/perceivedSeverity",
+    "alarmState": "https://ontology.example.com/tmf/alarmState",
+    "probableCause": "https://ontology.example.com/tmf/probableCause",
+    "specificProblem": "https://ontology.example.com/tmf/specificProblem",
+    "raisedAt": "https://ontology.example.com/tmf/raisedAt",
+    "ticketType": "https://ontology.example.com/tmf/ticketType",
+    "ticketStatus": "https://ontology.example.com/tmf/ticketStatus",
+    "ticketSeverity": "https://ontology.example.com/tmf/ticketSeverity",
+    "slaViolated": "https://ontology.example.com/tmf/slaViolated",
+    "reportType": "https://ontology.example.com/tmf/reportType",
+    "slaCompliant": "https://ontology.example.com/tmf/slaCompliant",
+    "overallQualityScore": "https://ontology.example.com/tmf/overallQualityScore"
+  },
+  "db_tables": ["tmf_alarm", "tmf_trouble_ticket", "tmf_service_quality_report"],
+  "system_prompt_hint": "You are a fault management AI assistant. Focus on active alarms, open trouble tickets, SLA violation flags, and service quality degradation. Escalate Critical alarms and SLA-breaching tickets immediately. Use TMF642 and TMF621 terminology.",
+  "cq_ids": ["CQ-TMF10", "CQ-TMF11", "CQ-TMF12"]
+}

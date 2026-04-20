@@ -1,0 +1,29 @@
+{
+  "name": "billing",
+  "description": "Billing and Revenue Management domain — covers customer bills, billing accounts, product subscriptions, commercial agreements, and party financial relationships per TMF678.",
+  "sensitivity_tier": "Confidential",
+  "owl_classes": ["CustomerBill", "BillingAccount", "Product", "Agreement", "Party"],
+  "shacl_shapes": ["CustomerBillShape", "BillingAccountShape", "ProductShape", "AgreementShape"],
+  "context_terms": {
+    "CustomerBill": "https://ontology.example.com/tmf/CustomerBill",
+    "BillingAccount": "https://ontology.example.com/tmf/BillingAccount",
+    "Product": "https://ontology.example.com/tmf/Product",
+    "Agreement": "https://ontology.example.com/tmf/Agreement",
+    "Party": "https://ontology.example.com/tmf/Party",
+    "billNumber": "https://ontology.example.com/tmf/billNumber",
+    "billType": "https://ontology.example.com/tmf/billType",
+    "amountDue": "https://ontology.example.com/tmf/amountDue",
+    "taxAmount": "https://ontology.example.com/tmf/taxAmount",
+    "currencyCode": "https://ontology.example.com/tmf/currencyCode",
+    "billingPeriodStart": "https://ontology.example.com/tmf/billingPeriodStart",
+    "billingPeriodEnd": "https://ontology.example.com/tmf/billingPeriodEnd",
+    "paymentDueDate": "https://ontology.example.com/tmf/paymentDueDate",
+    "billState": "https://ontology.example.com/tmf/billState",
+    "disputed": "https://ontology.example.com/tmf/disputed",
+    "agreementType": "https://ontology.example.com/tmf/agreementType",
+    "productStatus": "https://ontology.example.com/tmf/productStatus"
+  },
+  "db_tables": ["tmf_customer_bill", "tmf_product", "tmf_agreement"],
+  "system_prompt_hint": "You are a billing and revenue management AI assistant. Focus on bill disputes, overdue payments, SLA-linked commercial agreements, and product subscription lifecycles. Treat all financial amounts and customer account data as Confidential. Use TMF678 and TMF651 terminology.",
+  "cq_ids": ["CQ-TMF13"]
+}
