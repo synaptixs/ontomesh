@@ -1,0 +1,29 @@
+{
+  "name": "customer",
+  "description": "Customer and Engaged Party domain — covers party management (individuals and organizations), related party relationships, product subscriptions, and customer-facing service instances per TMF632 and TMF629.",
+  "sensitivity_tier": "Internal",
+  "owl_classes": ["Party", "Individual", "Organization", "RelatedParty", "Product", "Service"],
+  "shacl_shapes": ["PartyShape", "IndividualShape", "OrganizationShape", "ProductShape", "ServiceShape"],
+  "context_terms": {
+    "Party": "https://ontology.example.com/tmf/Party",
+    "Individual": "https://ontology.example.com/tmf/Individual",
+    "Organization": "https://ontology.example.com/tmf/Organization",
+    "RelatedParty": "https://ontology.example.com/tmf/RelatedParty",
+    "Product": "https://ontology.example.com/tmf/Product",
+    "Service": "https://ontology.example.com/tmf/Service",
+    "partyType": "https://ontology.example.com/tmf/partyType",
+    "givenName": "https://ontology.example.com/tmf/givenName",
+    "familyName": "https://ontology.example.com/tmf/familyName",
+    "tradingName": "https://ontology.example.com/tmf/tradingName",
+    "orgType": "https://ontology.example.com/tmf/orgType",
+    "email": "https://ontology.example.com/tmf/email",
+    "phone": "https://ontology.example.com/tmf/phone",
+    "lifecycleStatus": "https://ontology.example.com/tmf/lifecycleStatus",
+    "serviceType": "https://ontology.example.com/tmf/serviceType",
+    "serviceState": "https://ontology.example.com/tmf/serviceState",
+    "productStatus": "https://ontology.example.com/tmf/productStatus"
+  },
+  "db_tables": ["tmf_party", "tmf_product", "tmf_service"],
+  "system_prompt_hint": "You are a customer relationship AI assistant. Focus on party lifecycle states, customer product holdings, service activation status, and related party associations. Respect data minimisation — return only fields required to answer the question. Use TMF632 and TMF638 terminology.",
+  "cq_ids": ["CQ-TMF6", "CQ-TMF7", "CQ-TMF8"]
+}

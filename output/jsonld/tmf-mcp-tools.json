@@ -29,6 +29,45 @@
         "required": [
           "nf_iri"
         ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "format": "uri",
+            "description": "TMF-compliant self href /{apiRoot}/{resource}/{id}"
+          },
+          "@baseType": {
+            "type": "string",
+            "description": "TMF630: base type of this resource"
+          },
+          "@schemaLocation": {
+            "type": "string",
+            "format": "uri",
+            "description": "TMF630: JSON schema URL for this resource"
+          },
+          "@referredType": {
+            "type": "string",
+            "description": "TMF630: concrete type when used as a reference"
+          },
+          "operationalState": {
+            "type": "string"
+          },
+          "adminState": {
+            "type": "string"
+          },
+          "nfType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "href",
+          "@baseType",
+          "@schemaLocation",
+          "operationalState",
+          "adminState"
+        ]
       }
     },
     {
@@ -85,6 +124,41 @@
           "source_resource_iri",
           "raised_by_iri",
           "raised_at"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "format": "uri",
+            "description": "TMF-compliant self href /{apiRoot}/{resource}/{id}"
+          },
+          "@baseType": {
+            "type": "string",
+            "description": "TMF630: base type of this resource"
+          },
+          "@schemaLocation": {
+            "type": "string",
+            "format": "uri",
+            "description": "TMF630: JSON schema URL for this resource"
+          },
+          "@referredType": {
+            "type": "string",
+            "description": "TMF630: concrete type when used as a reference"
+          },
+          "alarmState": {
+            "type": "string"
+          },
+          "perceivedSeverity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "href",
+          "@baseType",
+          "@schemaLocation",
+          "alarmState"
         ]
       }
     },
@@ -153,6 +227,44 @@
           "derivation",
           "observed_at",
           "recorded_by_iri"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "format": "uri",
+            "description": "TMF-compliant self href /{apiRoot}/{resource}/{id}"
+          },
+          "@baseType": {
+            "type": "string",
+            "description": "TMF630: base type of this resource"
+          },
+          "@schemaLocation": {
+            "type": "string",
+            "format": "uri",
+            "description": "TMF630: JSON schema URL for this resource"
+          },
+          "@referredType": {
+            "type": "string",
+            "description": "TMF630: concrete type when used as a reference"
+          },
+          "kpiType": {
+            "type": "string"
+          },
+          "numericValue": {
+            "type": "number"
+          },
+          "breachIndicator": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "href",
+          "@baseType",
+          "@schemaLocation",
+          "kpiType"
         ]
       }
     }

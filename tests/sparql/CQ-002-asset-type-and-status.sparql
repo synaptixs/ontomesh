@@ -1,0 +1,15 @@
+# CQ-002: What type is each asset and what is its current status?
+# Priority: Critical
+# Validates: Asset type hierarchy, status semantics
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?asset ?assetLabel ?assetType ?status WHERE {
+  ?asset a :Asset .
+  OPTIONAL { ?asset rdfs:label ?assetLabel }
+  OPTIONAL { ?asset :assetType ?assetType }
+  OPTIONAL { ?asset :hasStatus ?status }
+}
+ORDER BY ?assetLabel

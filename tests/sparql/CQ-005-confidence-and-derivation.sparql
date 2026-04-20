@@ -1,0 +1,15 @@
+# CQ-005: What is the confidence score and derivation method for each observation?
+# Priority: Critical
+# Validates: Observation completeness, confidence modeling
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?obs ?obsType ?confidence ?method WHERE {
+  ?obs a :ObservationRecord ;
+       :hasConfidenceScore ?confidence ;
+       :derivationMethod ?method .
+  OPTIONAL { ?obs :observationType ?obsType }
+}
+ORDER BY DESC(?confidence)

@@ -18,6 +18,22 @@
       "@id": "prov:wasAssociatedWith",
       "@type": "@id"
     },
+    "href": {
+      "@id": "https://ontology.example.com/tmf/href",
+      "@type": "xsd:anyURI"
+    },
+    "@baseType": {
+      "@id": "https://ontology.example.com/tmf/baseType",
+      "@type": "xsd:string"
+    },
+    "@schemaLocation": {
+      "@id": "https://ontology.example.com/tmf/schemaLocation",
+      "@type": "xsd:anyURI"
+    },
+    "@referredType": {
+      "@id": "https://ontology.example.com/tmf/referredType",
+      "@type": "xsd:string"
+    },
     "Resource": {
       "@id": "https://ontology.example.com/tmf/Resource"
     },
@@ -114,6 +130,90 @@
     "tmfApiId": {
       "@id": "https://ontology.example.com/tmf/tmfApiId",
       "@type": "xsd:string"
+    },
+    "TroubleTicket": {
+      "@id": "https://ontology.example.com/tmf/TroubleTicket"
+    },
+    "NetworkSliceProfile": {
+      "@id": "https://ontology.example.com/tmf/NetworkSliceProfile"
+    },
+    "ServiceQualityReport": {
+      "@id": "https://ontology.example.com/tmf/ServiceQualityReport"
+    },
+    "GeographicSite": {
+      "@id": "https://ontology.example.com/tmf/GeographicSite"
+    },
+    "CustomerBill": {
+      "@id": "https://ontology.example.com/tmf/CustomerBill"
+    },
+    "ProductOfferingQualification": {
+      "@id": "https://ontology.example.com/tmf/ProductOfferingQualification"
+    },
+    "EventSubscription": {
+      "@id": "https://ontology.example.com/tmf/EventSubscription"
+    },
+    "ConflictEvent": {
+      "@id": "https://ontology.example.com/tmf/ConflictEvent"
+    },
+    "ticketType": {
+      "@id": "https://ontology.example.com/tmf/hasTicketType",
+      "@type": "xsd:string"
+    },
+    "ticketStatus": {
+      "@id": "https://ontology.example.com/tmf/hasTicketStatus",
+      "@type": "xsd:string"
+    },
+    "sliceType": {
+      "@id": "https://ontology.example.com/tmf/hasSliceType",
+      "@type": "xsd:string"
+    },
+    "sst": {
+      "@id": "https://ontology.example.com/tmf/hasSst",
+      "@type": "xsd:integer"
+    },
+    "latencyTargetMs": {
+      "@id": "https://ontology.example.com/tmf/latencyTargetMs",
+      "@type": "xsd:decimal"
+    },
+    "slaCompliant": {
+      "@id": "https://ontology.example.com/tmf/slaCompliant",
+      "@type": "xsd:boolean"
+    },
+    "qualityScore": {
+      "@id": "https://ontology.example.com/tmf/overallQualityScore",
+      "@type": "xsd:decimal"
+    },
+    "billState": {
+      "@id": "https://ontology.example.com/tmf/hasBillState",
+      "@type": "xsd:string"
+    },
+    "amountDue": {
+      "@id": "https://ontology.example.com/tmf/amountDue",
+      "@type": "xsd:decimal"
+    },
+    "callbackUrl": {
+      "@id": "https://ontology.example.com/tmf/callbackUrl",
+      "@type": "xsd:anyURI"
+    },
+    "eventType": {
+      "@id": "https://ontology.example.com/tmf/eventType",
+      "@type": "xsd:string"
+    },
+    "conflictType": {
+      "@id": "https://ontology.example.com/tmf/conflictType",
+      "@type": "xsd:string"
+    },
+    "resolutionTier": {
+      "@id": "https://ontology.example.com/tmf/resolutionTier",
+      "@type": "xsd:integer"
+    },
+    "wasInvalidatedBy": {
+      "@id": "prov:wasInvalidatedBy",
+      "@type": "@id"
+    },
+    "invalidatedAt": {
+      "@id": "prov:invalidatedAtTime",
+      "@type": "xsd:dateTime"
     }
   }
 }

@@ -1,0 +1,163 @@
+# ============================================================
+# Federated SPARQL Queries — Multi-Domain Named Graph Joins
+# Ontology Toolkit v1.3 — Phase 2B
+# ============================================================
+# These queries use SPARQL SERVICE to federate across named
+# graph endpoints defined in federation-config.ttl.
+# Run against a Fuseki/Stardog/Oxigraph instance with all
+# named graphs loaded.
+# ============================================================
+
+PREFIX :       <https://ontology.example.com/tmf/>
+PREFIX prov:   <http://www.w3.org/ns/prov#>
+PREFIX schema: <https://schema.org/>
+PREFIX sosa:   <http://www.w3.org/ns/sosa/>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+# ── FQ-01: Full cross-domain traceability chain ──────────────
+# Resource → Service → Product → Customer → Bill
+# Joins Resource, Service, Party, and Billing named graphs.
+# ─────────────────────────────────────────────────────────────
+SELECT ?resource ?nfType ?service ?product ?customer ?bill ?amountDue
+WHERE {
+  SERVICE <http://localhost:3030/ontology/sparql> {
+    GRAPH <https://gtc.example.com/graphs/resource> {
+      ?resource a :Resource ;
+                :hasNfType ?nfType ;
+                :hasOperationalState "Enabled" .
+    }
+    GRAPH <https://gtc.example.com/graphs/service> {
+      ?service a :Service ;
+               :realisedByResource ?resource ;
+               :hasServiceState "Active" .
+      ?product a :Product ;
+               :realisedByService ?service ;
+               :hasStatus "Active" .
+    }
+    GRAPH <https://gtc.example.com/graphs/party> {
+      ?account a :CustomerAccount ;
+               :holdsProduct ?product .
+      ?customer a :Party ;
+                :hasAccount ?account .
+    }
+    GRAPH <https://gtc.example.com/graphs/billing> {
+      ?bill a :CustomerBill ;
+            :billedToAccount ?account ;
+            :amountDue ?amountDue .
+      FILTER(?amountDue > 0)
+    }
+  }
+}
+ORDER BY ?customer ?resource
+
+
+# ── FQ-02: Active trouble tickets with SLA breach risk ───────
+# Joins Trouble, Service, and Party named graphs.
+# ─────────────────────────────────────────────────────────────
+SELECT ?ticket ?severity ?service ?slaAgreement ?dueDate
+WHERE {
+  SERVICE <http://localhost:3030/ontology/sparql> {
+    GRAPH <https://gtc.example.com/graphs/trouble> {
+      ?ticket a :TroubleTicket ;
+              :hasTicketStatus ?status ;
+              :ticketSeverity ?severity .
+      FILTER(?status NOT IN ("Resolved","Closed","Cancelled"))
+    }
+    GRAPH <https://gtc.example.com/graphs/service> {
+      ?ticket :affectsService ?service .
+    }
+    GRAPH <https://gtc.example.com/graphs/party> {
+      OPTIONAL {
+        ?slaAgreement a :Agreement ;
+                      :agreementType "SLA" ;
+                      :coversService ?service ;
+                      :validUntil ?dueDate .
+      }
+    }
+  }
+}
+ORDER BY
+  CASE ?severity
+    WHEN "1-Critical" THEN 1
+    WHEN "2-High"     THEN 2
+    ELSE 3
+  END
+
+
+# ── FQ-03: SOSA observation federation ───────────────────────
+# Cross-domain join: SOSA observations about resources with
+# provenance from the EngagedParty graph (who made observation).
+# ─────────────────────────────────────────────────────────────
+SELECT ?obs ?feature ?sensor ?value ?confidence ?method ?observedAt
+WHERE {
+  SERVICE <http://localhost:3030/ontology/sparql> {
+    GRAPH <https://gtc.example.com/graphs/resource> {
+      ?obs a sosa:Observation ;
+           sosa:hasFeatureOfInterest ?feature ;
+           sosa:madeBySensor ?sensor ;
+           sosa:hasSimpleResult ?value ;
+           sosa:resultTime ?observedAt .
+      OPTIONAL { ?obs :hasConfidenceScore ?confidence }
+      OPTIONAL { ?obs :derivationMethod ?method }
+    }
+    GRAPH <https://gtc.example.com/graphs/party> {
+      ?sensor a :Agent ;
+              :hasName ?sensorName .
+    }
+  }
+}
+ORDER BY DESC(?observedAt)
+
+
+# ── FQ-04: Network slice profile SLA compliance federation ───
+# Joins Resource, Service, and Party (billing) named graphs.
+# ─────────────────────────────────────────────────────────────
+SELECT ?sliceProfile ?sliceType ?latencyTarget ?actualLatency
+       ?slaBreached ?agreement
+WHERE {
+  SERVICE <http://localhost:3030/ontology/sparql> {
+    GRAPH <https://gtc.example.com/graphs/resource> {
+      ?sliceProfile a :NetworkSliceProfile ;
+                    :hasSliceType ?sliceType ;
+                    :latencyTargetMs ?latencyTarget ;
+                    :lifecycleStatus "Active" .
+      OPTIONAL {
+        ?latKpi a :PerformanceIndicator ;
+                :kpiType "LATENCY" ;
+                :aboutResource ?sliceRes ;
+                :numericValue ?actualLatency .
+        ?sliceProfile :backedByResource ?sliceRes .
+      }
+    }
+    GRAPH <https://gtc.example.com/graphs/party> {
+      OPTIONAL {
+        ?agreement a :Agreement ;
+                   :agreementType "SLA" ;
+                   :coversSliceProfile ?sliceProfile .
+      }
+    }
+  }
+  BIND(IF(?actualLatency > ?latencyTarget, true, false) AS ?slaBreached)
+}
+ORDER BY ?sliceType
+
+
+# ── FQ-05: Event subscription coverage audit ─────────────────
+# Shows which event types are subscribed to and by which parties.
+# ─────────────────────────────────────────────────────────────
+SELECT ?subscription ?eventType ?subscriber ?callbackUrl ?status
+WHERE {
+  SERVICE <http://localhost:3030/ontology/sparql> {
+    GRAPH <https://gtc.example.com/graphs/resource> {
+      ?subscription a :EventSubscription ;
+                    :eventType ?eventType ;
+                    :callbackUrl ?callbackUrl ;
+                    :hasTicketStatus ?status .
+      FILTER(?status = "Active")
+    }
+    GRAPH <https://gtc.example.com/graphs/party> {
+      ?subscription :subscriberParty ?subscriber .
+    }
+  }
+}
+ORDER BY ?eventType ?subscriber

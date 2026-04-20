@@ -5,6 +5,10 @@ Generates:
   output/jsonld/enterprise-context.json   — canonical JSON-LD context
   output/jsonld/observation-payload.json  — sample agent payload
   output/vocab/enterprise-skos.ttl        — SKOS terminology scheme
+
+Phase 1 additions:
+  - TMF630 meta-attributes (@baseType, @schemaLocation, @referredType, href)
+  - EntityRefOrValue pattern (reference form vs inline value form)
 """
 
 import os
@@ -20,6 +24,34 @@ PROV = "http://www.w3.org/ns/prov#"
 SKOS_NS = "http://www.w3.org/2004/02/skos/core#"
 OWL_NS  = "http://www.w3.org/2002/07/owl#"
 RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#"
+
+# Base URL used in sample payloads
+_SAMPLE_BASE = "https://gtc.example.com"
+
+
+# ── EntityRefOrValue helpers ──────────────────────────────────────────────
+# TMF630 Part 2 §6: every FK-linked property must support either
+#   - reference form: { "@id", "href", "@referredType" }  (pointer only)
+#   - value form:     { "@id", "@type", href, + all attributes }  (inline)
+
+def _entity_ref(type_name: str, entity_id: str, href: str) -> dict:
+    """Return the reference form of an EntityRefOrValue (pointer only)."""
+    return {
+        "@referredType": type_name,
+        "@id": entity_id,
+        "href": href,
+    }
+
+
+def _entity_value(type_name: str, entity_id: str, href: str, **attrs) -> dict:
+    """Return the value form of an EntityRefOrValue (fully inlined)."""
+    obj = {
+        "@type": type_name,
+        "@id": entity_id,
+        "href": href,
+    }
+    obj.update(attrs)
+    return obj
 
 
 # ── JSON-LD Context ──────────────────────────────────────────────────────
@@ -49,6 +81,11 @@ def _build_context(tables: List[TableModel]) -> dict:
         "observedAsset": {"@id": f"{BASE_IRI}refersToAsset",      "@type": "@id"},
         "participant":   {"@id": f"{BASE_IRI}hasParticipant",     "@type": "@id"},
         "governedBy":    {"@id": f"{BASE_IRI}governedBy",         "@type": "@id"},
+        # TMF630 meta-attributes (present in enterprise context for compatibility)
+        "href":            {"@id": f"{BASE_IRI}href",            "@type": "xsd:anyURI"},
+        "@baseType":       {"@id": f"{BASE_IRI}baseType",        "@type": "xsd:string"},
+        "@schemaLocation": {"@id": f"{BASE_IRI}schemaLocation",  "@type": "xsd:anyURI"},
+        "@referredType":   {"@id": f"{BASE_IRI}referredType",    "@type": "xsd:string"},
     }
 
     # Add class term definitions
@@ -70,34 +107,48 @@ def _build_context(tables: List[TableModel]) -> dict:
 
 
 def _sample_observation_payload() -> dict:
-    """Concrete example of a PROV-O-aligned agent observation payload."""
+    """PROV-O-aligned agent observation payload.
+
+    Demonstrates:
+    - TMF630 meta-attributes: @baseType, href
+    - EntityRefOrValue value form on observedAsset (fully inline)
+    - EntityRefOrValue reference form on wasAssociatedWith agent (pointer only)
+    """
     return {
         "@context": f"{BASE_IRI}jsonld/enterprise-context.json",
         "@type": "ObservationRecord",
-        "@id": "https://gtc.example.com/obs/obs-001",
+        "@baseType": "ObservationRecord",
+        "@id": f"{_SAMPLE_BASE}/obs/obs-001",
+        "href": f"{_SAMPLE_BASE}/observations/obs-001",
         "observationType": "PACKET_LOSS_RATE",
         "numericValue": 18.7,
         "unitOfMeasure": "percent",
         "confidence": 0.98,
         "derivedBy": "MEASURED",
         "sourceRef": "https://oss.gtc.example.com/metrics/ran043",
-        "observedAsset": {
-            "@type": "Asset",
-            "@id": "https://gtc.example.com/assets/NE-RAN-043",
-            "name": "gNB Site 043",
-            "sensitivityTier": f"{BASE_IRI}Internal"
-        },
+        # EntityRefOrValue — value form (full inline)
+        "observedAsset": _entity_value(
+            "Asset",
+            f"{_SAMPLE_BASE}/assets/NE-RAN-043",
+            f"{_SAMPLE_BASE}/assets/NE-RAN-043",
+            name="gNB Site 043",
+            sensitivityTier=f"{BASE_IRI}Internal",
+        ),
         "generatedBy": {
             "@type": ["Agent", "prov:Activity"],
-            "@id": "https://gtc.example.com/events/measure-activity-obs-001",
+            "@id": f"{_SAMPLE_BASE}/events/measure-activity-obs-001",
             "wasAssociatedWith": {
-                "@type": "Agent",
-                "@id": "https://gtc.example.com/agents/ml-monitor-agent",
+                # EntityRefOrValue — reference form (pointer only)
+                **_entity_ref(
+                    "Agent",
+                    f"{_SAMPLE_BASE}/agents/ml-monitor-agent",
+                    f"{_SAMPLE_BASE}/agents/ml-monitor-agent",
+                ),
                 "name": "ML Monitor Agent",
                 "agentType": "AI_AGENT",
-                "agentIri": "https://gtc.example.com/agents/ml-monitor-agent",
+                "agentIri": f"{_SAMPLE_BASE}/agents/ml-monitor-agent",
                 "credentialExpiry": "2026-12-31T23:59:59Z",
-                "sensitivityTier": f"{BASE_IRI}Internal"
+                "sensitivityTier": f"{BASE_IRI}Internal",
             }
         },
         "generatedAt": "2026-04-10T02:14:00Z",
@@ -111,36 +162,55 @@ def _sample_observation_payload() -> dict:
 
 
 def _sample_event_payload() -> dict:
-    """Concrete example of an agent-produced domain event payload."""
+    """Agent-produced domain event payload.
+
+    Demonstrates:
+    - TMF630 @baseType on the root object
+    - EntityRefOrValue reference form on participants (pointer only)
+    - EntityRefOrValue value form on governedBy policy (inline)
+    """
     return {
         "@context": f"{BASE_IRI}jsonld/enterprise-context.json",
         "@type": ["DomainEvent", "IncidentEvent"],
-        "@id": "https://gtc.example.com/events/evt-001",
+        "@baseType": "DomainEvent",
+        "@id": f"{_SAMPLE_BASE}/events/evt-001",
+        "href": f"{_SAMPLE_BASE}/events/evt-001",
         "title": "High packet loss on gNB 043",
         "eventType": "INCIDENT",
         "status": "COMPLETED",
         "outcome": "RESOLVED",
-        "observedAsset": {
-            "@type": "Asset",
-            "@id": "https://gtc.example.com/assets/NE-RAN-043"
-        },
+        # EntityRefOrValue — reference form (pointer only — asset detail fetched separately)
+        "observedAsset": _entity_ref(
+            "Asset",
+            f"{_SAMPLE_BASE}/assets/NE-RAN-043",
+            f"{_SAMPLE_BASE}/assets/NE-RAN-043",
+        ),
         "participant": [
             {
-                "@type": "Agent",
-                "@id": "https://gtc.example.com/agents/noc-engineer-01",
-                "participationRole": "INITIATOR"
+                # EntityRefOrValue — reference form
+                **_entity_ref(
+                    "Agent",
+                    f"{_SAMPLE_BASE}/agents/noc-engineer-01",
+                    f"{_SAMPLE_BASE}/agents/noc-engineer-01",
+                ),
+                "participationRole": "INITIATOR",
             },
             {
-                "@type": "Agent",
-                "@id": "https://gtc.example.com/agents/ml-monitor-agent",
-                "participationRole": "OBSERVER"
+                **_entity_ref(
+                    "Agent",
+                    f"{_SAMPLE_BASE}/agents/ml-monitor-agent",
+                    f"{_SAMPLE_BASE}/agents/ml-monitor-agent",
+                ),
+                "participationRole": "OBSERVER",
             }
         ],
-        "governedBy": {
-            "@type": "Policy",
-            "@id": "https://gtc.example.com/policies/OPS-INC-RTO-4H",
-            "code": "OPS-INC-RTO-4H"
-        },
+        # EntityRefOrValue — value form (policy is cheap to inline)
+        "governedBy": _entity_value(
+            "Policy",
+            f"{_SAMPLE_BASE}/policies/OPS-INC-RTO-4H",
+            f"{_SAMPLE_BASE}/policies/OPS-INC-RTO-4H",
+            code="OPS-INC-RTO-4H",
+        ),
         "startedAt": "2026-04-10T02:15:00Z",
         "endedAt":   "2026-04-10T05:44:00Z",
         "sensitivityTier": f"{BASE_IRI}Internal",

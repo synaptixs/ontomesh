@@ -1,0 +1,29 @@
+{
+  "name": "compliance",
+  "description": "Compliance and Governance domain — covers semantic consistency checks, ontology-level conflict resolution, observation record auditing, and policy enforcement across the TM Forum information model.",
+  "sensitivity_tier": "Internal",
+  "owl_classes": ["TmfEntity", "ObservationRecord", "ConflictEvent", "Policy"],
+  "shacl_shapes": ["TmfEntityShape", "ObservationRecordShape", "ConflictEventShape", "PolicyShape"],
+  "context_terms": {
+    "TmfEntity": "https://ontology.example.com/tmf/TmfEntity",
+    "ObservationRecord": "https://ontology.example.com/tmf/ObservationRecord",
+    "ConflictEvent": "https://ontology.example.com/tmf/ConflictEvent",
+    "Policy": "https://ontology.example.com/tmf/Policy",
+    "recordType": "https://ontology.example.com/tmf/recordType",
+    "kpiType": "https://ontology.example.com/tmf/kpiType",
+    "derivationMethod": "https://ontology.example.com/tmf/derivationMethod",
+    "confidenceScore": "https://ontology.example.com/tmf/confidenceScore",
+    "provAgentIri": "https://ontology.example.com/tmf/provAgentIri",
+    "conflictType": "https://ontology.example.com/tmf/conflictType",
+    "resolutionTier": "https://ontology.example.com/tmf/resolutionTier",
+    "winningAssertionIri": "https://ontology.example.com/tmf/winningAssertionIri",
+    "resolutionRule": "https://ontology.example.com/tmf/resolutionRule",
+    "escalatedToHuman": "https://ontology.example.com/tmf/escalatedToHuman",
+    "policyType": "https://ontology.example.com/tmf/policyType",
+    "lossType": "https://ontology.example.com/tmf/lossType",
+    "severity": "https://ontology.example.com/tmf/severity"
+  },
+  "db_tables": ["tmf_conflict_event", "observation_record", "semantic_loss_log"],
+  "system_prompt_hint": "You are a compliance and governance AI assistant. Focus on unresolved conflict events, SHACL violation patterns, low-confidence observations, and policy adherence. Flag escalated conflicts and semantic losses immediately. Use PROV-O derivation terminology.",
+  "cq_ids": ["CQ-P2B-conflict-resolution"]
+}

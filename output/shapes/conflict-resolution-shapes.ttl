@@ -1,0 +1,81 @@
+@prefix :       <https://ontology.example.com/tmf/> .
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix shapes: <https://ontology.example.com/tmf/shapes/> .
+
+# ── Phase 2B: Conflict Resolution SHACL Shapes ────────────────────────────
+
+shapes:ResourceStateConsistencyShape
+  a sh:NodeShape ;
+  sh:targetClass :Resource ;
+  rdfs:comment "Tier-1: operational_state=Disabled must not coexist with admin_state=Unlocked." ;
+  sh:sparql [
+    sh:message "OperationalAndAdminStateConsistency — Disabled resource must not be Unlocked." ;
+    sh:severity sh:Violation ;
+    sh:prefixes <https://ontology.example.com/tmf/> ;
+    sh:select "SELECT $this WHERE { $this :hasOperationalState \"Disabled\" ; :hasAdminState \"Unlocked\" . }" ;
+  ] .
+
+shapes:AlarmClearedAtShape
+  a sh:NodeShape ;
+  sh:targetClass :Alarm ;
+  rdfs:comment "Tier-1: Cleared alarm must have a cleared_at timestamp." ;
+  sh:sparql [
+    sh:message "AlarmClearedAtConsistency — Cleared alarm must have a cleared_at timestamp." ;
+    sh:severity sh:Violation ;
+    sh:prefixes <https://ontology.example.com/tmf/> ;
+    sh:select "SELECT $this WHERE { $this :hasAlarmState \"Cleared\" . FILTER NOT EXISTS { $this :clearedAt ?t } }" ;
+  ] .
+
+shapes:TroubleTicketResolvedShape
+  a sh:NodeShape ;
+  sh:targetClass :TroubleTicket ;
+  rdfs:comment "Tier-1: Resolved/Closed ticket must have resolved_at." ;
+  sh:sparql [
+    sh:message "TroubleTicketResolvedAtConsistency — Resolved or Closed ticket must have resolved_at." ;
+    sh:severity sh:Violation ;
+    sh:prefixes <https://ontology.example.com/tmf/> ;
+    sh:select "SELECT $this WHERE { $this :hasTicketStatus ?s . FILTER(?s IN (\"Resolved\",\"Closed\")) FILTER NOT EXISTS { $this :resolvedAt ?t } }" ;
+  ] .
+
+shapes:ConflictEventShape
+  a sh:NodeShape ;
+  sh:targetClass :ConflictEvent ;
+  sh:property [
+    sh:path :assertionAIri ;
+    sh:minCount 1 ;
+    sh:datatype xsd:anyURI ;
+    sh:message "ConflictEvent must reference at least one assertion IRI (assertionAIri)." ;
+    sh:severity sh:Violation ;
+  ] ;
+  sh:property [
+    sh:path :conflictType ;
+    sh:minCount 1 ;
+    sh:message "conflictType must be one of the allowed values." ;
+    sh:severity sh:Violation ;
+  ] ;
+  sh:property [
+    sh:path :resolutionTier ;
+    sh:datatype xsd:integer ;
+    sh:message "resolutionTier must be 1, 2, or 3." ;
+    sh:severity sh:Warning ;
+  ] .
+
+shapes:EventSubscriptionShape
+  a sh:NodeShape ;
+  sh:targetClass :EventSubscription ;
+  sh:property [
+    sh:path :callbackUrl ;
+    sh:minCount 1 ;
+    sh:datatype xsd:anyURI ;
+    sh:message "EventSubscription must have a callbackUrl." ;
+    sh:severity sh:Violation ;
+  ] ;
+  sh:property [
+    sh:path :eventType ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "EventSubscription must specify an eventType." ;
+    sh:severity sh:Violation ;
+  ] .

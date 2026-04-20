@@ -1,0 +1,19 @@
+# CQ-008: Which assets have observations with confidence below 0.8 (low-trust data)?
+# Priority: High
+# Validates: Confidence filtering, trust-level querying
+# Expected: may be empty (that's acceptable — no low-confidence data is a good sign)
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?asset ?assetLabel ?obs ?obsType ?confidence ?method WHERE {
+  ?obs a :ObservationRecord ;
+       :refersToAsset ?asset ;
+       :hasConfidenceScore ?confidence ;
+       :derivationMethod ?method .
+  FILTER (?confidence < "0.8"^^xsd:decimal)
+  OPTIONAL { ?obs :observationType ?obsType }
+  OPTIONAL { ?asset rdfs:label ?assetLabel }
+}
+ORDER BY ?confidence

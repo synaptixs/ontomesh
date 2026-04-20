@@ -14,7 +14,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-04-18T03:54:21Z"^^xsd:dateTime ;
+  dcterms:created "2026-04-19T02:45:47Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -464,16 +464,16 @@
   rdfs:label "Name" ;
   rdfs:domain :Agent ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasAgentType
   a owl:DatatypeProperty ;
   rdfs:label "Agent Type" ;
   rdfs:domain :Agent ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCredentialExpiry
   a owl:DatatypeProperty ;
@@ -509,16 +509,16 @@
   rdfs:label "Code" ;
   rdfs:domain :AssetType ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasLabel
   a owl:DatatypeProperty ;
   rdfs:label "Label" ;
   rdfs:domain :AssetType ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
@@ -546,8 +546,8 @@
   rdfs:label "Name" ;
   rdfs:domain :Asset ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasLocationCode
   a owl:DatatypeProperty ;
@@ -605,16 +605,16 @@
   rdfs:domain :DomainEvent ;
   rdfs:range xsd:string ;
   rdfs:comment "Subclass discriminator for OWL event class hierarchy." ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasTitle
   a owl:DatatypeProperty ;
   rdfs:label "Title" ;
   rdfs:domain :DomainEvent ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
@@ -670,8 +670,8 @@
   rdfs:label "Participation Role" ;
   rdfs:domain :EventParticipants ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasJoinedAt
   a owl:DatatypeProperty ;
@@ -692,8 +692,8 @@
   rdfs:label "Observation Type" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasNumericValue
   a owl:DatatypeProperty ;
@@ -745,8 +745,8 @@
   rdfs:label "Observed At" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCreatedAt
   a owl:DatatypeProperty ;
@@ -760,16 +760,16 @@
   rdfs:label "Name" ;
   rdfs:domain :Organization ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasOrgType
   a owl:DatatypeProperty ;
   rdfs:label "Org Type" ;
   rdfs:domain :Organization ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasJurisdiction
   a owl:DatatypeProperty ;
@@ -804,16 +804,16 @@
   rdfs:label "Code" ;
   rdfs:domain :Policy ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasTitle
   a owl:DatatypeProperty ;
   rdfs:label "Title" ;
   rdfs:domain :Policy ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasPolicyType
   a owl:DatatypeProperty ;
@@ -821,8 +821,8 @@
   rdfs:domain :Policy ;
   rdfs:range xsd:string ;
   rdfs:comment "Category of policy: OPERATIONAL, COMPLIANCE, SECURITY, SLA, SAFETY." ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
@@ -885,16 +885,16 @@
   rdfs:label "Code" ;
   rdfs:domain :Role ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasLabel
   a owl:DatatypeProperty ;
   rdfs:label "Label" ;
   rdfs:domain :Role ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
@@ -922,8 +922,8 @@
   rdfs:label "Name" ;
   rdfs:domain :Agreement ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasAgreementType
   a owl:DatatypeProperty ;
@@ -979,8 +979,8 @@
   rdfs:label "Alarm Type" ;
   rdfs:domain :Alarm ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasPerceivedSeverity
   a owl:DatatypeProperty ;
@@ -988,8 +988,8 @@
   rdfs:domain :Alarm ;
   rdfs:range xsd:string ;
   rdfs:comment "ITU-T X.733 / TMF642 alarm severity: Critical, Major, Minor, Warning, Indeterminate, Cleared." ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasProbableCause
   a owl:DatatypeProperty ;
@@ -1018,8 +1018,8 @@
   rdfs:label "Raised At" ;
   rdfs:domain :Alarm ;
   rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasAcknowledgedAt
   a owl:DatatypeProperty ;
@@ -1082,8 +1082,8 @@
   rdfs:label "Owner Type" ;
   rdfs:domain :Attachment ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCreatedAt
   a owl:DatatypeProperty ;
@@ -1097,8 +1097,8 @@
   rdfs:label "Name" ;
   rdfs:domain :Characteristic ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasValue
   a owl:DatatypeProperty ;
@@ -1126,8 +1126,8 @@
   rdfs:label "Owner Type" ;
   rdfs:domain :Characteristic ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCreatedAt
   a owl:DatatypeProperty ;
@@ -1155,8 +1155,8 @@
   rdfs:label "Name" ;
   rdfs:domain :CustomerAccount ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasAccountType
   a owl:DatatypeProperty ;
@@ -1198,8 +1198,8 @@
   rdfs:label "Text" ;
   rdfs:domain :Note ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasAuthor
   a owl:DatatypeProperty ;
@@ -1227,8 +1227,8 @@
   rdfs:label "Owner Type" ;
   rdfs:domain :Note ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasPartyIri
   a owl:DatatypeProperty ;
@@ -1243,16 +1243,16 @@
   rdfs:label "Party Type" ;
   rdfs:domain :Party ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasName
   a owl:DatatypeProperty ;
   rdfs:label "Name" ;
   rdfs:domain :Party ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasGivenName
   a owl:DatatypeProperty ;
@@ -1329,8 +1329,8 @@
   rdfs:label "Role Name" ;
   rdfs:domain :PartyRole ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasRoleType
   a owl:DatatypeProperty ;
@@ -1379,8 +1379,8 @@
   rdfs:label "Name" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
@@ -1466,8 +1466,8 @@
   rdfs:label "Observed At" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCreatedAt
   a owl:DatatypeProperty ;
@@ -1488,8 +1488,8 @@
   rdfs:label "Name" ;
   rdfs:domain :GeographicLocation ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasPlaceType
   a owl:DatatypeProperty ;
@@ -1580,8 +1580,8 @@
   rdfs:label "Name" ;
   rdfs:domain :Policy ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasPolicyType
   a owl:DatatypeProperty ;
@@ -1651,8 +1651,8 @@
   rdfs:label "Name" ;
   rdfs:domain :Product ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasStatus
   a owl:DatatypeProperty ;
@@ -1701,8 +1701,8 @@
   rdfs:label "Name" ;
   rdfs:domain :ProductOffering ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
@@ -1765,8 +1765,8 @@
   rdfs:label "Order Date" ;
   rdfs:domain :ProductOrder ;
   rdfs:range xsd:date ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCompletionDate
   a owl:DatatypeProperty ;
@@ -1822,8 +1822,8 @@
   rdfs:label "Name" ;
   rdfs:domain :ProductSpecification ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasVersion
   a owl:DatatypeProperty ;
@@ -1886,16 +1886,16 @@
   rdfs:label "Name" ;
   rdfs:domain :Resource ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasResourceType
   a owl:DatatypeProperty ;
   rdfs:label "Resource Type" ;
   rdfs:domain :Resource ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasNfType
   a owl:DatatypeProperty ;
@@ -1968,8 +1968,8 @@
   rdfs:label "Relationship Type" ;
   rdfs:domain :ResourceRelationship ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCreatedAt
   a owl:DatatypeProperty ;
@@ -1990,8 +1990,8 @@
   rdfs:label "Name" ;
   rdfs:domain :ResourceSpecification ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasVersion
   a owl:DatatypeProperty ;
@@ -2055,16 +2055,16 @@
   rdfs:label "Name" ;
   rdfs:domain :Service ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasServiceType
   a owl:DatatypeProperty ;
   rdfs:label "Service Type" ;
   rdfs:domain :Service ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasState
   a owl:DatatypeProperty ;
@@ -2113,8 +2113,8 @@
   rdfs:label "Order Date" ;
   rdfs:domain :ServiceOrder ;
   rdfs:range xsd:date ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasCompletionDate
   a owl:DatatypeProperty ;
@@ -2163,8 +2163,8 @@
   rdfs:label "Description" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasPriority
   a owl:DatatypeProperty ;
@@ -2207,8 +2207,8 @@
   rdfs:label "Submitted At" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasResolvedAt
   a owl:DatatypeProperty ;
@@ -2236,8 +2236,8 @@
   rdfs:label "Name" ;
   rdfs:domain :ServiceSpecification ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasVersion
   a owl:DatatypeProperty ;
@@ -2279,8 +2279,8 @@
   rdfs:label "Name" ;
   rdfs:domain :UserRole ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal ;
-  # Required property (NOT NULL in schema) .
+  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+  :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
