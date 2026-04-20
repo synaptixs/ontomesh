@@ -7,3 +7,13 @@ CQ-005,Critical,PASS-STRUCTURAL,What is the confidence score and derivation meth
 CQ-006,High,PASS-STRUCTURAL,What role does each agent hold and in what scope?,rdflib,0,(TBox-only — no instance data in ontology),"Role separation, agent-role relationship",CQ-006-agent-roles.sparql
 CQ-007,Critical,PASS-STRUCTURAL,"Which policy governed each event, and what was the compliance outcome?",rdflib,0,(TBox-only — no instance data in ontology),"Policy-event relationship, compliance modeling",CQ-007-policy-governance.sparql
 CQ-008,High,PASS,Which assets have observations with confidence below 0.8 (low-trust data)?,rdflib,0,(empty),"Confidence filtering, trust-level querying",CQ-008-low-confidence-observations.sparql
+CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-alignment-dolce.sparql
+CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-conflict-resolution.sparql
+CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-event-subscriptions.sparql
+CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),FlavorRegistry correctness; runtime_flavor table population.,CQ-RT-01-flavor-registry.sparql
+CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Grounder.record_grounding(); ObservationRecord provenance stamping.,CQ-RT-02-grounding-records.sparql
+CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),PayloadAssembler output; runtime_payload and runtime_grounding,CQ-RT-03-runtime-payloads.sparql
+CQ-TMF10,High,PASS-STRUCTURAL,"Which trouble tickets are open or in-progress,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF10-trouble-tickets.sparql
+CQ-TMF11,High,PASS-STRUCTURAL,"Which network slice profiles are active,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF11-network-slice-profiles.sparql
+CQ-TMF12,High,PASS-STRUCTURAL,"Which service quality reports show SLA non-compliance,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF12-service-quality-reports.sparql
+CQ-TMF13,High,PASS-STRUCTURAL,"Which customer bills are outstanding or disputed,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF13-customer-bills.sparql

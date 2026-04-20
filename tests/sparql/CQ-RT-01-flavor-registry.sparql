@@ -1,0 +1,32 @@
+# CQ-RT-01: Verify registered runtime flavors have all required ontology properties.
+#
+# Competency Question:
+#   Which runtime flavors are registered and do they each declare a sensitivity tier,
+#   at least one OWL class, and at least one DB table?
+#
+# Expected result: 5 flavor instances (network-ops, billing, compliance,
+#   customer, fault-management), each with sensitivityTier, owlClasses, and dbTables.
+#
+# Phase: RT — Runtime Layer
+# Validates: FlavorRegistry correctness; runtime_flavor table population.
+
+PREFIX : <https://ontology.example.com/tmf/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?flavor ?sensitivityTier ?owlClasses ?dbTables
+WHERE {
+  ?flavor a :RuntimeFlavor ;
+          :sensitivityTier ?sensitivityTier ;
+          :owlClasses      ?owlClasses ;
+          :dbTables        ?dbTables .
+
+  # Require that all three critical properties are non-empty
+  FILTER(BOUND(?sensitivityTier) && ?sensitivityTier != "")
+  FILTER(BOUND(?owlClasses)      && ?owlClasses != "")
+  FILTER(BOUND(?dbTables)        && ?dbTables != "")
+
+  # Tier must be from the allowed set
+  FILTER(?sensitivityTier IN ("Public", "Internal", "Confidential", "Restricted"))
+}
+ORDER BY ?sensitivityTier ?flavor
