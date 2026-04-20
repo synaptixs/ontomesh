@@ -29,11 +29,20 @@ _BIN_ROBOT = os.path.join(REPO_ROOT, "bin", "robot")
 
 
 def _robot_cmd() -> Optional[str]:
-    """Return the path to the robot binary, or None if not found."""
-    if os.path.isfile(_BIN_ROBOT) and os.access(_BIN_ROBOT, os.X_OK):
-        return _BIN_ROBOT
-    found = shutil.which("robot")
-    return found
+    """Return the path to a working ROBOT binary, or None if unavailable."""
+    candidates = [_BIN_ROBOT, shutil.which("robot")]
+    for path in candidates:
+        if not path or not os.path.isfile(path) or not os.access(path, os.X_OK):
+            continue
+        try:
+            r = subprocess.run(
+                [path, "--version"], capture_output=True, timeout=15
+            )
+            if r.returncode == 0:
+                return path
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+    return None
 
 
 def _run(cmd: List[str], cwd: str = REPO_ROOT) -> subprocess.CompletedProcess:
@@ -77,7 +86,20 @@ def run_reasoner(ontology_path: str, output_path: str,
         "--input", ontology_path,
         "--output", output_path,
     ]
-    result = _run(cmd)
+    try:
+        result = _run(cmd)
+    except (FileNotFoundError, OSError) as exc:
+        return {
+            "status": "SKIPPED",
+            "reasoner": reasoner,
+            "output_path": None,
+            "message": (
+                f"ROBOT binary could not be executed ({exc}). "
+                "The wrapper script may have a bad shebang or Java is not installed. "
+                "Structural checks will be used instead."
+            ),
+            "findings": [],
+        }
 
     findings = []
     if result.returncode != 0:

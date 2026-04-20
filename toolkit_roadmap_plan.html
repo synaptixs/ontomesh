@@ -132,7 +132,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 <div class="stats">
   <div class="stat"><div class="stat-n">32</div><div class="stat-l">Roadmap items<br>3 phases + runtime layer</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--done)">7</div><div class="stat-l">Phase 1 ✓ Done<br>Completed Apr 2026</div></div>
-  <div class="stat"><div class="stat-n" style="color:var(--p2)">8</div><div class="stat-l">P2 — new capability<br>~9 sprints</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--done)">4</div><div class="stat-l">Phase 2A ✓ Done<br>Completed Apr 2026</div></div>
   <div class="stat"><div class="stat-n" style="color:var(--p3)">9</div><div class="stat-l">P3 — strategic<br>~16 sprints</div></div>
   <div class="stat"><div class="stat-n">326</div><div class="stat-l">Engineering-days<br>estimated total (incl. runtime)</div></div>
 </div>
@@ -222,26 +222,26 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
     <div style="grid-column:7/14"></div>
   </div>
 
-  <div class="phase-sep">Phase 2A — data &amp; CI/CD (months 4–6)</div>
+  <div class="phase-sep">Phase 2A — data &amp; CI/CD (months 4–6) · ✓ COMPLETED APR 2026</div>
 
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> CI/CD pipeline</div>
-    <div style="grid-column:7/9; background:var(--p2); border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> CI/CD pipeline</div>
+    <div style="grid-column:7/9; background:var(--done); border-radius:2px; height:14px;"></div>
     <div style="grid-column:9/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> Log connector</div>
-    <div style="grid-column:7/11; background:var(--p2); border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Log connector</div>
+    <div style="grid-column:7/11; background:var(--done); border-radius:2px; height:14px;"></div>
     <div style="grid-column:11/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> LLM-assisted wizard</div>
-    <div style="grid-column:8/10; background:var(--p2); opacity:.75; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> LLM-assisted wizard</div>
+    <div style="grid-column:8/10; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:10/14"></div>
   </div>
   <div class="gantt-row">
-    <div class="gantt-label"><span class="badge b-p2">P2</span> Named-graph RBAC</div>
-    <div style="grid-column:9/11; background:var(--p2); opacity:.8; border-radius:2px; height:14px;"></div>
+    <div class="gantt-label"><span class="badge b-done">✓</span> Named-graph RBAC</div>
+    <div style="grid-column:9/11; background:var(--done); opacity:.85; border-radius:2px; height:14px;"></div>
     <div style="grid-column:11/14"></div>
   </div>
 
@@ -415,10 +415,10 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
 </tr>
 
 <!-- PHASE 2A -->
-<tr class="area-row"><td colspan="7">Phase 2A — Data &amp; CI/CD &nbsp;·&nbsp; Months 4–6 &nbsp;·&nbsp; ~34 engineering-days</td></tr>
+<tr class="area-row"><td colspan="7">Phase 2A — Data &amp; CI/CD &nbsp;·&nbsp; Months 4–6 &nbsp;·&nbsp; ~34 engineering-days &nbsp;·&nbsp; <span style="color:var(--done);font-weight:700;">✓ COMPLETED APR 2026</span></td></tr>
 
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S6</td>
   <td class="t-feat">CI/CD pipeline</td>
   <td class="t-detail">Ship <code>.github/workflows/ontology.yml</code> (GitHub Actions) and <code>Jenkinsfile</code>. Stages: (1) reasoner consistency, (2) SHACL validation, (3) SPARQL CQ tests, (4) regression gate, (5) governance score delta report as PR comment. Blocks merge on Critical SHACL violations or CQ regressions.</td>
@@ -427,7 +427,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">6d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S6–S8</td>
   <td class="t-feat">Structured log connector</td>
   <td class="t-detail">New <code>src/log_connector.py</code>. Format detectors: syslog RFC5424, JSON-lines, CEF, OpenTelemetry trace, plain regex. Entity extractor anchored to <code>ontology_metadata</code> class names and external_id patterns. Produces ObservationRecord instances with <code>derivation_method=IMPORTED</code>, <code>source_ref=file:line</code>, <code>confidence_score</code> from match certainty. CLI: <code>python3 toolkit.py --phase log --log-path /var/log/*.log</code></td>
@@ -436,7 +436,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">15d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S7</td>
   <td class="t-feat">LLM-assisted wizard</td>
   <td class="t-detail">Add optional <code>--llm</code> flag to <code>onboard.py</code>. On domain description entry, call the Anthropic API (claude-sonnet) to suggest entities, events, relationships, and 8 CQs. User reviews and edits suggestions rather than typing from scratch. Estimated onboarding time: 15 minutes → &lt;5 minutes.</td>
@@ -445,7 +445,7 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
   <td class="t-effort">5d</td>
 </tr>
 <tr>
-  <td><span class="badge b-p2">P2</span></td>
+  <td><span class="badge b-done">✓</span></td>
   <td class="t-sprint">S8</td>
   <td class="t-feat">Named-graph RBAC</td>
   <td class="t-detail">Generate working access control configs from sensitivity tier annotations: (1) Stardog RBAC policy file, (2) Apache Fuseki/Shiro config, (3) Amazon Neptune IAM policy JSON. Each config partitions the RDF store into 4 named graphs (Public, Internal, Confidential, Restricted) with role-based access. CLI: <code>python3 toolkit.py --phase security --store stardog</code></td>
@@ -659,13 +659,13 @@ footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--rule
       <li>✓ Average governance score ≥ 4.2 / 5.0</li>
     </ul>
   </div>
-  <div class="gate-card" style="border-color:var(--p2)">
-    <h3 style="color:var(--p2)">Phase 2A exit</h3>
+  <div class="gate-card" style="border-color:var(--done)">
+    <h3 style="color:var(--done)">Phase 2A ✓ Complete · Apr 2026</h3>
     <ul>
-      <li>CI/CD pipeline blocks on Critical violations</li>
-      <li>Log connector processes syslog + JSON</li>
-      <li>RBAC config generated for ≥ 2 graph stores</li>
-      <li>Onboarding time ≤ 5 min (LLM-assisted)</li>
+      <li>✓ CI/CD pipeline blocks on Critical violations</li>
+      <li>✓ Log connector processes syslog + JSON</li>
+      <li>✓ RBAC config generated for ≥ 2 graph stores</li>
+      <li>✓ Onboarding time ≤ 5 min (LLM-assisted)</li>
     </ul>
   </div>
   <div class="gate-card" style="border-color:var(--p2)">
