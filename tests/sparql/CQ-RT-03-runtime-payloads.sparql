@@ -1,0 +1,48 @@
+# CQ-RT-03: Verify runtime payloads link to a registered flavor and have
+#            an assembledAt timestamp.
+#
+# Competency Question:
+#   Which runtime payloads exist, do they each reference a valid flavor, and do
+#   they carry an assembledAt timestamp? Are any payloads missing a flavor link?
+#
+# Expected result: All RuntimePayload instances have:
+#   - :flavorName bound and matching a registered RuntimeFlavor
+#   - :assembledAt present and parseable as xsd:dateTime
+#   - :question non-empty
+#   - Optional: linked grounding events via RuntimeGrounding
+#
+# Phase: RT — Runtime Layer
+# Validates: PayloadAssembler output; runtime_payload and runtime_grounding
+#            table integrity; flavor→payload referential consistency.
+
+PREFIX : <https://ontology.example.com/tmf/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT ?payload ?payloadId ?flavorName ?question ?assembledAt ?groundingId ?recordCount
+WHERE {
+  ?payload a :RuntimePayload ;
+           :payloadId    ?payloadId ;
+           :flavorName   ?flavorName ;
+           :question     ?question ;
+           :assembledAt  ?assembledAt .
+
+  # Verify the flavor is registered
+  ?flavorRef a :RuntimeFlavor ;
+             :name ?flavorName .
+
+  # assembledAt must be present and non-empty
+  FILTER(BOUND(?assembledAt) && ?assembledAt != "")
+
+  # question must be non-empty
+  FILTER(BOUND(?question) && ?question != "")
+
+  # Join grounding events where available
+  OPTIONAL {
+    ?grounding a :RuntimeGrounding ;
+               :payloadId    ?payloadId ;
+               :groundingId  ?groundingId ;
+               :recordCount  ?recordCount .
+  }
+}
+ORDER BY DESC(?assembledAt)

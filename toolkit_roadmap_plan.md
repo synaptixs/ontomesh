@@ -15,6 +15,7 @@ Sequenced delivery plan for the 24-item future roadmap. Three phases across 12 m
 | Phase 2A | ✓ Done — Completed Apr 2026 (4 items) |
 | Phase 2B | ✓ Done — Completed Apr 2026 (4 items) |
 | Phase 3 — strategic | 9 items, ~16 sprints |
+| Runtime Layer | ✓ Done — Completed Apr 2026 (6 components) |
 | Total estimated effort | 326 engineering-days (incl. runtime) |
 
 ---
@@ -33,7 +34,7 @@ Remaining TMF domains, conflict resolution, ontology alignment. Completes the te
 ### Phase 3 · M10–M12+ — Scale & Community
 Graph store deploy, Docker kit, browser wizard, additional templates, W3C community group, drift detection.
 
-### Runtime Layer · Parallel Track — Ontology-augmented AI Runtime
+### Runtime Layer · Parallel Track · ✓ COMPLETED APR 2026 — Ontology-augmented AI Runtime
 The consumption layer that connects toolkit artifacts to LLMs. Payload assembler, flavor registry, SHACL output gate, PROV-O response stamping, ObservationRecord feedback loop. Runs alongside all pipeline phases — not after them.
 
 ---
@@ -62,13 +63,13 @@ The consumption layer that connects toolkit artifacts to LLMs. Payload assembler
 | ✓ TMF Event Hub | | | | | | | █ | |
 | ✓ Conflict resolution | | | | | | | ██ | |
 | ✓ Ontology alignment | | | | | | | ██ | |
-| **Runtime Layer — Parallel Track (M3–M12)** | | | | | | | | |
-| RT Ontology flavor registry | | | | ██ | | | | |
-| RT Data grounding module | | | | ███ | | | | |
-| RT Payload assembler | | | | | ███ | | | |
-| RT Output SHACL gate | | | | | | ██ | | |
-| RT PROV-O response stamping | | | | | | | ██ | |
-| RT Runtime SDK + docs | | | | | | | | ███ |
+| **Runtime Layer — Parallel Track (M3–M12) · ✓ COMPLETED APR 2026** | | | | | | | | |
+| ✓ Ontology flavor registry | | | | ██ | | | | |
+| ✓ Data grounding module | | | | ███ | | | | |
+| ✓ Payload assembler | | | | | ███ | | | |
+| ✓ Output SHACL gate | | | | | | ██ | | |
+| ✓ PROV-O response stamping | | | | | | | ██ | |
+| ✓ Runtime SDK + docs | | | | | | | | ███ |
 | **Phase 3 — Scale & Community** | | | | | | | | |
 | P3 Graph store publishing | | | | | | | | █ |
 | P3 Docker Compose kit | | | | | | | | █ |
@@ -121,18 +122,18 @@ The consumption layer that connects toolkit artifacts to LLMs. Payload assembler
 
 ---
 
-### Runtime Layer · Parallel Track M3–M12 · ~55 engineering-days
+### Runtime Layer · Parallel Track M3–M12 · ~55 engineering-days · ✓ COMPLETED APR 2026
 
 > The consumption bridge between toolkit artifacts and AI/LLM systems
 
 | Phase | Sprint | Item | Scope & Deliverable | Roles | Depends on | Effort |
 |-------|--------|------|---------------------|-------|------------|--------|
-| RT | S5–S6 | **Ontology flavor registry** | Configuration layer that defines named agent views over the master ontology. Each flavor specifies: OWL class subset, SHACL shape subset, scoped JSON-LD context terms, and sensitivity-tier access level. Stored as `runtime/flavors/{name}.json`. Flavors are generated automatically from `ontology_metadata` sid_domain groupings and can be manually extended. Ships with 5 starter flavors: network-ops, billing, compliance, customer, fault-management. | Ontology Eng | OWL ontology, SHACL shapes, JSON-LD context | 5d |
-| RT | S6–S8 | **Data grounding module** | The critical missing step in most LLM + enterprise data architectures. `runtime/grounder.py` takes a question and a flavor, queries the enterprise database for relevant records, and serialises those records as JSON-LD using the flavor's scoped context — binding each field value to its ontology IRI. Output: typed, ontology-grounded data ready for LLM payload. Without this step, raw data sits next to the ontology in a prompt without being connected to it. CLI: `python3 runtime/grounder.py --flavor network-ops --question "Which NFs are degraded?" --db <connection>` | Ontology Eng, Data Eng | Flavor registry, db_connector | 10d |
-| RT | S7–S9 | **Payload assembler** | Assembles the full LLM payload from five components: (1) system prompt — ontology summary + domain rules + agent role description, (2) ontology flavor — relevant class and property definitions in natural language, (3) grounded data — JSON-LD serialised enterprise records from the grounder, (4) PROV-O context — provenance of each data point in the payload, (5) question + output format instructions. Returns a structured payload dict that any LLM API client can consume. LLM-agnostic — works with Anthropic, OpenAI, Google, Llama, or any custom endpoint. | Data Eng, AI/ML Eng | Flavor registry, Grounding module, PROV-O patterns | 12d |
-| RT | S8–S10 | **Output SHACL gate + PROV-O stamping** | Governs LLM responses — the step missing from almost every production implementation. For structured responses: SHACL validates the output against the relevant ontology shapes before any downstream action. For all responses: stamps PROV-O provenance (agent = LLM identifier + model version, `prov:generatedAtTime`, confidence extracted from model output, `derivation_method=SYNTHESIZED`). Stores validated response as an `ObservationRecord` with `source_ref` pointing to the payload ID. | Ontology Eng, AI/ML Eng | SHACL shapes, PROV-O patterns, Payload assembler | 10d |
-| RT | S9–S10 | **SHACL input gate (inbound data validation)** | Validates enterprise data against SHACL shapes *before* it enters the LLM payload. Rejects malformed, incomplete, or low-confidence records at the acceptance gate rather than letting bad data reach the model. Integrates with the existing `agent-gate.ttl`. Reports rejected records to `semantic_loss_log` with `loss_type=REJECTED_AT_RUNTIME_GATE`. | Ontology Eng | SHACL shapes, agent-gate.ttl | 5d |
-| RT | S13–S15 | **Runtime SDK + multi-LLM adapters + documentation** | Package the runtime layer as a lightweight Python SDK: `pip install ontology-toolkit-runtime`. Ships with LLM-specific adapters (Anthropic Messages API, OpenAI Chat Completions, Google Vertex, Ollama local). Includes a `RuntimeClient` class, async support, streaming response handling, and a worked example notebook per industry template. | Data Eng, AI/ML Eng | All RT modules, Industry templates | 13d |
+| ✓ | S5–S6 | **Ontology flavor registry** | Configuration layer that defines named agent views over the master ontology. Each flavor specifies: OWL class subset, SHACL shape subset, scoped JSON-LD context terms, and sensitivity-tier access level. Stored as `runtime/flavors/{name}.json`. Flavors are generated automatically from `ontology_metadata` sid_domain groupings and can be manually extended. Ships with 5 starter flavors: network-ops, billing, compliance, customer, fault-management. | Ontology Eng | OWL ontology, SHACL shapes, JSON-LD context | 5d |
+| ✓ | S6–S8 | **Data grounding module** | The critical missing step in most LLM + enterprise data architectures. `runtime/grounder.py` takes a question and a flavor, queries the enterprise database for relevant records, and serialises those records as JSON-LD using the flavor's scoped context — binding each field value to its ontology IRI. Output: typed, ontology-grounded data ready for LLM payload. Without this step, raw data sits next to the ontology in a prompt without being connected to it. CLI: `python3 runtime/grounder.py --flavor network-ops --question "Which NFs are degraded?" --db <connection>` | Ontology Eng, Data Eng | Flavor registry, db_connector | 10d |
+| ✓ | S7–S9 | **Payload assembler** | Assembles the full LLM payload from five components: (1) system prompt — ontology summary + domain rules + agent role description, (2) ontology flavor — relevant class and property definitions in natural language, (3) grounded data — JSON-LD serialised enterprise records from the grounder, (4) PROV-O context — provenance of each data point in the payload, (5) question + output format instructions. Returns a structured payload dict that any LLM API client can consume. LLM-agnostic — works with Anthropic, OpenAI, Google, Llama, or any custom endpoint. | Data Eng, AI/ML Eng | Flavor registry, Grounding module, PROV-O patterns | 12d |
+| ✓ | S8–S10 | **Output SHACL gate + PROV-O stamping** | Governs LLM responses — the step missing from almost every production implementation. For structured responses: SHACL validates the output against the relevant ontology shapes before any downstream action. For all responses: stamps PROV-O provenance (agent = LLM identifier + model version, `prov:generatedAtTime`, confidence extracted from model output, `derivation_method=SYNTHESIZED`). Stores validated response as an `ObservationRecord` with `source_ref` pointing to the payload ID. | Ontology Eng, AI/ML Eng | SHACL shapes, PROV-O patterns, Payload assembler | 10d |
+| ✓ | S9–S10 | **SHACL input gate (inbound data validation)** | Validates enterprise data against SHACL shapes *before* it enters the LLM payload. Rejects malformed, incomplete, or low-confidence records at the acceptance gate rather than letting bad data reach the model. Integrates with the existing `agent-gate.ttl`. Reports rejected records to `semantic_loss_log` with `loss_type=REJECTED_AT_RUNTIME_GATE`. | Ontology Eng | SHACL shapes, agent-gate.ttl | 5d |
+| ✓ | S13–S15 | **Runtime SDK + multi-LLM adapters + documentation** | Package the runtime layer as a lightweight Python SDK: `pip install ontology-toolkit-runtime`. Ships with LLM-specific adapters (Anthropic Messages API, OpenAI Chat Completions, Google Vertex, Ollama local). Includes a `RuntimeClient` class, async support, streaming response handling, and a worked example notebook per industry template. | Data Eng, AI/ML Eng | All RT modules, Industry templates | 13d |
 
 ---
 
@@ -153,12 +154,14 @@ The consumption layer that connects toolkit artifacts to LLMs. Payload assembler
 
 ## Phase Exit Gates
 
-### Runtime MVP Exit
-- Flavor registry: 5 starter flavors generated
-- Grounder: JSON-LD output verified against context
-- Assembler: payload roundtrip test passing
-- Output gate: SHACL validates LLM response
-- PROV-O stamp: every response has `source_ref` + timestamp
+### Runtime Layer ✓ Complete · Apr 2026
+- ✓ Flavor registry: 5 starter flavors loaded and validated (`network-ops`, `billing`, `compliance`, `customer`, `fault-management`)
+- ✓ Grounder: JSON-LD output with `@type`, ontology IRI bindings, and PROV-O grounding record
+- ✓ InputGate: SHACL acceptance screening; rejections logged to `semantic_loss_log`
+- ✓ Assembler: 5-component payload with token budget; LLM-agnostic output
+- ✓ OutputGate: SHACL response validation + PROV-O stamping + `ObservationRecord` storage
+- ✓ RuntimeClient: end-to-end `ask()` pipeline with 4 adapters (Anthropic, OpenAI, Vertex, Ollama)
+- ✓ 3 new SPARQL CQ tests (CQ-RT-01/02/03) — 18 total passing
 
 ### Phase 1 ✓ Complete · Apr 2026
 - ✓ `@baseType` / `@schemaLocation` in all payloads
@@ -215,6 +218,6 @@ The consumption layer that connects toolkit artifacts to LLMs. Payload assembler
 
 ---
 
-*Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.4*
+*Ontology Toolkit Roadmap · Prepared April 2026 · Framework v1.1 · Toolkit v1.5*
 
 *Total estimated effort: 326 engineering-days (271 pipeline + 55 runtime) across 12 months*
