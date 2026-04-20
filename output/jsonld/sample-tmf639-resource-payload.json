@@ -4,27 +4,36 @@
     "Resource",
     "NetworkFunction"
   ],
+  "@baseType": "Resource",
+  "@schemaLocation": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF639-ResourceInventory-v5.0.0.swagger.json",
   "@id": "https://gtc.example.com/resources/amf-east-01",
+  "href": "https://gtc.example.com/tmf-api/resourceInventoryManagement/v5/resource/amf-east-01",
   "name": "AMF East 01",
   "nfType": "AMF",
   "operationalState": "Enabled",
   "adminState": "Unlocked",
   "resourceSpecification": {
     "@type": "ResourceSpecification",
+    "@referredType": "ResourceSpecification",
     "@id": "https://gtc.example.com/catalog/spec/amf-5g-v2",
+    "href": "https://gtc.example.com/tmf-api/resourceCatalog/v4/resourceSpecification/amf-5g-v2",
     "name": "AMF 5G Specification",
     "version": "2.0"
   },
   "place": {
     "@type": "GeographicPlace",
+    "@referredType": "GeographicPlace",
     "@id": "https://gtc.example.com/places/dc-east",
+    "href": "https://gtc.example.com/tmf-api/geographicAddressManagement/v4/geographicAddress/dc-east",
     "name": "Data Centre East"
   },
   "resourceRelationship": [
     {
       "relationshipType": "relies-on",
       "resource": {
-        "@id": "https://gtc.example.com/resources/nrf-east-01"
+        "@referredType": "NetworkFunction",
+        "@id": "https://gtc.example.com/resources/nrf-east-01",
+        "href": "https://gtc.example.com/tmf-api/resourceInventoryManagement/v5/resource/nrf-east-01"
       }
     }
   ],

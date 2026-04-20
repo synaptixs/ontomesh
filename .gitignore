@@ -1,0 +1,60 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.installed.cfg
+pip-wheel-metadata/
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+.env
+ENV/
+
+# ── Generated database ────────────────────────────────────────────────────────
+db/enterprise.db
+db/*.db-shm
+db/*.db-wal
+
+# ── Generated output artefacts ────────────────────────────────────────────────
+# Keep the JSON-LD / ontology source files that are committed intentionally,
+# but exclude everything that is rebuilt on every pipeline run.
+output/reports/
+output/logs/
+output/tmp/
+# Specific generated files re-emitted every run:
+output/jsonld/mcp-tools.json
+output/jsonld/runtime-mcp-tools.json
+
+# ── IDE / editor ──────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ── Secrets / credentials ─────────────────────────────────────────────────────
+.env
+.env.*
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# ── Test / coverage artefacts ─────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# ── MyPy / type-checker caches ────────────────────────────────────────────────
+.mypy_cache/
+.ruff_cache/

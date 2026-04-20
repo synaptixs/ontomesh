@@ -1,0 +1,20 @@
+# CQ-006: What role does each agent hold and in what scope?
+# Priority: High
+# Validates: Role separation, agent-role relationship
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?agent ?agentLabel ?agentType ?role ?roleLabel ?scopeAsset WHERE {
+  ?agent a :Agent .
+  OPTIONAL { ?agent rdfs:label ?agentLabel }
+  OPTIONAL { ?agent :agentType ?agentType }
+  OPTIONAL {
+    ?agentRole :agent ?agent ;
+               :role ?role .
+    OPTIONAL { ?role rdfs:label ?roleLabel }
+    OPTIONAL { ?agentRole :scopeAsset ?scopeAsset }
+  }
+}
+ORDER BY ?agentLabel

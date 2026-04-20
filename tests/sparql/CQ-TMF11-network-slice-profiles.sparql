@@ -1,0 +1,17 @@
+# CQ-TMF11: Which network slice profiles are active,
+#           what are their SLA parameters (latency, reliability),
+#           and which resource instances back them?
+# TMF645 NetworkSliceProfile — Phase 2B
+PREFIX : <https://ontology.example.com/tmf/>
+
+SELECT ?profile ?sliceType ?sst ?latency ?reliability ?resource
+WHERE {
+  ?profile a :NetworkSliceProfile ;
+           :hasSliceType ?sliceType ;
+           :hasSst ?sst ;
+           :latencyTargetMs ?latency ;
+           :lifecycleStatus "Active" .
+  OPTIONAL { ?profile :backedByResource ?resource }
+  OPTIONAL { ?profile :reliabilityTarget ?reliability }
+}
+ORDER BY ?sliceType

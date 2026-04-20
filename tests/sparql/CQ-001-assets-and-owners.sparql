@@ -1,0 +1,18 @@
+# CQ-001: Which assets exist in the domain and who owns them?
+# Priority: Critical
+# Validates: Entity identification, relationship completeness
+# Expected: non-empty result set
+
+PREFIX : <https://ontology.example.com/enterprise/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT ?asset ?assetLabel ?owner ?ownerLabel WHERE {
+  ?asset a :Asset .
+  OPTIONAL { ?asset rdfs:label ?assetLabel }
+  OPTIONAL {
+    ?asset :ownerOrg ?owner .
+    OPTIONAL { ?owner rdfs:label ?ownerLabel }
+  }
+}
+ORDER BY ?assetLabel

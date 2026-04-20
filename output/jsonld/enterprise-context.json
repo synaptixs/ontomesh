@@ -62,6 +62,22 @@
       "@id": "https://ontology.example.com/enterprise/governedBy",
       "@type": "@id"
     },
+    "href": {
+      "@id": "https://ontology.example.com/enterprise/href",
+      "@type": "xsd:anyURI"
+    },
+    "@baseType": {
+      "@id": "https://ontology.example.com/enterprise/baseType",
+      "@type": "xsd:string"
+    },
+    "@schemaLocation": {
+      "@id": "https://ontology.example.com/enterprise/schemaLocation",
+      "@type": "xsd:anyURI"
+    },
+    "@referredType": {
+      "@id": "https://ontology.example.com/enterprise/referredType",
+      "@type": "xsd:string"
+    },
     "AgentRoles": {
       "@id": "https://ontology.example.com/enterprise/AgentRoles"
     },

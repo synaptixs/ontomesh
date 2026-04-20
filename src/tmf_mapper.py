@@ -125,6 +125,52 @@ SID_DOMAINS = {
         "SupplierSLA": ("Agreement",
             "A service level agreement with a supplier or partner.", "TMF651", "S/P SLA"),
     },
+    # ── Phase 2B — TMF Remaining Domains ────────────────────
+    "TroubleMgmt": {
+        "TroubleTicket": ("TmfEntity",
+            "A customer or resource trouble ticket per TMF621. Tracks issue lifecycle from New to Closed.", "TMF621", "Service Trouble"),
+        "ResourceTroubleTicket": ("TroubleTicket",
+            "A trouble ticket specifically associated with a resource fault or outage.", "TMF621", "Resource Trouble"),
+        "CustomerTroubleTicket": ("TroubleTicket",
+            "A trouble ticket raised by or on behalf of a customer.", "TMF621", "Customer Problem"),
+    },
+    "NetworkSliceMgmt": {
+        "NetworkSliceProfile": ("TmfEntity",
+            "A 3GPP S-NSSAI-aligned network slice profile with SLA parameters per TMF645.", "TMF645", "Logical Resource"),
+    },
+    "ServiceQuality": {
+        "ServiceQualityReport": ("TmfEntity",
+            "An SLA compliance or KQI quality assessment report per TMF657.", "TMF657", "Service Quality"),
+    },
+    "GeographicSite": {
+        "GeographicSite": ("TmfEntity",
+            "A structured physical site record (data centre, cell tower, PoP) per TMF674.", "TMF674", "Location"),
+    },
+    "Billing": {
+        "CustomerBill": ("TmfEntity",
+            "A customer invoice per TMF678 Customer Bill Management.", "TMF678", "Customer Account"),
+        "BillingAccount": ("TmfEntity",
+            "The billing account that owns the bill relationship per TMF678.", "TMF678", "Customer Account"),
+    },
+    "Qualification": {
+        "ProductOfferingQualification": ("TmfEntity",
+            "An eligibility/feasibility check for a product offering at a customer site per TMF679.", "TMF679", "Product Offering"),
+        "QualificationItem": ("ProductOfferingQualification",
+            "A single line item within a product offering qualification request.", "TMF679", "Product Offering"),
+    },
+    # ── Event Hub & Conflict Resolution ─────────────────────
+    "EventHub": {
+        "EventSubscription": ("TmfEntity",
+            "An async notification subscription per TMF630 §5 event hub pattern.", "TMF688", "Business Interaction"),
+        "EventNotification": ("TmfEntity",
+            "An event notification payload delivered to a subscriber's callback URL.", "TMF688", "Business Interaction"),
+    },
+    "ConflictResolution": {
+        "ConflictEvent": ("TmfEntity",
+            "A multi-agent assertion conflict record with 3-tier resolution chain per framework §10.1.", None, "Policy"),
+        "AssertionResolution": ("ConflictEvent",
+            "The winning assertion and resolution rationale for a resolved conflict event.", None, "Policy"),
+    },
 }
 
 # ── TMF Open API Reference Map ─────────────────────────────────────────────
@@ -137,6 +183,8 @@ TMF_API_MAP = {
         "sid_class": "ProductOffering",
         "sid_domain": "Product",
         "url_pattern": "/tmf-api/productCatalogManagement/v5/",
+        "resource_name": "productOffering",
+        "schema_location": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF620-ProductCatalog-v5.0.0.swagger.json",
         "description": "Manages the lifecycle of catalog elements: productSpecification, productOffering, category.",
     },
     "TMF622": {
@@ -145,6 +193,8 @@ TMF_API_MAP = {
         "sid_class": "ProductOrder",
         "sid_domain": "Product",
         "url_pattern": "/tmf-api/productOrderingManagement/v5/productOrder",
+        "resource_name": "productOrder",
+        "schema_location": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF622-ProductOrdering-v5.0.0.swagger.json",
         "description": "Manages product orders from submission through completion.",
     },
     "TMF629": {
@@ -153,6 +203,8 @@ TMF_API_MAP = {
         "sid_class": "Party",
         "sid_domain": "EngagedParty",
         "url_pattern": "/tmf-api/customerManagement/v4/customer",
+        "resource_name": "customer",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF629-Customer-v4.0.0.swagger.json",
         "description": "Provides customer lifecycle management.",
     },
     "TMF632": {
@@ -161,6 +213,8 @@ TMF_API_MAP = {
         "sid_class": "Party",
         "sid_domain": "EngagedParty",
         "url_pattern": "/tmf-api/partyManagement/v5/individual",
+        "resource_name": "individual",
+        "schema_location": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF632-Party-v5.0.0.swagger.json",
         "description": "Manages individuals and organisations.",
     },
     "TMF633": {
@@ -169,6 +223,8 @@ TMF_API_MAP = {
         "sid_class": "ServiceSpecification",
         "sid_domain": "Service",
         "url_pattern": "/tmf-api/serviceCatalogManagement/v4/serviceSpecification",
+        "resource_name": "serviceSpecification",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF633-ServiceCatalog-v4.0.0.swagger.json",
         "description": "Manages service catalog: serviceSpecification and serviceCategory.",
     },
     "TMF634": {
@@ -177,6 +233,8 @@ TMF_API_MAP = {
         "sid_class": "ResourceSpecification",
         "sid_domain": "Resource",
         "url_pattern": "/tmf-api/resourceCatalog/v4/resourceSpecification",
+        "resource_name": "resourceSpecification",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF634-ResourceCatalog-v4.0.0.swagger.json",
         "description": "Manages resource specifications and catalog entries.",
     },
     "TMF637": {
@@ -185,6 +243,8 @@ TMF_API_MAP = {
         "sid_class": "Product",
         "sid_domain": "Product",
         "url_pattern": "/tmf-api/productInventory/v4/product",
+        "resource_name": "product",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF637-ProductInventory-v4.0.0.swagger.json",
         "description": "Manages product instances in the inventory.",
     },
     "TMF638": {
@@ -193,6 +253,8 @@ TMF_API_MAP = {
         "sid_class": "Service",
         "sid_domain": "Service",
         "url_pattern": "/tmf-api/serviceInventory/v4/service",
+        "resource_name": "service",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF638-ServiceInventory-v4.0.0.swagger.json",
         "description": "Manages service instances (CFS and RFS) in the inventory.",
     },
     "TMF639": {
@@ -201,6 +263,8 @@ TMF_API_MAP = {
         "sid_class": "Resource",
         "sid_domain": "Resource",
         "url_pattern": "/tmf-api/resourceInventoryManagement/v5/resource",
+        "resource_name": "resource",
+        "schema_location": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF639-ResourceInventory-v5.0.0.swagger.json",
         "description": "Manages logical and physical resource instances.",
     },
     "TMF641": {
@@ -209,6 +273,8 @@ TMF_API_MAP = {
         "sid_class": "ServiceOrder",
         "sid_domain": "Service",
         "url_pattern": "/tmf-api/serviceOrdering/v4/serviceOrder",
+        "resource_name": "serviceOrder",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF641-ServiceOrdering-v4.0.0.swagger.json",
         "description": "Manages service fulfilment orders.",
     },
     "TMF642": {
@@ -217,6 +283,8 @@ TMF_API_MAP = {
         "sid_class": "Alarm",
         "sid_domain": "Resource",
         "url_pattern": "/tmf-api/alarmManagement/v4/alarm",
+        "resource_name": "alarm",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF642-Alarm-v4.0.0.swagger.json",
         "description": "Manages network alarms per ITU-T X.733 and 3GPP fault management.",
     },
     "TMF651": {
@@ -225,6 +293,8 @@ TMF_API_MAP = {
         "sid_class": "Agreement",
         "sid_domain": "EngagedParty",
         "url_pattern": "/tmf-api/agreementManagement/v4/agreement",
+        "resource_name": "agreement",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF651-Agreement-v4.0.0.swagger.json",
         "description": "Manages commercial and SLA agreements between parties.",
     },
     "TMF656": {
@@ -233,6 +303,8 @@ TMF_API_MAP = {
         "sid_class": "ServiceProblem",
         "sid_domain": "Service",
         "url_pattern": "/tmf-api/serviceProblemManagement/v4/serviceProblem",
+        "resource_name": "serviceProblem",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF656-ServiceProblem-v4.0.0.swagger.json",
         "description": "Manages service problems and trouble tickets.",
     },
     "TMF666": {
@@ -241,6 +313,8 @@ TMF_API_MAP = {
         "sid_class": "CustomerAccount",
         "sid_domain": "EngagedParty",
         "url_pattern": "/tmf-api/accountManagement/v5/partyAccount",
+        "resource_name": "partyAccount",
+        "schema_location": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF666-Account-v5.0.0.swagger.json",
         "description": "Manages customer and party accounts.",
     },
     "TMF669": {
@@ -249,6 +323,8 @@ TMF_API_MAP = {
         "sid_class": "PartyRole",
         "sid_domain": "EngagedParty",
         "url_pattern": "/tmf-api/partyRoleManagement/v5/partyRole",
+        "resource_name": "partyRole",
+        "schema_location": "https://tmforum-apis.github.io/V5.0.0_OneAPI/swagger2.0/TMF669-PartyRole-v5.0.0.swagger.json",
         "description": "Manages the roles parties play in business interactions.",
     },
     "TMF672": {
@@ -257,6 +333,8 @@ TMF_API_MAP = {
         "sid_class": "UserRole",
         "sid_domain": "Enterprise",
         "url_pattern": "/tmf-api/userRolesPermissions/v4/userRole",
+        "resource_name": "userRole",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF672-UserRolesPermissions-v4.0.0.swagger.json",
         "description": "Manages user roles and permission grants.",
     },
     "TMF673": {
@@ -265,6 +343,8 @@ TMF_API_MAP = {
         "sid_class": "GeographicPlace",
         "sid_domain": "Common",
         "url_pattern": "/tmf-api/geographicAddressManagement/v4/geographicAddress",
+        "resource_name": "geographicAddress",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF673-GeographicAddress-v4.0.0.swagger.json",
         "description": "Manages geographic addresses and address validation.",
     },
     "TMF688": {
@@ -273,7 +353,70 @@ TMF_API_MAP = {
         "sid_class": "BusinessInteraction",
         "sid_domain": "Enterprise",
         "url_pattern": "/tmf-api/eventManagement/v4/event",
+        "resource_name": "event",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF688-Event-v4.0.0.swagger.json",
         "description": "Manages asynchronous event publication and subscription.",
+    },
+    # ── Phase 2B — New APIs ──────────────────────────────────
+    "TMF621": {
+        "name": "Trouble Ticket Management API",
+        "version": "v4.0",
+        "sid_class": "TroubleTicket",
+        "sid_domain": "TroubleMgmt",
+        "url_pattern": "/tmf-api/troubleTicket/v4/troubleTicket",
+        "resource_name": "troubleTicket",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF621-TroubleTicket-v4.0.0.swagger.json",
+        "description": "Manages customer and resource trouble tickets from creation through resolution.",
+    },
+    "TMF645": {
+        "name": "Service Qualification Management API",
+        "version": "v4.0",
+        "sid_class": "NetworkSliceProfile",
+        "sid_domain": "NetworkSliceMgmt",
+        "url_pattern": "/tmf-api/serviceQualificationManagement/v4/checkServiceQualification",
+        "resource_name": "checkServiceQualification",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF645-ServiceQualification-v4.0.0.swagger.json",
+        "description": "Manages network slice profiles and service qualification checks (3GPP S-NSSAI).",
+    },
+    "TMF657": {
+        "name": "Service Quality Management API",
+        "version": "v4.0",
+        "sid_class": "ServiceQualityReport",
+        "sid_domain": "ServiceQuality",
+        "url_pattern": "/tmf-api/serviceQualityManagement/v4/serviceLevelObjective",
+        "resource_name": "serviceLevelObjective",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF657-ServiceQuality-v4.0.0.swagger.json",
+        "description": "Manages service quality reports, SLA compliance checks, and KQI assessments.",
+    },
+    "TMF674": {
+        "name": "Geographic Site Management API",
+        "version": "v4.0",
+        "sid_class": "GeographicSite",
+        "sid_domain": "GeographicSite",
+        "url_pattern": "/tmf-api/geographicSiteManagement/v4/geographicSite",
+        "resource_name": "geographicSite",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF674-GeographicSite-v4.0.0.swagger.json",
+        "description": "Manages geographic sites (data centres, cell towers, PoP sites) with full operational attributes.",
+    },
+    "TMF678": {
+        "name": "Customer Bill Management API",
+        "version": "v4.0",
+        "sid_class": "CustomerBill",
+        "sid_domain": "Billing",
+        "url_pattern": "/tmf-api/customerBillManagement/v4/customerBill",
+        "resource_name": "customerBill",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF678-CustomerBill-v4.0.0.swagger.json",
+        "description": "Manages customer bills, invoices, and credit notes with dispute tracking.",
+    },
+    "TMF679": {
+        "name": "Product Offering Qualification API",
+        "version": "v4.0",
+        "sid_class": "ProductOfferingQualification",
+        "sid_domain": "Qualification",
+        "url_pattern": "/tmf-api/productOfferingQualification/v4/productOfferingQualification",
+        "resource_name": "productOfferingQualification",
+        "schema_location": "https://tmforum-apis.github.io/V4.0.0_OneAPI/swagger2.0/TMF679-ProductOfferingQualification-v4.0.0.swagger.json",
+        "description": "Checks eligibility and technical feasibility for product offerings at a given customer location.",
     },
 }
 
@@ -519,6 +662,121 @@ TMF_COMPETENCY_QUESTIONS = [
         "expected_non_empty": False,
         "validates": "TMF641 ServiceOrder lifecycle, ProductOrder→ServiceOrder link",
     },
+    # ── Phase 2B CQs ─────────────────────────────────────────────────────
+    {
+        "id": "CQ-TMF10",
+        "question": "Which trouble tickets are open or in-progress, what resources or services are affected, and which have breached SLA?",
+        "priority": "Critical",
+        "sparql_equiv": (
+            "SELECT ?ticket ?severity ?resource ?service ?sla_violated WHERE { "
+            "?ticket a :TroubleTicket ; :hasStatus ?status "
+            "FILTER(?status NOT IN ('Resolved','Closed','Cancelled')) "
+            "OPTIONAL { ?ticket :affectsResource ?resource } "
+            "OPTIONAL { ?ticket :affectsService ?service } "
+            "OPTIONAL { ?ticket :slaViolated ?sla_violated } }"
+        ),
+        "sql": """
+            SELECT tt.ticket_iri, tt.ticket_type, tt.severity, tt.priority,
+                   tt.status, tt.category,
+                   r.name AS affected_resource, r.nf_type,
+                   s.name AS affected_service,
+                   al.perceived_severity AS alarm_severity,
+                   tt.sla_violated, tt.submitted_at
+            FROM tmf_trouble_ticket tt
+            LEFT JOIN tmf_resource r ON tt.affected_resource_id = r.id
+            LEFT JOIN tmf_service s ON tt.affected_service_id = s.id
+            LEFT JOIN tmf_alarm al ON tt.related_alarm_id = al.id
+            WHERE tt.status NOT IN ('Resolved','Closed','Cancelled')
+            ORDER BY
+              CASE tt.severity
+                WHEN '1-Critical' THEN 1 WHEN '2-High' THEN 2
+                WHEN '3-Medium' THEN 3 ELSE 4
+              END
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF621 TroubleTicket lifecycle, resource and service fault linkage, SLA breach tracking",
+    },
+    {
+        "id": "CQ-TMF11",
+        "question": "Which network slice profiles are active, what are their SLA parameters, and which resource instances back them?",
+        "priority": "High",
+        "sparql_equiv": (
+            "SELECT ?profile ?sliceType ?latency ?reliability ?resource WHERE { "
+            "?profile a :NetworkSliceProfile ; :sliceType ?sliceType ; "
+            ":latencyTargetMs ?latency ; :reliabilityTarget ?reliability . "
+            "OPTIONAL { ?profile :backedByResource ?resource } "
+            "FILTER(?profile :lifecycleStatus 'Active') }"
+        ),
+        "sql": """
+            SELECT nsp.profile_iri, nsp.name AS profile_name,
+                   nsp.slice_type, nsp.sst, nsp.sd,
+                   nsp.max_dl_throughput, nsp.max_ul_throughput,
+                   nsp.latency_target_ms, nsp.reliability_target,
+                   nsp.max_devices, nsp.lifecycle_status,
+                   r.name AS resource_name, r.operational_state,
+                   a.name AS covered_by_sla
+            FROM tmf_network_slice_profile nsp
+            LEFT JOIN tmf_resource r ON nsp.resource_id = r.id
+            LEFT JOIN tmf_agreement a ON nsp.agreement_id = a.id
+            WHERE nsp.lifecycle_status = 'Active'
+            ORDER BY nsp.slice_type
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF645 NetworkSliceProfile, 3GPP S-NSSAI parameters, Resource-Slice linkage",
+    },
+    {
+        "id": "CQ-TMF12",
+        "question": "Which service quality reports show SLA non-compliance, and what metrics breached their thresholds?",
+        "priority": "Critical",
+        "sparql_equiv": (
+            "SELECT ?report ?service ?agreement ?score WHERE { "
+            "?report a :ServiceQualityReport ; :slaCompliant false ; "
+            ":overallQualityScore ?score ; "
+            ":coversService ?service ; :coversAgreement ?agreement }"
+        ),
+        "sql": """
+            SELECT sqr.report_iri, sqr.report_type,
+                   sqr.period_start, sqr.period_end,
+                   sqr.overall_quality_score, sqr.sla_compliant,
+                   sqr.quality_metrics,
+                   s.name AS service_name,
+                   a.name AS agreement_name, a.valid_until
+            FROM tmf_service_quality_report sqr
+            LEFT JOIN tmf_service s ON sqr.service_id = s.id
+            LEFT JOIN tmf_agreement a ON sqr.agreement_id = a.id
+            WHERE sqr.sla_compliant = 0
+            ORDER BY sqr.overall_quality_score ASC
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF657 ServiceQualityReport, SLA compliance tracking, KQI threshold breach",
+    },
+    {
+        "id": "CQ-TMF13",
+        "question": "Which customer bills are outstanding or disputed, and what is the total amount due per account?",
+        "priority": "High",
+        "sparql_equiv": (
+            "SELECT ?bill ?account ?amount ?state ?disputed WHERE { "
+            "?bill a :CustomerBill ; :billedAccount ?account ; "
+            ":amountDue ?amount ; :billState ?state . "
+            "OPTIONAL { ?bill :disputed ?disputed } "
+            "FILTER(?state NOT IN ('Settled','Cancelled')) }"
+        ),
+        "sql": """
+            SELECT cb.bill_number, cb.bill_type, cb.bill_date,
+                   cb.payment_due_date, cb.amount_due, cb.tax_amount,
+                   cb.currency_code, cb.state, cb.disputed,
+                   cb.dispute_reason,
+                   ca.account_number, ca.name AS account_name,
+                   p.name AS party_name
+            FROM tmf_customer_bill cb
+            JOIN tmf_customer_account ca ON cb.customer_account_id = ca.id
+            JOIN tmf_party p ON ca.party_id = p.id
+            WHERE cb.state NOT IN ('Settled','Cancelled')
+            ORDER BY cb.payment_due_date ASC
+        """,
+        "expected_non_empty": True,
+        "validates": "TMF678 CustomerBill, outstanding invoices and dispute tracking",
+    },
 ]
 
 # ── SID Ontology Turtle Generator ──────────────────────────────────────────
@@ -659,11 +917,20 @@ def generate_sid_hierarchy(output_dir: str):
     print(f"    SID classes: {total}  |  Domains: {len(SID_DOMAINS)}  |  Open APIs mapped: {len(TMF_API_MAP)}")
 
 
+def _tmf_href(api_id: str, resource_id: str, base_url: str = "https://gtc.example.com") -> str:
+    """Build a TMF-compliant href following /{apiRoot}/{resource}/{id} pattern."""
+    info = TMF_API_MAP.get(api_id, {})
+    url_pattern = info.get("url_pattern", f"/tmf-api/{api_id.lower()}/v4/{api_id.lower()}")
+    # Strip trailing slash from url_pattern, append /resource_id
+    return f"{base_url}{url_pattern.rstrip('/')}/{resource_id}"
+
+
 def generate_tmf_jsonld(output_dir: str):
     """Generate TMF-aligned JSON-LD context and sample payloads."""
     os.makedirs(output_dir, exist_ok=True)
 
     # TMF JSON-LD context — adds TMF namespace on top of the generic context
+    # Includes TMF630 meta-attributes: @baseType, @schemaLocation, @referredType, href
     context = {
         "@context": {
             "@vocab": BASE_IRI,
@@ -676,6 +943,11 @@ def generate_tmf_jsonld(output_dir: str):
             "generatedBy": {"@id": "prov:wasGeneratedBy", "@type": "@id"},
             "generatedAt": {"@id": "prov:generatedAtTime", "@type": "xsd:dateTime"},
             "associatedWith": {"@id": "prov:wasAssociatedWith", "@type": "@id"},
+            # TMF630 meta-attributes (required on all TmfEntity instances)
+            "href": {"@id": f"{BASE_IRI}href", "@type": "xsd:anyURI"},
+            "@baseType": {"@id": f"{BASE_IRI}baseType", "@type": "xsd:string"},
+            "@schemaLocation": {"@id": f"{BASE_IRI}schemaLocation", "@type": "xsd:anyURI"},
+            "@referredType": {"@id": f"{BASE_IRI}referredType", "@type": "xsd:string"},
             # TMF SID class shorthands
             "Resource": {"@id": f"{BASE_IRI}Resource"},
             "NetworkFunction": {"@id": f"{BASE_IRI}NetworkFunction"},
@@ -705,6 +977,32 @@ def generate_tmf_jsonld(output_dir: str):
             "thresholdHigh": {"@id": f"{BASE_IRI}thresholdHigh", "@type": "xsd:decimal"},
             "sidDomain": {"@id": f"{BASE_IRI}sidDomain", "@type": "xsd:string"},
             "tmfApiId": {"@id": f"{BASE_IRI}tmfApiId", "@type": "xsd:string"},
+            # Phase 2B — additional SID class shorthands
+            "TroubleTicket": {"@id": f"{BASE_IRI}TroubleTicket"},
+            "NetworkSliceProfile": {"@id": f"{BASE_IRI}NetworkSliceProfile"},
+            "ServiceQualityReport": {"@id": f"{BASE_IRI}ServiceQualityReport"},
+            "GeographicSite": {"@id": f"{BASE_IRI}GeographicSite"},
+            "CustomerBill": {"@id": f"{BASE_IRI}CustomerBill"},
+            "ProductOfferingQualification": {"@id": f"{BASE_IRI}ProductOfferingQualification"},
+            "EventSubscription": {"@id": f"{BASE_IRI}EventSubscription"},
+            "ConflictEvent": {"@id": f"{BASE_IRI}ConflictEvent"},
+            # Phase 2B property shorthands
+            "ticketType": {"@id": f"{BASE_IRI}hasTicketType", "@type": "xsd:string"},
+            "ticketStatus": {"@id": f"{BASE_IRI}hasTicketStatus", "@type": "xsd:string"},
+            "sliceType": {"@id": f"{BASE_IRI}hasSliceType", "@type": "xsd:string"},
+            "sst": {"@id": f"{BASE_IRI}hasSst", "@type": "xsd:integer"},
+            "latencyTargetMs": {"@id": f"{BASE_IRI}latencyTargetMs", "@type": "xsd:decimal"},
+            "slaCompliant": {"@id": f"{BASE_IRI}slaCompliant", "@type": "xsd:boolean"},
+            "qualityScore": {"@id": f"{BASE_IRI}overallQualityScore", "@type": "xsd:decimal"},
+            "billState": {"@id": f"{BASE_IRI}hasBillState", "@type": "xsd:string"},
+            "amountDue": {"@id": f"{BASE_IRI}amountDue", "@type": "xsd:decimal"},
+            "callbackUrl": {"@id": f"{BASE_IRI}callbackUrl", "@type": "xsd:anyURI"},
+            "eventType": {"@id": f"{BASE_IRI}eventType", "@type": "xsd:string"},
+            "conflictType": {"@id": f"{BASE_IRI}conflictType", "@type": "xsd:string"},
+            "resolutionTier": {"@id": f"{BASE_IRI}resolutionTier", "@type": "xsd:integer"},
+            # PROV-O wasInvalidatedBy (conflict resolution)
+            "wasInvalidatedBy": {"@id": "prov:wasInvalidatedBy", "@type": "@id"},
+            "invalidatedAt": {"@id": "prov:invalidatedAtTime", "@type": "xsd:dateTime"},
         }
     }
     ctx_path = os.path.join(output_dir, "tmf-context.json")
@@ -712,11 +1010,17 @@ def generate_tmf_jsonld(output_dir: str):
         json.dump(context, f, indent=2)
     print(f"  ✓ TMF JSON-LD context   → {ctx_path}")
 
-    # Sample TMF642 Alarm payload
+    tmf639_info = TMF_API_MAP["TMF639"]
+    tmf642_info = TMF_API_MAP["TMF642"]
+
+    # Sample TMF642 Alarm payload — includes TMF630 meta-attributes and href
     alarm_payload = {
         "@context": f"{BASE_IRI}jsonld/tmf-context.json",
         "@type": ["Alarm", "CommunicationsAlarm"],
+        "@baseType": "Alarm",
+        "@schemaLocation": tmf642_info["schema_location"],
         "@id": "https://gtc.example.com/alarms/ALM-20260410-001",
+        "href": _tmf_href("TMF642", "ALM-20260410-001"),
         "alarmType": "CommunicationsAlarm",
         "perceivedSeverity": "Critical",
         "alarmState": "Cleared",
@@ -724,7 +1028,9 @@ def generate_tmf_jsonld(output_dir: str):
         "specificProblem": "gNB 043 lost uplink connectivity to AMF — packet loss 18.7%",
         "sourceResource": {
             "@type": "NetworkFunction",
+            "@referredType": "NetworkFunction",
             "@id": "https://gtc.example.com/resources/gnb-043",
+            "href": _tmf_href("TMF639", "gnb-043"),
             "name": "gNB Site 043",
             "nfType": "gNB",
             "operationalState": "Disabled",
@@ -735,12 +1041,14 @@ def generate_tmf_jsonld(output_dir: str):
         "generatedAt": "2026-04-10T02:14:00Z",
         "generatedBy": {
             "@type": "Party",
+            "@referredType": "Party",
             "@id": "https://gtc.example.com/parties/ml-monitor-agent",
+            "href": _tmf_href("TMF632", "ml-monitor-agent"),
             "name": "ML Monitor Agent"
         },
         "_tmf": {
             "apiId": "TMF642",
-            "apiVersion": "v4.0",
+            "apiVersion": tmf642_info["version"],
             "sidDomain": "Resource",
             "sidABE": "Resource Trouble",
             "etomProcess": "1.4.4 Alarm Surveillance"
@@ -755,35 +1063,46 @@ def generate_tmf_jsonld(output_dir: str):
         json.dump(alarm_payload, f, indent=2)
     print(f"  ✓ TMF642 alarm payload  → {alarm_path}")
 
-    # Sample TMF639 Resource inventory payload
+    # Sample TMF639 Resource inventory payload — includes TMF630 meta-attributes and href
     resource_payload = {
         "@context": f"{BASE_IRI}jsonld/tmf-context.json",
         "@type": ["Resource", "NetworkFunction"],
+        "@baseType": "Resource",
+        "@schemaLocation": tmf639_info["schema_location"],
         "@id": "https://gtc.example.com/resources/amf-east-01",
+        "href": _tmf_href("TMF639", "amf-east-01"),
         "name": "AMF East 01",
         "nfType": "AMF",
         "operationalState": "Enabled",
         "adminState": "Unlocked",
         "resourceSpecification": {
             "@type": "ResourceSpecification",
+            "@referredType": "ResourceSpecification",
             "@id": "https://gtc.example.com/catalog/spec/amf-5g-v2",
+            "href": _tmf_href("TMF634", "amf-5g-v2"),
             "name": "AMF 5G Specification",
             "version": "2.0"
         },
         "place": {
             "@type": "GeographicPlace",
+            "@referredType": "GeographicPlace",
             "@id": "https://gtc.example.com/places/dc-east",
+            "href": _tmf_href("TMF673", "dc-east"),
             "name": "Data Centre East"
         },
         "resourceRelationship": [
             {
                 "relationshipType": "relies-on",
-                "resource": {"@id": "https://gtc.example.com/resources/nrf-east-01"}
+                "resource": {
+                    "@referredType": "NetworkFunction",
+                    "@id": "https://gtc.example.com/resources/nrf-east-01",
+                    "href": _tmf_href("TMF639", "nrf-east-01"),
+                }
             }
         ],
         "_tmf": {
             "apiId": "TMF639",
-            "apiVersion": "v5.0",
+            "apiVersion": tmf639_info["version"],
             "sidDomain": "Resource",
             "sidABE": "Logical Resource"
         }
@@ -794,6 +1113,13 @@ def generate_tmf_jsonld(output_dir: str):
     print(f"  ✓ TMF639 resource payload → {res_path}")
 
     # MCP tool definitions with TMF semantic bindings
+    # outputSchema includes TMF630 meta-attributes on all response objects
+    tmf630_meta_properties = {
+        "href":            {"type": "string", "format": "uri", "description": "TMF-compliant self href /{apiRoot}/{resource}/{id}"},
+        "@baseType":       {"type": "string", "description": "TMF630: base type of this resource"},
+        "@schemaLocation": {"type": "string", "format": "uri", "description": "TMF630: JSON schema URL for this resource"},
+        "@referredType":   {"type": "string", "description": "TMF630: concrete type when used as a reference"},
+    }
     tmf_tools = [
         {
             "name": "get_network_function_status",
@@ -808,6 +1134,16 @@ def generate_tmf_jsonld(output_dir: str):
                     "nf_type": {"type": "string", "enum": ["AMF","SMF","UPF","gNB","PCF","UDM","NRF"]}
                 },
                 "required": ["nf_iri"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    **tmf630_meta_properties,
+                    "operationalState": {"type": "string"},
+                    "adminState": {"type": "string"},
+                    "nfType": {"type": "string"},
+                },
+                "required": ["href", "@baseType", "@schemaLocation", "operationalState", "adminState"]
             }
         },
         {
@@ -829,6 +1165,15 @@ def generate_tmf_jsonld(output_dir: str):
                     "raised_at": {"type": "string", "format": "date-time"}
                 },
                 "required": ["alarm_type","perceived_severity","source_resource_iri","raised_by_iri","raised_at"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    **tmf630_meta_properties,
+                    "alarmState": {"type": "string"},
+                    "perceivedSeverity": {"type": "string"},
+                },
+                "required": ["href", "@baseType", "@schemaLocation", "alarmState"]
             }
         },
         {
@@ -851,6 +1196,16 @@ def generate_tmf_jsonld(output_dir: str):
                     "recorded_by_iri": {"type": "string"}
                 },
                 "required": ["resource_iri","kpi_type","numeric_value","confidence","derivation","observed_at","recorded_by_iri"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    **tmf630_meta_properties,
+                    "kpiType": {"type": "string"},
+                    "numericValue": {"type": "number"},
+                    "breachIndicator": {"type": "boolean"},
+                },
+                "required": ["href", "@baseType", "@schemaLocation", "kpiType"]
             }
         },
     ]

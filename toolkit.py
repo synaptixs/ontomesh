@@ -161,6 +161,22 @@ def phase2_ontology(db_path: str, out_path: str):
     generate_ontology(intro, os.path.join(out_path, "ontology"))
     intro.close()
 
+    # Reasoner integration — classify and snapshot (graceful if ROBOT absent)
+    from reasoner import run_and_report
+    ontology_path = os.path.join(out_path, "ontology", "enterprise.ttl")
+    profile_path  = os.path.join(out_path, "ontology", "profile_recommendation.md")
+    profile = "OWL 2 EL"
+    try:
+        if os.path.isfile(profile_path):
+            with open(profile_path) as f:
+                for line in f:
+                    if "**Recommended profile:**" in line:
+                        profile = line.split("**Recommended profile:**")[1].strip().rstrip("  ").rstrip()
+                        break
+    except Exception:
+        pass
+    run_and_report(ontology_path, os.path.join(out_path, "ontology"), profile)
+
 
 def phase3_shacl(db_path: str, out_path: str):
     step(3, "Validation — SHACL Shape Generation")
@@ -244,6 +260,208 @@ def phase_tmf(db_path: str, out_path: str):
     intro.close()
 
 
+def _generate_runtime_mcp_tools(out_path: str):
+    """Write the runtime MCP tool definitions JSON to output/jsonld/."""
+    import json as _json
+    tools = [
+        {
+            "name": "ground_data",
+            "description": (
+                "Ground a natural-language question against the enterprise database "
+                "using the specified ontology flavor. Retrieves relevant records from "
+                "the flavor's DB tables via keyword matching and serialises them as "
+                "JSON-LD nodes using the flavor's scoped context. Returns a grounded "
+                "data payload ready for LLM consumption."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The natural-language question driving data retrieval."
+                    },
+                    "flavor": {
+                        "type": "string",
+                        "description": "Ontology flavor name (e.g. 'network-ops', 'billing', 'fault-management').",
+                        "enum": ["network-ops", "billing", "compliance", "customer", "fault-management"]
+                    },
+                    "max_records": {
+                        "type": "integer",
+                        "description": "Maximum number of records to retrieve across all tables.",
+                        "default": 50
+                    },
+                    "db_path": {
+                        "type": "string",
+                        "description": "Path to the SQLite enterprise database. Defaults to db/enterprise.db."
+                    }
+                },
+                "required": ["question", "flavor"]
+            }
+        },
+        {
+            "name": "assemble_payload",
+            "description": (
+                "Assemble a complete LLM input payload from a grounded data set, "
+                "system prompt, ontology flavor section, PROV-O context, and output "
+                "format instructions. The returned payload dict is LLM-agnostic and "
+                "can be consumed by any registered adapter (Anthropic, OpenAI, Vertex, Ollama)."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The natural-language question to answer."
+                    },
+                    "flavor": {
+                        "type": "string",
+                        "description": "Ontology flavor name.",
+                        "enum": ["network-ops", "billing", "compliance", "customer", "fault-management"]
+                    },
+                    "grounded_data": {
+                        "type": "object",
+                        "description": "Pre-grounded JSON-LD data dict (output of ground_data). If omitted, auto-grounds."
+                    },
+                    "output_format": {
+                        "type": "string",
+                        "description": "Desired response format from the LLM.",
+                        "enum": ["json", "jsonld", "text", "table"],
+                        "default": "json"
+                    },
+                    "max_tokens": {
+                        "type": "integer",
+                        "description": "Token budget for the assembled payload.",
+                        "default": 4000
+                    }
+                },
+                "required": ["question", "flavor"]
+            }
+        },
+        {
+            "name": "validate_response",
+            "description": (
+                "Validate an LLM response against SHACL shapes for the active flavor "
+                "and stamp it with PROV-O provenance. Stores an ObservationRecord in "
+                "the database capturing the model, payload ID, and confidence score. "
+                "Returns validation status, violation messages, and the observation IRI."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "response": {
+                        "type": "string",
+                        "description": "The raw LLM response string (JSON or plain text)."
+                    },
+                    "payload_id": {
+                        "type": "string",
+                        "description": "The UUID payload_id from the assembled payload."
+                    },
+                    "model_id": {
+                        "type": "string",
+                        "description": "The LLM model identifier (e.g. 'claude-sonnet-4-5')."
+                    },
+                    "flavor": {
+                        "type": "string",
+                        "description": "Ontology flavor name used for SHACL shape selection.",
+                        "enum": ["network-ops", "billing", "compliance", "customer", "fault-management"]
+                    },
+                    "confidence": {
+                        "type": "number",
+                        "description": "Optional confidence score override (0.0–1.0).",
+                        "minimum": 0.0,
+                        "maximum": 1.0
+                    }
+                },
+                "required": ["response", "payload_id", "model_id", "flavor"]
+            }
+        },
+        {
+            "name": "ask_ontology",
+            "description": (
+                "Run the full ontology-augmented AI pipeline in a single call: "
+                "ground → screen → assemble → LLM call → validate+stamp. "
+                "Equivalent to RuntimeClient.ask(). Returns the answer, PROV-O "
+                "provenance, validation status, and observation IRI."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The natural-language question to answer."
+                    },
+                    "flavor": {
+                        "type": "string",
+                        "description": "Ontology flavor name.",
+                        "enum": ["network-ops", "billing", "compliance", "customer", "fault-management"]
+                    },
+                    "adapter": {
+                        "type": "string",
+                        "description": "LLM adapter to use.",
+                        "enum": ["anthropic", "openai", "vertex", "ollama"],
+                        "default": "anthropic"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional model override (e.g. 'claude-sonnet-4-5', 'gpt-4o')."
+                    },
+                    "output_format": {
+                        "type": "string",
+                        "description": "Desired response format.",
+                        "enum": ["json", "jsonld", "text", "table"],
+                        "default": "json"
+                    },
+                    "max_records": {
+                        "type": "integer",
+                        "description": "Maximum DB records to include in context.",
+                        "default": 50
+                    },
+                    "min_confidence": {
+                        "type": "number",
+                        "description": "Minimum confidence score for InputGate screening.",
+                        "minimum": 0.0,
+                        "maximum": 1.0,
+                        "default": 0.0
+                    }
+                },
+                "required": ["question", "flavor"]
+            }
+        }
+    ]
+
+    jsonld_dir = os.path.join(out_path, "jsonld")
+    os.makedirs(jsonld_dir, exist_ok=True)
+    out_file = os.path.join(jsonld_dir, "runtime-mcp-tools.json")
+    with open(out_file, "w") as f:
+        _json.dump({"tools": tools}, f, indent=2)
+    print(f"  ✓ Runtime MCP tools       → {out_file}")
+
+
+def phase_runtime(db_path: str, out_path: str):
+    """Phase RT — Runtime Layer: Flavor Registry, Grounder, Assembler, Gates, SDK."""
+    step(0, "Runtime Layer — Flavor Registry · Grounder · Assembler · Gates · SDK")
+    sys.path.insert(0, os.path.join(HERE, "runtime"))
+    from flavor_registry import FlavorRegistry
+    from grounder import Grounder
+    from assembler import PayloadAssembler
+    from output_gate import OutputGate
+    from input_gate import InputGate
+
+    # Generate runtime MCP tools JSON
+    _generate_runtime_mcp_tools(out_path)
+
+    # Validate all 5 flavor files load correctly
+    reg = FlavorRegistry()
+    for fname in reg.list_flavors():
+        f = reg.load(fname)
+        errs = reg.validate(f)
+        if errs:
+            print(f"  WARN flavor {fname}: {errs}")
+        else:
+            print(f"  ✓  flavor '{fname}' valid ({len(f['owl_classes'])} classes, tier={f['sensitivity_tier']})")
+    print(f"  ✓  {len(reg.list_flavors())} flavors registered")
+
+
 def phase_test(db_path: str, out_path: str):
     step(0, "CQ Tests + Governance Scorecard")
     from db_introspector import DBIntrospector
@@ -252,6 +470,13 @@ def phase_test(db_path: str, out_path: str):
     intro = DBIntrospector(db_path)
     run_cq_tests(intro, os.path.join(out_path, "reports"))
     intro.close()
+
+    # SPARQL CQ test suite
+    from sparql_tester import run_sparql_cq_tests
+    run_sparql_cq_tests(
+        os.path.join(out_path, "ontology"),
+        os.path.join(out_path, "reports"),
+    )
 
 
 def phase_report(out_path: str):
@@ -269,8 +494,17 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","tmf","test","report"],
+                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime"],
                         help="Run a specific phase only")
+    parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
+    parser.add_argument("--log-format", default="auto",
+                        choices=["auto","jsonl","syslog","cef","otlp","regex"],
+                        help="Log format for --phase log (default: auto-detect)")
+    parser.add_argument("--log-regex",  default=None, help="Named-group regex for --log-format regex")
+    parser.add_argument("--dry-run",    action="store_true", help="Log ingest dry-run (no DB writes)")
+    parser.add_argument("--store",      default="all",
+                        choices=["all","stardog","fuseki","neptune"],
+                        help="Graph store target for --phase security")
     parser.add_argument("--industry", default="Enterprise", help="Industry label for output")
     args = parser.parse_args()
 
@@ -279,15 +513,77 @@ def main():
 
     os.makedirs(args.out, exist_ok=True)
 
+    def phase_reasoner(db_path: str, out_path: str):
+        step(0, "Reasoner — OWL 2 Consistency Check + Hierarchy Snapshot")
+        from reasoner import run_and_report
+        ontology_path = os.path.join(out_path, "ontology", "enterprise.ttl")
+        run_and_report(ontology_path, os.path.join(out_path, "ontology"))
+
+    def phase_sparql(db_path: str, out_path: str):
+        step(0, "SPARQL CQ Tests")
+        from sparql_tester import run_sparql_cq_tests
+        run_sparql_cq_tests(
+            os.path.join(out_path, "ontology"),
+            os.path.join(out_path, "reports"),
+        )
+
+    def phase_log(db_path: str, out_path: str):
+        step(0, "Structured Log Ingestion")
+        from log_connector import run_log_ingest
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase log")
+            print("    Example: python3 toolkit.py --phase log --log-path /var/log/app.log")
+            return
+        run_log_ingest(
+            db_path=db_path,
+            out_path=out_path,
+            log_path=log_path,
+            fmt=args.log_format,
+            custom_regex=args.log_regex,
+            dry_run=args.dry_run,
+        )
+
+    def phase_security(db_path: str, out_path: str):
+        step(0, "Named-Graph RBAC Config Generation")
+        from db_introspector import DBIntrospector
+        from rbac_generator import generate_rbac
+        intro = DBIntrospector(db_path)
+        generate_rbac(intro, os.path.join(out_path, "security"), store=args.store)
+        intro.close()
+
+    def phase_conflict(db_path: str, out_path: str):
+        step(0, "Multi-Agent Conflict Resolution — 3-Tier Chain")
+        from conflict_resolver import (
+            run_conflict_resolution,
+            generate_conflict_shacl,
+            generate_conflict_mcp_tools,
+        )
+        run_conflict_resolution(db_path, out_path)
+        generate_conflict_shacl(os.path.join(out_path, "shapes"))
+        generate_conflict_mcp_tools(os.path.join(out_path, "jsonld"))
+
+    def phase_alignment(db_path: str, out_path: str):
+        step(0, "Ontology Alignment & Federation — DOLCE/FOAF/Schema.org/SOSA")
+        from alignment_generator import run_alignment
+        run_alignment(out_path)
+
     phases = {
-        "1":      [(phase1_foundation, [args.db, args.out])],
-        "2":      [(phase2_ontology,   [args.db, args.out])],
-        "3":      [(phase3_shacl,      [args.db, args.out])],
-        "4":      [(phase4_mapping,    [args.db, args.out])],
-        "5":      [(phase5_exchange,   [args.db, args.out])],
-        "tmf":    [(phase_tmf,         [args.db, args.out])],
-        "test":   [(phase_test,        [args.db, args.out])],
-        "report": [(phase_report,      [args.out])],
+        "1":       [(phase1_foundation, [args.db, args.out])],
+        "2":       [(phase2_ontology,   [args.db, args.out])],
+        "3":       [(phase3_shacl,      [args.db, args.out])],
+        "4":       [(phase4_mapping,    [args.db, args.out])],
+        "5":       [(phase5_exchange,   [args.db, args.out])],
+        "tmf":     [(phase_tmf,         [args.db, args.out])],
+        "test":    [(phase_test,        [args.db, args.out])],
+        "report":  [(phase_report,      [args.out])],
+        "reasoner": [(phase_reasoner,  [args.db, args.out])],
+        "sparql":   [(phase_sparql,    [args.db, args.out])],
+        "log":       [(phase_log,       [args.db, args.out])],
+        "security":  [(phase_security,  [args.db, args.out])],
+        "conflict":  [(phase_conflict,  [args.db, args.out])],
+        "alignment": [(phase_alignment, [args.db, args.out])],
+        "runtime":   [(phase_runtime,   [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
@@ -295,6 +591,9 @@ def main():
             (phase4_mapping,    [args.db, args.out]),
             (phase5_exchange,   [args.db, args.out]),
             (phase_tmf,         [args.db, args.out]),
+            (phase_conflict,    [args.db, args.out]),
+            (phase_alignment,   [args.db, args.out]),
+            (phase_runtime,     [args.db, args.out]),
             (phase_test,        [args.db, args.out]),
             (phase_report,      [args.out]),
         ]

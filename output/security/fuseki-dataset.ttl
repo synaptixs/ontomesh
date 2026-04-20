@@ -1,0 +1,42 @@
+@prefix :     <#> .
+@prefix fuseki: <http://jena.apache.org/fuseki#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ja:   <http://jena.hpl.hp.com/2005/11/Assembler#> .
+
+# ── Fuseki Dataset Configuration ─────────────────────────────────
+# Named graphs mapped to sensitivity tiers
+
+:ontologyService a fuseki:Service ;
+    fuseki:name "ontology" ;
+    fuseki:endpoint [ fuseki:operation fuseki:query  ; fuseki:name "query" ] ;
+    fuseki:endpoint [ fuseki:operation fuseki:update ; fuseki:name "update" ] ;
+    fuseki:dataset :tieredDataset .
+
+:tieredDataset a ja:RDFDataset ;
+    ja:namedGraph [ ja:graphName <https://ontology.example.com/enterprise/graph/Public> ; ja:graph :graphPublic ] ;
+    ja:namedGraph [ ja:graphName <https://ontology.example.com/enterprise/graph/Internal> ; ja:graph :graphInternal ] ;
+    ja:namedGraph [ ja:graphName <https://ontology.example.com/enterprise/graph/Confidential> ; ja:graph :graphConfidential ] ;
+    ja:namedGraph [ ja:graphName <https://ontology.example.com/enterprise/graph/Restricted> ; ja:graph :graphRestricted ] ;
+    .
+
+:graphPublic a ja:MemoryModel ;
+    # Sensitivity tier: Public
+    # Classes: AssetType, ProductOffering, ProductSpecification, ResourceSpecification, ServiceSpecification
+    .
+
+:graphInternal a ja:MemoryModel ;
+    # Sensitivity tier: Internal
+    # Classes: Agent, AgentRoles, Alarm, Asset, Attachment, Characteristic, DomainEvent, EventParticipants, GeographicLocation, Note, Organization, PartyRole, Policy, PolicyApplication, Resource, ResourceRelationship, Role, Service, ServiceOrder, UserRole
+    .
+
+:graphConfidential a ja:MemoryModel ;
+    # Sensitivity tier: Confidential
+    # Classes: Agreement, CustomerAccount, ObservationRecord, Party, PerformanceIndicator, Product, ProductOrder, ServiceProblem
+    .
+
+:graphRestricted a ja:MemoryModel ;
+    # Sensitivity tier: Restricted
+    # Classes: (none)
+    .
+

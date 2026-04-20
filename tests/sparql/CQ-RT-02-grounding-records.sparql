@@ -1,0 +1,37 @@
+# CQ-RT-02: Verify ObservationRecord instances created by the Grounder have
+#            derivation_method=SYNTHESIZED and a source_ref linking to the original question.
+#
+# Competency Question:
+#   Which observation records were produced by the runtime Grounder, do they all
+#   carry derivationMethod SYNTHESIZED, and do they reference a source question?
+#
+# Expected result: All grounding-type observation records have:
+#   - :derivationMethod "SYNTHESIZED"
+#   - :recordType "GROUNDING"
+#   - :sourceRef bound and non-empty
+#   - prov:generatedAtTime present
+#
+# Phase: RT — Runtime Layer
+# Validates: Grounder.record_grounding(); ObservationRecord provenance stamping.
+
+PREFIX : <https://ontology.example.com/tmf/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?record ?entityIri ?derivationMethod ?sourceRef ?generatedAt
+WHERE {
+  ?record a :ObservationRecord ;
+          :recordType        "GROUNDING" ;
+          :derivationMethod  ?derivationMethod ;
+          :sourceRef         ?sourceRef ;
+          :entityIri         ?entityIri .
+
+  OPTIONAL { ?record prov:generatedAtTime ?generatedAt }
+
+  # All grounder records must be SYNTHESIZED
+  FILTER(?derivationMethod = "SYNTHESIZED")
+
+  # Source ref must be non-empty (captures the original question)
+  FILTER(BOUND(?sourceRef) && ?sourceRef != "")
+}
+ORDER BY DESC(?generatedAt)
