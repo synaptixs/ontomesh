@@ -1,4 +1,4 @@
-# Ontology Engineering Toolkit — v1.4
+# Ontology Engineering Toolkit — v1.5
 
 **Domain-agnostic · Zero core dependencies · Runs in under 2 seconds**
 
@@ -45,9 +45,9 @@ It reads your relational schema and a thin annotation table, then generates ever
 | TMF | TM Forum alignment | SID OWL hierarchy (24 APIs, 13 CQs), TMF API coverage |
 | conflict | Multi-agent conflict resolution ✓ Phase 2B | 3-tier resolution chain, SHACL shapes, MCP tools, PROV-O invalidation |
 | alignment | Ontology alignment & federation ✓ Phase 2B | alignment.ttl (DOLCE/FOAF/Schema.org/SOSA), federation-config.ttl, federated SPARQL queries |
-| Test | CQ test runner | 17 competency question tests, governance scorecard |
+| Test | CQ test runner | 18 SPARQL competency question tests, governance scorecard |
 | Report | HTML reporter | Self-contained visual summary report |
-| **Runtime** | **AI consumption layer** | **Payload assembler, grounding module, output gate, PROV-O stamping** |
+| **runtime** | **AI consumption layer ✓ Complete** | **FlavorRegistry (5 flavors), Grounder, PayloadAssembler, InputGate, OutputGate, RuntimeClient (4 LLM adapters)** |
 
 ---
 
@@ -406,17 +406,24 @@ ontology-toolkit/
 │       ├── output/
 │       └── session.json
 │
-├── runtime/                     ← AI consumption layer (connects toolkit to LLMs)
+├── runtime/                     ← AI consumption layer (connects toolkit to LLMs) ✓ Complete
 │   ├── flavors/                 ← Named ontology views for each agent type
-│   │   ├── network-ops.json     ← Resource, Alarm, KPI classes — network agents
-│   │   ├── billing.json         ← Product, Account, Order classes — billing agents
-│   │   ├── compliance.json      ← Policy, Agreement, Party classes — compliance agents
-│   │   ├── customer.json        ← Party, Service, Product classes — customer agents
-│   │   └── fault-management.json ← Alarm, ServiceProblem, Resource classes
-│   ├── grounder.py              ← Serialises enterprise records as JSON-LD (grounding step)
-│   ├── assembler.py             ← Assembles complete LLM payload from 5 components
-│   ├── output_gate.py           ← SHACL-validates LLM responses + stamps PROV-O provenance
-│   └── client.py                ← RuntimeClient — end-to-end helper with multi-LLM adapters
+│   │   ├── network-ops.json     ← Resource, NetworkFunction, Alarm, KPI — network agents
+│   │   ├── billing.json         ← CustomerBill, Product, Agreement — billing agents
+│   │   ├── compliance.json      ← ConflictEvent, Policy, ObservationRecord — compliance agents
+│   │   ├── customer.json        ← Party, Service, Product — customer service agents
+│   │   └── fault-management.json ← Alarm, TroubleTicket, ServiceQualityReport
+│   ├── flavor_registry.py       ← Loads, validates, and serves flavor configs
+│   ├── grounder.py              ← Queries DB and serialises records as JSON-LD
+│   ├── assembler.py             ← Assembles full 5-component LLM payload
+│   ├── output_gate.py           ← SHACL-validates LLM responses + PROV-O stamping
+│   ├── input_gate.py            ← SHACL acceptance gate for inbound enterprise data
+│   ├── client.py                ← RuntimeClient — end-to-end pipeline, adapter factory
+│   └── adapters/                ← LLM-specific adapters
+│       ├── anthropic_adapter.py ← Anthropic Messages API (with prompt caching)
+│       ├── openai_adapter.py    ← OpenAI Chat Completions
+│       ├── vertex_adapter.py    ← Google Vertex AI (Gemini)
+│       └── ollama_adapter.py    ← Ollama local LLM
 │
 ├── .github/
 │   └── workflows/
@@ -791,8 +798,8 @@ Add an entry to `INDUSTRY_TEMPLATES` in `onboard.py`:
 
 ---
 
-*Framework: v1.1 · Toolkit: v1.3 · April 2026*  
-*OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · TM Forum SID v23.0 · 6 database backends · Runtime layer (roadmap)*
+*Framework: v1.1 · Toolkit: v1.5 · April 2026*  
+*OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · TM Forum SID v23.0 · 6 database backends · Runtime layer (complete)*
 
 ---
 
@@ -893,54 +900,79 @@ Raw enterprise data sitting next to an ontology in a prompt does not connect the
 
 An LLM response is a new assertion entering your enterprise knowledge base. Without output governance, it is an ungovernable, untraceable string. With PROV-O stamping it becomes a first-class enterprise fact with a full provenance chain: who asked, which model answered, when, with what confidence, derived from which source records. This is what makes AI output auditable — and what regulators increasingly require.
 
-### Runtime CLI (roadmap)
+### Running the runtime phase
 
 ```bash
-# Generate a flavor from the master ontology
-python3 runtime/grounder.py --flavor network-ops --question "Which NFs are degraded?" --db "postgresql://..."
+# Validate all flavors and generate runtime MCP tools
+python3 toolkit.py --phase runtime
 
-# Assemble a full payload
-python3 runtime/assembler.py --flavor network-ops --question "Which NFs are degraded?" --db "postgresql://..." --output payload.json
+# Ground data for a question, output JSON-LD to stdout
+python3 runtime/grounder.py --flavor network-ops \
+    --question "Which NFs are degraded?" \
+    --db db/enterprise.db
 
-# Send payload to an LLM and govern the response
-python3 runtime/client.py --payload payload.json --llm anthropic --model claude-sonnet-4-6
-
-# Inspect the stored ObservationRecord
-python3 toolkit.py --phase report
+# Validate inbound records against SHACL shapes before they reach the LLM
+python3 -c "
+import sys; sys.path.insert(0, 'runtime')
+from input_gate import InputGate
+gate = InputGate('db/enterprise.db', min_confidence=0.6)
+accepted, rejected = gate.screen_db_query('tmf_resource', flavor_name='network-ops')
+print(gate.summary(accepted, rejected))
+"
 ```
 
-### Runtime SDK (roadmap)
+### Runtime SDK
 
 ```python
-from ontology_runtime import RuntimeClient
+import sys; sys.path.insert(0, 'runtime')
+from client import RuntimeClient
 
 client = RuntimeClient(
-    db="postgresql://user:pass@host/mydb",
-    ontology_dir="output/",
-    llm="anthropic",
-    model="claude-sonnet-4-6"
+    db_path="db/enterprise.db",
+    adapter="anthropic",         # or "openai", "vertex", "ollama"
+    model="claude-sonnet-4-5",
 )
 
-response = client.ask(
+result = client.ask(
+    question="Which 5G network functions are currently degraded and what is their impact on active services?",
     flavor="network-ops",
-    question="Which 5G network functions are currently degraded and what is the impact on active services?",
-    instructions="Return a JSON list of affected NFs with severity and impacted service names."
+    output_format="json",
 )
 
-# response.answer      — the LLM's response
-# response.grounded_data — the JSON-LD records sent in the payload
-# response.provenance  — full PROV-O chain on the response
-# response.shacl_valid — True if the response passed the output gate
-# response.stored_as   — IRI of the ObservationRecord written to the semantic layer
-print(response.answer)
+print(result["answer"])           # LLM response text
+print(result["valid"])            # True if output gate SHACL check passed
+print(result["observation_iri"])  # IRI of the PROV-O ObservationRecord stored
+print(result["prov"])             # Full provenance dict: model, timestamp, confidence
 ```
+
+### Supported LLM adapters
+
+| Adapter | `adapter=` key | Default model | Install |
+|---|---|---|---|
+| Anthropic Messages API | `"anthropic"` | `claude-sonnet-4-5` | `pip install anthropic` |
+| OpenAI Chat Completions | `"openai"` | `gpt-4o` | `pip install openai` |
+| Google Vertex AI (Gemini) | `"vertex"` | `gemini-1.5-pro` | `pip install google-cloud-aiplatform` |
+| Ollama (local) | `"ollama"` | `llama3` | Ollama server running at `localhost:11434` |
+
+All adapters are optional — the core runtime modules (`grounder`, `assembler`, `input_gate`, `output_gate`) have zero external dependencies. Install only the adapter you need. The Anthropic adapter uses prompt caching on the system prompt for reduced latency and cost.
+
+### Runtime MCP tools
+
+The runtime phase generates `output/jsonld/runtime-mcp-tools.json` with four MCP tool definitions: `ground_data`, `assemble_payload`, `validate_response`, and `ask_ontology`. These tools let any MCP-compatible agent call the runtime pipeline directly.
 
 ### What the runtime layer does NOT do
 
 The runtime layer is not a replacement for the toolkit pipeline. It does not generate ontologies, create SHACL shapes, or manage database schemas. Those are the pipeline's responsibility. The runtime layer is strictly a consumption layer — it reads the pipeline's outputs and uses them to power governed, auditable LLM interactions.
 
-The runtime layer also does not choose which LLM to use. That is an enterprise decision. The payload it assembles is LLM-agnostic, and adapters for major APIs (Anthropic, OpenAI, Google, Ollama) handle the API-specific call mechanics while the semantic payload remains identical.
+The runtime layer also does not choose which LLM to use. That is an enterprise decision. The payload it assembles is LLM-agnostic, and adapters for Anthropic, OpenAI, Google Vertex, and Ollama handle API-specific mechanics while the semantic payload remains identical.
 
-### Status
+### Status — ✓ Complete (Apr 2026)
 
-The runtime layer is on the development roadmap. The semantic artifacts it requires — OWL ontology, SHACL shapes, JSON-LD context, PROV-O patterns — are all produced by the current toolkit pipeline (v1.3). The runtime modules (`grounder.py`, `assembler.py`, `output_gate.py`, `client.py`) are planned for the Phase 2A sprint cycle. See the [roadmap plan](toolkit_roadmap_plan.html) for delivery timeline and sprint assignments.
+| Component | Status | Output |
+|---|---|---|
+| FlavorRegistry | ✓ Complete | 5 starter flavors, auto-discovery from `runtime/flavors/` |
+| Grounder | ✓ Complete | JSON-LD nodes with `@type`, ontology IRI bindings, PROV-O grounding record |
+| InputGate | ✓ Complete | SHACL acceptance screening, rejection log to `semantic_loss_log` |
+| PayloadAssembler | ✓ Complete | 5-component payload, token budget, LLM-agnostic dict output |
+| OutputGate | ✓ Complete | SHACL response validation, PROV-O stamping, `ObservationRecord` storage |
+| RuntimeClient | ✓ Complete | Full pipeline in one call, async support, 4 LLM adapters |

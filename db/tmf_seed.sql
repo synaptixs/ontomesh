@@ -657,3 +657,102 @@ INSERT INTO tmf_conflict_event (conflict_iri, assertion_a_iri, assertion_b_iri,
  'sh:Violation: OperationalAndAdminStateConsistency — Disabled resource must not be Unlocked.',
  1,NULL,NULL,
  1,0,'Escalated','2026-04-10T02:14:00Z',NULL);
+
+-- ============================================================
+-- PHASE RT: Runtime Layer seed
+-- ============================================================
+
+-- ── Runtime table ontology_metadata annotations ───────────────
+INSERT INTO ontology_metadata (
+    target_type, table_name, semantic_type, label, description,
+    sensitivity_tier, is_event_class,
+    skos_pref_label, skos_alt_labels, cq_coverage,
+    sid_domain, sid_abe, tmf_api_id, tmf_api_version, tmf_entity_name, etom_process
+) VALUES
+
+('TABLE','runtime_flavor','RuntimeFlavor',
+ 'Runtime Flavor','An ontology domain flavor configuration defining scope, OWL classes, SHACL shapes, and sensitivity tier for AI runtime sessions.',
+ 'Internal',0,'Runtime Flavor','Ontology Flavor,Domain Flavor,LLM Scope','CQ-RT-01',
+ 'Enterprise','Policy',NULL,NULL,'RuntimeFlavor','1.1.4'),
+
+('TABLE','runtime_payload','RuntimePayload',
+ 'Runtime Payload','A fully assembled LLM input payload capturing question, flavor, model, and token budget for a single AI call.',
+ 'Internal',0,'Runtime Payload','LLM Payload,AI Payload','CQ-RT-03',
+ 'Enterprise','Policy',NULL,NULL,'RuntimePayload','1.1.4'),
+
+('TABLE','runtime_grounding','RuntimeGrounding',
+ 'Runtime Grounding','A data grounding event linking a payload to the DB tables and records retrieved for context.',
+ 'Internal',0,'Runtime Grounding','Data Grounding,Context Retrieval','CQ-RT-02',
+ 'Enterprise','Policy',NULL,NULL,'RuntimeGrounding','1.1.4'),
+
+('TABLE','observation_record','ObservationRecord',
+ 'Observation Record','A PROV-O annotated observation produced by measurement, inference, import, synthesis, or grounding.',
+ 'Internal',0,'Observation Record','PROV Observation,KPI Record','CQ-004,CQ-005,CQ-RT-02',
+ 'Common','Observation',NULL,NULL,'ObservationRecord','1.4.4'),
+
+('TABLE','tmf_conflict_event','ConflictEvent',
+ 'Conflict Event','A detected conflict between two ontology assertions with 3-tier resolution chain tracking.',
+ 'Internal',1,'Conflict Event','Assertion Conflict,Semantic Conflict','CQ-P2B-conflict-resolution',
+ 'Enterprise','Conflict Resolution',NULL,NULL,'ConflictEvent','1.1.4'),
+
+('TABLE','semantic_loss_log','SemanticLossRecord',
+ 'Semantic Loss Log','Records of semantic information loss including rejected records, unmapped columns, and derivation gaps.',
+ 'Internal',0,'Semantic Loss','Information Loss,Data Quality','CQ-005',
+ 'Enterprise','Quality Management',NULL,NULL,'SemanticLossRecord','1.1.4');
+
+-- ── Runtime Flavor seed rows (one per JSON flavor file) ────────
+INSERT INTO runtime_flavor (
+    name, description, sensitivity_tier,
+    owl_classes, shacl_shapes, context_terms, db_tables,
+    system_prompt_hint, cq_ids
+) VALUES
+
+('network-ops',
+ 'Network Operations domain — resource inventory, network function management, alarm surveillance, performance monitoring, and 5G slice management.',
+ 'Internal',
+ '["Resource","NetworkFunction","NetworkSlice","Alarm","PerformanceIndicator"]',
+ '["ResourceShape","AlarmShape","PerformanceIndicatorShape","NetworkFunctionShape"]',
+ '{"resourceType":"https://ontology.example.com/tmf/resourceType","operationalState":"https://ontology.example.com/tmf/operationalState","alarmType":"https://ontology.example.com/tmf/alarmType","perceivedSeverity":"https://ontology.example.com/tmf/perceivedSeverity","kpiType":"https://ontology.example.com/tmf/kpiType"}',
+ '["tmf_resource","tmf_alarm","tmf_performance_indicator"]',
+ 'Focus on resource operational states, alarm severity and correlation, KPI threshold breaches, and 5G network function health.',
+ '["CQ-TMF1","CQ-TMF2","CQ-TMF3","CQ-TMF4","CQ-TMF5"]'),
+
+('billing',
+ 'Billing and Revenue Management domain — customer bills, billing accounts, product subscriptions, commercial agreements, and party financial relationships.',
+ 'Confidential',
+ '["CustomerBill","BillingAccount","Product","Agreement","Party"]',
+ '["CustomerBillShape","BillingAccountShape","ProductShape","AgreementShape"]',
+ '{"billNumber":"https://ontology.example.com/tmf/billNumber","amountDue":"https://ontology.example.com/tmf/amountDue","billState":"https://ontology.example.com/tmf/billState","currencyCode":"https://ontology.example.com/tmf/currencyCode","agreementType":"https://ontology.example.com/tmf/agreementType"}',
+ '["tmf_customer_bill","tmf_product","tmf_agreement"]',
+ 'Focus on bill disputes, overdue payments, SLA-linked commercial agreements, and product subscription lifecycles.',
+ '["CQ-TMF13"]'),
+
+('compliance',
+ 'Compliance and Governance domain — semantic consistency checks, ontology-level conflict resolution, observation record auditing, and policy enforcement.',
+ 'Internal',
+ '["TmfEntity","ObservationRecord","ConflictEvent","Policy"]',
+ '["TmfEntityShape","ObservationRecordShape","ConflictEventShape","PolicyShape"]',
+ '{"recordType":"https://ontology.example.com/tmf/recordType","derivationMethod":"https://ontology.example.com/tmf/derivationMethod","confidenceScore":"https://ontology.example.com/tmf/confidenceScore","conflictType":"https://ontology.example.com/tmf/conflictType","resolutionTier":"https://ontology.example.com/tmf/resolutionTier"}',
+ '["tmf_conflict_event","observation_record","semantic_loss_log"]',
+ 'Focus on unresolved conflict events, SHACL violation patterns, low-confidence observations, and policy adherence.',
+ '["CQ-P2B-conflict-resolution"]'),
+
+('customer',
+ 'Customer and Engaged Party domain — party management (individuals and organizations), related party relationships, product subscriptions, and customer-facing service instances.',
+ 'Internal',
+ '["Party","Individual","Organization","RelatedParty","Product","Service"]',
+ '["PartyShape","IndividualShape","OrganizationShape","ProductShape","ServiceShape"]',
+ '{"partyType":"https://ontology.example.com/tmf/partyType","givenName":"https://ontology.example.com/tmf/givenName","familyName":"https://ontology.example.com/tmf/familyName","tradingName":"https://ontology.example.com/tmf/tradingName","serviceType":"https://ontology.example.com/tmf/serviceType"}',
+ '["tmf_party","tmf_product","tmf_service"]',
+ 'Focus on party lifecycle states, customer product holdings, service activation status, and related party associations.',
+ '["CQ-TMF6","CQ-TMF7","CQ-TMF8"]'),
+
+('fault-management',
+ 'Fault Management domain — alarm lifecycle management, trouble ticket triage, affected resource identification, and service quality reporting.',
+ 'Internal',
+ '["Alarm","TroubleTicket","Resource","ServiceQualityReport"]',
+ '["AlarmShape","TroubleTicketShape","ResourceShape","ServiceQualityReportShape"]',
+ '{"alarmType":"https://ontology.example.com/tmf/alarmType","perceivedSeverity":"https://ontology.example.com/tmf/perceivedSeverity","alarmState":"https://ontology.example.com/tmf/alarmState","ticketStatus":"https://ontology.example.com/tmf/ticketStatus","slaViolated":"https://ontology.example.com/tmf/slaViolated"}',
+ '["tmf_alarm","tmf_trouble_ticket","tmf_service_quality_report"]',
+ 'Focus on active alarms, open trouble tickets, SLA violation flags, and service quality degradation.',
+ '["CQ-TMF10","CQ-TMF11","CQ-TMF12"]');

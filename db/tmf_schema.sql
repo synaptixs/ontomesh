@@ -812,3 +812,56 @@ CREATE INDEX IF NOT EXISTS idx_evtsub_status ON tmf_event_subscription(status);
 CREATE INDEX IF NOT EXISTS idx_evtsub_type   ON tmf_event_subscription(event_type);
 CREATE INDEX IF NOT EXISTS idx_conflict_st   ON tmf_conflict_event(status);
 CREATE INDEX IF NOT EXISTS idx_conflict_tier ON tmf_conflict_event(resolution_tier);
+
+-- ============================================================
+-- PHASE RT: Runtime Layer
+-- ============================================================
+-- Tracks LLM flavor registry, assembled payloads, and data
+-- grounding events for full PROV-O auditability of all AI calls.
+-- ============================================================
+
+-- Runtime Flavor Registry — mirrors the JSON flavor files in DB form
+CREATE TABLE IF NOT EXISTS runtime_flavor (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name                TEXT NOT NULL UNIQUE,
+    description         TEXT,
+    sensitivity_tier    TEXT NOT NULL
+                        CHECK(sensitivity_tier IN ('Public','Internal','Confidential','Restricted')),
+    owl_classes         TEXT NOT NULL,   -- JSON array of class name strings
+    shacl_shapes        TEXT,           -- JSON array of shape name strings
+    context_terms       TEXT,           -- JSON object {term: IRI, ...}
+    db_tables           TEXT NOT NULL,  -- JSON array of table name strings
+    system_prompt_hint  TEXT,
+    cq_ids              TEXT,           -- JSON array of CQ ID strings
+    created_at          TEXT DEFAULT (datetime('now'))
+);
+
+-- Runtime Payload — records every assembled LLM payload
+CREATE TABLE IF NOT EXISTS runtime_payload (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    payload_id          TEXT NOT NULL UNIQUE,   -- UUID4
+    flavor_name         TEXT NOT NULL,
+    question            TEXT NOT NULL,
+    model_id            TEXT,
+    token_budget        INTEGER DEFAULT 4000,
+    assembled_at        TEXT NOT NULL,
+    created_at          TEXT DEFAULT (datetime('now'))
+);
+
+-- Runtime Grounding — records every data grounding event
+CREATE TABLE IF NOT EXISTS runtime_grounding (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    grounding_id        TEXT NOT NULL UNIQUE,   -- UUID4
+    payload_id          TEXT REFERENCES runtime_payload(payload_id),
+    flavor_name         TEXT NOT NULL,
+    question            TEXT NOT NULL,
+    tables_queried      TEXT,       -- JSON array of table names
+    record_count        INTEGER DEFAULT 0,
+    grounded_at         TEXT NOT NULL,
+    created_at          TEXT DEFAULT (datetime('now'))
+);
+
+-- Phase RT indexes
+CREATE INDEX IF NOT EXISTS idx_rt_flavor_name      ON runtime_flavor(name);
+CREATE INDEX IF NOT EXISTS idx_rt_payload_flavor   ON runtime_payload(flavor_name);
+CREATE INDEX IF NOT EXISTS idx_rt_grounding_payload ON runtime_grounding(payload_id);
