@@ -1,0 +1,206 @@
+# Energy & Utilities Industry Template
+# Ontology Toolkit — Phase 3 · Sprint S14
+# Standard alignment: IEC CIM (Common Information Model) IEC 61968/61970
+
+industry: energy_utilities
+label: "Energy & Utilities"
+description: >
+  Domain template for electric utilities, gas networks, and renewable energy operators.
+  Aligned with IEC Common Information Model (CIM) IEC 61968/61970 and NERC reliability standards.
+version: "1.0.0"
+base_iri: "https://ontology.example.com/energy/"
+external_alignments:
+  - iec_cim: "http://iec.ch/TC57/CIM100#"
+  - nerc: "http://www.nerc.com/vocab/"
+  - inspire: "https://inspire.ec.europa.eu/vocab/"
+
+entities:
+  - name: PowerAsset
+    label: "Power Asset"
+    description: "A physical component of the electrical grid — generator, transformer, line, substation."
+    sensitivity: Internal
+    cim_equivalent: "cim:Equipment"
+    properties:
+      - asset_id: {type: string, required: true}
+      - asset_type: {type: string, required: true, values: [Generator, Transformer, TransmissionLine, Substation, Meter, Switch, Capacitor]}
+      - voltage_level_kv: {type: decimal, required: false}
+      - capacity_mw: {type: decimal, required: false}
+      - installation_date: {type: date, required: false}
+      - asset_status: {type: string, values: [Operational, Maintenance, Decommissioned, Planned]}
+      - geo_location: {type: string, required: false, description: "WKT POINT or GeoJSON"}
+      - owner_utility: {type: string, required: false}
+      - cim_mrid: {type: string, required: false, description: "CIM master resource identifier"}
+
+  - name: EnergyMeter
+    label: "Energy Meter"
+    description: "Smart or conventional meter measuring energy consumption or production."
+    sensitivity: Confidential
+    cim_equivalent: "cim:Meter"
+    properties:
+      - meter_id: {type: string, required: true}
+      - meter_type: {type: string, values: [SmartMeter, ConventionalMeter, SubMeter, ProductionMeter]}
+      - location_id: {type: string, required: true}
+      - communication_protocol: {type: string, values: [DLMS, ANSI_C12, COSEM, ModBus, LoRaWAN]}
+      - interval_minutes: {type: integer, required: false, description: "Reading interval in minutes"}
+
+  - name: EnergyReading
+    label: "Energy Reading"
+    description: "A time-series measurement from a meter — consumption, production, or reactive power."
+    sensitivity: Confidential
+    cim_equivalent: "cim:ReadingType"
+    properties:
+      - reading_id: {type: string, required: true}
+      - meter_id: {type: string, required: true, fk: EnergyMeter}
+      - reading_datetime: {type: datetime, required: true}
+      - kwh_value: {type: decimal, required: true}
+      - reading_type: {type: string, values: [Consumption, Production, Net, ReactiveImport, ReactiveExport]}
+      - quality_code: {type: string, values: [Valid, Estimated, Missing, Replaced, Calculated]}
+
+  - name: GridTopology
+    label: "Grid Topology"
+    description: "Connectivity model describing how power assets are interconnected."
+    sensitivity: Internal
+    cim_equivalent: "cim:ConnectivityNode"
+    properties:
+      - topology_id: {type: string, required: true}
+      - from_asset_id: {type: string, required: true, fk: PowerAsset}
+      - to_asset_id: {type: string, required: true, fk: PowerAsset}
+      - connection_type: {type: string, values: [Series, Parallel, BusBar, Feeder]}
+      - nominal_voltage_kv: {type: decimal, required: false}
+
+  - name: OutageEvent
+    label: "Outage Event"
+    description: "An unplanned or planned interruption of electrical supply."
+    sensitivity: Internal
+    cim_equivalent: "cim:Outage"
+    is_event: true
+    properties:
+      - outage_id: {type: string, required: true}
+      - affected_asset_id: {type: string, required: true, fk: PowerAsset}
+      - start_time: {type: datetime, required: true}
+      - end_time: {type: datetime, required: false}
+      - cause_code: {type: string, values: [EquipmentFailure, Weather, ThirdParty, Planned, Unknown]}
+      - customers_affected: {type: integer, required: false}
+      - saidi_minutes: {type: decimal, required: false, description: "System Average Interruption Duration Index contribution"}
+      - restoration_crew_id: {type: string, required: false}
+
+  - name: GridKPI
+    label: "Grid KPI"
+    description: "Reliability and performance indicators for grid operations (SAIDI, SAIFI, CAIDI)."
+    sensitivity: Public
+    cim_equivalent: "cim:PerformanceIndex"
+    properties:
+      - kpi_id: {type: string, required: true}
+      - kpi_type: {type: string, values: [SAIDI, SAIFI, CAIDI, MAIFI, ENS, ASAI]}
+      - measurement_period: {type: string, required: true}
+      - value: {type: decimal, required: true}
+      - utility_region: {type: string, required: false}
+
+  - name: RenewableAsset
+    label: "Renewable Energy Asset"
+    description: "A solar PV, wind turbine, battery storage, or hydro plant."
+    sensitivity: Internal
+    parent: PowerAsset
+    properties:
+      - renewable_type: {type: string, values: [Solar, Wind, Hydro, Battery, Biomass, Geothermal]}
+      - capacity_mw: {type: decimal, required: true}
+      - capacity_factor_pct: {type: decimal, required: false}
+      - interconnection_point: {type: string, required: false}
+      - forecast_model: {type: string, required: false}
+
+  - name: EnergyMarketTransaction
+    label: "Energy Market Transaction"
+    description: "A buy/sell transaction in a wholesale or balancing electricity market."
+    sensitivity: Restricted
+    properties:
+      - transaction_id: {type: string, required: true}
+      - market_type: {type: string, values: [DayAhead, Intraday, BalancingMechanism, Bilateral]}
+      - asset_id: {type: string, required: true, fk: PowerAsset}
+      - delivery_period: {type: string, required: true}
+      - volume_mwh: {type: decimal, required: true}
+      - price_per_mwh: {type: decimal, required: true}
+      - counterparty: {type: string, required: false}
+
+events:
+  - name: VoltageExcursion
+    label: "Voltage Excursion"
+    description: "Voltage exceeds or falls below acceptable operational limits."
+    parent: OutageEvent
+    trigger: voltage_level_kv
+  - name: FrequencyDeviation
+    label: "Frequency Deviation"
+    description: "Grid frequency deviates from nominal (50/60 Hz)."
+    is_event: true
+  - name: TheftDetectionAlert
+    label: "Theft Detection Alert"
+    description: "Statistical anomaly in meter readings suggesting energy theft."
+    sensitivity: Confidential
+    is_event: true
+  - name: AssetMaintenanceEvent
+    label: "Asset Maintenance Event"
+    description: "Scheduled or reactive maintenance on a power asset."
+    is_event: true
+
+relationships:
+  - "A PowerAsset belongs to exactly one GridTopology connectivity node."
+  - "An EnergyMeter measures one or more PowerAssets."
+  - "An EnergyReading is produced by exactly one EnergyMeter."
+  - "An OutageEvent affects one or more PowerAssets."
+  - "A RenewableAsset is a specialisation of PowerAsset."
+  - "A GridKPI is computed from one or more OutageEvents within a measurement period."
+  - "An EnergyMarketTransaction is associated with one PowerAsset (generation unit or load)."
+
+competency_questions:
+  - id: CQ-EN-01
+    question: "Which assets have been in outage for more than 4 hours in the last 30 days?"
+    priority: Critical
+  - id: CQ-EN-02
+    question: "What is the SAIDI contribution per feeder for the current quarter?"
+    priority: Critical
+  - id: CQ-EN-03
+    question: "Which meters show consumption anomalies consistent with energy theft?"
+    priority: High
+  - id: CQ-EN-04
+    question: "What is the capacity factor of each renewable asset this month?"
+    priority: High
+  - id: CQ-EN-05
+    question: "Which transmission lines are operating above 90% thermal rating?"
+    priority: High
+  - id: CQ-EN-06
+    question: "What is the day-ahead price forecast for delivery tomorrow?"
+    priority: Medium
+  - id: CQ-EN-07
+    question: "Which assets are due for maintenance in the next 14 days?"
+    priority: Medium
+  - id: CQ-EN-08
+    question: "What is the renewable generation mix (%) for the current month?"
+    priority: Medium
+  - id: CQ-EN-09
+    question: "Which customers were affected by unplanned outages more than twice this year?"
+    priority: High
+  - id: CQ-EN-10
+    question: "What are the CIM mRID mappings for all substations in region X?"
+    priority: Low
+
+sensitivity_classification:
+  Public:       [GridKPI, GridTopology]
+  Internal:     [PowerAsset, OutageEvent, RenewableAsset, GridTopology]
+  Confidential: [EnergyMeter, EnergyReading, TheftDetectionAlert]
+  Restricted:   [EnergyMarketTransaction]
+
+iec_cim_alignments:
+  - local: PowerAsset
+    cim: "cim:Equipment"
+    match: equivalentClass
+  - local: EnergyMeter
+    cim: "cim:Meter"
+    match: equivalentClass
+  - local: OutageEvent
+    cim: "cim:Outage"
+    match: equivalentClass
+  - local: GridTopology
+    cim: "cim:ConnectivityNode"
+    match: closeMatch
+  - local: RenewableAsset
+    cim: "cim:GeneratingUnit"
+    match: closeMatch

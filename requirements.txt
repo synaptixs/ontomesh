@@ -1,0 +1,51 @@
+# Ontology Engineering Toolkit — Python dependencies
+# conda env: ontology
+# Install: pip install -r requirements.txt
+#
+# Core pipeline (phases 1–5, TMF, conflict, alignment, runtime, phase 3)
+# All listed here for explicit versioning; install only what you need.
+
+# ── Database drivers ────────────────────────────────────────────────────────
+psycopg2-binary>=2.9.9          # PostgreSQL
+mysql-connector-python>=8.3.0   # MySQL / MariaDB
+pyodbc>=5.1.0                   # SQL Server (also needs ODBC Driver 17/18)
+oracledb>=2.3.0                 # Oracle thin mode (no Instant Client required)
+ibm_db>=3.2.3                   # IBM DB2 (needs DB2 CLI driver from IBM)
+ibm_db_dbi>=3.2.3               # IBM DB2 DBI interface
+
+# ── RDF / OWL / SHACL ──────────────────────────────────────────────────────
+rdflib>=7.0.0                   # RDF graph, Turtle parsing, SPARQL queries
+pyshacl>=0.26.0                 # SHACL validation (used by InputGate/OutputGate)
+sparqlwrapper>=2.0.0            # SPARQL endpoint client (used by graph_publisher)
+
+# ── Runtime layer — LLM adapters ────────────────────────────────────────────
+anthropic>=0.34.0               # Anthropic Messages API (claude-sonnet)
+openai>=1.40.0                  # OpenAI Chat Completions (GPT-4o)
+google-cloud-aiplatform>=1.60.0 # Vertex AI / Gemini
+requests>=2.32.3                # Ollama adapter + graph store HTTP calls
+
+# ── Phase 3: Graph store publishing ─────────────────────────────────────────
+# sparqlwrapper covers Fuseki/Stardog/Oxigraph/Neptune SPARQL Update
+boto3>=1.35.0                   # Amazon Neptune (AWS SDK — also used for IAM signing)
+
+# ── Phase 3: Drift detection ────────────────────────────────────────────────
+# No extra deps — drift_detector.py uses rdflib + stdlib
+
+# ── Phase 3: Log entity discovery (NLP) ─────────────────────────────────────
+spacy>=3.7.4                    # NLP pipeline for co-occurrence entity discovery
+# Download English model after install:
+#   python -m spacy download en_core_web_sm
+
+# ── Phase 3: Browser wizard ──────────────────────────────────────────────────
+flask>=3.0.3                    # Browser wizard web server
+flask-cors>=4.0.1               # CORS for local dev wizard
+
+# ── Phase 3: Modular OWL ────────────────────────────────────────────────────
+# rdflib covers owl:imports resolution — no extra deps
+
+# ── CI/CD / testing ──────────────────────────────────────────────────────────
+pytest>=8.2.2                   # Test runner
+pyyaml>=6.0.2                   # YAML template parsing
+
+# ── Reporting ───────────────────────────────────────────────────────────────
+jinja2>=3.1.4                   # HTML report templating (optional; reporter.py uses stdlib)
