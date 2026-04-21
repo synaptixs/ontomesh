@@ -1,0 +1,116 @@
+{
+  "mcp_tools": [
+    {
+      "name": "create_task",
+      "description": "Create a TMF630 Part 4 async Task resource for a long-running operation. Returns the task_id and href for polling. Use poll_task_status to check completion.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_type": {
+            "type": "string",
+            "description": "Type of operation (e.g. 'resourceImport', 'ontologyValidation', 'schemaExport')."
+          },
+          "related_entity_id": {
+            "type": "string",
+            "description": "Optional ID of the resource this task operates on."
+          },
+          "related_entity_type": {
+            "type": "string",
+            "description": "Type of the related entity (e.g. 'TmfResource')."
+          }
+        },
+        "required": [
+          "task_type"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "@baseType": {
+            "type": "string"
+          },
+          "@schemaLocation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "poll_task_status",
+      "description": "Poll the status of a TMF630 async Task by task_id. Returns current status and percent_progress.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "description": "The task_id returned by create_task."
+          }
+        },
+        "required": [
+          "task_id"
+        ]
+      }
+    },
+    {
+      "name": "create_import_job",
+      "description": "TMF630 Part 7: Create a bulk ImportJob to ingest a batch of resource instances from a remote URI or uploaded file. Returns import_job_id for polling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content_type": {
+            "type": "string",
+            "enum": [
+              "application/json",
+              "text/csv",
+              "application/ld+json",
+              "text/turtle"
+            ],
+            "description": "MIME type of the import payload."
+          },
+          "source_uri": {
+            "type": "string",
+            "description": "URI of the remote file to import (https:// or file://)."
+          }
+        },
+        "required": [
+          "content_type"
+        ]
+      }
+    },
+    {
+      "name": "create_export_job",
+      "description": "TMF630 Part 7: Create a bulk ExportJob to export matching resource instances. Supports SPARQL/SQL filter query. Returns export_job_id and download URL when complete.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content_type": {
+            "type": "string",
+            "enum": [
+              "application/json",
+              "text/csv",
+              "application/ld+json",
+              "text/turtle"
+            ],
+            "description": "Desired export format."
+          },
+          "query": {
+            "type": "string",
+            "description": "Optional SQL or SPARQL filter restricting exported records."
+          }
+        },
+        "required": [
+          "content_type"
+        ]
+      }
+    }
+  ]
+}

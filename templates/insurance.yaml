@@ -1,0 +1,190 @@
+# Insurance Industry Template
+# Ontology Toolkit — Phase 3 · Sprint S14
+
+industry: insurance
+label: "Insurance"
+description: >
+  Domain template for P&C, life, health, and specialty insurance carriers.
+  Covers policy lifecycle, underwriting, claims management, reinsurance, and regulatory reporting.
+  Aligned with ACORD (Association for Cooperative Operations Research and Development) standards.
+version: "1.0.0"
+base_iri: "https://ontology.example.com/insurance/"
+external_alignments:
+  - acord: "https://www.acord.org/vocab/"
+  - schema_org: "https://schema.org/"
+  - fibo: "https://spec.edmcouncil.org/fibo/ontology/FND/"
+
+entities:
+  - name: Policy
+    label: "Insurance Policy"
+    description: "A contract between an insurer and a policyholder providing coverage for specified risks."
+    sensitivity: Confidential
+    acord_equivalent: "acord:Policy"
+    properties:
+      - policy_id: {type: string, required: true}
+      - policy_number: {type: string, required: true}
+      - policy_type: {type: string, values: [Auto, Home, Life, Health, Commercial, Liability, Marine, Travel, Cyber, Specialty]}
+      - policyholder_id: {type: string, required: true, fk: Policyholder}
+      - insurer_id: {type: string, required: true, fk: Insurer}
+      - inception_date: {type: date, required: true}
+      - expiry_date: {type: date, required: true}
+      - premium_amount: {type: decimal, required: true}
+      - currency: {type: string, required: true}
+      - coverage_limit: {type: decimal, required: true}
+      - deductible_amount: {type: decimal, required: false}
+      - policy_status: {type: string, values: [Quote, Bound, Active, Lapsed, Cancelled, Expired, Renewed]}
+      - risk_score: {type: decimal, required: false}
+
+  - name: Policyholder
+    label: "Policyholder"
+    description: "The individual or organisation that owns an insurance policy."
+    sensitivity: Restricted
+    properties:
+      - policyholder_id: {type: string, required: true}
+      - entity_type: {type: string, values: [Individual, Business, Trust, GovernmentEntity]}
+      - date_of_birth: {type: date, required: false, description: "For individuals only"}
+      - industry_code: {type: string, required: false, description: "SIC or NAICS for businesses"}
+      - credit_score: {type: integer, required: false}
+      - years_as_customer: {type: integer, required: false}
+      - kyc_status: {type: string, values: [Pending, Verified, Rejected, Review]}
+
+  - name: Insurer
+    label: "Insurer"
+    description: "An insurance company or underwriting syndicate providing coverage."
+    sensitivity: Public
+    properties:
+      - insurer_id: {type: string, required: true}
+      - insurer_name: {type: string, required: true}
+      - regulator_id: {type: string, required: false, description: "Regulatory reference FCA/NAIC"}
+      - am_best_rating: {type: string, required: false}
+      - solvency_ratio_pct: {type: decimal, required: false}
+
+  - name: Claim
+    label: "Insurance Claim"
+    description: "A formal request by a policyholder for payment after a covered loss."
+    sensitivity: Confidential
+    acord_equivalent: "acord:Claim"
+    is_event: true
+    properties:
+      - claim_id: {type: string, required: true}
+      - policy_id: {type: string, required: true, fk: Policy}
+      - claim_number: {type: string, required: true}
+      - loss_date: {type: datetime, required: true}
+      - report_date: {type: datetime, required: true}
+      - claim_type: {type: string, values: [MotorAccident, TheftLoss, PropertyDamage, LiabilityBodily, LifeDeath, HealthMedical, BusinessInterruption, CyberIncident]}
+      - claim_status: {type: string, values: [Fnol, InvestigationOpen, InvestigationClosed, PartiallyPaid, FullyPaid, Denied, Withdrawn, Litigation]}
+      - reserve_amount: {type: decimal, required: false}
+      - paid_amount: {type: decimal, required: false}
+      - adjuster_id: {type: string, required: false}
+      - fraud_score: {type: decimal, required: false}
+
+  - name: Underwriting
+    label: "Underwriting Record"
+    description: "Risk assessment and pricing decision for a policy application."
+    sensitivity: Confidential
+    properties:
+      - underwriting_id: {type: string, required: true}
+      - policy_id: {type: string, required: true, fk: Policy}
+      - underwriter_id: {type: string, required: true}
+      - risk_assessment_date: {type: datetime, required: true}
+      - risk_class: {type: string, values: [Standard, Preferred, SubStandard, Declined]}
+      - loading_factor: {type: decimal, required: false, description: "Premium loading multiplier"}
+      - referral_reason: {type: string, required: false}
+
+  - name: Reinsurance
+    label: "Reinsurance Treaty"
+    description: "A contract between an insurer (cedant) and a reinsurer transferring risk."
+    sensitivity: Restricted
+    properties:
+      - reinsurance_id: {type: string, required: true}
+      - treaty_type: {type: string, values: [QuotaShare, SurplusShare, ExcessOfLoss, StopLoss, Facultative]}
+      - cedant_id: {type: string, required: true, fk: Insurer}
+      - reinsurer_name: {type: string, required: true}
+      - retention_limit: {type: decimal, required: true}
+      - cession_limit: {type: decimal, required: true}
+      - effective_date: {type: date, required: true}
+      - expiry_date: {type: date, required: true}
+
+  - name: RegulatoryReturn
+    label: "Regulatory Return"
+    description: "A statutory filing submitted to an insurance regulator (Solvency II, NAIC)."
+    sensitivity: Restricted
+    properties:
+      - return_id: {type: string, required: true}
+      - insurer_id: {type: string, required: true, fk: Insurer}
+      - return_type: {type: string, values: [SolvencyII_QRT, SolvencyII_ORSA, NAIC_Annual, NAIC_Quarterly, IFRS17]}
+      - reporting_period: {type: string, required: true}
+      - submission_deadline: {type: datetime, required: true}
+      - submission_date: {type: datetime, required: false}
+      - filing_status: {type: string, values: [Pending, Submitted, Accepted, Rejected, Amended]}
+      - scr_ratio_pct: {type: decimal, required: false, description: "Solvency Capital Requirement ratio"}
+
+events:
+  - name: FraudAlert
+    label: "Fraud Alert"
+    description: "A claim or application flagged for potential insurance fraud."
+    sensitivity: Restricted
+    is_event: true
+  - name: PolicyLapseEvent
+    label: "Policy Lapse Event"
+    description: "A policy became inactive due to non-payment of premium."
+    sensitivity: Confidential
+    is_event: true
+  - name: LargeClaimEvent
+    label: "Large Loss Event"
+    description: "A claim exceeding the large-loss threshold requiring senior adjuster."
+    sensitivity: Confidential
+    is_event: true
+  - name: CatastropheEvent
+    label: "Catastrophe Event"
+    description: "A natural or man-made catastrophe triggering multiple claims."
+    sensitivity: Internal
+    is_event: true
+
+relationships:
+  - "A Policy is held by exactly one Policyholder."
+  - "A Policy is issued by exactly one Insurer."
+  - "A Claim is lodged against exactly one Policy."
+  - "An Underwriting record is created for exactly one Policy."
+  - "A Reinsurance treaty is between exactly one cedant Insurer and a reinsurer."
+  - "A RegulatoryReturn is filed by exactly one Insurer."
+  - "A FraudAlert is associated with one or more Claims."
+  - "A CatastropheEvent may trigger multiple Claims."
+
+competency_questions:
+  - id: CQ-INS-01
+    question: "What is the combined ratio by product line for the current quarter?"
+    priority: Critical
+  - id: CQ-INS-02
+    question: "Which open claims have been in investigation status for more than 90 days?"
+    priority: Critical
+  - id: CQ-INS-03
+    question: "Which policies are at risk of lapse in the next 30 days?"
+    priority: High
+  - id: CQ-INS-04
+    question: "What is the fraud detection rate by claim type?"
+    priority: High
+  - id: CQ-INS-05
+    question: "Which reinsurance treaties expire in the next 6 months?"
+    priority: High
+  - id: CQ-INS-06
+    question: "What is the Solvency Capital Requirement ratio for each legal entity?"
+    priority: Critical
+  - id: CQ-INS-07
+    question: "Which policyholders have submitted more than 3 claims in 2 years?"
+    priority: High
+  - id: CQ-INS-08
+    question: "What is the average claims settlement time per claim type?"
+    priority: Medium
+  - id: CQ-INS-09
+    question: "Which catastrophe events have aggregate reserved amounts above threshold?"
+    priority: High
+  - id: CQ-INS-10
+    question: "Which regulatory returns are overdue for filing?"
+    priority: Critical
+
+sensitivity_classification:
+  Public:       [Insurer]
+  Internal:     [CatastropheEvent]
+  Confidential: [Policy, Claim, Underwriting, PolicyLapseEvent, LargeClaimEvent]
+  Restricted:   [Policyholder, Reinsurance, RegulatoryReturn, FraudAlert]

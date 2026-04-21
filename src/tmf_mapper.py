@@ -1255,3 +1255,385 @@ def generate_tmf_api_coverage(intro, output_dir: str):
         w.writerows(rows)
     print(f"  ✓ TMF API coverage      → {path}")
     print(f"    APIs mapped: {len(covered)}/{len(TMF_API_MAP)} ({coverage_pct}%)")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Phase 3 · Sprint S16–S18
+#  TMF630 Parts 4 & 7 — Async Task resource + Bulk Import/Export operations
+# ═══════════════════════════════════════════════════════════════════════════
+
+# TMF630 Part 4 — Task resource schema (async long-running operations)
+TMF630_TASK_SQL = """
+CREATE TABLE IF NOT EXISTS tmf_task (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id             TEXT NOT NULL UNIQUE,
+    task_type           TEXT NOT NULL,
+    status              TEXT NOT NULL DEFAULT 'inProgress',
+    creation_date       TEXT,
+    completion_date     TEXT,
+    percent_progress    INTEGER DEFAULT 0,
+    task_resource_ref   TEXT,
+    task_error          TEXT,
+    related_entity_id   TEXT,
+    related_entity_type TEXT,
+    requested_by        TEXT,
+    external_id         TEXT,
+    href                TEXT,
+    base_type           TEXT DEFAULT 'Task',
+    schema_location     TEXT,
+    created_at          TEXT DEFAULT (datetime('now')),
+    updated_at          TEXT
+);
+
+INSERT OR IGNORE INTO ontology_metadata
+  (table_name, semantic_type, sensitivity_tier, label, description,
+   sid_domain, sid_abe, tmf_api_id, tmf_api_version, tmf_entity_name)
+VALUES
+  ('tmf_task','Entity','Internal',
+   'TMF Task',
+   'TMF630 Part 4 — asynchronous long-running operation resource',
+   'Common','TaskManagement','TMF630','5.0','Task');
+"""
+
+# TMF630 Part 7 — Bulk operations (ImportJob / ExportJob)
+TMF630_BULK_SQL = """
+CREATE TABLE IF NOT EXISTS tmf_import_job (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    import_job_id       TEXT NOT NULL UNIQUE,
+    content_type        TEXT NOT NULL,
+    source_uri          TEXT,
+    creation_date       TEXT,
+    completion_date     TEXT,
+    status              TEXT DEFAULT 'running',
+    error_log           TEXT,
+    path                TEXT,
+    url                 TEXT,
+    href                TEXT,
+    base_type           TEXT DEFAULT 'ImportJob',
+    schema_location     TEXT,
+    created_at          TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS tmf_export_job (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    export_job_id       TEXT NOT NULL UNIQUE,
+    content_type        TEXT NOT NULL,
+    query               TEXT,
+    path                TEXT,
+    url                 TEXT,
+    creation_date       TEXT,
+    completion_date     TEXT,
+    status              TEXT DEFAULT 'running',
+    error_log           TEXT,
+    href                TEXT,
+    base_type           TEXT DEFAULT 'ExportJob',
+    schema_location     TEXT,
+    created_at          TEXT DEFAULT (datetime('now'))
+);
+
+INSERT OR IGNORE INTO ontology_metadata
+  (table_name, semantic_type, sensitivity_tier, label, description,
+   sid_domain, sid_abe, tmf_api_id, tmf_api_version, tmf_entity_name)
+VALUES
+  ('tmf_import_job','Entity','Internal',
+   'TMF Import Job',
+   'TMF630 Part 7 — bulk resource import operation',
+   'Common','BulkOperations','TMF630','5.0','ImportJob'),
+  ('tmf_export_job','Entity','Internal',
+   'TMF Export Job',
+   'TMF630 Part 7 — bulk resource export operation',
+   'Common','BulkOperations','TMF630','5.0','ExportJob');
+"""
+
+# OWL classes for TMF630 Task + Bulk resources
+TMF630_TASK_OWL = """\
+# ── TMF630 Part 4 — Task Resource ─────────────────────────────────────────
+
+:TmfTask
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TMF Task" ;
+  rdfs:comment "TMF630 Part 4: asynchronous long-running operation. Enables async task management in ODA-compliant deployments." ;
+  skos:prefLabel "Task" ;
+  skos:altLabel "TMF Task Resource" ;
+  :sensitivityTier :Internal .
+
+:taskId          a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:string ; rdfs:label "Task ID" .
+:taskType        a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:string ; rdfs:label "Task Type" .
+:percentProgress a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:integer ; rdfs:label "Percent Progress" .
+:taskError       a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:string ; rdfs:label "Task Error" .
+:taskStatus      a owl:DatatypeProperty ; rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
+  rdfs:label "Task Status" ;
+  rdfs:comment "Values: inProgress | completed | failed | cancelled" .
+
+# ── TMF630 Part 7 — Bulk Import / Export ───────────────────────────────────
+
+:TmfImportJob
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TMF Import Job" ;
+  rdfs:comment "TMF630 Part 7: asynchronous bulk import of resource instances." ;
+  skos:prefLabel "ImportJob" ;
+  :sensitivityTier :Internal .
+
+:TmfExportJob
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TMF Export Job" ;
+  rdfs:comment "TMF630 Part 7: asynchronous bulk export of resource instances." ;
+  skos:prefLabel "ExportJob" ;
+  :sensitivityTier :Internal .
+
+:importJobId  a owl:DatatypeProperty ; rdfs:domain :TmfImportJob ; rdfs:range xsd:string ; rdfs:label "Import Job ID" .
+:exportJobId  a owl:DatatypeProperty ; rdfs:domain :TmfExportJob ; rdfs:range xsd:string ; rdfs:label "Export Job ID" .
+:contentType  a owl:DatatypeProperty ; rdfs:domain :TmfEntity    ; rdfs:range xsd:string ; rdfs:label "Content Type" .
+:sourceUri    a owl:DatatypeProperty ; rdfs:domain :TmfImportJob ; rdfs:range xsd:anyURI ; rdfs:label "Source URI" .
+:exportQuery  a owl:DatatypeProperty ; rdfs:domain :TmfExportJob ; rdfs:range xsd:string ; rdfs:label "Export Query" .
+:bulkJobStatus a owl:DatatypeProperty ; rdfs:domain :TmfEntity ;
+  rdfs:range xsd:string ;
+  rdfs:label "Bulk Job Status" ;
+  rdfs:comment "Values: running | succeeded | failed" .
+"""
+
+# SHACL shapes for TMF630 Task + Bulk
+TMF630_TASK_SHACL = """\
+# ── TMF630 Task SHACL Shape ────────────────────────────────────────────────
+
+:TmfTaskShape
+  a sh:NodeShape ;
+  sh:targetClass :TmfTask ;
+  rdfs:label "TMF Task Shape" ;
+
+  sh:property [ sh:path :taskId       ; sh:minCount 1 ; sh:datatype xsd:string ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :taskType     ; sh:minCount 1 ; sh:datatype xsd:string ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :taskStatus   ; sh:minCount 1 ;
+    sh:in ( "inProgress" "completed" "failed" "cancelled" ) ;
+    sh:severity sh:Violation ] ;
+  sh:property [ sh:path :percentProgress ; sh:datatype xsd:integer ;
+    sh:minInclusive 0 ; sh:maxInclusive 100 ; sh:severity sh:Warning ] .
+
+:TmfImportJobShape
+  a sh:NodeShape ;
+  sh:targetClass :TmfImportJob ;
+  sh:property [ sh:path :importJobId  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :contentType  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :bulkJobStatus ; sh:in ( "running" "succeeded" "failed" ) ; sh:severity sh:Violation ] .
+
+:TmfExportJobShape
+  a sh:NodeShape ;
+  sh:targetClass :TmfExportJob ;
+  sh:property [ sh:path :exportJobId  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :contentType  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :bulkJobStatus ; sh:in ( "running" "succeeded" "failed" ) ; sh:severity sh:Violation ] .
+"""
+
+# MCP tools for TMF630 async operations
+TMF630_TASK_MCP_TOOLS = [
+    {
+        "name": "create_task",
+        "description": (
+            "Create a TMF630 Part 4 async Task resource for a long-running operation. "
+            "Returns the task_id and href for polling. "
+            "Use poll_task_status to check completion."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "task_type": {
+                    "type": "string",
+                    "description": "Type of operation (e.g. 'resourceImport', 'ontologyValidation', 'schemaExport')."
+                },
+                "related_entity_id": {
+                    "type": "string",
+                    "description": "Optional ID of the resource this task operates on."
+                },
+                "related_entity_type": {
+                    "type": "string",
+                    "description": "Type of the related entity (e.g. 'TmfResource')."
+                }
+            },
+            "required": ["task_type"]
+        },
+        "outputSchema": {
+            "type": "object",
+            "properties": {
+                "task_id": {"type": "string"},
+                "href": {"type": "string"},
+                "status": {"type": "string"},
+                "@baseType": {"type": "string"},
+                "@schemaLocation": {"type": "string"}
+            }
+        }
+    },
+    {
+        "name": "poll_task_status",
+        "description": "Poll the status of a TMF630 async Task by task_id. Returns current status and percent_progress.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "task_id": {"type": "string", "description": "The task_id returned by create_task."}
+            },
+            "required": ["task_id"]
+        }
+    },
+    {
+        "name": "create_import_job",
+        "description": (
+            "TMF630 Part 7: Create a bulk ImportJob to ingest a batch of resource instances "
+            "from a remote URI or uploaded file. Returns import_job_id for polling."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "content_type": {
+                    "type": "string",
+                    "enum": ["application/json", "text/csv", "application/ld+json", "text/turtle"],
+                    "description": "MIME type of the import payload."
+                },
+                "source_uri": {
+                    "type": "string",
+                    "description": "URI of the remote file to import (https:// or file://)."
+                }
+            },
+            "required": ["content_type"]
+        }
+    },
+    {
+        "name": "create_export_job",
+        "description": (
+            "TMF630 Part 7: Create a bulk ExportJob to export matching resource instances. "
+            "Supports SPARQL/SQL filter query. Returns export_job_id and download URL when complete."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "content_type": {
+                    "type": "string",
+                    "enum": ["application/json", "text/csv", "application/ld+json", "text/turtle"],
+                    "description": "Desired export format."
+                },
+                "query": {
+                    "type": "string",
+                    "description": "Optional SQL or SPARQL filter restricting exported records."
+                }
+            },
+            "required": ["content_type"]
+        }
+    },
+]
+
+# TMF630 CQ tests for Task + Bulk resources
+TMF630_TASK_CQS = [
+    {
+        "id": "CQ-TMF-14",
+        "priority": "High",
+        "question": "Which async tasks are currently in 'inProgress' state for more than 30 minutes?",
+        "validates": "TmfTask lifecycle",
+        "sql": "SELECT task_id, task_type, creation_date, percent_progress FROM tmf_task WHERE status='inProgress'",
+        "expected_non_empty": False,
+    },
+    {
+        "id": "CQ-TMF-15",
+        "priority": "High",
+        "question": "Which bulk ImportJobs failed in the last 24 hours?",
+        "validates": "TmfImportJob lifecycle",
+        "sql": "SELECT import_job_id, content_type, status, error_log, created_at FROM tmf_import_job WHERE status='failed'",
+        "expected_non_empty": False,
+    },
+    {
+        "id": "CQ-TMF-16",
+        "priority": "Medium",
+        "question": "What is the total number of completed ExportJobs per content_type this month?",
+        "validates": "TmfExportJob aggregate",
+        "sql": "SELECT content_type, COUNT(*) as total FROM tmf_export_job WHERE status='succeeded' GROUP BY content_type",
+        "expected_non_empty": False,
+    },
+]
+
+
+def provision_tmf630_task_tables(db_path: str):
+    """Create tmf_task, tmf_import_job, tmf_export_job tables and seed ontology_metadata."""
+    import sqlite3 as _sqlite3
+    conn = _sqlite3.connect(db_path)
+    conn.executescript(TMF630_TASK_SQL)
+    conn.executescript(TMF630_BULK_SQL)
+    conn.commit()
+    conn.close()
+    print("  ✓ TMF630 Task + Bulk tables provisioned")
+
+
+def generate_tmf630_task_owl(output_dir: str):
+    """Append TMF630 Task/Bulk OWL classes to the SID hierarchy Turtle."""
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "tmf630-task-bulk.ttl")
+    prefixes = """\
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+
+"""
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(prefixes)
+        f.write(TMF630_TASK_OWL)
+        f.write("\n\n")
+        f.write(TMF630_TASK_SHACL)
+    print(f"  ✓ TMF630 Task/Bulk OWL  → {path}")
+
+
+def generate_tmf630_mcp_tools(output_dir: str):
+    """Write TMF630 async Task + Bulk MCP tool definitions."""
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "tmf630-task-mcp-tools.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"mcp_tools": TMF630_TASK_MCP_TOOLS}, f, indent=2)
+    print(f"  ✓ TMF630 Task MCP tools → {path}")
+
+
+def run_tmf630_task_phase(db_path: str, out_path: str):
+    """Run the full TMF630 Task + Bulk operations phase."""
+    ont_dir  = os.path.join(out_path, "ontology")
+    jsonld_dir = os.path.join(out_path, "jsonld")
+    rpt_dir  = os.path.join(out_path, "reports")
+    os.makedirs(rpt_dir, exist_ok=True)
+
+    provision_tmf630_task_tables(db_path)
+    generate_tmf630_task_owl(ont_dir)
+    generate_tmf630_mcp_tools(jsonld_dir)
+
+    # Run TMF630 Task CQ tests
+    import sqlite3 as _sqlite3
+    conn = _sqlite3.connect(db_path)
+    results = []
+    passed = failed = 0
+    for cq in TMF630_TASK_CQS:
+        try:
+            rows = conn.execute(cq["sql"]).fetchall()
+            ok = (len(rows) > 0) == cq["expected_non_empty"]
+            status = "PASS" if ok else "FAIL"
+            if ok:
+                passed += 1
+            else:
+                failed += 1
+        except Exception as e:
+            status = "ERROR"
+            rows = []
+            failed += 1
+        results.append({**cq, "status": status, "row_count": len(rows)})
+        icon = "✓" if status == "PASS" else "✗"
+        print(f"    {icon} {cq['id']} [{cq['priority']:8s}] {status}  — {cq['question'][:60]}")
+    conn.close()
+
+    print(f"  TMF630 Task CQs: {passed} passed, {failed} failed")
+
+    import csv as _csv
+    cq_path = os.path.join(rpt_dir, "tmf630_task_cq_results.csv")
+    with open(cq_path, "w", newline="") as f:
+        w = _csv.DictWriter(f, fieldnames=["id","priority","status","question","validates","row_count"])
+        w.writeheader()
+        for r in results:
+            w.writerow({k: r.get(k, "") for k in ["id","priority","status","question","validates","row_count"]})
+    print(f"  ✓ TMF630 Task CQ results → {cq_path}")

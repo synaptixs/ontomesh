@@ -1,0 +1,223 @@
+# Pharmaceuticals Industry Template
+# Ontology Toolkit — Phase 3 · Sprint S14
+# Standard alignment: IDMP (ISO 11616 / EMA SPOR), FHIR R4
+
+industry: pharmaceuticals
+label: "Pharmaceuticals"
+description: >
+  Domain template for pharmaceutical manufacturers, CROs, and regulatory affairs teams.
+  Covers drug product lifecycle from R&D through clinical trials, manufacturing, and pharmacovigilance.
+  Aligned with IDMP (Identification of Medicinal Products, ISO 11616/11238/11239/11240/11615),
+  EMA SPOR, ICH E2B(R3), and HL7 FHIR R4 MedicinalProduct resources.
+version: "1.0.0"
+base_iri: "https://ontology.example.com/pharma/"
+external_alignments:
+  - idmp: "https://spor.ema.europa.eu/v1/lists/"
+  - fhir: "http://hl7.org/fhir/"
+  - snomed: "http://snomed.info/sct/"
+  - chebi: "http://purl.obolibrary.org/obo/CHEBI_"
+
+entities:
+  - name: MedicinalProduct
+    label: "Medicinal Product"
+    description: "A regulated pharmaceutical product with a marketing authorisation."
+    sensitivity: Public
+    idmp_equivalent: "idmp:MedicinalProduct"
+    fhir_equivalent: "fhir:MedicinalProduct"
+    properties:
+      - product_id: {type: string, required: true}
+      - product_name: {type: string, required: true}
+      - inn: {type: string, required: false, description: "WHO International Nonproprietary Name"}
+      - atc_code: {type: string, required: false, description: "WHO ATC classification code"}
+      - regulatory_status: {type: string, values: [PreClinical, Phase1, Phase2, Phase3, MAA_Submitted, Approved, Withdrawn, Discontinued]}
+      - marketing_authorisation_number: {type: string, required: false}
+      - indication: {type: string, required: false}
+      - therapeutic_area: {type: string, required: false}
+      - orphan_designation: {type: boolean, required: false}
+
+  - name: ActiveSubstance
+    label: "Active Substance"
+    description: "A chemical or biological substance with pharmacological activity."
+    sensitivity: Public
+    idmp_equivalent: "idmp:Substance"
+    properties:
+      - substance_id: {type: string, required: true}
+      - substance_name: {type: string, required: true}
+      - inn: {type: string, required: false}
+      - cas_number: {type: string, required: false, description: "CAS Registry Number"}
+      - chebi_id: {type: string, required: false}
+      - substance_type: {type: string, values: [SmallMolecule, Biologic, Peptide, Oligonucleotide, CellGeneTherapy, Radiopharmaceutical]}
+      - molecular_formula: {type: string, required: false}
+      - molecular_weight_dalton: {type: decimal, required: false}
+
+  - name: ClinicalTrial
+    label: "Clinical Trial"
+    description: "A human study evaluating the safety and efficacy of a medicinal product."
+    sensitivity: Internal
+    properties:
+      - trial_id: {type: string, required: true}
+      - nct_number: {type: string, required: false, description: "ClinicalTrials.gov NCT identifier"}
+      - eudract_number: {type: string, required: false, description: "EU Clinical Trials Register"}
+      - product_id: {type: string, required: true, fk: MedicinalProduct}
+      - phase: {type: string, values: [Phase1, Phase1_2, Phase2, Phase2_3, Phase3, Phase4, Observational]}
+      - status: {type: string, values: [Planned, Recruiting, Active, Completed, Terminated, Suspended, Withdrawn]}
+      - sponsor: {type: string, required: true}
+      - planned_enrolment: {type: integer, required: false}
+      - actual_enrolment: {type: integer, required: false}
+      - primary_endpoint: {type: string, required: false}
+      - study_start_date: {type: date, required: false}
+      - primary_completion_date: {type: date, required: false}
+
+  - name: ManufacturingSite
+    label: "Manufacturing Site"
+    description: "A GMP-certified facility where pharmaceutical products are manufactured."
+    sensitivity: Internal
+    properties:
+      - site_id: {type: string, required: true}
+      - site_name: {type: string, required: true}
+      - address: {type: string, required: true}
+      - country_code: {type: string, required: true}
+      - gmp_certificate_number: {type: string, required: false}
+      - gmp_certificate_expiry: {type: date, required: false}
+      - site_type: {type: string, values: [API, Formulation, Packaging, QualityControl, Biologics, Sterile]}
+      - capacity_batch_per_year: {type: integer, required: false}
+
+  - name: Batch
+    label: "Product Batch"
+    description: "A manufactured lot of a medicinal product with traceability to raw materials."
+    sensitivity: Internal
+    properties:
+      - batch_id: {type: string, required: true}
+      - batch_number: {type: string, required: true}
+      - product_id: {type: string, required: true, fk: MedicinalProduct}
+      - site_id: {type: string, required: true, fk: ManufacturingSite}
+      - manufacture_date: {type: date, required: true}
+      - expiry_date: {type: date, required: true}
+      - batch_size_units: {type: integer, required: false}
+      - batch_status: {type: string, values: [InProcess, Released, Quarantined, Rejected, Recalled, Distributed]}
+      - quality_release_date: {type: date, required: false}
+
+  - name: AdverseEvent
+    label: "Adverse Event"
+    description: "An undesirable medical occurrence in a patient administered a medicinal product."
+    sensitivity: Confidential
+    is_event: true
+    fhir_equivalent: "fhir:AdverseEvent"
+    properties:
+      - ae_id: {type: string, required: true}
+      - product_id: {type: string, required: true, fk: MedicinalProduct}
+      - batch_id: {type: string, required: false, fk: Batch}
+      - reporter_type: {type: string, values: [HealthcareProfessional, Patient, Regulator, Literature]}
+      - seriousness: {type: string, values: [NonSerious, Serious, Fatal]}
+      - meddra_preferred_term: {type: string, required: false, description: "MedDRA PT code"}
+      - onset_date: {type: date, required: false}
+      - report_date: {type: datetime, required: true}
+      - case_number: {type: string, required: true}
+      - regulatory_submission_due: {type: date, required: false, description: "15-day for serious unexpected"}
+      - regulatory_submitted: {type: boolean, required: false}
+
+  - name: RegulatorySubmission
+    label: "Regulatory Submission"
+    description: "A dossier or safety report submitted to a health authority (EMA, FDA, PMDA)."
+    sensitivity: Restricted
+    properties:
+      - submission_id: {type: string, required: true}
+      - product_id: {type: string, required: true, fk: MedicinalProduct}
+      - authority: {type: string, values: [EMA, FDA, PMDA, HC, TGA, NMPA, ANVISA, CDSCO]}
+      - submission_type: {type: string, values: [MAA, Variation, Renewal, ICSR, PSUR, PBRER, DSUR, IND, NDA, BLA]}
+      - submission_date: {type: datetime, required: false}
+      - deadline_date: {type: datetime, required: false}
+      - status: {type: string, values: [Planned, InPreparation, Submitted, UnderReview, Approved, Refused, Withdrawn]}
+      - ectd_sequence: {type: string, required: false, description: "eCTD submission sequence number"}
+
+  - name: QualityNonConformance
+    label: "Quality Non-Conformance"
+    description: "A deviation, out-of-specification result, or quality complaint."
+    sensitivity: Confidential
+    is_event: true
+    properties:
+      - nc_id: {type: string, required: true}
+      - batch_id: {type: string, required: false, fk: Batch}
+      - product_id: {type: string, required: true, fk: MedicinalProduct}
+      - nc_type: {type: string, values: [OOS, OOT, Deviation, Complaint, AuditFinding, CAPA]}
+      - severity: {type: string, values: [Critical, Major, Minor]}
+      - detection_date: {type: datetime, required: true}
+      - root_cause: {type: string, required: false}
+      - capa_due_date: {type: date, required: false}
+      - capa_closed_date: {type: date, required: false}
+
+events:
+  - name: BatchRecallEvent
+    label: "Batch Recall Event"
+    description: "A market recall initiated for a defective or unsafe batch."
+    sensitivity: Confidential
+    is_event: true
+  - name: ClinicalTrialHoldEvent
+    label: "Clinical Trial Hold"
+    description: "Regulatory hold placed on a clinical trial due to safety concerns."
+    sensitivity: Internal
+    is_event: true
+  - name: PatentExpiryEvent
+    label: "Patent Expiry Event"
+    description: "Patent protection expires, opening the product to generic competition."
+    sensitivity: Public
+    is_event: true
+
+relationships:
+  - "A MedicinalProduct contains one or more ActiveSubstances."
+  - "A ClinicalTrial investigates exactly one MedicinalProduct."
+  - "A Batch is manufactured at exactly one ManufacturingSite."
+  - "A Batch belongs to exactly one MedicinalProduct."
+  - "An AdverseEvent is associated with exactly one MedicinalProduct."
+  - "A RegulatorySubmission covers exactly one MedicinalProduct."
+  - "A QualityNonConformance is linked to one Batch or one MedicinalProduct."
+  - "A BatchRecallEvent invalidates one or more Batches."
+
+competency_questions:
+  - id: CQ-PH-01
+    question: "Which open adverse events are past their 15-day regulatory reporting deadline?"
+    priority: Critical
+  - id: CQ-PH-02
+    question: "What is the batch rejection rate per manufacturing site for the current year?"
+    priority: Critical
+  - id: CQ-PH-03
+    question: "Which clinical trials are in Phase 3 and currently recruiting?"
+    priority: High
+  - id: CQ-PH-04
+    question: "Which products have GMP certificates expiring in the next 6 months?"
+    priority: High
+  - id: CQ-PH-05
+    question: "What is the CAPA closure rate for critical non-conformances?"
+    priority: High
+  - id: CQ-PH-06
+    question: "Which regulatory submissions are overdue per authority?"
+    priority: Critical
+  - id: CQ-PH-07
+    question: "How many serious adverse events were reported per product this quarter?"
+    priority: High
+  - id: CQ-PH-08
+    question: "Which products have patents expiring within 3 years?"
+    priority: Medium
+  - id: CQ-PH-09
+    question: "What is the recall history for product X over the last 5 years?"
+    priority: Medium
+  - id: CQ-PH-10
+    question: "Which active substances are shared across more than 3 approved products?"
+    priority: Low
+
+sensitivity_classification:
+  Public:       [MedicinalProduct, ActiveSubstance, PatentExpiryEvent]
+  Internal:     [ClinicalTrial, ManufacturingSite, Batch, ClinicalTrialHoldEvent]
+  Confidential: [AdverseEvent, QualityNonConformance, BatchRecallEvent]
+  Restricted:   [RegulatorySubmission]
+
+idmp_alignments:
+  - local: MedicinalProduct
+    idmp: "idmp:MedicinalProduct"
+    match: equivalentClass
+  - local: ActiveSubstance
+    idmp: "idmp:Substance"
+    match: equivalentClass
+  - local: Batch
+    idmp: "idmp:ManufacturedItem"
+    match: closeMatch
