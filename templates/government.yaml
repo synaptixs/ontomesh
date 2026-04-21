@@ -1,0 +1,206 @@
+# Government & Public Sector Industry Template
+# Ontology Toolkit — Phase 3 · Sprint S14
+# Standard alignment: DCAT (Data Catalog Vocabulary), INSPIRE (EU Spatial Data)
+
+industry: government
+label: "Government & Public Sector"
+description: >
+  Domain template for government agencies, municipalities, and public sector organisations.
+  Aligned with W3C DCAT v3, INSPIRE Directive (EU), and FOAF for agent descriptions.
+  Suitable for open data portals, regulatory compliance, public service delivery, and e-government.
+version: "1.0.0"
+base_iri: "https://ontology.example.com/government/"
+external_alignments:
+  - dcat: "http://www.w3.org/ns/dcat#"
+  - inspire: "https://inspire.ec.europa.eu/vocab/"
+  - foaf: "http://xmlns.com/foaf/0.1/"
+  - org: "http://www.w3.org/ns/org#"
+  - locn: "http://www.w3.org/ns/locn#"
+
+entities:
+  - name: Citizen
+    label: "Citizen"
+    description: "A natural person interacting with government services."
+    sensitivity: Restricted
+    foaf_equivalent: "foaf:Person"
+    properties:
+      - citizen_id: {type: string, required: true, description: "Anonymised/pseudonymised identifier"}
+      - date_of_birth: {type: date, required: false}
+      - residency_status: {type: string, values: [Resident, NonResident, Visitor, Refugee, Applicant]}
+      - registration_date: {type: date, required: false}
+      - preferred_language: {type: string, required: false}
+      - accessibility_needs: {type: string, required: false}
+
+  - name: GovernmentAgency
+    label: "Government Agency"
+    description: "A government body, ministry, department, or regulatory authority."
+    sensitivity: Public
+    org_equivalent: "org:Organization"
+    properties:
+      - agency_id: {type: string, required: true}
+      - agency_name: {type: string, required: true}
+      - agency_type: {type: string, values: [Ministry, Department, RegionalAuthority, Municipality, RegulatoryBody, Court, PublicEnterprise]}
+      - jurisdiction: {type: string, required: true}
+      - parent_agency_id: {type: string, required: false, fk: GovernmentAgency}
+      - official_url: {type: string, required: false}
+      - established_date: {type: date, required: false}
+
+  - name: PublicService
+    label: "Public Service"
+    description: "A service provided by a government agency to citizens or businesses."
+    sensitivity: Public
+    properties:
+      - service_id: {type: string, required: true}
+      - service_name: {type: string, required: true}
+      - owning_agency_id: {type: string, required: true, fk: GovernmentAgency}
+      - service_type: {type: string, values: [Permit, Benefit, Registration, Certification, Inspection, Enforcement, Advisory]}
+      - delivery_channel: {type: string, values: [Online, InPerson, Post, Phone, Mobile]}
+      - average_processing_days: {type: integer, required: false}
+      - is_digital: {type: boolean, required: false}
+
+  - name: ServiceApplication
+    label: "Service Application"
+    description: "A citizen or business application for a public service."
+    sensitivity: Restricted
+    properties:
+      - application_id: {type: string, required: true}
+      - service_id: {type: string, required: true, fk: PublicService}
+      - applicant_id: {type: string, required: true, fk: Citizen}
+      - submission_date: {type: datetime, required: true}
+      - application_status: {type: string, values: [Draft, Submitted, UnderReview, Approved, Rejected, Appealed, Withdrawn]}
+      - decision_date: {type: date, required: false}
+      - case_officer_id: {type: string, required: false}
+      - priority_flag: {type: boolean, required: false}
+
+  - name: Legislation
+    label: "Legislation"
+    description: "A law, regulation, directive, or statutory instrument."
+    sensitivity: Public
+    properties:
+      - legislation_id: {type: string, required: true}
+      - title: {type: string, required: true}
+      - jurisdiction: {type: string, required: true}
+      - legislation_type: {type: string, values: [PrimaryLegislation, SecondaryLegislation, Directive, Regulation, Guidance, Policy]}
+      - enactment_date: {type: date, required: false}
+      - commencement_date: {type: date, required: false}
+      - is_in_force: {type: boolean, required: true}
+      - eli_uri: {type: string, required: false, description: "European Legislation Identifier URI"}
+
+  - name: Dataset
+    label: "Open Data Dataset"
+    description: "A published government dataset available via an open data portal."
+    sensitivity: Public
+    dcat_equivalent: "dcat:Dataset"
+    properties:
+      - dataset_id: {type: string, required: true}
+      - title: {type: string, required: true}
+      - owning_agency_id: {type: string, required: true, fk: GovernmentAgency}
+      - publisher: {type: string, required: false}
+      - license: {type: string, required: false, description: "SPDX license identifier or URL"}
+      - theme: {type: string, required: false, description: "EU Data Theme (health, transport, environment...)"}
+      - update_frequency: {type: string, values: [Daily, Weekly, Monthly, Quarterly, Annual, Irregular]}
+      - spatial_coverage: {type: string, required: false, description: "WKT or ISO 3166 country/region code"}
+      - temporal_start: {type: date, required: false}
+      - temporal_end: {type: date, required: false}
+      - dcat_identifier: {type: string, required: false}
+
+  - name: GeoFeature
+    label: "Geographic Feature"
+    description: "A spatial entity in INSPIRE — administrative boundary, building, infrastructure."
+    sensitivity: Public
+    inspire_equivalent: "inspire:SpatialObject"
+    properties:
+      - feature_id: {type: string, required: true}
+      - feature_type: {type: string, values: [AdministrativeUnit, Address, Building, Road, TransportLink, LandParcel, ProtectedSite, WaterBody]}
+      - geometry_wkt: {type: string, required: false, description: "WKT geometry (POINT, LINESTRING, POLYGON)"}
+      - inspire_id: {type: string, required: false}
+      - country_code: {type: string, required: true}
+      - nuts_code: {type: string, required: false, description: "EU NUTS region code"}
+
+  - name: AuditRecord
+    label: "Audit Record"
+    description: "An immutable log of government decision or data access for accountability."
+    sensitivity: Confidential
+    is_event: true
+    properties:
+      - audit_id: {type: string, required: true}
+      - actor_id: {type: string, required: true, description: "Officer or system that performed the action"}
+      - action_type: {type: string, values: [Create, Read, Update, Delete, Approve, Reject, Export, Share]}
+      - subject_id: {type: string, required: true, description: "ID of the resource acted upon"}
+      - subject_type: {type: string, required: true}
+      - timestamp: {type: datetime, required: true}
+      - outcome: {type: string, values: [Success, Failure, PartialSuccess]}
+      - ip_address: {type: string, required: false}
+
+events:
+  - name: PolicyDecisionEvent
+    label: "Policy Decision Event"
+    description: "A formal policy decision made by a government body."
+    sensitivity: Public
+    is_event: true
+  - name: DataBreachEvent
+    label: "Data Breach Event"
+    description: "Unauthorised access to personal data held by a government agency."
+    sensitivity: Restricted
+    is_event: true
+  - name: ComplianceViolationEvent
+    label: "Compliance Violation Event"
+    description: "A detected violation of a statutory obligation."
+    sensitivity: Confidential
+    is_event: true
+
+relationships:
+  - "A ServiceApplication is submitted by exactly one Citizen."
+  - "A ServiceApplication requests exactly one PublicService."
+  - "A PublicService is owned by exactly one GovernmentAgency."
+  - "A GovernmentAgency may be subordinate to another GovernmentAgency."
+  - "A Dataset is published by exactly one GovernmentAgency."
+  - "A Legislation governs one or more PublicServices."
+  - "An AuditRecord is associated with one subject entity."
+  - "A GeoFeature may be the spatial extent of a GovernmentAgency jurisdiction."
+
+competency_questions:
+  - id: CQ-GOV-01
+    question: "What is the average processing time for permit applications per agency?"
+    priority: Critical
+  - id: CQ-GOV-02
+    question: "Which datasets have not been updated in the last 6 months?"
+    priority: High
+  - id: CQ-GOV-03
+    question: "Which services still have no digital delivery channel?"
+    priority: High
+  - id: CQ-GOV-04
+    question: "Which legislation governs the service application process for benefit X?"
+    priority: High
+  - id: CQ-GOV-05
+    question: "How many citizens have applications in 'Appealed' status?"
+    priority: Medium
+  - id: CQ-GOV-06
+    question: "What is the citizen satisfaction rate per service type?"
+    priority: Medium
+  - id: CQ-GOV-07
+    question: "Which audit records show data exports in the last 90 days?"
+    priority: Medium
+  - id: CQ-GOV-08
+    question: "What is the geographic coverage of datasets matching theme 'transport'?"
+    priority: Low
+  - id: CQ-GOV-09
+    question: "Which agencies reported compliance violations in the current financial year?"
+    priority: High
+  - id: CQ-GOV-10
+    question: "What datasets use open licenses (CC-BY or OGL) and are spatially referenced?"
+    priority: Low
+
+sensitivity_classification:
+  Public:       [GovernmentAgency, PublicService, Legislation, Dataset, GeoFeature, PolicyDecisionEvent]
+  Internal:     []
+  Confidential: [AuditRecord, ComplianceViolationEvent]
+  Restricted:   [Citizen, ServiceApplication, DataBreachEvent]
+
+dcat_alignments:
+  - local: Dataset
+    dcat: "dcat:Dataset"
+    match: equivalentClass
+  - local: GovernmentAgency
+    dcat: "dcat:DataService"
+    match: closeMatch
