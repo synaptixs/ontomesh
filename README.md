@@ -1,6 +1,6 @@
-# Ontology Engineering Toolkit — v1.5
+# Ontology Engineering Toolkit — v2.0
 
-**Domain-agnostic · Zero core dependencies · Runs in under 2 seconds**
+**Domain-agnostic · Phase 3 complete · Scale & Community edition**
 
 A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineering Framework v1.1](docs/framework-whitepaper.md). Takes a relational database schema and produces a production-ready OWL 2 ontology, SHACL validation shapes, JSON-LD agent payloads, SKOS vocabulary, and a scored governance report — for any domain, any industry, any major relational database.
 
@@ -25,6 +25,7 @@ A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineerin
 15. [Extending the toolkit](#15-extending-the-toolkit)
 16. [Companion documents](#16-companion-documents)
 17. [Runtime — connecting the toolkit to AI and LLMs](#17-runtime--connecting-the-toolkit-to-ai-and-llms)
+18. [Phase 3 — Scale & Community](#18-phase-3--scale--community)
 
 ---
 
@@ -48,6 +49,13 @@ It reads your relational schema and a thin annotation table, then generates ever
 | Test | CQ test runner | 18 SPARQL competency question tests, governance scorecard |
 | Report | HTML reporter | Self-contained visual summary report |
 | **runtime** | **AI consumption layer ✓ Complete** | **FlavorRegistry (5 flavors), Grounder, PayloadAssembler, InputGate, OutputGate, RuntimeClient (4 LLM adapters)** |
+| **publish** | **Graph store publishing ✓ Phase 3** | **One-command upload to Fuseki/Stardog/Oxigraph/Neptune/GraphDB with named-graph sensitivity partitioning** |
+| **drift** | **Drift detection extension ✓ Phase 3** | **drift.ttl (DriftObservation OWL hierarchy), drift-shapes.ttl, drift-skos.ttl (PSI/KL/JS/Calibration/LogShift)** |
+| **templates** | **Industry templates ✓ Phase 3** | **5 new domains: Energy (IEC CIM), Logistics, Government (DCAT/INSPIRE), Insurance, Pharma (IDMP). 10 templates total.** |
+| **modular** | **Modular OWL ✓ Phase 3** | **modules.json manifest, master.ttl (owl:imports graph), cycle detection, IRI conflict report** |
+| **discover** | **Log entity discovery ✓ Phase 3** | **entity_discovery_candidates.csv, entity_discovery_summary.json (NLP co-occurrence, spaCy)** |
+| **tmf630** | **TMF630 Task + Bulk ✓ Phase 3** | **tmf630-task-bulk.ttl, tmf630-task-mcp-tools.json, TmfTask/TmfImportJob/TmfExportJob OWL+SHACL** |
+| **wizard** | **Browser wizard ✓ Phase 3** | **Flask web app — drag-and-drop entity/relationship builder, template picker, pipeline runner** |
 
 ---
 
@@ -976,3 +984,207 @@ The runtime layer also does not choose which LLM to use. That is an enterprise d
 | PayloadAssembler | ✓ Complete | 5-component payload, token budget, LLM-agnostic dict output |
 | OutputGate | ✓ Complete | SHACL response validation, PROV-O stamping, `ObservationRecord` storage |
 | RuntimeClient | ✓ Complete | Full pipeline in one call, async support, 4 LLM adapters |
+
+---
+
+## 18. Phase 3 — Scale & Community
+
+Phase 3 completes the toolkit with deployment infrastructure, additional industry verticals, ML monitoring integration, and a browser-based authoring interface. All 8 items are implemented in this release (v2.0).
+
+### 18.1 Graph Store Publishing
+
+One-command upload of all Turtle artifacts to a supported graph store with named-graph partitioning by sensitivity tier.
+
+```bash
+# Apache Jena Fuseki
+python3 toolkit.py --phase publish --store fuseki --endpoint http://localhost:3030/dataset
+
+# Stardog
+python3 toolkit.py --phase publish --store stardog --endpoint http://localhost:5820/mydb \
+  --gstore-user admin --gstore-password admin
+
+# Oxigraph (Docker)
+python3 toolkit.py --phase publish --store oxigraph --endpoint http://localhost:7878
+
+# Amazon Neptune (SigV4 — set AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY env vars)
+python3 toolkit.py --phase publish --store neptune \
+  --endpoint https://my-cluster.neptune.amazonaws.com:8182 --aws-region us-east-1
+
+# Ontotext GraphDB
+python3 toolkit.py --phase publish --store graphdb --endpoint http://localhost:7200/repositories/myrepo
+```
+
+Named-graph partitioning:
+
+| Sensitivity | Named Graph |
+|---|---|
+| Public | `https://ontology.example.com/graph/public` |
+| Internal | `https://ontology.example.com/graph/internal` |
+| Confidential | `https://ontology.example.com/graph/confidential` |
+| Restricted | `https://ontology.example.com/graph/restricted` |
+
+Output: `output/reports/publish_summary.json`
+
+### 18.2 Docker Compose Kit
+
+Full-stack demo in one command — toolkit + Oxigraph SPARQL endpoint + SHACL validation service + nginx API gateway with TMF URL patterns.
+
+```bash
+# Start the full stack
+docker-compose up -d
+
+# Browser wizard
+open http://localhost:5000
+
+# Oxigraph SPARQL endpoint
+open http://localhost:7878
+
+# API gateway (TMF URL patterns)
+open http://localhost:8080
+
+# Publish pipeline output to Oxigraph
+docker-compose exec toolkit python toolkit.py --phase publish \
+  --store oxigraph --endpoint http://oxigraph:7878
+```
+
+Pre-loaded example: telecom schema with TMF seed data.
+
+### 18.3 Drift Detection Ontology Extension
+
+Extends `PerformanceIndicator` with ML monitoring metrics as first-class OWL citizens.
+
+```bash
+python3 toolkit.py --phase drift
+```
+
+**Generates:**
+- `output/ontology/drift.ttl` — `DriftObservation` OWL subclass hierarchy
+  - `PSIDriftObservation` — Population Stability Index (WARNING >0.1, CRITICAL >0.25)
+  - `KLDriftObservation` — Kullback-Leibler divergence
+  - `JSDriftObservation` — Jensen-Shannon divergence (bounded 0–1)
+  - `CalibrationDriftObservation` — Expected Calibration Error
+  - `LogTemplateDriftObservation` — log template cluster shift
+- `output/shapes/drift-shapes.ttl` — SHACL shapes with threshold enforcement
+- `output/vocab/drift-skos.ttl` — drift taxonomy (10 SKOS concepts)
+
+### 18.4 Industry Templates (10 total)
+
+Load a pre-built domain model instead of starting from scratch. 5 new templates added in Phase 3:
+
+```bash
+python3 toolkit.py --phase templates --template energy_utilities
+python3 toolkit.py --phase templates --template logistics_supply_chain
+python3 toolkit.py --phase templates --template government
+python3 toolkit.py --phase templates --template insurance
+python3 toolkit.py --phase templates --template pharmaceuticals
+python3 toolkit.py --phase templates --template all   # all 5 at once
+```
+
+Or load directly from the browser wizard's template picker.
+
+| Template | Standard Alignment | Entities | CQs |
+|---|---|---|---|
+| energy_utilities | IEC CIM 61968/61970 | 8 | 10 |
+| logistics_supply_chain | GS1, Schema.org | 8 | 10 |
+| government | DCAT v3, INSPIRE, FOAF | 8 | 10 |
+| insurance | ACORD, FIBO | 8 | 10 |
+| pharmaceuticals | IDMP (ISO 11616), HL7 FHIR R4 | 9 | 10 |
+| telecom | TM Forum SID v23.0 | existing | 13 |
+| healthcare | HL7 FHIR | existing | 8 |
+| finance | FIBO | existing | 8 |
+
+### 18.5 Modular OWL
+
+Multi-team ontology authoring with `owl:imports` support, acyclicity enforcement, and IRI conflict detection.
+
+```bash
+python3 toolkit.py --phase modular
+```
+
+**Generates:**
+- `output/ontology/master.ttl` — master ontology `owl:imports`-ing all modules
+- `output/ontology/modules.json` — full module manifest (IRIs, versions, import graph)
+
+**Checks performed:**
+1. **Acyclicity** — detects import cycles that would break OWL reasoners
+2. **IRI conflict detection** — flags the same IRI defined in multiple modules
+3. **Per-module versioning** — reads `owl:versionInfo` from each `.ttl` file
+
+### 18.6 Log Entity Discovery (NLP)
+
+Statistical co-occurrence analysis over log corpora to surface candidate entities not yet in the ontology. Requires spaCy.
+
+```bash
+# Install NLP deps first
+pip install spacy && python -m spacy download en_core_web_sm
+
+# Run discovery
+python3 toolkit.py --phase discover --log-path /var/log/app.log
+python3 toolkit.py --phase discover --log-path /var/log/*.log --min-freq 5
+```
+
+**Outputs:**
+- `output/reports/entity_discovery_candidates.csv` — top 200 candidates with TF-IDF score, frequency, and co-occurring terms
+- `output/reports/entity_discovery_summary.json` — pipeline summary
+
+Candidates are for expert review only — nothing is auto-added to the ontology.
+
+### 18.7 TMF630 Task + Bulk Operations (Parts 4 & 7)
+
+Required for full TMF Open API conformance certification.
+
+```bash
+python3 toolkit.py --phase tmf630
+```
+
+**Generates:**
+- `output/ontology/tmf630-task-bulk.ttl` — `TmfTask`, `TmfImportJob`, `TmfExportJob` OWL classes + SHACL shapes
+- `output/jsonld/tmf630-task-mcp-tools.json` — 4 MCP tools: `create_task`, `poll_task_status`, `create_import_job`, `create_export_job`
+- DB tables: `tmf_task`, `tmf_import_job`, `tmf_export_job`
+- 3 new TMF CQ tests (CQ-TMF-14/15/16)
+
+### 18.8 Browser Wizard
+
+Web-based equivalent of `onboard.py` with a drag-and-drop entity/relationship builder.
+
+```bash
+python3 toolkit.py --phase wizard
+# or directly:
+python3 wizard/app.py
+```
+
+Open `http://localhost:5000` in your browser.
+
+**Features:**
+- 6-step wizard: Domain → Entities → Events → Relationships → CQs → Generate
+- Template picker (loads any YAML template into the wizard)
+- One-click pipeline execution from the browser
+- Real-time pipeline log streaming
+- Artifact browser (download generated files directly from the UI)
+- Session persistence (`.wizard_session.json`)
+
+**API endpoints** (for integration):
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `GET /` | GET | Browser wizard UI |
+| `/api/session` | GET/POST | Load / save session JSON |
+| `/api/templates` | GET | List available templates |
+| `/api/template/<name>` | GET | Load template as session |
+| `/api/generate` | POST | Run pipeline phases |
+| `/api/pipeline/status` | GET | Poll pipeline progress |
+| `/api/output` | GET | List generated artifacts |
+| `/api/output/<subdir>/<file>` | GET | Download artifact |
+
+### Phase 3 Exit Gates — ✓ Complete (Apr 2026)
+
+| Gate | Status |
+|---|---|
+| One-command Docker stack running | ✓ `docker-compose up -d` |
+| 10 industry templates available | ✓ 5 existing + 5 new (v2.0) |
+| Graph store publishing (5 stores) | ✓ Fuseki/Stardog/Oxigraph/Neptune/GraphDB |
+| Drift detection OWL + SHACL | ✓ 5 metric types, PSI thresholds enforced |
+| Modular OWL with cycle detection | ✓ Import graph + IRI conflict scan |
+| Log entity discovery (NLP) | ✓ spaCy + co-occurrence fallback |
+| TMF630 Task + Bulk conformance | ✓ Parts 4 & 7, 3 new CQ tests |
+| Browser wizard | ✓ Flask + 6-step UI + template picker |

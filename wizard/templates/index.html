@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ontology Toolkit — Browser Wizard</title>
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d2e; --border: #2d3058;
+      --accent: #5b8af7; --accent2: #7c5bf7; --success: #3ddc84;
+      --warn: #f7c948; --danger: #f76b6b; --text: #e2e8f0; --muted: #8892b0;
+      --radius: 8px; --font: 'Segoe UI', system-ui, sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font);
+           font-size: 14px; line-height: 1.6; }
+    a    { color: var(--accent); text-decoration: none; }
+    h2   { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
+    h3   { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    .app   { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 220px; min-width: 220px; background: var(--surface);
+               border-right: 1px solid var(--border); padding: 20px 0; display: flex;
+               flex-direction: column; }
+    .main  { flex: 1; overflow-y: auto; padding: 28px 32px; }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border);
+                    margin-bottom: 16px; }
+    .sidebar-logo span { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+    .sidebar-logo strong { font-size: 15px; color: var(--text); }
+    .step-nav  { list-style: none; padding: 0 12px; }
+    .step-nav li { padding: 8px 12px; border-radius: var(--radius); cursor: pointer;
+                   color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 8px;
+                   transition: background 0.15s; margin-bottom: 2px; }
+    .step-nav li:hover  { background: rgba(91,138,247,.12); color: var(--text); }
+    .step-nav li.active { background: rgba(91,138,247,.2); color: var(--accent); font-weight: 600; }
+    .step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--border);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .step-nav li.active .step-num { background: var(--accent); color: #fff; }
+    .step-nav li.done .step-num   { background: var(--success); color: #0f1117; }
+    .sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+    .btn-run { width: 100%; padding: 10px; border: none; border-radius: var(--radius);
+               background: linear-gradient(135deg, var(--accent), var(--accent2));
+               color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+               transition: opacity 0.15s; }
+    .btn-run:hover { opacity: 0.85; }
+    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Cards & Inputs ─────────────────────────────────────────────────── */
+    .card { background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 600;
+                   text-transform: uppercase; letter-spacing: .5px;
+                   color: var(--muted); margin-bottom: 4px; }
+    .field input, .field textarea, .field select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); padding: 8px 12px; font-size: 14px;
+      outline: none; transition: border-color 0.15s; }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--accent); }
+    .field textarea { resize: vertical; min-height: 72px; }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn { padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
+           font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.8; }
+    .btn-primary  { background: var(--accent); color: #fff; }
+    .btn-danger   { background: var(--danger); color: #fff; }
+    .btn-ghost    { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+    .btn-success  { background: var(--success); color: #0f1117; }
+
+    /* ── Entity/Event chips ─────────────────────────────────────────────── */
+    .item-list { display: flex; flex-direction: column; gap: 8px; }
+    .item-card { background: var(--bg); border: 1px solid var(--border);
+                 border-radius: var(--radius); padding: 12px 14px;
+                 display: flex; align-items: flex-start; gap: 12px; }
+    .item-card.dragging { opacity: 0.5; }
+    .item-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .item-body { flex: 1; min-width: 0; }
+    .item-name { font-weight: 600; font-size: 14px; }
+    .item-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .item-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .tag  { font-size: 11px; padding: 2px 8px; border-radius: 12px;
+            background: rgba(91,138,247,.15); color: var(--accent); }
+    .tag.restricted { background: rgba(247,107,107,.15); color: var(--danger); }
+    .tag.confidential { background: rgba(247,201,72,.15); color: var(--warn); }
+    .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ── Property sub-table ─────────────────────────────────────────────── */
+    .props-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+    .props-table th { text-align: left; padding: 4px 8px; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .props-table td { padding: 4px 8px; border-bottom: 1px solid rgba(45,48,88,.4); }
+
+    /* ── CQ list ─────────────────────────────────────────────────────────── */
+    .cq-item { background: var(--bg); border: 1px solid var(--border);
+               border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;
+               display: flex; gap: 10px; align-items: flex-start; }
+    .cq-id   { font-size: 11px; color: var(--accent); font-weight: 700;
+               background: rgba(91,138,247,.12); padding: 2px 8px; border-radius: 12px;
+               flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Relationship chips ─────────────────────────────────────────────── */
+    .rel-item { background: var(--bg); border: 1px solid var(--border);
+                border-radius: 6px; padding: 8px 12px; margin-bottom: 6px;
+                display: flex; gap: 8px; align-items: center; }
+    .rel-arrow { color: var(--accent2); font-weight: 700; }
+
+    /* ── Template picker ─────────────────────────────────────────────────── */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .template-card { background: var(--bg); border: 1px solid var(--border);
+                     border-radius: var(--radius); padding: 14px; cursor: pointer;
+                     text-align: center; transition: border-color 0.15s; }
+    .template-card:hover { border-color: var(--accent); }
+    .template-card .t-icon { font-size: 28px; margin-bottom: 8px; }
+    .template-card .t-name { font-size: 12px; font-weight: 600; }
+
+    /* ── Pipeline log ─────────────────────────────────────────────────────── */
+    #pipeline-log { background: #0a0c14; border: 1px solid var(--border);
+                    border-radius: var(--radius); padding: 16px; font-family: monospace;
+                    font-size: 12px; height: 320px; overflow-y: auto; color: #c8e6c9; }
+    .log-ok   { color: #3ddc84; }
+    .log-warn { color: #f7c948; }
+    .log-err  { color: #f76b6b; }
+
+    /* ── Modal ─────────────────────────────────────────────────────────────── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7);
+                      display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: var(--surface); border: 1px solid var(--border);
+             border-radius: var(--radius); padding: 24px; min-width: 480px; max-width: 640px; width: 90%; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center;
+                    margin-bottom: 16px; }
+    .modal-footer { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* ── Step panels ─────────────────────────────────────────────────────── */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .step-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .step-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+    /* ── Misc ─────────────────────────────────────────────────────────────── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+             border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .badge.running { background: rgba(247,201,72,.15); color: var(--warn); }
+    .badge.done    { background: rgba(61,220,132,.15); color: var(--success); }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: var(--radius);
+             padding: 12px 18px; font-size: 13px; z-index: 200;
+             animation: fadeIn .3s; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <strong>Ontology Toolkit</strong>
+      <span>Browser Wizard · v2.0</span>
+    </div>
+    <ul class="step-nav" id="step-nav">
+      <li class="active" data-step="domain"><span class="step-num">1</span> Domain Identity</li>
+      <li data-step="entities"><span class="step-num">2</span> Entities</li>
+      <li data-step="events"><span class="step-num">3</span> Events</li>
+      <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
+      <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
+      <li data-step="generate"><span class="step-num">6</span> Generate</li>
+    </ul>
+    <div class="sidebar-footer">
+      <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
+      <button class="btn-run" id="btn-run-pipeline" onclick="runPipeline()">▶ Run Pipeline</button>
+    </div>
+  </aside>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Step 1: Domain -->
+    <div class="step-panel active" id="step-domain">
+      <div class="step-title">Domain Identity</div>
+      <div class="step-subtitle">Define the scope of your ontology. All generated IRIs and documentation will use these values.</div>
+
+      <div class="card">
+        <h3>Load a starter template</h3>
+        <div class="template-grid" id="template-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Domain details</h3>
+        <div class="field"><label>Domain Name</label>
+          <input id="d-name" placeholder="e.g. Enterprise Network Operations" /></div>
+        <div class="field"><label>Description</label>
+          <textarea id="d-desc" placeholder="What this ontology covers..."></textarea></div>
+        <div class="field"><label>Base IRI</label>
+          <input id="d-iri" placeholder="https://ontology.example.com/enterprise/" /></div>
+        <div class="field"><label>Industry</label>
+          <select id="d-industry">
+            <option value="telecom">Telecom</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="finance">Finance</option>
+            <option value="energy_utilities">Energy & Utilities</option>
+            <option value="logistics_supply_chain">Logistics & Supply Chain</option>
+            <option value="government">Government</option>
+            <option value="insurance">Insurance</option>
+            <option value="pharmaceuticals">Pharmaceuticals</option>
+            <option value="custom">Custom</option>
+          </select></div>
+        <button class="btn btn-primary" onclick="saveDomain()">Save &amp; Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Entities -->
+    <div class="step-panel" id="step-entities">
+      <div class="step-title">Entities</div>
+      <div class="step-subtitle">The main things in your domain — assets, customers, resources, orders. Each becomes an OWL class.</div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Entities <span id="entity-count" class="badge">(0)</span></h3>
+          <button class="btn btn-primary" onclick="openEntityModal()">+ Add Entity</button>
+        </div>
+        <div class="item-list" id="entity-list"></div>
+      </div>
+    </div>
+
+    <!-- Step 3: Events -->
+    <div class="step-panel" id="step-events">
+      <div class="step-title">Events</div>
+      <div class="step-subtitle">Things that happen — incidents, alerts, orders. Events become OWL subclasses of a base Event class.</div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Events <span id="event-count" class="badge">(0)</span></h3>
+          <button class="btn btn-primary" onclick="openEventModal()">+ Add Event</button>
+        </div>
+        <div class="item-list" id="event-list"></div>
+      </div>
+    </div>
+
+    <!-- Step 4: Relationships -->
+    <div class="step-panel" id="step-relationships">
+      <div class="step-title">Relationships</div>
+      <div class="step-subtitle">Describe how entities connect. Write plain sentences — e.g. "A Customer places one or more Orders."</div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Relationships <span id="rel-count" class="badge">(0)</span></h3>
+          <button class="btn btn-primary" onclick="addRelationship()">+ Add</button>
+        </div>
+        <div id="rel-list"></div>
+        <div style="margin-top:12px; display:flex; gap:8px">
+          <input id="new-rel" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
+                 placeholder="A Customer places one or more Orders." />
+          <button class="btn btn-primary" onclick="addRelationship()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: CQs -->
+    <div class="step-panel" id="step-cqs">
+      <div class="step-title">Competency Questions</div>
+      <div class="step-subtitle">Questions your ontology must be able to answer. These drive the governance scorecard and SPARQL test suite.</div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Questions <span id="cq-count" class="badge">(0)</span></h3>
+          <button class="btn btn-primary" onclick="addCQ()">+ Add</button>
+        </div>
+        <div id="cq-list"></div>
+        <div style="margin-top:12px; display:flex; gap:8px">
+          <input id="new-cq" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
+                 placeholder="Which assets have been in outage for more than 4 hours?" />
+          <button class="btn btn-primary" onclick="addCQ()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6: Generate -->
+    <div class="step-panel" id="step-generate">
+      <div class="step-title">Generate Ontology</div>
+      <div class="step-subtitle">Review your session and run the toolkit pipeline to generate OWL, SHACL, JSON-LD, SKOS, and the governance report.</div>
+
+      <div class="card">
+        <h3>Session Summary</h3>
+        <div id="session-summary"></div>
+      </div>
+
+      <div class="card">
+        <h3>Pipeline phases</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px">
+          <label><input type="checkbox" id="ph-all" checked onchange="toggleAllPhases(this)"> All phases</label>
+        </div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13px">
+          <label><input type="checkbox" class="ph-cb" value="1" checked> 1 — Foundation</label>
+          <label><input type="checkbox" class="ph-cb" value="2" checked> 2 — OWL Modeling</label>
+          <label><input type="checkbox" class="ph-cb" value="3" checked> 3 — SHACL</label>
+          <label><input type="checkbox" class="ph-cb" value="4" checked> 4 — Mapping</label>
+          <label><input type="checkbox" class="ph-cb" value="5" checked> 5 — JSON-LD</label>
+          <label><input type="checkbox" class="ph-cb" value="test" checked> Test</label>
+          <label><input type="checkbox" class="ph-cb" value="report" checked> Report</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Pipeline Output</h3>
+          <span id="pipeline-badge" class="badge" style="display:none"></span>
+        </div>
+        <div id="pipeline-log">Waiting to run pipeline...</div>
+      </div>
+
+      <div class="card" id="artifact-list-card" style="display:none">
+        <h3>Generated Artifacts</h3>
+        <div id="artifact-list"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Entity Modal ──────────────────────────────────────────────────────── -->
+<div id="entity-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="entity-modal-title">Add Entity</h2>
+      <button class="btn btn-ghost" onclick="closeModal('entity-modal')">✕</button>
+    </div>
+    <div class="field"><label>Class Name</label><input id="em-name" placeholder="e.g. NetworkFunction" /></div>
+    <div class="field"><label>Label</label><input id="em-label" placeholder="e.g. Network Function" /></div>
+    <div class="field"><label>Description</label><textarea id="em-desc" placeholder="What this entity represents..."></textarea></div>
+    <div class="field"><label>Sensitivity Tier</label>
+      <select id="em-tier">
+        <option>Public</option><option selected>Internal</option>
+        <option>Confidential</option><option>Restricted</option>
+      </select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('entity-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEntity()">Save Entity</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Event Modal ───────────────────────────────────────────────────────── -->
+<div id="event-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Event</h2>
+      <button class="btn btn-ghost" onclick="closeModal('event-modal')">✕</button>
+    </div>
+    <div class="field"><label>Event Name</label><input id="ev-name" placeholder="e.g. OutageEvent" /></div>
+    <div class="field"><label>Label</label><input id="ev-label" placeholder="e.g. Outage Event" /></div>
+    <div class="field"><label>Description</label><textarea id="ev-desc" placeholder="What triggers this event..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('event-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let session = {
+  domain: {}, entities: [], events: [], relationships: [], competency_questions: []
+};
+let currentStep = 'domain';
+const TEMPLATE_ICONS = {
+  telecom:'📡', healthcare:'🏥', finance:'💼', energy_utilities:'⚡',
+  logistics_supply_chain:'🚚', government:'🏛️', insurance:'🛡️', pharmaceuticals:'💊', custom:'⚙️'
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  await loadSession();
+  loadTemplateList();
+  render();
+}
+
+async function loadSession() {
+  try {
+    const r = await fetch('/api/session');
+    if (r.ok) session = await r.json();
+  } catch(e) {}
+}
+
+async function saveSession() {
+  try {
+    await fetch('/api/session', {
+      method: 'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(session)
+    });
+    document.getElementById('save-status').textContent = '✓ Saved ' + new Date().toLocaleTimeString();
+  } catch(e) {}
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function goStep(name) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-nav li').forEach(li => li.classList.remove('active'));
+  document.getElementById('step-'+name).classList.add('active');
+  document.querySelector(`[data-step="${name}"]`).classList.add('active');
+  currentStep = name;
+  if (name === 'generate') renderSummary();
+}
+
+document.querySelectorAll('.step-nav li').forEach(li => {
+  li.addEventListener('click', () => goStep(li.dataset.step));
+});
+
+// ── Templates ─────────────────────────────────────────────────────────────
+async function loadTemplateList() {
+  try {
+    const r = await fetch('/api/templates');
+    const data = await r.json();
+    const grid = document.getElementById('template-grid');
+    grid.innerHTML = data.templates.map(t => `
+      <div class="template-card" onclick="loadTemplate('${t}')">
+        <div class="t-icon">${TEMPLATE_ICONS[t]||'📋'}</div>
+        <div class="t-name">${t.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+async function loadTemplate(name) {
+  try {
+    const r = await fetch('/api/template/'+name);
+    if (r.ok) {
+      session = await r.json();
+      render();
+      showToast('Template loaded: '+name.replace(/_/g,' '));
+    }
+  } catch(e) {}
+}
+
+// ── Domain ────────────────────────────────────────────────────────────────
+function saveDomain() {
+  session.domain = {
+    name: document.getElementById('d-name').value,
+    description: document.getElementById('d-desc').value,
+    base_iri: document.getElementById('d-iri').value,
+    industry: document.getElementById('d-industry').value,
+  };
+  saveSession();
+  goStep('entities');
+}
+
+// ── Entities ──────────────────────────────────────────────────────────────
+function openEntityModal(idx) {
+  document.getElementById('em-name').value = '';
+  document.getElementById('em-label').value = '';
+  document.getElementById('em-desc').value = '';
+  document.getElementById('em-tier').value = 'Internal';
+  document.getElementById('entity-modal-title').textContent = 'Add Entity';
+  document.getElementById('entity-modal').style.display = 'flex';
+}
+
+function saveEntity() {
+  const name = document.getElementById('em-name').value.trim();
+  if (!name) return;
+  session.entities.push({
+    name, label: document.getElementById('em-label').value || name,
+    description: document.getElementById('em-desc').value,
+    sensitivity: document.getElementById('em-tier').value,
+    properties: []
+  });
+  closeModal('entity-modal');
+  saveSession();
+  renderEntities();
+}
+
+function removeEntity(i) {
+  session.entities.splice(i, 1);
+  saveSession();
+  renderEntities();
+}
+
+function renderEntities() {
+  const list = document.getElementById('entity-list');
+  document.getElementById('entity-count').textContent = `(${session.entities.length})`;
+  if (!session.entities.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No entities yet. Click + Add Entity.</div>';
+    return;
+  }
+  list.innerHTML = session.entities.map((e,i) => `
+    <div class="item-card">
+      <div class="item-icon">🔷</div>
+      <div class="item-body">
+        <div class="item-name">${e.name}</div>
+        <div class="item-desc">${e.description||''}</div>
+        <div class="item-tags">
+          <span class="tag ${e.sensitivity.toLowerCase()}">${e.sensitivity}</span>
+          ${e.properties.length ? `<span class="tag">${e.properties.length} props</span>` : ''}
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="removeEntity(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Events ────────────────────────────────────────────────────────────────
+function openEventModal() {
+  document.getElementById('ev-name').value = '';
+  document.getElementById('ev-label').value = '';
+  document.getElementById('ev-desc').value = '';
+  document.getElementById('event-modal').style.display = 'flex';
+}
+
+function saveEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  if (!name) return;
+  session.events.push({
+    name, label: document.getElementById('ev-label').value || name,
+    description: document.getElementById('ev-desc').value
+  });
+  closeModal('event-modal');
+  saveSession();
+  renderEvents();
+}
+
+function removeEvent(i) {
+  session.events.splice(i, 1);
+  saveSession();
+  renderEvents();
+}
+
+function renderEvents() {
+  const list = document.getElementById('event-list');
+  document.getElementById('event-count').textContent = `(${session.events.length})`;
+  if (!session.events.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No events yet.</div>';
+    return;
+  }
+  list.innerHTML = session.events.map((e,i) => `
+    <div class="item-card">
+      <div class="item-icon">⚡</div>
+      <div class="item-body">
+        <div class="item-name">${e.name}</div>
+        <div class="item-desc">${e.description||''}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="removeEvent(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Relationships ──────────────────────────────────────────────────────────
+function addRelationship() {
+  const input = document.getElementById('new-rel');
+  const val = input.value.trim();
+  if (!val) return;
+  session.relationships.push(val);
+  input.value = '';
+  saveSession();
+  renderRelationships();
+}
+
+function removeRel(i) {
+  session.relationships.splice(i, 1);
+  saveSession();
+  renderRelationships();
+}
+
+function renderRelationships() {
+  const list = document.getElementById('rel-list');
+  document.getElementById('rel-count').textContent = `(${session.relationships.length})`;
+  if (!session.relationships.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No relationships yet.</div>';
+    return;
+  }
+  list.innerHTML = session.relationships.map((r,i) => `
+    <div class="rel-item">
+      <span class="rel-arrow">→</span>
+      <span style="flex:1;font-size:13px">${r}</span>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRel(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('new-rel').addEventListener('keydown', e => { if (e.key==='Enter') addRelationship(); });
+
+// ── CQs ───────────────────────────────────────────────────────────────────
+function addCQ() {
+  const input = document.getElementById('new-cq');
+  const val = input.value.trim();
+  if (!val) return;
+  const id = `CQ-${(session.competency_questions.length+1).toString().padStart(2,'0')}`;
+  session.competency_questions.push({id, question: val, priority:'Medium'});
+  input.value = '';
+  saveSession();
+  renderCQs();
+}
+
+function removeCQ(i) {
+  session.competency_questions.splice(i, 1);
+  saveSession();
+  renderCQs();
+}
+
+function renderCQs() {
+  const list = document.getElementById('cq-list');
+  document.getElementById('cq-count').textContent = `(${session.competency_questions.length})`;
+  if (!session.competency_questions.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No competency questions yet.</div>';
+    return;
+  }
+  list.innerHTML = session.competency_questions.map((cq,i) => `
+    <div class="cq-item">
+      <span class="cq-id">${cq.id||''}</span>
+      <span style="flex:1;font-size:13px">${cq.question}</span>
+      <select style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:11px;padding:2px 6px"
+              onchange="session.competency_questions[${i}].priority=this.value;saveSession()">
+        <option ${cq.priority==='Critical'?'selected':''}>Critical</option>
+        <option ${cq.priority==='High'?'selected':''}>High</option>
+        <option ${cq.priority==='Medium'?'selected':''}>Medium</option>
+        <option ${cq.priority==='Low'?'selected':''}>Low</option>
+      </select>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeCQ(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('new-cq').addEventListener('keydown', e => { if (e.key==='Enter') addCQ(); });
+
+// ── Generate ──────────────────────────────────────────────────────────────
+function toggleAllPhases(cb) {
+  document.querySelectorAll('.ph-cb').forEach(c => c.checked = cb.checked);
+}
+
+async function runPipeline() {
+  const phases = Array.from(document.querySelectorAll('.ph-cb:checked')).map(c=>c.value);
+  const log = document.getElementById('pipeline-log');
+  const badge = document.getElementById('pipeline-badge');
+  log.innerHTML = '<span class="log-warn">Starting pipeline...</span>';
+  badge.style.display = 'inline-flex';
+  badge.className = 'badge running';
+  badge.textContent = '⏳ Running';
+  document.getElementById('btn-run-pipeline').disabled = true;
+
+  try {
+    await fetch('/api/generate', {
+      method: 'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({phases: phases.length ? phases : ['all']})
+    });
+    pollPipelineStatus();
+  } catch(e) {
+    log.innerHTML = `<span class="log-err">Failed to start: ${e}</span>`;
+    badge.className = 'badge';
+    badge.textContent = '✗ Error';
+    document.getElementById('btn-run-pipeline').disabled = false;
+  }
+}
+
+async function pollPipelineStatus() {
+  try {
+    const r = await fetch('/api/pipeline/status');
+    const data = await r.json();
+    const log = document.getElementById('pipeline-log');
+    const badge = document.getElementById('pipeline-badge');
+
+    log.innerHTML = data.last_lines.map(line => {
+      const cls = line.includes('✓') ? 'log-ok' : line.includes('✗')||line.includes('ERROR')||line.includes('FAIL') ? 'log-err' : line.includes('WARN')||line.includes('⚠') ? 'log-warn' : '';
+      return `<div class="${cls}">${escHtml(line)}</div>`;
+    }).join('');
+    log.scrollTop = log.scrollHeight;
+
+    if (data.running) {
+      setTimeout(pollPipelineStatus, 1500);
+    } else {
+      badge.className = 'badge done';
+      badge.textContent = '✓ Done';
+      document.getElementById('btn-run-pipeline').disabled = false;
+      loadArtifacts();
+    }
+  } catch(e) {
+    setTimeout(pollPipelineStatus, 2000);
+  }
+}
+
+async function loadArtifacts() {
+  try {
+    const r = await fetch('/api/output');
+    const data = await r.json();
+    const card = document.getElementById('artifact-list-card');
+    const list = document.getElementById('artifact-list');
+    const entries = Object.entries(data).flatMap(([subdir, files]) =>
+      files.map(f => ({subdir, file: f}))
+    );
+    if (!entries.length) return;
+    card.style.display = 'block';
+    list.innerHTML = entries.map(({subdir,file}) =>
+      `<div style="display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(45,48,88,.3)">
+        <span style="color:var(--muted);width:90px">${subdir}/</span>
+        <a href="/api/output/${subdir}/${file}" target="_blank">${file}</a>
+      </div>`
+    ).join('');
+  } catch(e) {}
+}
+
+function renderSummary() {
+  const d = session.domain || {};
+  document.getElementById('session-summary').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div><span style="color:var(--muted);font-size:12px">Domain</span><div style="font-weight:600">${d.name||'(not set)'}</div></div>
+      <div><span style="color:var(--muted);font-size:12px">Industry</span><div>${d.industry||'—'}</div></div>
+      <div><span style="color:var(--muted);font-size:12px">Entities</span><div>${session.entities.length}</div></div>
+      <div><span style="color:var(--muted);font-size:12px">Events</span><div>${session.events.length}</div></div>
+      <div><span style="color:var(--muted);font-size:12px">Relationships</span><div>${session.relationships.length}</div></div>
+      <div><span style="color:var(--muted);font-size:12px">Competency Questions</span><div>${session.competency_questions.length}</div></div>
+    </div>`;
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function render() {
+  if (session.domain?.name) {
+    document.getElementById('d-name').value = session.domain.name;
+    document.getElementById('d-desc').value = session.domain.description||'';
+    document.getElementById('d-iri').value  = session.domain.base_iri||'';
+    const sel = document.getElementById('d-industry');
+    if (session.domain.industry) {
+      for (const opt of sel.options) { if (opt.value===session.domain.industry) { opt.selected=true; break; }}
+    }
+  }
+  renderEntities();
+  renderEvents();
+  renderRelationships();
+  renderCQs();
+}
+
+init();
+</script>
+</body>
+</html>

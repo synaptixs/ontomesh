@@ -494,7 +494,8 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime"],
+                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
+                                 "publish","drift","templates","modular","discover","tmf630","wizard"],
                         help="Run a specific phase only")
     parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
     parser.add_argument("--log-format", default="auto",
@@ -503,8 +504,14 @@ def main():
     parser.add_argument("--log-regex",  default=None, help="Named-group regex for --log-format regex")
     parser.add_argument("--dry-run",    action="store_true", help="Log ingest dry-run (no DB writes)")
     parser.add_argument("--store",      default="all",
-                        choices=["all","stardog","fuseki","neptune"],
-                        help="Graph store target for --phase security")
+                        choices=["all","stardog","fuseki","neptune","oxigraph","graphdb"],
+                        help="Graph store target for --phase security or --phase publish")
+    parser.add_argument("--endpoint",   default="", help="Graph store endpoint URL for --phase publish")
+    parser.add_argument("--gstore-user",     default="", help="Graph store username (Fuseki/Stardog/GraphDB)")
+    parser.add_argument("--gstore-password", default="", help="Graph store password")
+    parser.add_argument("--aws-region",      default="us-east-1", help="AWS region for Neptune")
+    parser.add_argument("--template",   default="all", help="Industry template name for --phase templates")
+    parser.add_argument("--min-freq",   type=int, default=3, help="Min co-occurrence frequency for --phase discover")
     parser.add_argument("--industry", default="Enterprise", help="Industry label for output")
     args = parser.parse_args()
 
@@ -568,6 +575,71 @@ def main():
         from alignment_generator import run_alignment
         run_alignment(out_path)
 
+    # ── Phase 3 handlers ─────────────────────────────────────────────────
+
+    def phase_publish(db_path: str, out_path: str):
+        step(0, "Phase 3 — Graph Store Publishing")
+        from graph_publisher import run_publish, generate_publish_summary
+        if not args.endpoint:
+            print("  ⚠  --endpoint is required for --phase publish")
+            print("    Example: python3 toolkit.py --phase publish --store fuseki --endpoint http://localhost:3030/dataset")
+            return
+        store = args.store if args.store != "all" else "fuseki"
+        results = run_publish(
+            out_path,
+            store=store,
+            endpoint=args.endpoint,
+            user=args.gstore_user,
+            password=args.gstore_password,
+            region=args.aws_region,
+        )
+        generate_publish_summary(results, out_path, store, args.endpoint)
+
+    def phase_drift(db_path: str, out_path: str):
+        step(0, "Phase 3 — Drift Detection Ontology Extension")
+        from drift_detector import run_drift_detection
+        run_drift_detection(out_path)
+
+    def phase_templates(db_path: str, out_path: str):
+        step(0, "Phase 3 — Industry Templates")
+        from template_loader import run_templates
+        run_templates(out_path, template_name=args.template)
+
+    def phase_modular(db_path: str, out_path: str):
+        step(0, "Phase 3 — Modular OWL (owl:imports + cycle + IRI conflict detection)")
+        from modular_owl import run_modular_owl
+        run_modular_owl(out_path)
+
+    def phase_discover(db_path: str, out_path: str):
+        step(0, "Phase 3 — Log Entity Discovery (NLP co-occurrence analysis)")
+        from entity_discoverer import run_entity_discovery
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠  --log-path is required for --phase discover")
+            print("    Example: python3 toolkit.py --phase discover --log-path /var/log/app.log")
+            return
+        run_entity_discovery(
+            log_path=log_path,
+            db_path=db_path,
+            out_path=out_path,
+            min_freq=args.min_freq,
+        )
+
+    def phase_tmf630(db_path: str, out_path: str):
+        step(0, "Phase 3 — TMF630 Task + Bulk Operations (Parts 4 & 7)")
+        from tmf_mapper import run_tmf630_task_phase
+        run_tmf630_task_phase(db_path, out_path)
+
+    def phase_wizard(db_path: str, out_path: str):
+        step(0, "Phase 3 — Browser Wizard (Flask)")
+        wizard_path = os.path.join(HERE, "wizard", "app.py")
+        if not os.path.exists(wizard_path):
+            print(f"  ⚠  Wizard not found at {wizard_path}")
+            return
+        print(f"  Starting browser wizard at http://127.0.0.1:5000")
+        print(f"  Press Ctrl+C to stop.")
+        os.execv(sys.executable, [sys.executable, wizard_path, "--debug"])
+
     phases = {
         "1":       [(phase1_foundation, [args.db, args.out])],
         "2":       [(phase2_ontology,   [args.db, args.out])],
@@ -584,6 +656,14 @@ def main():
         "conflict":  [(phase_conflict,  [args.db, args.out])],
         "alignment": [(phase_alignment, [args.db, args.out])],
         "runtime":   [(phase_runtime,   [args.db, args.out])],
+        # ── Phase 3 ───────────────────────────────────────────────────────
+        "publish":   [(phase_publish,   [args.db, args.out])],
+        "drift":     [(phase_drift,     [args.db, args.out])],
+        "templates": [(phase_templates, [args.db, args.out])],
+        "modular":   [(phase_modular,   [args.db, args.out])],
+        "discover":  [(phase_discover,  [args.db, args.out])],
+        "tmf630":    [(phase_tmf630,    [args.db, args.out])],
+        "wizard":    [(phase_wizard,    [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
@@ -594,6 +674,10 @@ def main():
             (phase_conflict,    [args.db, args.out]),
             (phase_alignment,   [args.db, args.out]),
             (phase_runtime,     [args.db, args.out]),
+            (phase_drift,       [args.db, args.out]),
+            (phase_templates,   [args.db, args.out]),
+            (phase_modular,     [args.db, args.out]),
+            (phase_tmf630,      [args.db, args.out]),
             (phase_test,        [args.db, args.out]),
             (phase_report,      [args.out]),
         ]
