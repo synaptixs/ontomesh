@@ -496,7 +496,7 @@ def main():
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
                         choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
-                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve"],
+                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate"],
                         help="Run a specific phase only")
     # ── Workstream 2 (evolve) flags ────────────────────────────────────
     parser.add_argument("--review", action="store_true",
@@ -521,6 +521,35 @@ def main():
                         help="Restrict --phase evolve to a single detection strategy")
     parser.add_argument("--open-pr", action="store_true",
                         help="On --apply, open a draft GitHub PR with the diff (requires gh CLI)")
+    # ── Workstream 3 (federate) flags ──────────────────────────────────
+    parser.add_argument("--generate-keys", action="store_true",
+                        help="Generate a local Ed25519 signing keypair (--phase federate)")
+    parser.add_argument("--key-name", default="enterprise",
+                        help="Keypair name for --phase federate --generate-keys")
+    parser.add_argument("--register-partner", default=None, metavar="URL",
+                        help="Register a partner by capability-manifest URL (--phase federate)")
+    parser.add_argument("--partner-iri", default=None,
+                        help="Partner IRI for --phase federate operations")
+    parser.add_argument("--partner-endpoint", default=None,
+                        help="Partner SPARQL endpoint (for --register-partner)")
+    parser.add_argument("--partner-display-name", default=None,
+                        help="Human-readable partner name (for --register-partner)")
+    parser.add_argument("--partner-public-key", default=None,
+                        help="Partner Ed25519 public key b64 (for --register-partner)")
+    parser.add_argument("--exposed-classes", default=None,
+                        help="Comma-separated OWL class IRIs exposed by the partner")
+    parser.add_argument("--max-tier", default="Internal",
+                        choices=["Public", "Internal", "Confidential"],
+                        help="Maximum sensitivity tier shareable with the partner")
+    parser.add_argument("--handshake", default=None, metavar="URL",
+                        help="Start the trust-bootstrap handshake with a partner (--phase federate)")
+    parser.add_argument("--list-partners", action="store_true",
+                        help="List every registered federation partner")
+    parser.add_argument("--build-manifest", action="store_true",
+                        help="Build + sign the local capability manifest (--phase federate)")
+    parser.add_argument("--enterprise-iri",
+                        default="https://enterprise.example.com/ontology#self",
+                        help="Enterprise IRI used when building a capability manifest")
     parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
     parser.add_argument("--log-format", default="auto",
                         choices=["auto","jsonl","syslog","cef","otlp","regex"],
@@ -724,6 +753,130 @@ def main():
             f"candidate={scoring['candidates']}"
         )
 
+    def phase_federate(db_path: str, out_path: str):
+        step(0, "Workstream 3 — Cross-Enterprise Federated Ontology Network")
+
+        sys.path.insert(0, HERE)
+        from federation import (
+            partner_registry, manifest as fed_manifest, trust as fed_trust,
+        )
+
+        # Route 1 — generate a local Ed25519 signing keypair
+        if args.generate_keys:
+            result = fed_manifest.generate_keypair(key_name=args.key_name)
+            print(f"  ✓ Keypair generated")
+            print(f"    secret : {result['sk_path']} (mode 0600)")
+            print(f"    public : {result['pk_path']}")
+            print(f"    pk b64 : {result['public_key']}")
+            return
+
+        # Route 2 — list every registered partner
+        if args.list_partners:
+            partners = partner_registry.list_partners(db_path)
+            if not partners:
+                print("  (no partners registered)")
+                return
+            print(f"\n  {len(partners)} partners registered:\n")
+            print(f"  {'ID':<10} {'State':<14} {'Tier':<14} Name")
+            print(f"  {'─'*10} {'─'*14} {'─'*14} {'─'*40}")
+            for p in partners:
+                pid = (p.get("partner_id") or "")[:8]
+                state = p.get("trust_state") or ""
+                tier = p.get("max_shareable_tier") or ""
+                name = (p.get("display_name") or "")[:40]
+                print(f"  {pid:<10} {state:<14} {tier:<14} {name}")
+            return
+
+        # Route 3 — register a new partner from declared parameters
+        if args.register_partner:
+            if not args.partner_public_key:
+                print("  ⚠  --partner-public-key is required for --register-partner")
+                return
+            classes = [c.strip() for c in (args.exposed_classes or "").split(",") if c.strip()]
+            iri = args.partner_iri or args.register_partner
+            result = partner_registry.register_partner(
+                db_path,
+                partner_iri=iri,
+                display_name=args.partner_display_name or iri,
+                sparql_endpoint=args.partner_endpoint or args.register_partner,
+                public_key=args.partner_public_key,
+                exposed_classes=classes,
+                max_shareable_tier=args.max_tier,
+                manifest_url=args.register_partner,
+            )
+            print(f"  ✓ Partner registered: {result}")
+            return
+
+        # Route 4 — build + sign the local capability manifest
+        if args.build_manifest:
+            sk = fed_manifest.load_secret_key(args.key_name)
+            pk = fed_manifest.load_public_key(args.key_name)
+            if not sk or not pk:
+                print(f"  ⚠  No keypair named '{args.key_name}' — "
+                      "run --generate-keys first.")
+                return
+            classes = [c.strip() for c in (args.exposed_classes or "").split(",") if c.strip()]
+            if not classes:
+                classes = [
+                    "https://ontology.example.com/tmf/NetworkFunction",
+                    "https://ontology.example.com/tmf/PerformanceIndicator",
+                ]
+            m = fed_manifest.build_manifest(
+                enterprise_iri=args.enterprise_iri,
+                ontology_iri=f"{args.enterprise_iri.rstrip('#self').rstrip('/')}/enterprise.ttl",
+                exposed_classes=classes,
+                public_key=pk,
+                signer_iri=args.enterprise_iri,
+            )
+            signed = fed_manifest.sign_manifest(m, secret_key_b64=sk)
+            path = fed_manifest.write_manifest(signed)
+            check = fed_manifest.verify_manifest(signed)
+            print(f"  ✓ Capability manifest signed → {path}")
+            print(f"    verify: {check}")
+            return
+
+        # Route 5 — run the trust-bootstrap handshake
+        if args.handshake:
+            partner_iri = args.partner_iri or args.handshake
+            sk = fed_manifest.load_secret_key(args.key_name)
+            pk = fed_manifest.load_public_key(args.key_name)
+            if not sk:
+                print(f"  ⚠  No keypair '{args.key_name}' — run --generate-keys first.")
+                return
+            # Build local manifest on the fly (exposure defaults are fine for demo)
+            local_m = fed_manifest.build_manifest(
+                enterprise_iri=args.enterprise_iri,
+                ontology_iri=f"{args.enterprise_iri.rstrip('#self').rstrip('/')}/enterprise.ttl",
+                exposed_classes=[
+                    "https://ontology.example.com/tmf/NetworkFunction",
+                    "https://ontology.example.com/tmf/PerformanceIndicator",
+                ],
+                public_key=pk,
+                signer_iri=args.enterprise_iri,
+            )
+            hs = fed_trust.handshake(
+                db_path, partner_iri=partner_iri,
+                local_manifest=local_m, secret_key_b64=sk,
+            )
+            print(f"  ✓ Handshake: {hs.get('ok')}  "
+                  f"(partner_id={hs.get('partner_id', '—')[:8]})")
+            if hs.get("ok"):
+                print("    Send the signed manifest to the partner and run "
+                      "--handshake again on their response to countersign.")
+            return
+
+        # Route 6 (default) — show a concise status summary
+        partners = partner_registry.list_partners(db_path)
+        active = [p for p in partners if p.get("trust_state") == "ACTIVE"]
+        print(f"  Federation status — {len(partners)} partners "
+              f"({len(active)} ACTIVE).")
+        print("  CLI options:")
+        print("    --generate-keys           — create signing keypair")
+        print("    --build-manifest          — sign local capability manifest")
+        print("    --list-partners           — show every registered partner")
+        print("    --register-partner <url>  — register a new partner")
+        print("    --handshake <url>         — start bilateral trust handshake")
+
     def phase_wizard(db_path: str, out_path: str):
         step(0, "Phase 3 — Browser Wizard (Flask)")
         wizard_path = os.path.join(HERE, "wizard", "app.py")
@@ -759,6 +912,7 @@ def main():
         "tmf630":    [(phase_tmf630,    [args.db, args.out])],
         "wizard":    [(phase_wizard,    [args.db, args.out])],
         "evolve":    [(phase_evolve,    [args.db, args.out])],
+        "federate":  [(phase_federate,  [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
