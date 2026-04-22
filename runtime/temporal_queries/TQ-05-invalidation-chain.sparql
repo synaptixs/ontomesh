@@ -1,0 +1,56 @@
+# TQ-05 — Provenance invalidation chain
+# ───────────────────────────────────────
+# Traces the full prov:wasInvalidatedBy chain from any given observation
+# back through all supersession events to the original source record.
+# Essential for auditing consolidation decisions and for CQ-MEM-03.
+#
+# Parameters:
+#   {{START_IRI}}  — IRI of the observation to start the chain from
+#
+# Returns the ordered chain: original → superseded by → superseded by → …
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?step ?record ?invalidatedBy ?method ?generated ?valueText
+WHERE {
+    {
+        # Step 0 — the starting record itself
+        SELECT (0 AS ?step) ?record ?method ?generated ?valueText
+        WHERE {
+            BIND(<{{START_IRI}}> AS ?record)
+            ?record tmf:derivation_method ?method ;
+                    prov:generatedAtTime  ?generated .
+            OPTIONAL { ?record tmf:value_text ?valueText }
+        }
+    }
+    UNION
+    {
+        # Step 1 — direct invalidator
+        SELECT (1 AS ?step) ?record ?invalidatedBy ?method ?generated ?valueText
+        WHERE {
+            BIND(<{{START_IRI}}> AS ?orig)
+            ?orig     prov:wasInvalidatedBy ?record .
+            ?record   tmf:derivation_method ?method ;
+                      prov:generatedAtTime  ?generated .
+            OPTIONAL { ?record tmf:value_text ?valueText }
+            OPTIONAL { ?record prov:wasInvalidatedBy ?invalidatedBy }
+        }
+    }
+    UNION
+    {
+        # Step 2 — invalidator of the invalidator (two hops)
+        SELECT (2 AS ?step) ?record ?invalidatedBy ?method ?generated ?valueText
+        WHERE {
+            BIND(<{{START_IRI}}> AS ?orig)
+            ?orig  prov:wasInvalidatedBy ?mid .
+            ?mid   prov:wasInvalidatedBy ?record .
+            ?record   tmf:derivation_method ?method ;
+                      prov:generatedAtTime  ?generated .
+            OPTIONAL { ?record tmf:value_text ?valueText }
+            OPTIONAL { ?record prov:wasInvalidatedBy ?invalidatedBy }
+        }
+    }
+}
+ORDER BY ?step

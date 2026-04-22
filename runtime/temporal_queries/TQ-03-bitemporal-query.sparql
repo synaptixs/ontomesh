@@ -1,0 +1,52 @@
+# TQ-03 — Bi-temporal query (valid-time vs transaction-time)
+# ────────────────────────────────────────────────────────────
+# Distinguishes between:
+#   • valid-time  — when the fact was true in the world (valid_from)
+#   • transaction-time — when the fact was recorded (generated_at / created_at)
+#
+# This allows "what did we know at time T about the state at time V?"
+# queries that are essential for audit trails and compliance evidence.
+#
+# Parameters:
+#   {{VALID_TIME}}        — ISO 8601 datetime: when was it true in the world?
+#   {{TRANSACTION_TIME}}  — ISO 8601 datetime: when was it recorded?
+#   {{ENTITY_IRI}}        — (optional) entity IRI filter
+#
+# Returns observations satisfying both temporal dimensions simultaneously.
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?record ?entity ?type ?method ?validFrom ?generatedAt ?confidence ?valueText
+WHERE {
+    ?record a tmf:ObservationRecord ;
+            tmf:entity_iri        ?entity ;
+            tmf:record_type       ?type ;
+            tmf:derivation_method ?method ;
+            tmf:valid_from        ?validFrom ;
+            prov:generatedAtTime  ?generatedAt .
+
+    OPTIONAL { ?record tmf:confidence_score ?confidence }
+    OPTIONAL { ?record tmf:value_text       ?valueText  }
+
+    # Valid-time dimension: the fact was valid at VALID_TIME
+    FILTER (?validFrom <= "{{VALID_TIME}}"^^xsd:dateTime)
+
+    # Transaction-time dimension: the record was created at or before TRANSACTION_TIME
+    FILTER (?generatedAt <= "{{TRANSACTION_TIME}}"^^xsd:dateTime)
+
+    # Exclude records that had already been invalidated by TRANSACTION_TIME
+    FILTER NOT EXISTS {
+        ?record prov:wasInvalidatedBy ?inv .
+        ?inv    prov:generatedAtTime  ?invTime .
+        FILTER (?invTime <= "{{TRANSACTION_TIME}}"^^xsd:dateTime)
+    }
+
+    # Optional entity filter
+    FILTER (
+        "{{ENTITY_IRI}}" = ""
+        || CONTAINS(STR(?entity), "{{ENTITY_IRI}}")
+    )
+}
+ORDER BY DESC(?generatedAt)

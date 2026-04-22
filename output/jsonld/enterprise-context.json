@@ -111,6 +111,15 @@
     "Role": {
       "@id": "https://ontology.example.com/enterprise/Role"
     },
+    "RuntimeFlavor": {
+      "@id": "https://ontology.example.com/enterprise/RuntimeFlavor"
+    },
+    "RuntimeGrounding": {
+      "@id": "https://ontology.example.com/enterprise/RuntimeGrounding"
+    },
+    "RuntimePayload": {
+      "@id": "https://ontology.example.com/enterprise/RuntimePayload"
+    },
     "Agreement": {
       "@id": "https://ontology.example.com/enterprise/Agreement"
     },
@@ -123,8 +132,29 @@
     "Characteristic": {
       "@id": "https://ontology.example.com/enterprise/Characteristic"
     },
+    "ConflictEvent": {
+      "@id": "https://ontology.example.com/enterprise/ConflictEvent"
+    },
     "CustomerAccount": {
       "@id": "https://ontology.example.com/enterprise/CustomerAccount"
+    },
+    "CustomerBill": {
+      "@id": "https://ontology.example.com/enterprise/CustomerBill"
+    },
+    "EventSubscription": {
+      "@id": "https://ontology.example.com/enterprise/EventSubscription"
+    },
+    "TmfExportJob": {
+      "@id": "https://ontology.example.com/enterprise/TmfExportJob"
+    },
+    "GeographicSite": {
+      "@id": "https://ontology.example.com/enterprise/GeographicSite"
+    },
+    "TmfImportJob": {
+      "@id": "https://ontology.example.com/enterprise/TmfImportJob"
+    },
+    "NetworkSliceProfile": {
+      "@id": "https://ontology.example.com/enterprise/NetworkSliceProfile"
     },
     "Note": {
       "@id": "https://ontology.example.com/enterprise/Note"
@@ -146,6 +176,9 @@
     },
     "ProductOffering": {
       "@id": "https://ontology.example.com/enterprise/ProductOffering"
+    },
+    "ProductOfferingQualification": {
+      "@id": "https://ontology.example.com/enterprise/ProductOfferingQualification"
     },
     "ProductOrder": {
       "@id": "https://ontology.example.com/enterprise/ProductOrder"
@@ -171,8 +204,17 @@
     "ServiceProblem": {
       "@id": "https://ontology.example.com/enterprise/ServiceProblem"
     },
+    "ServiceQualityReport": {
+      "@id": "https://ontology.example.com/enterprise/ServiceQualityReport"
+    },
     "ServiceSpecification": {
       "@id": "https://ontology.example.com/enterprise/ServiceSpecification"
+    },
+    "TmfTask": {
+      "@id": "https://ontology.example.com/enterprise/TmfTask"
+    },
+    "TroubleTicket": {
+      "@id": "https://ontology.example.com/enterprise/TroubleTicket"
     },
     "UserRole": {
       "@id": "https://ontology.example.com/enterprise/UserRole"
@@ -329,6 +371,58 @@
       "@id": "https://ontology.example.com/enterprise/hasAppliedAt",
       "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
     },
+    "owlClasses": {
+      "@id": "https://ontology.example.com/enterprise/hasOwlClasses",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "shaclShapes": {
+      "@id": "https://ontology.example.com/enterprise/hasShaclShapes",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "contextTerms": {
+      "@id": "https://ontology.example.com/enterprise/hasContextTerms",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "dbTables": {
+      "@id": "https://ontology.example.com/enterprise/hasDbTables",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "systemPromptHint": {
+      "@id": "https://ontology.example.com/enterprise/hasSystemPromptHint",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "cqIds": {
+      "@id": "https://ontology.example.com/enterprise/hasCqIds",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "flavorName": {
+      "@id": "https://ontology.example.com/enterprise/hasFlavorName",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "question": {
+      "@id": "https://ontology.example.com/enterprise/hasQuestion",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "tablesQueried": {
+      "@id": "https://ontology.example.com/enterprise/hasTablesQueried",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "recordCount": {
+      "@id": "https://ontology.example.com/enterprise/hasRecordCount",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "groundedAt": {
+      "@id": "https://ontology.example.com/enterprise/hasGroundedAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "tokenBudget": {
+      "@id": "https://ontology.example.com/enterprise/hasTokenBudget",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "assembledAt": {
+      "@id": "https://ontology.example.com/enterprise/hasAssembledAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
     "agreementIri": {
       "@id": "https://ontology.example.com/enterprise/hasAgreementIri",
       "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
@@ -401,6 +495,58 @@
       "@id": "https://ontology.example.com/enterprise/hasUnit",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
+    "conflictIri": {
+      "@id": "https://ontology.example.com/enterprise/hasConflictIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "assertionAIri": {
+      "@id": "https://ontology.example.com/enterprise/hasAssertionAIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "assertionBIri": {
+      "@id": "https://ontology.example.com/enterprise/hasAssertionBIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "conflictType": {
+      "@id": "https://ontology.example.com/enterprise/hasConflictType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "shaclViolationMsg": {
+      "@id": "https://ontology.example.com/enterprise/hasShaclViolationMsg",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "resolutionTier": {
+      "@id": "https://ontology.example.com/enterprise/hasResolutionTier",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "winningAssertionIri": {
+      "@id": "https://ontology.example.com/enterprise/hasWinningAssertionIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "resolutionRule": {
+      "@id": "https://ontology.example.com/enterprise/hasResolutionRule",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "escalatedToHuman": {
+      "@id": "https://ontology.example.com/enterprise/hasEscalatedToHuman",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "humanResolution": {
+      "@id": "https://ontology.example.com/enterprise/hasHumanResolution",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "invalidationRecorded": {
+      "@id": "https://ontology.example.com/enterprise/hasInvalidationRecorded",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "detectedAt": {
+      "@id": "https://ontology.example.com/enterprise/hasDetectedAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "resolvedAt": {
+      "@id": "https://ontology.example.com/enterprise/hasResolvedAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
     "accountIri": {
       "@id": "https://ontology.example.com/enterprise/hasAccountIri",
       "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
@@ -419,6 +565,218 @@
     },
     "currencyCode": {
       "@id": "https://ontology.example.com/enterprise/hasCurrencyCode",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "billIri": {
+      "@id": "https://ontology.example.com/enterprise/hasBillIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "billNumber": {
+      "@id": "https://ontology.example.com/enterprise/hasBillNumber",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "billType": {
+      "@id": "https://ontology.example.com/enterprise/hasBillType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "billingPeriodStart": {
+      "@id": "https://ontology.example.com/enterprise/hasBillingPeriodStart",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "billingPeriodEnd": {
+      "@id": "https://ontology.example.com/enterprise/hasBillingPeriodEnd",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "billDate": {
+      "@id": "https://ontology.example.com/enterprise/hasBillDate",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "paymentDueDate": {
+      "@id": "https://ontology.example.com/enterprise/hasPaymentDueDate",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "amountDue": {
+      "@id": "https://ontology.example.com/enterprise/hasAmountDue",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "taxAmount": {
+      "@id": "https://ontology.example.com/enterprise/hasTaxAmount",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "paymentMethod": {
+      "@id": "https://ontology.example.com/enterprise/hasPaymentMethod",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "state": {
+      "@id": "https://ontology.example.com/enterprise/hasState",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "disputed": {
+      "@id": "https://ontology.example.com/enterprise/hasDisputed",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "disputeReason": {
+      "@id": "https://ontology.example.com/enterprise/hasDisputeReason",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "billDocumentUrl": {
+      "@id": "https://ontology.example.com/enterprise/hasBillDocumentUrl",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "subscriptionIri": {
+      "@id": "https://ontology.example.com/enterprise/hasSubscriptionIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "eventDomain": {
+      "@id": "https://ontology.example.com/enterprise/hasEventDomain",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "filterCriteria": {
+      "@id": "https://ontology.example.com/enterprise/hasFilterCriteria",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "callbackUrl": {
+      "@id": "https://ontology.example.com/enterprise/hasCallbackUrl",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "callbackMethod": {
+      "@id": "https://ontology.example.com/enterprise/hasCallbackMethod",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "authHeader": {
+      "@id": "https://ontology.example.com/enterprise/hasAuthHeader",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "retryPolicy": {
+      "@id": "https://ontology.example.com/enterprise/hasRetryPolicy",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "lastDeliveredAt": {
+      "@id": "https://ontology.example.com/enterprise/hasLastDeliveredAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "deliveryFailures": {
+      "@id": "https://ontology.example.com/enterprise/hasDeliveryFailures",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "validForStart": {
+      "@id": "https://ontology.example.com/enterprise/hasValidForStart",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "validForEnd": {
+      "@id": "https://ontology.example.com/enterprise/hasValidForEnd",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "contentType": {
+      "@id": "https://ontology.example.com/enterprise/hasContentType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "query": {
+      "@id": "https://ontology.example.com/enterprise/hasQuery",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "path": {
+      "@id": "https://ontology.example.com/enterprise/hasPath",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "creationDate": {
+      "@id": "https://ontology.example.com/enterprise/hasCreationDate",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "completionDate": {
+      "@id": "https://ontology.example.com/enterprise/hasCompletionDate",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "errorLog": {
+      "@id": "https://ontology.example.com/enterprise/hasErrorLog",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "baseType": {
+      "@id": "https://ontology.example.com/enterprise/hasBaseType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "schemaLocation": {
+      "@id": "https://ontology.example.com/enterprise/hasSchemaLocation",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "siteIri": {
+      "@id": "https://ontology.example.com/enterprise/hasSiteIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "siteType": {
+      "@id": "https://ontology.example.com/enterprise/hasSiteType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "siteCategory": {
+      "@id": "https://ontology.example.com/enterprise/hasSiteCategory",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "powerSupply": {
+      "@id": "https://ontology.example.com/enterprise/hasPowerSupply",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "coolingType": {
+      "@id": "https://ontology.example.com/enterprise/hasCoolingType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "rackCapacity": {
+      "@id": "https://ontology.example.com/enterprise/hasRackCapacity",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "operationalStatus": {
+      "@id": "https://ontology.example.com/enterprise/hasOperationalStatus",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "latitude": {
+      "@id": "https://ontology.example.com/enterprise/hasLatitude",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "longitude": {
+      "@id": "https://ontology.example.com/enterprise/hasLongitude",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "sourceUri": {
+      "@id": "https://ontology.example.com/enterprise/hasSourceUri",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "profileIri": {
+      "@id": "https://ontology.example.com/enterprise/hasProfileIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "sliceType": {
+      "@id": "https://ontology.example.com/enterprise/hasSliceType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "sst": {
+      "@id": "https://ontology.example.com/enterprise/hasSst",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "sd": {
+      "@id": "https://ontology.example.com/enterprise/hasSd",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "maxDlThroughput": {
+      "@id": "https://ontology.example.com/enterprise/hasMaxDlThroughput",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "maxUlThroughput": {
+      "@id": "https://ontology.example.com/enterprise/hasMaxUlThroughput",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "latencyTargetMs": {
+      "@id": "https://ontology.example.com/enterprise/hasLatencyTargetMs",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "reliabilityTarget": {
+      "@id": "https://ontology.example.com/enterprise/hasReliabilityTarget",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "maxDevices": {
+      "@id": "https://ontology.example.com/enterprise/hasMaxDevices",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "lifecycleStatus": {
+      "@id": "https://ontology.example.com/enterprise/hasLifecycleStatus",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "text": {
@@ -467,10 +825,6 @@
     },
     "phone": {
       "@id": "https://ontology.example.com/enterprise/hasPhone",
-      "@type": "http://www.w3.org/2001/XMLSchema#string"
-    },
-    "lifecycleStatus": {
-      "@id": "https://ontology.example.com/enterprise/hasLifecycleStatus",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "roleName": {
@@ -537,14 +891,6 @@
       "@id": "https://ontology.example.com/enterprise/hasCountry",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
-    "latitude": {
-      "@id": "https://ontology.example.com/enterprise/hasLatitude",
-      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
-    },
-    "longitude": {
-      "@id": "https://ontology.example.com/enterprise/hasLongitude",
-      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
-    },
     "policyIri": {
       "@id": "https://ontology.example.com/enterprise/hasPolicyIri",
       "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
@@ -577,13 +923,29 @@
       "@id": "https://ontology.example.com/enterprise/hasIsBundle",
       "@type": "http://www.w3.org/2001/XMLSchema#boolean"
     },
-    "validForStart": {
-      "@id": "https://ontology.example.com/enterprise/hasValidForStart",
+    "poqIri": {
+      "@id": "https://ontology.example.com/enterprise/hasPoqIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "qualificationResult": {
+      "@id": "https://ontology.example.com/enterprise/hasQualificationResult",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
-    "validForEnd": {
-      "@id": "https://ontology.example.com/enterprise/hasValidForEnd",
+    "eligibilityReason": {
+      "@id": "https://ontology.example.com/enterprise/hasEligibilityReason",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "feasibilityCheck": {
+      "@id": "https://ontology.example.com/enterprise/hasFeasibilityCheck",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "feasibilityNotes": {
+      "@id": "https://ontology.example.com/enterprise/hasFeasibilityNotes",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "requestedAt": {
+      "@id": "https://ontology.example.com/enterprise/hasRequestedAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
     },
     "orderIri": {
       "@id": "https://ontology.example.com/enterprise/hasOrderIri",
@@ -593,20 +955,12 @@
       "@id": "https://ontology.example.com/enterprise/hasOrderDate",
       "@type": "http://www.w3.org/2001/XMLSchema#date"
     },
-    "completionDate": {
-      "@id": "https://ontology.example.com/enterprise/hasCompletionDate",
-      "@type": "http://www.w3.org/2001/XMLSchema#date"
-    },
     "requestedCompletion": {
       "@id": "https://ontology.example.com/enterprise/hasRequestedCompletion",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "orderType": {
       "@id": "https://ontology.example.com/enterprise/hasOrderType",
-      "@type": "http://www.w3.org/2001/XMLSchema#string"
-    },
-    "state": {
-      "@id": "https://ontology.example.com/enterprise/hasState",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "specIri": {
@@ -693,9 +1047,77 @@
       "@id": "https://ontology.example.com/enterprise/hasSubmittedAt",
       "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
     },
-    "resolvedAt": {
-      "@id": "https://ontology.example.com/enterprise/hasResolvedAt",
-      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    "reportIri": {
+      "@id": "https://ontology.example.com/enterprise/hasReportIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "reportType": {
+      "@id": "https://ontology.example.com/enterprise/hasReportType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "periodStart": {
+      "@id": "https://ontology.example.com/enterprise/hasPeriodStart",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "periodEnd": {
+      "@id": "https://ontology.example.com/enterprise/hasPeriodEnd",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "qualityMetrics": {
+      "@id": "https://ontology.example.com/enterprise/hasQualityMetrics",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "slaCompliant": {
+      "@id": "https://ontology.example.com/enterprise/hasSlaCompliant",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "overallQualityScore": {
+      "@id": "https://ontology.example.com/enterprise/hasOverallQualityScore",
+      "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "taskType": {
+      "@id": "https://ontology.example.com/enterprise/hasTaskType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "percentProgress": {
+      "@id": "https://ontology.example.com/enterprise/hasPercentProgress",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "taskResourceRef": {
+      "@id": "https://ontology.example.com/enterprise/hasTaskResourceRef",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "taskError": {
+      "@id": "https://ontology.example.com/enterprise/hasTaskError",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "relatedEntityType": {
+      "@id": "https://ontology.example.com/enterprise/hasRelatedEntityType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "requestedBy": {
+      "@id": "https://ontology.example.com/enterprise/hasRequestedBy",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "ticketIri": {
+      "@id": "https://ontology.example.com/enterprise/hasTicketIri",
+      "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
+    },
+    "ticketType": {
+      "@id": "https://ontology.example.com/enterprise/hasTicketType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "severity": {
+      "@id": "https://ontology.example.com/enterprise/hasSeverity",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "subCategory": {
+      "@id": "https://ontology.example.com/enterprise/hasSubCategory",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "expectedResolution": {
+      "@id": "https://ontology.example.com/enterprise/hasExpectedResolution",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "permissionSet": {
       "@id": "https://ontology.example.com/enterprise/hasPermissionSet",

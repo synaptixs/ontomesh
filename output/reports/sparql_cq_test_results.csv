@@ -1,19 +1,19 @@
 cq_id,priority,status,question,backend,row_count,sample_result,validates,sparql_file
-CQ-001,Critical,PASS-STRUCTURAL,Which assets exist in the domain and who owns them?,rdflib,0,(TBox-only — no instance data in ontology),"Entity identification, relationship completeness",CQ-001-assets-and-owners.sparql
-CQ-002,Critical,PASS-STRUCTURAL,What type is each asset and what is its current status?,rdflib,0,(TBox-only — no instance data in ontology),"Asset type hierarchy, status semantics",CQ-002-asset-type-and-status.sparql
-CQ-003,Critical,PASS-STRUCTURAL,Which events have occurred against each asset?,rdflib,0,(TBox-only — no instance data in ontology),"Event modeling, asset-event relationship",CQ-003-events-per-asset.sparql
-CQ-004,Critical,PASS-STRUCTURAL,Which agent produced each observation (PROV-O: wasGeneratedBy)?,rdflib,0,(TBox-only — no instance data in ontology),"PROV-O provenance, agent-observation relationship",CQ-004-prov-agent-per-observation.sparql
-CQ-005,Critical,PASS-STRUCTURAL,What is the confidence score and derivation method for each observation?,rdflib,0,(TBox-only — no instance data in ontology),"Observation completeness, confidence modeling",CQ-005-confidence-and-derivation.sparql
-CQ-006,High,PASS-STRUCTURAL,What role does each agent hold and in what scope?,rdflib,0,(TBox-only — no instance data in ontology),"Role separation, agent-role relationship",CQ-006-agent-roles.sparql
-CQ-007,Critical,PASS-STRUCTURAL,"Which policy governed each event, and what was the compliance outcome?",rdflib,0,(TBox-only — no instance data in ontology),"Policy-event relationship, compliance modeling",CQ-007-policy-governance.sparql
-CQ-008,High,PASS,Which assets have observations with confidence below 0.8 (low-trust data)?,rdflib,0,(empty),"Confidence filtering, trust-level querying",CQ-008-low-confidence-observations.sparql
-CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-alignment-dolce.sparql
-CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-conflict-resolution.sparql
-CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-event-subscriptions.sparql
-CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),FlavorRegistry correctness; runtime_flavor table population.,CQ-RT-01-flavor-registry.sparql
-CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Grounder.record_grounding(); ObservationRecord provenance stamping.,CQ-RT-02-grounding-records.sparql
-CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),PayloadAssembler output; runtime_payload and runtime_grounding,CQ-RT-03-runtime-payloads.sparql
-CQ-TMF10,High,PASS-STRUCTURAL,"Which trouble tickets are open or in-progress,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF10-trouble-tickets.sparql
-CQ-TMF11,High,PASS-STRUCTURAL,"Which network slice profiles are active,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF11-network-slice-profiles.sparql
-CQ-TMF12,High,PASS-STRUCTURAL,"Which service quality reports show SLA non-compliance,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF12-service-quality-reports.sparql
-CQ-TMF13,High,PASS-STRUCTURAL,"Which customer bills are outstanding or disputed,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF13-customer-bills.sparql
+CQ-001,Critical,SKIPPED,Which assets exist in the domain and who owns them?,rdflib,0,rdflib not installed — run: pip install rdflib,"Entity identification, relationship completeness",CQ-001-assets-and-owners.sparql
+CQ-002,Critical,SKIPPED,What type is each asset and what is its current status?,rdflib,0,rdflib not installed — run: pip install rdflib,"Asset type hierarchy, status semantics",CQ-002-asset-type-and-status.sparql
+CQ-003,Critical,SKIPPED,Which events have occurred against each asset?,rdflib,0,rdflib not installed — run: pip install rdflib,"Event modeling, asset-event relationship",CQ-003-events-per-asset.sparql
+CQ-004,Critical,SKIPPED,Which agent produced each observation (PROV-O: wasGeneratedBy)?,rdflib,0,rdflib not installed — run: pip install rdflib,"PROV-O provenance, agent-observation relationship",CQ-004-prov-agent-per-observation.sparql
+CQ-005,Critical,SKIPPED,What is the confidence score and derivation method for each observation?,rdflib,0,rdflib not installed — run: pip install rdflib,"Observation completeness, confidence modeling",CQ-005-confidence-and-derivation.sparql
+CQ-006,High,SKIPPED,What role does each agent hold and in what scope?,rdflib,0,rdflib not installed — run: pip install rdflib,"Role separation, agent-role relationship",CQ-006-agent-roles.sparql
+CQ-007,Critical,SKIPPED,"Which policy governed each event, and what was the compliance outcome?",rdflib,0,rdflib not installed — run: pip install rdflib,"Policy-event relationship, compliance modeling",CQ-007-policy-governance.sparql
+CQ-008,High,SKIPPED,Which assets have observations with confidence below 0.8 (low-trust data)?,rdflib,0,rdflib not installed — run: pip install rdflib,"Confidence filtering, trust-level querying",CQ-008-low-confidence-observations.sparql
+CQ-P2B,High,SKIPPED,,rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-P2B-alignment-dolce.sparql
+CQ-P2B,High,SKIPPED,,rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-P2B-conflict-resolution.sparql
+CQ-P2B,High,SKIPPED,,rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-P2B-event-subscriptions.sparql
+CQ-RT,High,SKIPPED,,rdflib,0,rdflib not installed — run: pip install rdflib,FlavorRegistry correctness; runtime_flavor table population.,CQ-RT-01-flavor-registry.sparql
+CQ-RT,High,SKIPPED,,rdflib,0,rdflib not installed — run: pip install rdflib,Grounder.record_grounding(); ObservationRecord provenance stamping.,CQ-RT-02-grounding-records.sparql
+CQ-RT,High,SKIPPED,,rdflib,0,rdflib not installed — run: pip install rdflib,PayloadAssembler output; runtime_payload and runtime_grounding,CQ-RT-03-runtime-payloads.sparql
+CQ-TMF10,High,SKIPPED,"Which trouble tickets are open or in-progress,",rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-TMF10-trouble-tickets.sparql
+CQ-TMF11,High,SKIPPED,"Which network slice profiles are active,",rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-TMF11-network-slice-profiles.sparql
+CQ-TMF12,High,SKIPPED,"Which service quality reports show SLA non-compliance,",rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-TMF12-service-quality-reports.sparql
+CQ-TMF13,High,SKIPPED,"Which customer bills are outstanding or disputed,",rdflib,0,rdflib not installed — run: pip install rdflib,,CQ-TMF13-customer-bills.sparql

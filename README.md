@@ -26,6 +26,7 @@ A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineerin
 16. [Companion documents](#16-companion-documents)
 17. [Runtime — connecting the toolkit to AI and LLMs](#17-runtime--connecting-the-toolkit-to-ai-and-llms)
 18. [Phase 3 — Scale & Community](#18-phase-3--scale--community)
+19. [Generation 2 — Agentic Semantic Memory Layer](#19-generation-2--agentic-semantic-memory-layer--complete-apr-2026)
 
 ---
 
@@ -56,6 +57,7 @@ It reads your relational schema and a thin annotation table, then generates ever
 | **discover** | **Log entity discovery ✓ Phase 3** | **entity_discovery_candidates.csv, entity_discovery_summary.json (NLP co-occurrence, spaCy)** |
 | **tmf630** | **TMF630 Task + Bulk ✓ Phase 3** | **tmf630-task-bulk.ttl, tmf630-task-mcp-tools.json, TmfTask/TmfImportJob/TmfExportJob OWL+SHACL** |
 | **wizard** | **Browser wizard ✓ Phase 3** | **Flask web app — drag-and-drop entity/relationship builder, template picker, pipeline runner** |
+| **memory** | **Agentic Semantic Memory ✓ Gen 2 / WS1** | **AgentMemory (recall/diff/consolidate/snapshot), 5 temporal SPARQL templates, consolidation daemon, 5 CQ-MEM tests, RuntimeClient memory_recall + remember()** |
 
 ---
 
@@ -1188,3 +1190,193 @@ Open `http://localhost:5000` in your browser.
 | Log entity discovery (NLP) | ✓ spaCy + co-occurrence fallback |
 | TMF630 Task + Bulk conformance | ✓ Parts 4 & 7, 3 new CQ tests |
 | Browser wizard | ✓ Flask + 6-step UI + template picker |
+
+---
+
+## 19. Generation 2 — Agentic Semantic Memory Layer ✓ Complete (Apr 2026)
+
+**Workstream 1 of the [Generation 2 Roadmap](ontology_gen2_roadmap.md).**
+
+Transforms the ontology graph store from a static semantic schema into the long-term working memory of AI agents. Every reasoning chain, observation, and decision is now a queryable, temporally-ordered fact. Agents build on prior reasoning rather than starting from scratch on every invocation.
+
+**Builds on:** PROV-O infrastructure · ObservationRecord store · RuntimeClient · Graph store publishing · Conflict resolution (v2.0)
+
+### 19.1 Memory API Core (`runtime/memory.py`)
+
+Three primary memory operations — all return typed JSON-LD objects ready for payload injection:
+
+```python
+from runtime.memory import AgentMemory
+
+mem = AgentMemory(db_path="db/enterprise.db")
+
+# Recall prior reasoning about a subject
+results = mem.recall("degraded network functions", flavor="network-ops")
+print(f"Found {results['result_count']} prior observations")
+
+# Find where two agents disagreed on the same entity
+diff = mem.diff("network-ops", "fault-management", subject="AMF-East-01")
+print(f"Disagreements: {diff['disagreement_count']}")
+
+# Point-in-time snapshot — what did agents know at 02:00 on 10 April?
+snapshot = mem.snapshot(at="2026-04-10T02:00:00+00:00", entity_iri="AMF-East-01")
+
+# Run consolidation — reduce graph size, escalate conflicts
+summary = mem.consolidate(older_than_days=90)
+print(f"Graph reduced by {summary['reduction_pct']}%")
+```
+
+| Method | Description |
+|---|---|
+| `recall(query, flavor, time_range, record_type, limit)` | SPARQL over ObservationRecord graph, filtered by time window and flavor |
+| `diff(agent_a, agent_b, subject, limit)` | Assertions where two agent flavors disagreed on the same entity |
+| `consolidate(older_than_days, dry_run)` | Three-strategy graph consolidation — supersession, compression, conflict escalation |
+| `snapshot(at, entity_iri, flavor)` | Point-in-time view: what did agents know at timestamp T? |
+| `influence_graph(agent, limit)` | `prov:wasInfluencedBy` graph — which agents build on whose prior reasoning |
+
+### 19.2 Temporal Reasoning Layer (`runtime/temporal_queries/`)
+
+Five parameterised SPARQL templates for temporal graph patterns:
+
+```python
+from runtime.temporal_queries import fill_template
+
+# Point-in-time snapshot
+sparql = fill_template("TQ-01", {
+    "AT_TIMESTAMP": "2026-04-10T02:00:00Z",
+    "ENTITY_IRI":   "AMF-East-01",
+})
+
+# Sliding-window KPI aggregation
+sparql = fill_template("TQ-02", {
+    "WINDOW_START": "2026-04-01T00:00:00Z",
+    "WINDOW_END":   "2026-04-10T23:59:59Z",
+    "KPI_TYPE":     "throughput",
+    "ENTITY_IRI":   "",
+})
+```
+
+| Template | Purpose |
+|---|---|
+| `TQ-01` | Point-in-time ontology snapshot |
+| `TQ-02` | Sliding-window KPI aggregation over PerformanceIndicator time series |
+| `TQ-03` | Bi-temporal query (valid-time × transaction-time) |
+| `TQ-04` | Temporal diff between two agent flavors on the same entity |
+| `TQ-05` | Provenance invalidation chain traversal |
+
+All templates are in `runtime/temporal_queries/` as `.sparql` files with `{{PARAM}}` placeholders.
+
+### 19.3 Cross-Agent Memory Sharing + PROV-O
+
+Memory sharing policies are defined per-flavor in the flavor JSON files under `runtime/flavors/`.  Each flavor declares:
+
+- `can_read_from` — which other flavors' observations it may query
+- `can_be_read_by` — which other flavors may read its observations
+- `max_readable_tier` — highest sensitivity tier accessible
+- `prov_influence_enabled` — whether `prov:wasInfluencedBy` links are emitted
+
+Access enforcement via the `FlavorRegistry`:
+
+```python
+from runtime.flavor_registry import FlavorRegistry
+
+reg = FlavorRegistry()
+
+# Check if network-ops may read fault-management observations
+allowed = reg.check_memory_access(
+    requesting_flavor="network-ops",
+    target_flavor="fault-management",
+    target_tier="Internal",
+)
+
+# Get the full sharing policy for a flavor
+policy = reg.get_memory_sharing_policy("compliance")
+# → {"can_read_from": [...], "can_be_read_by": [...], ...}
+```
+
+Default sharing matrix:
+
+| Flavor | Can read from | Can be read by |
+|---|---|---|
+| `network-ops` | network-ops, fault-management | fault-management, compliance |
+| `fault-management` | network-ops, fault-management | network-ops, compliance |
+| `compliance` | all flavors (up to Confidential) | compliance only |
+| `billing` | billing only | compliance only |
+| `customer` | customer only | billing, compliance |
+
+### 19.4 Memory Consolidation Daemon (`runtime/consolidation_daemon.py`)
+
+Background process applying three consolidation strategies on a configurable schedule:
+
+```bash
+# One-shot consolidation pass
+python3 runtime/consolidation_daemon.py --db db/enterprise.db --once
+
+# Dry-run (report only, no DB changes)
+python3 runtime/consolidation_daemon.py --db db/enterprise.db --once --dry-run
+
+# Scheduled mode (reads cron from consolidation_config.json, default: nightly at 02:00)
+python3 runtime/consolidation_daemon.py --db db/enterprise.db
+```
+
+**Strategies:**
+
+| Strategy | What it does |
+|---|---|
+| Supersession | MEASURED observation ⟹ marks prior INFERRED as `prov:wasInvalidatedBy` |
+| Temporal compression | Aggregates point observations >90d old into summary records, invalidates originals |
+| Conflict escalation | Contradicting MEASURED observations → raises `ConflictEvent` for human review |
+
+Configure via `runtime/consolidation_config.json` — retention by sensitivity tier, schedule cron, alert thresholds, per-strategy on/off switches.
+
+### 19.5 SPARQL CQ Tests — Memory Layer
+
+5 new competency question tests integrated into the CI/CD gate (`tests/sparql/`):
+
+| Test | What it verifies |
+|---|---|
+| `CQ-MEM-01` | `recall()` retrieves prior reasoning for a given subject |
+| `CQ-MEM-02` | `diff()` correctly identifies agent disagreements on the same entity |
+| `CQ-MEM-03` | Superseded observations carry `prov:wasInvalidatedBy` |
+| `CQ-MEM-04` | Cross-agent `prov:wasInfluencedBy` links propagate correctly |
+| `CQ-MEM-05` | Temporal snapshot returns correct non-invalidated state at timestamp T |
+
+### 19.6 RuntimeClient SDK Update
+
+`RuntimeClient.ask()` extended with memory-aware parameters:
+
+```python
+from runtime.client import RuntimeClient
+
+client = RuntimeClient(db_path="db/enterprise.db", adapter="anthropic")
+
+# Memory-augmented query — prepends prior reasoning to the payload
+result = client.ask(
+    question="Which NFs are currently degraded?",
+    flavor="network-ops",
+    memory_recall=True,          # prepend relevant prior observations
+    memory_recall_limit=5,       # top-5 most recent matching observations
+)
+print(f"Memory context injected: {result['memory_context_count']} prior observations")
+
+# Standalone recall — returns typed JSON-LD
+prior = client.remember("AMF-East-01", flavor="network-ops")
+print(f"Found {prior['result_count']} prior observations about AMF-East-01")
+```
+
+New SDK additions:
+- `RuntimeClient.ask(..., memory_recall=True)` — injects prior reasoning into payload
+- `RuntimeClient.ask(..., memory_recall_limit=N)` — caps prior context size
+- `RuntimeClient.ask(..., memory_time_range=(from, to))` — time-scopes the recall
+- `RuntimeClient.remember(subject, flavor, limit, time_range)` — standalone recall
+- `RuntimeClient.memory` property — exposes the `AgentMemory` instance directly
+
+### Workstream 1 Exit Gates — ✓ Complete (Apr 2026)
+
+| Gate | Status |
+|---|---|
+| `memory.recall()` returns typed JSON-LD objects | ✓ All 4 return shapes verified |
+| Temporal snapshot returns correct state at T-1 and T-2 | ✓ TQ-01 + TQ-03 templates |
+| Cross-agent influence links appear in graph | ✓ `prov:wasInfluencedBy` via diff() |
+| Consolidation reduces graph size by ≥20% on test corpus | ✓ Three-strategy daemon |
+| CQ-MEM-01 through CQ-MEM-05 all passing | ✓ Integrated into CI/CD gate |

@@ -1,0 +1,47 @@
+{
+  "_comment": "Memory consolidation daemon configuration — Workstream 1: Agentic Semantic Memory Layer",
+  "schedule": {
+    "enabled": true,
+    "cron": "0 2 * * *",
+    "description": "Run nightly at 02:00 UTC"
+  },
+  "strategies": {
+    "supersession": {
+      "enabled": true,
+      "older_than_days": 30,
+      "description": "Mark INFERRED observations as prov:wasInvalidatedBy when a newer MEASURED observation exists for the same entity. Default retention: 30 days before eligible for supersession."
+    },
+    "temporal_compression": {
+      "enabled": true,
+      "older_than_days": 90,
+      "min_point_observations": 2,
+      "description": "Aggregate point MEASURED observations older than 90 days into summary records per entity + record_type, reducing graph size."
+    },
+    "conflict_escalation": {
+      "enabled": true,
+      "description": "Raise a ConflictEvent ObservationRecord when two non-invalidated MEASURED observations on the same entity carry contradicting value_text. Requires human review."
+    }
+  },
+  "retention": {
+    "Public": {
+      "max_age_days": 365,
+      "description": "Public-tier observations retained for 1 year"
+    },
+    "Internal": {
+      "max_age_days": 180,
+      "description": "Internal-tier observations retained for 6 months"
+    },
+    "Confidential": {
+      "max_age_days": 730,
+      "description": "Confidential-tier observations retained for 2 years (audit requirements)"
+    },
+    "Restricted": {
+      "max_age_days": 2555,
+      "description": "Restricted-tier observations retained for 7 years (regulatory requirements)"
+    }
+  },
+  "inferred_ttl_days": 90,
+  "graph_size_alert_threshold": 100000,
+  "dry_run_default": false,
+  "log_path": "output/reports/consolidation_log.jsonl"
+}

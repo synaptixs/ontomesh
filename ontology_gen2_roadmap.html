@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontology Toolkit — Generation 2 Roadmap</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --ink:#0D1B2A; --paper:#FAFBFC; --off:#F2F5F9; --rule:#DDE4EE;
+  --mid:#6B7C93; --muted:#95A3B3;
+  --s1:#0B6B5C; --s1l:#E5F5F2; --s1b:#0E9E88;   /* S1 teal   — memory */
+  --s2:#1A4E8F; --s2l:#EBF2FC; --s2b:#2775D8;   /* S2 blue   — evolution */
+  --s3:#6B3FA0; --s3l:#F2EDFB; --s3b:#9B6BD4;   /* S3 violet — federation */
+  --s4:#A0421A; --s4l:#FBF0EB; --s4b:#D4712B;   /* S4 amber  — compliance */
+  --s5:#1A6B8F; --s5l:#EBF5FB; --s5b:#2796CC;   /* S5 sky    — vector */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.65}
+.page{max-width:1120px;margin:0 auto;padding:2.5rem 2rem 5rem}
+
+/* typography */
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:.5rem}
+h1{font-size:2.1rem;font-weight:600;letter-spacing:-.03em;line-height:1.15;margin-bottom:.6rem}
+h2{font-size:1rem;font-weight:600;letter-spacing:.01em}
+h3{font-size:.85rem;font-weight:600}
+.lead{font-size:15px;color:var(--mid);max-width:680px;line-height:1.75}
+code{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--off);padding:1px 5px;border-radius:3px}
+
+/* section headers */
+.sec{display:flex;align-items:center;gap:1rem;margin:3rem 0 1.25rem;padding-bottom:.55rem;border-bottom:2px solid var(--ink)}
+.sec h2{font-size:.9rem}
+.sec .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mid);border:1px solid var(--rule);padding:1px 8px;border-radius:2px}
+
+/* stat strip */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--rule);margin:1.5rem 0 2.5rem}
+.stat{padding:1.1rem 1.25rem;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:none}
+.stat-n{font-size:1.9rem;font-weight:600;letter-spacing:-.04em;line-height:1}
+.stat-l{font-size:11px;color:var(--mid);margin-top:4px;line-height:1.4}
+
+/* workstream overview cards */
+.ws-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:1.5rem 0 2rem}
+.ws-card{padding:1.1rem 1rem;border-radius:4px;border:1px solid var(--rule)}
+.ws-num{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mid);margin-bottom:6px}
+.ws-card h3{font-size:.82rem;margin-bottom:5px}
+.ws-card .ws-sub{font-size:12px;color:var(--mid);line-height:1.5}
+.ws-bar{height:3px;margin-top:12px;border-radius:2px}
+
+/* badges */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:2px;white-space:nowrap;letter-spacing:.03em}
+.b-s1{background:var(--s1l);color:var(--s1)}
+.b-s2{background:var(--s2l);color:var(--s2)}
+.b-s3{background:var(--s3l);color:var(--s3)}
+.b-s4{background:var(--s4l);color:var(--s4)}
+.b-s5{background:var(--s5l);color:var(--s5)}
+.b-grey{background:var(--off);color:var(--mid)}
+.b-done{background:#EDF7ED;color:#1B6B1B}
+
+/* workstream detail panels */
+.ws-panel{margin-bottom:2.5rem;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.ws-panel-hdr{padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:1rem}
+.ws-hdr-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ws-hdr-text h2{font-size:1.05rem;margin-bottom:4px}
+.ws-hdr-text p{font-size:12px;color:var(--mid);line-height:1.55}
+.ws-hdr-meta{margin-left:auto;text-align:right;flex-shrink:0}
+.ws-hdr-meta .effort{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;line-height:1}
+.ws-hdr-meta .effort-l{font-size:10px;color:var(--mid);margin-top:2px}
+
+/* sprint table */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);padding:8px 12px;background:var(--off);border-bottom:1px solid var(--rule);border-top:1px solid var(--rule);text-align:left}
+td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.t-sprint{font-family:'IBM Plex Mono',monospace;font-size:11px;text-align:center;white-space:nowrap;color:var(--mid)}
+.t-feat{font-weight:500}
+.t-detail{font-size:12px;color:var(--mid);line-height:1.55}
+.t-effort{font-family:'IBM Plex Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;font-weight:500}
+.t-dep{font-size:11px;color:var(--muted)}
+.t-role{font-size:11px}
+
+/* role chips */
+.role{display:inline-block;font-size:9.5px;font-weight:500;padding:1px 6px;border-radius:2px;margin:1px}
+.r-ont{background:#E5F2FC;color:#1A5F8A}
+.r-eng{background:#EAF5EA;color:#1B6B1B}
+.r-ml {background:#F5EDF7;color:#6B3FA0}
+.r-plat{background:#FEF3E8;color:#A05A1A}
+.r-gov{background:#FDFBE8;color:#7A6B1A}
+
+/* callout */
+.callout{border-left:3px solid;padding:.85rem 1rem;border-radius:0 4px 4px 0;margin:1rem 0;font-size:13px;line-height:1.6}
+.callout p{color:var(--ink)}
+.callout strong{font-weight:500}
+
+/* dependency flow */
+.dep-flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:.6rem 0;font-size:12px;color:var(--mid)}
+.dep-node{background:var(--off);border:1px solid var(--rule);padding:2px 8px;border-radius:2px;font-size:11px;color:var(--ink)}
+.dep-arrow{color:var(--muted);font-size:10px}
+
+/* gantt */
+.gantt-wrap{overflow-x:auto;margin:1rem 0}
+.gantt{min-width:860px}
+.gantt-hdr{display:grid;grid-template-columns:200px repeat(18,1fr);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mid);padding-bottom:5px;border-bottom:1px solid var(--rule);margin-bottom:3px}
+.gantt-row{display:grid;grid-template-columns:200px repeat(18,1fr);align-items:center;padding:4px 0;border-bottom:1px solid var(--off)}
+.gantt-row:hover{background:var(--off)}
+.gantt-label{font-size:12px;color:var(--ink);padding-right:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gantt-bar{border-radius:2px;height:13px}
+.gantt-sep{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mid);padding:8px 0 3px;border-top:1px solid var(--rule);margin-top:4px}
+
+/* risk table */
+.risk-hi{color:#C0392B;font-weight:600}
+.risk-md{color:#C07A00;font-weight:600}
+.risk-lo{color:#1B6B1B;font-weight:600}
+
+/* gate grid */
+.gate-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:1rem 0}
+.gate-card{border-left:3px solid;padding:.85rem 1rem;background:var(--off)}
+.gate-card h3{font-size:.78rem;margin-bottom:6px}
+.gate-card ul{padding-left:1rem;font-size:11.5px;color:var(--mid)}
+.gate-card li{margin-bottom:3px}
+
+/* team */
+.team-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:1rem 0}
+.team-card{padding:1rem;border:1px solid var(--rule);border-radius:4px}
+.team-card h3{font-size:.78rem;margin-bottom:6px}
+.team-card .fte{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;color:var(--ink);line-height:1}
+.team-card p{font-size:11.5px;color:var(--mid);margin-top:4px;line-height:1.5}
+
+footer{margin-top:3.5rem;padding-top:1.5rem;border-top:1px solid var(--rule);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mid);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ════ HEADER ══════════════════════════════════════════════════════ -->
+<div class="eyebrow">Generation 2 Roadmap · April 2026 · <span style="color:#1B6B1B">Workstream 1 Complete ✓</span></div>
+<h1>Ontology Toolkit — Next Horizon</h1>
+<p class="lead">Five workstreams that extend a complete semantic infrastructure platform into agentic AI memory, autonomous ontology evolution, cross-enterprise federation, regulatory compliance, and hybrid vector retrieval. Each workstream builds directly on completed v2.0 foundations. <strong style="color:#1B6B1B">Workstream 1 (Agentic Semantic Memory) delivered — April 2026.</strong></p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">5</div><div class="stat-l">New workstreams<br>Gen 2 roadmap</div></div>
+  <div class="stat"><div class="stat-n">260</div><div class="stat-l">Engineering-days<br>total estimated</div></div>
+  <div class="stat" style="background:#EDF7ED"><div class="stat-n" style="color:#1B6B1B">42d ✓</div><div class="stat-l">S1 — Agent memory<br>6 components · <strong style="color:#1B6B1B">Complete</strong></div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--s2)">48d</div><div class="stat-l">S2 — Auto-evolution<br>6 components</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--s3)">63d</div><div class="stat-l">S3 — Federation<br>6 components</div></div>
+</div>
+
+<!-- ════ WORKSTREAM OVERVIEW ════════════════════════════════════════ -->
+<div class="sec"><h2>Workstream overview</h2><span class="tag">18 months · 2-week sprints</span></div>
+
+<div class="ws-grid">
+  <div class="ws-card" style="border-top:3px solid #1B6B1B;background:#EDF7ED">
+    <div class="ws-num">WORKSTREAM 1 <span class="badge b-done">✓ Complete</span></div>
+    <h3>Agentic Semantic Memory</h3>
+    <div class="ws-sub">Living knowledge graph as AI agent long-term memory. Temporal reasoning, cross-agent sharing, memory consolidation.</div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:baseline">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:#1B6B1B">42d ✓</span>
+      <span style="font-size:10px;color:var(--mid)">M1–M4 · Apr 2026</span>
+    </div>
+    <div class="ws-bar" style="background:#1B6B1B"></div>
+  </div>
+  <div class="ws-card" style="border-top:3px solid var(--s2)">
+    <div class="ws-num">WORKSTREAM 2</div>
+    <h3>Autonomous Ontology Evolution</h3>
+    <div class="ws-sub">Production anomaly monitoring surfaces candidate ontology extensions. Human review gate. Auto-versioning on approval.</div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:baseline">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--s2)">48d</span>
+      <span style="font-size:10px;color:var(--mid)">M3–M7</span>
+    </div>
+    <div class="ws-bar" style="background:var(--s2)"></div>
+  </div>
+  <div class="ws-card" style="border-top:3px solid var(--s3)">
+    <div class="ws-num">WORKSTREAM 3</div>
+    <h3>Cross-Enterprise Federation</h3>
+    <div class="ws-sub">Multi-org semantic interoperability. Signed capability manifests, trust bootstrap, sensitivity-enforced SPARQL routing.</div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:baseline">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--s3)">63d</span>
+      <span style="font-size:10px;color:var(--mid)">M5–M11</span>
+    </div>
+    <div class="ws-bar" style="background:var(--s3)"></div>
+  </div>
+  <div class="ws-card" style="border-top:3px solid var(--s4)">
+    <div class="ws-num">WORKSTREAM 4</div>
+    <h3>Regulatory Compliance Engine</h3>
+    <div class="ws-sub">EU AI Act · Basel IV · HIPAA · Ofcom. On-demand evidence packages assembled from PROV-O chains and SHACL records.</div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:baseline">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--s4)">51d</span>
+      <span style="font-size:10px;color:var(--mid)">M4–M9</span>
+    </div>
+    <div class="ws-bar" style="background:var(--s4)"></div>
+  </div>
+  <div class="ws-card" style="border-top:3px solid var(--s5)">
+    <div class="ws-num">WORKSTREAM 5</div>
+    <h3>Ontology-Bounded Vector Retrieval</h3>
+    <div class="ws-sub">OWL class hierarchy as hard filter on vector similarity search. Hybrid SPARQL + vector query executor. 4 vector store integrations.</div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;align-items:baseline">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;color:var(--s5)">56d</span>
+      <span style="font-size:10px;color:var(--mid)">M7–M13</span>
+    </div>
+    <div class="ws-bar" style="background:var(--s5)"></div>
+  </div>
+</div>
+
+<!-- ════ GANTT ═══════════════════════════════════════════════════════ -->
+<div class="sec"><h2>18-month delivery timeline</h2><span class="tag">2-week sprints · parallel workstreams</span></div>
+<div class="gantt-wrap"><div class="gantt">
+  <div class="gantt-hdr">
+    <div></div>
+    <div>M1</div><div>M1</div><div>M2</div><div>M2</div>
+    <div>M3</div><div>M3</div><div>M4</div><div>M4</div>
+    <div>M5</div><div>M5</div><div>M6</div><div>M6</div>
+    <div>M7</div><div>M8</div><div>M9</div><div>M10</div>
+    <div>M12</div><div>M14+</div>
+  </div>
+
+  <div class="gantt-sep">Workstream 1 — Agentic Semantic Memory (M1–M4)</div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s1">S1</span> Memory API core</div><div style="grid-column:2/4;background:var(--s1);border-radius:2px;height:13px"></div><div style="grid-column:4/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s1">S1</span> Temporal reasoning</div><div style="grid-column:3/6;background:var(--s1);opacity:.85;border-radius:2px;height:13px"></div><div style="grid-column:6/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s1">S1</span> Cross-agent sharing</div><div style="grid-column:4/7;background:var(--s1);opacity:.75;border-radius:2px;height:13px"></div><div style="grid-column:7/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s1">S1</span> Consolidation daemon + SDK</div><div style="grid-column:5/9;background:var(--s1);opacity:.65;border-radius:2px;height:13px"></div><div style="grid-column:9/19"></div></div>
+
+  <div class="gantt-sep">Workstream 2 — Autonomous Ontology Evolution (M3–M7)</div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s2">S2</span> Proposal store + anomaly monitor</div><div style="grid-column:5/8;background:var(--s2);border-radius:2px;height:13px"></div><div style="grid-column:8/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s2">S2</span> Candidate scoring engine</div><div style="grid-column:6/9;background:var(--s2);opacity:.85;border-radius:2px;height:13px"></div><div style="grid-column:9/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s2">S2</span> Human review UI + CI/CD versioning</div><div style="grid-column:7/11;background:var(--s2);opacity:.75;border-radius:2px;height:13px"></div><div style="grid-column:11/19"></div></div>
+
+  <div class="gantt-sep">Workstream 3 — Cross-Enterprise Federation (M5–M11)</div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s3">S3</span> Partner registry + manifest signing</div><div style="grid-column:9/12;background:var(--s3);border-radius:2px;height:13px"></div><div style="grid-column:12/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s3">S3</span> Cross-enterprise SPARQL router</div><div style="grid-column:10/13;background:var(--s3);opacity:.85;border-radius:2px;height:13px"></div><div style="grid-column:13/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s3">S3</span> Trust protocol + W3C spec</div><div style="grid-column:11/16;background:var(--s3);opacity:.75;border-radius:2px;height:13px"></div><div style="grid-column:16/19"></div></div>
+
+  <div class="gantt-sep">Workstream 4 — Regulatory Compliance Engine (M4–M9)</div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s4">S4</span> Regulatory requirement registry</div><div style="grid-column:7/10;background:var(--s4);border-radius:2px;height:13px"></div><div style="grid-column:10/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s4">S4</span> Evidence assembler + bundle export</div><div style="grid-column:8/12;background:var(--s4);opacity:.85;border-radius:2px;height:13px"></div><div style="grid-column:12/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s4">S4</span> Regulation mapping + audit UI</div><div style="grid-column:10/14;background:var(--s4);opacity:.75;border-radius:2px;height:13px"></div><div style="grid-column:14/19"></div></div>
+
+  <div class="gantt-sep">Workstream 5 — Ontology-Bounded Vector Retrieval (M7–M13)</div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s5">S5</span> Embedding pipeline</div><div style="grid-column:13/15;background:var(--s5);border-radius:2px;height:13px"></div><div style="grid-column:15/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s5">S5</span> OWL filter + hybrid executor</div><div style="grid-column:14/16;background:var(--s5);opacity:.85;border-radius:2px;height:13px"></div><div style="grid-column:16/19"></div></div>
+  <div class="gantt-row"><div class="gantt-label"><span class="badge b-s5">S5</span> Vector store integrations + benchmarks</div><div style="grid-column:15/19;background:var(--s5);opacity:.75;border-radius:2px;height:13px"></div></div>
+</div></div>
+
+<!-- ════ WORKSTREAM 1 ════════════════════════════════════════════════ -->
+<div class="sec"><h2>Workstream detail plans</h2></div>
+
+<div class="ws-panel">
+  <div class="ws-panel-hdr" style="background:var(--s1l);border-bottom:1px solid var(--rule)">
+    <div class="ws-hdr-icon" style="background:var(--s1);color:#fff">🧠</div>
+    <div class="ws-hdr-text">
+      <h2 style="color:var(--s1)">Workstream 1 — Agentic Semantic Memory Layer <span class="badge b-done" style="font-size:12px;margin-left:8px">✓ Complete — Apr 2026</span></h2>
+      <p>Transforms the ontology graph store from a static semantic schema into the long-term working memory of AI agents. Every reasoning chain, observation, and decision becomes a queryable, temporally-ordered fact. Agents build on prior reasoning rather than starting from scratch on every invocation.</p>
+      <div style="margin-top:8px">
+        <span class="badge b-s1">M1–M4</span>
+        <span class="badge b-done" style="margin-left:6px">Branch: S1-Agentic-Semantic-Memory</span>
+        <span style="font-size:11px;color:var(--mid);margin-left:8px">Builds on: PROV-O infrastructure · ObservationRecord store · RuntimeClient · Graph store publishing · Conflict resolution (v2.0)</span>
+      </div>
+    </div>
+    <div class="ws-hdr-meta"><div class="effort" style="color:var(--s1)">42d</div><div class="effort-l">6 components<br><span style="color:#1B6B1B;font-weight:600">✓ All done</span></div></div>
+  </div>
+  <div class="callout" style="border-color:#1B6B1B;background:#EDF7ED;margin:1rem 1.25rem">
+    <p><strong>✓ Completed April 2026.</strong> All 6 components delivered on branch <code>S1-Agentic-Semantic-Memory</code>. All 5 exit gates met. Deliverables: <code>runtime/memory.py</code> · <code>runtime/temporal_queries/</code> (TQ-01–TQ-05) · <code>runtime/consolidation_daemon.py</code> · <code>runtime/consolidation_config.json</code> · <code>tests/sparql/CQ-MEM-01</code>–<code>CQ-MEM-05</code> · <code>runtime/flavor_registry.py</code> extended · all 5 flavor JSONs updated · <code>RuntimeClient.ask(memory_recall=True)</code> + <code>RuntimeClient.remember()</code>.</p>
+  </div>
+  <table>
+    <colgroup><col style="width:55px"><col style="width:60px"><col style="width:185px"><col><col style="width:120px"><col style="width:120px"><col style="width:48px"><col style="width:70px"></colgroup>
+    <thead><tr><th>WS</th><th>Sprint</th><th>Component</th><th>Scope &amp; deliverable</th><th>Roles</th><th>Depends on</th><th>Effort</th><th>Status</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><span class="badge b-s1">S1</span></td>
+      <td class="t-sprint">S1–S2</td>
+      <td class="t-feat">Memory API core</td>
+      <td class="t-detail">New <code>runtime/memory.py</code>. Five methods: <code>recall()</code>, <code>diff()</code>, <code>consolidate()</code>, <code>snapshot()</code>, <code>influence_graph()</code>. All return typed JSON-LD objects ready for payload injection. Supersession, temporal compression, and conflict escalation built into <code>consolidate()</code>.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-eng">Platform Eng</span></td>
+      <td class="t-dep">ObservationRecord store<br>SPARQL endpoint<br>PROV-O patterns</td>
+      <td class="t-effort">8d</td>
+      <td><span class="badge b-done">✓ Done</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s1">S1</span></td>
+      <td class="t-sprint">S2–S4</td>
+      <td class="t-feat">Temporal reasoning layer</td>
+      <td class="t-detail">5 parameterised SPARQL templates in <code>runtime/temporal_queries/</code>: TQ-01 point-in-time snapshot, TQ-02 sliding-window KPI aggregation, TQ-03 bi-temporal query (valid-time × transaction-time), TQ-04 temporal diff between two agent flavors, TQ-05 invalidation chain traversal. <code>fill_template()</code> helper in <code>__init__.py</code>.</td>
+      <td><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Memory API core<br>Named-graph RBAC</td>
+      <td class="t-effort">10d</td>
+      <td><span class="badge b-done">✓ Done</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s1">S1</span></td>
+      <td class="t-sprint">S3–S4</td>
+      <td class="t-feat">Cross-agent memory sharing + PROV-O</td>
+      <td class="t-detail"><code>FlavorRegistry.get_memory_sharing_policy()</code> and <code>check_memory_access()</code> enforce tier-gated cross-agent read access. All 5 flavor JSONs updated with <code>memory_sharing</code> policy blocks. <code>prov:wasInfluencedBy</code> links emitted via <code>diff()</code>. Agent influence graph via <code>influence_graph()</code>.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-ml">AI/ML Eng</span></td>
+      <td class="t-dep">Memory API core<br>Flavor registry<br>Named-graph RBAC</td>
+      <td class="t-effort">8d</td>
+      <td><span class="badge b-done">✓ Done</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s1">S1</span></td>
+      <td class="t-sprint">S4–S5</td>
+      <td class="t-feat">Memory consolidation daemon</td>
+      <td class="t-detail"><code>runtime/consolidation_daemon.py</code> — three strategies: supersession, temporal compression, conflict escalation. <code>runtime/consolidation_config.json</code> — schedule (nightly cron), retention by sensitivity tier, per-strategy switches, alert threshold. CLI: <code>--once</code>, <code>--dry-run</code>, scheduled mode. JSONL run log at <code>output/reports/consolidation_log.jsonl</code>.</td>
+      <td><span class="role r-eng">Platform Eng</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Temporal reasoning layer<br>Conflict resolution engine</td>
+      <td class="t-effort">7d</td>
+      <td><span class="badge b-done">✓ Done</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s1">S1</span></td>
+      <td class="t-sprint">S5</td>
+      <td class="t-feat">SPARQL CQ tests for memory layer</td>
+      <td class="t-detail">5 CQ tests in <code>tests/sparql/</code>: CQ-MEM-01 (recall retrieves prior reasoning), CQ-MEM-02 (diff identifies agent disagreements), CQ-MEM-03 (superseded observations carry <code>prov:wasInvalidatedBy</code>), CQ-MEM-04 (cross-agent influence links propagate), CQ-MEM-05 (temporal snapshot — ASK form for CI/CD gate). All integrated into CI/CD quality gate.</td>
+      <td><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">All memory components</td>
+      <td class="t-effort">5d</td>
+      <td><span class="badge b-done">✓ Done</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s1">S1</span></td>
+      <td class="t-sprint">S5–S6</td>
+      <td class="t-feat">Documentation + RuntimeClient SDK update</td>
+      <td class="t-detail"><code>RuntimeClient.ask()</code> extended with <code>memory_recall</code>, <code>memory_recall_limit</code>, <code>memory_time_range</code> parameters. New <code>RuntimeClient.remember()</code> convenience method. <code>RuntimeClient.memory</code> property exposes <code>AgentMemory</code> directly. <code>ask_async()</code> updated identically. README Section 19 added with full API reference and examples.</td>
+      <td><span class="role r-eng">Data Eng</span></td>
+      <td class="t-dep">All memory components</td>
+      <td class="t-effort">4d</td>
+      <td><span class="badge b-done">✓ Done</span></td>
+    </tr>
+    </tbody>
+  </table>
+  <div style="padding:1rem 1.25rem;background:var(--off);border-top:1px solid var(--rule)">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mid);margin-bottom:.6rem">Exit gates — all met</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+      <div style="background:#EDF7ED;border-left:3px solid #1B6B1B;padding:.5rem .75rem;font-size:11.5px"><strong style="color:#1B6B1B">✓</strong> <code>memory.recall()</code> returns typed JSON-LD objects</div>
+      <div style="background:#EDF7ED;border-left:3px solid #1B6B1B;padding:.5rem .75rem;font-size:11.5px"><strong style="color:#1B6B1B">✓</strong> Temporal snapshot correct at T-1 and T-2</div>
+      <div style="background:#EDF7ED;border-left:3px solid #1B6B1B;padding:.5rem .75rem;font-size:11.5px"><strong style="color:#1B6B1B">✓</strong> Cross-agent influence links appear in graph</div>
+      <div style="background:#EDF7ED;border-left:3px solid #1B6B1B;padding:.5rem .75rem;font-size:11.5px"><strong style="color:#1B6B1B">✓</strong> Consolidation daemon — three strategies implemented</div>
+      <div style="background:#EDF7ED;border-left:3px solid #1B6B1B;padding:.5rem .75rem;font-size:11.5px"><strong style="color:#1B6B1B">✓</strong> CQ-MEM-01 through CQ-MEM-05 integrated in CI/CD</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WORKSTREAM 2 ════════════════════════════════════════════════ -->
+<div class="ws-panel">
+  <div class="ws-panel-hdr" style="background:var(--s2l);border-bottom:1px solid var(--rule)">
+    <div class="ws-hdr-icon" style="background:var(--s2);color:#fff">🔄</div>
+    <div class="ws-hdr-text">
+      <h2 style="color:var(--s2)">Workstream 2 — Autonomous Ontology Evolution</h2>
+      <p>Closes the loop between what AI agents observe in production and what the ontology formally models. A monitoring daemon detects patterns the ontology doesn't yet capture, scores them as evolution candidates, routes them for expert review, and auto-increments the ontology version on approval. The ontology becomes a living, self-improving asset.</p>
+      <div style="margin-top:8px">
+        <span class="badge b-s2">M3–M7</span>
+        <span style="font-size:11px;color:var(--mid);margin-left:8px">Builds on: ObservationRecord store · NLP log entity discovery · CI/CD pipeline · SHACL shapes · SPARQL CQ tests (v2.0)</span>
+      </div>
+    </div>
+    <div class="ws-hdr-meta"><div class="effort" style="color:var(--s2)">48d</div><div class="effort-l">6 components</div></div>
+  </div>
+  <div class="callout" style="border-color:var(--s2);background:var(--s2l);margin:1rem 1.25rem">
+    <p><strong>Critical distinction:</strong> This workstream does not auto-update the ontology. It surfaces proposals. Every proposed change passes through a human review gate and the existing CI/CD pipeline before any axiom is added. The autonomy is in detection and scoring — governance remains with the domain expert.</p>
+  </div>
+  <table>
+    <colgroup><col style="width:55px"><col style="width:60px"><col style="width:195px"><col><col style="width:130px"><col style="width:130px"><col style="width:48px"></colgroup>
+    <thead><tr><th>WS</th><th>Sprint</th><th>Component</th><th>Scope &amp; deliverable</th><th>Roles</th><th>Depends on</th><th>Effort</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><span class="badge b-s2">S2</span></td>
+      <td class="t-sprint">S5</td>
+      <td class="t-feat">Evolution proposal store + schema</td>
+      <td class="t-detail">New table <code>ontology_evolution_proposals</code>: proposal_id, proposal_type (NEW_CLASS / NEW_PROPERTY / NEW_CONSTRAINT / DEPRECATE), candidate_json (the proposed OWL axiom in Turtle), evidence_sparql (the query that surfaced it), confidence_score, reviewer_id, status (PENDING / APPROVED / REJECTED / DEFERRED), version_target, created_at, reviewed_at. Adds SHACL shape validating the proposal structure. New governance scorecard criterion: "Evolution proposals reviewed within SLA (7 days)."</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-gov">Governance</span></td>
+      <td class="t-dep">ontology_metadata<br>SHACL shapes</td>
+      <td class="t-effort">5d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s2">S2</span></td>
+      <td class="t-sprint">S6–S8</td>
+      <td class="t-feat">Production anomaly monitor</td>
+      <td class="t-detail">Background daemon (<code>src/evolution_monitor.py</code>) that queries the ObservationRecord store on a configurable schedule (default: nightly). Four detection strategies: (1) <em>sh:in violation accumulation</em> — values appearing in observations that fail <code>sh:in</code> constraints repeatedly signal a missing enumeration term; (2) <em>property cardinality breach</em> — FK patterns appearing in JSON-LD payloads that don't correspond to any OWL ObjectProperty; (3) <em>class co-occurrence</em> — entity pairs that consistently appear together in observations but have no defined OWL relationship; (4) <em>NLP candidate promotion</em> — entities already surfaced by the log entity discovery pipeline that now appear in ≥N confirmed observations. Each detection produces a candidate entry in the proposal store with a confidence score and SPARQL evidence query.</td>
+      <td><span class="role r-ml">ML Eng</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">ObservationRecord store<br>SHACL shapes<br>NLP discovery pipeline<br>Proposal store</td>
+      <td class="t-effort">12d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s2">S2</span></td>
+      <td class="t-sprint">S7–S9</td>
+      <td class="t-feat">Candidate scoring engine</td>
+      <td class="t-detail">Scores each proposal across five dimensions: (1) evidence volume — how many distinct ObservationRecord instances support this proposal; (2) evidence recency — weighted toward recent observations; (3) cross-domain support — does the same pattern appear across multiple industry templates or flavors; (4) ontology consistency risk — does the proposed axiom introduce any new potential inconsistencies (checked via ROBOT ELK reasoner on a test ontology); (5) schema alignment — does the proposed class or property already exist under a different name in the physical schema? Produces a composite score 0.0–1.0. Proposals scoring >0.8 are escalated to REVIEW immediately; 0.5–0.8 are batched for weekly review; <0.5 remain as candidates for manual promotion.</td>
+      <td><span class="role r-ml">ML Eng</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Anomaly monitor<br>Reasoner integration<br>Proposal store</td>
+      <td class="t-effort">10d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s2">S2</span></td>
+      <td class="t-sprint">S8–S10</td>
+      <td class="t-feat">Human review workflow + browser UI</td>
+      <td class="t-detail">Extend the browser wizard (Phase 3) with an Evolution Review tab. Shows each PENDING proposal with: the proposed OWL axiom rendered as human-readable text, the SPARQL evidence query (clickable to run against the live graph), the confidence score with dimensional breakdown, and a preview of what the ontology diff would look like. Reviewer can APPROVE (with optional note and target version), REJECT (with reason), or DEFER (with review-by date). Email/webhook notification on new high-confidence proposals. CLI fallback: <code>python3 toolkit.py --phase evolve --review</code>.</td>
+      <td><span class="role r-gov">Governance</span><span class="role r-eng">Platform Eng</span></td>
+      <td class="t-dep">Browser wizard<br>Scoring engine<br>Proposal store</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s2">S2</span></td>
+      <td class="t-sprint">S9–S11</td>
+      <td class="t-feat">CI/CD auto-versioning on approval</td>
+      <td class="t-detail">When a proposal is APPROVED, the CI/CD pipeline is triggered with the proposed Turtle diff. The pipeline: (1) applies the axiom to a branch of the ontology; (2) runs the full SHACL + reasoner + SPARQL CQ test suite; (3) if all pass, increments the MINOR version per semver; (4) generates a governance scorecard delta report; (5) creates a GitHub PR with the diff, test results, and the original proposal evidence. The domain expert reviews the PR before merge — the review gate cannot be bypassed by the automation. On merge, the updated ontology is published to all configured graph stores.</td>
+      <td><span class="role r-eng">Platform Eng</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">CI/CD pipeline (v2.0)<br>Graph store publishing<br>Review workflow</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s2">S2</span></td>
+      <td class="t-sprint">S11</td>
+      <td class="t-feat">SPARQL CQ tests for evolution pipeline</td>
+      <td class="t-detail">5 new CQ tests: CQ-EVO-01 (do proposals with score >0.8 appear in REVIEW status?), CQ-EVO-02 (do APPROVED proposals produce a valid Turtle diff?), CQ-EVO-03 (does the reasoner detect any inconsistency introduced by the last approved axiom?), CQ-EVO-04 (is the ontology version incremented on approval?), CQ-EVO-05 (does the evidence SPARQL query for each proposal return ≥1 row?). Added to the CI/CD quality gate.</td>
+      <td><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">All evolution components</td>
+      <td class="t-effort">5d</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════ WORKSTREAM 3 ════════════════════════════════════════════════ -->
+<div class="ws-panel">
+  <div class="ws-panel-hdr" style="background:var(--s3l);border-bottom:1px solid var(--rule)">
+    <div class="ws-hdr-icon" style="background:var(--s3);color:#fff">🌐</div>
+    <div class="ws-hdr-text">
+      <h2 style="color:var(--s3)">Workstream 3 — Cross-Enterprise Federated Ontology Network</h2>
+      <p>Extends the toolkit from single-enterprise to multi-enterprise semantic interoperability. Each organisation maintains full sovereignty — they publish a cryptographically signed capability manifest declaring what they expose, to whom, and at what sensitivity tier. Incoming federated queries are validated at the receiving boundary before any local data flows.</p>
+      <div style="margin-top:8px">
+        <span class="badge b-s3">M5–M11</span>
+        <span style="font-size:11px;color:var(--mid);margin-left:8px">Builds on: SPARQL federation · Named-graph RBAC · Ontology alignment (DOLCE/FOAF/Schema.org) · W3C Community Group (v2.0)</span>
+      </div>
+    </div>
+    <div class="ws-hdr-meta"><div class="effort" style="color:var(--s3)">63d</div><div class="effort-l">6 components</div></div>
+  </div>
+  <div class="callout" style="border-color:var(--s3);background:var(--s3l);margin:1rem 1.25rem">
+    <p><strong>Strategic importance:</strong> This workstream is the primary deliverable for the W3C Community Group standardisation track. The cross-enterprise interoperability protocol — capability manifests, trust bootstrap, sensitivity-enforced federation — is the specification the community group should standardise. Building it here provides both a reference implementation and a concrete use case for the standards process.</p>
+  </div>
+  <table>
+    <colgroup><col style="width:55px"><col style="width:60px"><col style="width:195px"><col><col style="width:130px"><col style="width:130px"><col style="width:48px"></colgroup>
+    <thead><tr><th>WS</th><th>Sprint</th><th>Component</th><th>Scope &amp; deliverable</th><th>Roles</th><th>Depends on</th><th>Effort</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><span class="badge b-s3">S3</span></td>
+      <td class="t-sprint">S9–S10</td>
+      <td class="t-feat">Partner capability registry</td>
+      <td class="t-detail">New <code>federation/partner_registry.json</code> and accompanying schema. Each partner entry declares: partner IRI, SPARQL endpoint URL, exposed class list (subset of the partner's master ontology), sensitivity tier per class, SHACL shape subset governing what the partner accepts for inbound queries, and the partner's public signing key. The registry is stored in the master ontology's named graph (sensitivity tier = Confidential). CLI: <code>python3 toolkit.py --phase federate --register-partner https://partner.example.com/ontology</code>. Partners self-publish their capability document at a well-known URI following the format established in this workstream.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-gov">Governance</span></td>
+      <td class="t-dep">Named-graph RBAC<br>Ontology alignment</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s3">S3</span></td>
+      <td class="t-sprint">S10–S12</td>
+      <td class="t-feat">Capability manifest generator + signing</td>
+      <td class="t-detail">Generates a signed JSON-LD capability manifest from a given enterprise's ontology configuration. The manifest declares the ontology IRI, the list of exposed classes and properties, the sensitivity tier for each (filtered by the accessing partner's trust level), the SHACL shapes that inbound queries must satisfy, and a validity period. Signing uses Ed25519 keys (generated by <code>toolkit.py --phase federate --generate-keys</code>). Verification uses the partner's public key from the registry. Capability manifests are versioned and published to the graph store as a named graph per partner relationship.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-eng">Platform Eng</span></td>
+      <td class="t-dep">Partner registry<br>Sensitivity tiers</td>
+      <td class="t-effort">10d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s3">S3</span></td>
+      <td class="t-sprint">S11–S14</td>
+      <td class="t-feat">Cross-enterprise SPARQL router</td>
+      <td class="t-detail">Extends the intra-enterprise SPARQL federation (v2.0) to cross-enterprise queries. The router: (1) parses the incoming SPARQL query and identifies which SERVICE clauses reference partner endpoints; (2) verifies the requesting agent's flavor against the partner's capability manifest (does this agent have the right sensitivity tier to access the requested classes?); (3) rewrites the query to include sensitivity filters enforced by the partner's SHACL shapes; (4) routes the rewritten query to the partner endpoint; (5) validates the returned results against the partner's declared schema before merging them into the local result set. No partner data enters the local graph — results are returned transiently and carry partner provenance annotations.</td>
+      <td><span class="role r-eng">Platform Eng</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Capability manifest<br>Partner registry<br>Named-graph RBAC<br>SPARQL federation</td>
+      <td class="t-effort">12d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s3">S3</span></td>
+      <td class="t-sprint">S12–S14</td>
+      <td class="t-feat">Sensitivity enforcement at federation boundary</td>
+      <td class="t-detail">Dedicated SHACL shapes for federated result validation: every triple returned from a partner endpoint must match the sensitivity tier declared in their capability manifest, must carry a partner provenance annotation (<code>prov:wasAttributedTo</code> the partner IRI), and must conform to the exposed class list. Results that fail validation are rejected with a structured error (TMF630 Error resource format) and logged to the semantic loss log with <code>loss_type=FEDERATION_BOUNDARY_VIOLATION</code>. Sensitivity violations are escalated to the governance queue.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-gov">Security</span></td>
+      <td class="t-dep">SPARQL router<br>SHACL shapes<br>Capability manifest</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s3">S3</span></td>
+      <td class="t-sprint">S13–S16</td>
+      <td class="t-feat">Trust bootstrap protocol</td>
+      <td class="t-detail">Defines the handshake that two enterprises perform before any federated queries flow. Steps: (1) Enterprise A requests federation with Enterprise B — sends its capability manifest and public key; (2) Enterprise B verifies the manifest signature, reviews the declared class exposure, and countersigns with their own key; (3) Both parties store the signed bilateral agreement in their partner registry; (4) A test query (SPARQL ASK over a Public-tier class) verifies the connection; (5) The agreement is versioned and expires after a configurable period (default: 12 months). CLI: <code>python3 toolkit.py --phase federate --handshake https://partner.example.com</code>. The protocol is documented as the first deliverable for the W3C Community Group specification.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-gov">Governance</span><span class="role r-eng">Platform Eng</span></td>
+      <td class="t-dep">Capability manifest<br>Partner registry<br>SPARQL router</td>
+      <td class="t-effort">10d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s3">S3</span></td>
+      <td class="t-sprint">S15–S22</td>
+      <td class="t-feat">W3C interoperability protocol specification</td>
+      <td class="t-detail">Formal specification document for the cross-enterprise ontology interoperability protocol, published as a W3C Community Group Report. Covers: capability manifest format (normative JSON-LD schema), trust bootstrap handshake (normative protocol definition with state machine), sensitivity enforcement requirements (normative SHACL profile), federation query patterns (informative SPARQL examples), and conformance criteria (mandatory vs optional requirements per RFC 2119). The reference implementation is the toolkit's <code>federation/</code> module. Submitted to the W3C Community Group for review and iteration. Target: Community Group Final Specification Agreement signatures from ≥3 organisations.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-gov">Program Lead</span></td>
+      <td class="t-dep">All federation components<br>W3C CG (v2.0)<br>3+ pilot deployments</td>
+      <td class="t-effort">15d</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════ WORKSTREAM 4 ════════════════════════════════════════════════ -->
+<div class="ws-panel">
+  <div class="ws-panel-hdr" style="background:var(--s4l);border-bottom:1px solid var(--rule)">
+    <div class="ws-hdr-icon" style="background:var(--s4);color:#fff">⚖️</div>
+    <div class="ws-hdr-text">
+      <h2 style="color:var(--s4)">Workstream 4 — Regulatory AI Compliance Evidence Engine</h2>
+      <p>Turns the toolkit's existing governance outputs — PROV-O chains, SHACL validation records, governance scorecard — into on-demand, signed, machine-verifiable evidence packages mapped to named regulatory frameworks. Compliance evidence becomes automatic rather than manually reconstructed.</p>
+      <div style="margin-top:8px">
+        <span class="badge b-s4">M4–M9</span>
+        <span style="font-size:11px;color:var(--mid);margin-left:8px">Builds on: PROV-O provenance · SHACL validation · Governance scorecard (31 criteria) · ObservationRecord store · CI/CD pipeline (v2.0)</span>
+      </div>
+    </div>
+    <div class="ws-hdr-meta"><div class="effort" style="color:var(--s4)">51d</div><div class="effort-l">6 components</div></div>
+  </div>
+  <div class="callout" style="border-color:var(--s4);background:var(--s4l);margin:1rem 1.25rem">
+    <p><strong>Regulatory context:</strong> EU AI Act provisions for high-risk AI systems apply from August 2026. Basel IV model risk SR 11-7 requires explainability for algorithmic decisions. HIPAA AI addenda are under active rulemaking. Ofcom's network transparency requirements affect UK telecom AI deployments. The toolkit already captures the evidence; this workstream assembles and certifies it.</p>
+  </div>
+  <table>
+    <colgroup><col style="width:55px"><col style="width:60px"><col style="width:195px"><col><col style="width:130px"><col style="width:130px"><col style="width:48px"></colgroup>
+    <thead><tr><th>WS</th><th>Sprint</th><th>Component</th><th>Scope &amp; deliverable</th><th>Roles</th><th>Depends on</th><th>Effort</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><span class="badge b-s4">S4</span></td>
+      <td class="t-sprint">S7–S9</td>
+      <td class="t-feat">Regulatory requirement registry</td>
+      <td class="t-detail">New <code>compliance/regulations/</code> directory. Each regulation is a JSON file declaring: regulation ID, name, jurisdiction, effective date, and a list of evidentiary requirements — each requirement maps to a toolkit artefact type (SPARQL CQ result / SHACL validation record / PROV-O chain / governance scorecard criterion / ObservationRecord). Ships with four pre-built regulation files: EU AI Act Article 13 (transparency), Basel IV SR 11-7 (model risk), HIPAA §164.312 (AI audit trail), and Ofcom Network Transparency Code. Registry is extensible — organisations add custom regulations by following the schema.</td>
+      <td><span class="role r-gov">Governance</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Governance scorecard<br>SPARQL CQ tests<br>PROV-O patterns</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s4">S4</span></td>
+      <td class="t-sprint">S8–S11</td>
+      <td class="t-feat">Evidence assembler — SPARQL + PROV-O query engine</td>
+      <td class="t-detail">New <code>compliance/assembler.py</code>. Takes a regulation ID, a decision IRI (an ObservationRecord or LLM response), and a time range. Executes: (1) the SPARQL CQ tests relevant to that regulation and captures results; (2) the PROV-O provenance chain for the decision back to source ObservationRecords and their originating database records; (3) the SHACL validation report for the input data that fed the decision; (4) the governance scorecard snapshot at the time of the decision. Returns a structured evidence object: one evidence item per regulatory requirement, each with status (SATISFIED / INSUFFICIENT / NOT_APPLICABLE), source query, and result. CLI: <code>python3 toolkit.py --phase comply --regulation eu-ai-act --decision &lt;observation_iri&gt;</code>.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-eng">Platform Eng</span></td>
+      <td class="t-dep">Regulatory registry<br>SPARQL endpoint<br>PROV-O store<br>SHACL validation</td>
+      <td class="t-effort">12d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s4">S4</span></td>
+      <td class="t-sprint">S10–S12</td>
+      <td class="t-feat">Signed compliance bundle exporter</td>
+      <td class="t-detail">Packages the assembled evidence into a portable, verifiable compliance bundle. Format: ZIP containing (1) the evidence object as signed JSON-LD (Ed25519), (2) all referenced SPARQL results as CSV, (3) the relevant PROV-O chain as Turtle, (4) the SHACL validation report, (5) the governance scorecard snapshot, (6) a human-readable PDF evidence summary. The bundle is immutable once signed — the signature covers the hash of all included files. Verification: <code>python3 toolkit.py --phase comply --verify bundle.zip</code>. Bundles are stored in the graph store as named graphs (sensitivity = Restricted) with retention policy metadata.</td>
+      <td><span class="role r-eng">Platform Eng</span><span class="role r-gov">Governance</span></td>
+      <td class="t-dep">Evidence assembler<br>Signing infrastructure<br>Graph store publishing</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s4">S4</span></td>
+      <td class="t-sprint">S11–S13</td>
+      <td class="t-feat">Regulation-to-toolkit mapping layer</td>
+      <td class="t-detail">Maps each regulatory requirement to the specific toolkit artefact and governance criterion that satisfies it. Implemented as a bidirectional index: (1) given a regulation requirement, which toolkit tests/criteria provide evidence; (2) given a toolkit criterion, which regulations does it satisfy. This mapping powers the compliance dashboard and enables gap analysis — "which of my current governance criteria do NOT satisfy any regulatory requirement?" and "which regulatory requirements have NO toolkit coverage?" New governance scorecard dimension: Regulatory Coverage (% of loaded regulations with full evidence coverage).</td>
+      <td><span class="role r-gov">Governance</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Regulatory registry<br>Governance scorecard<br>Evidence assembler</td>
+      <td class="t-effort">10d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s4">S4</span></td>
+      <td class="t-sprint">S12–S14</td>
+      <td class="t-feat">Compliance audit trail reporting UI</td>
+      <td class="t-detail">New tab in the browser wizard: Compliance Dashboard. Shows: per-regulation coverage score (% of requirements satisfied), a traffic-light status per requirement, a timeline of compliance bundle exports (with verification status), and a gap analysis panel ("these requirements have no current toolkit evidence — recommended remediation"). Allows triggering a new evidence assembly from the UI, with configurable time window and decision scope. Generates a compliance summary report alongside the existing HTML toolkit report on every CI/CD pipeline run.</td>
+      <td><span class="role r-gov">Governance</span><span class="role r-eng">Platform Eng</span></td>
+      <td class="t-dep">Browser wizard<br>Mapping layer<br>Bundle exporter</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s4">S4</span></td>
+      <td class="t-sprint">S14</td>
+      <td class="t-feat">SPARQL CQ tests + new governance criteria</td>
+      <td class="t-detail">5 new SPARQL CQ tests: CQ-CMP-01 (does every high-confidence ObservationRecord have a complete PROV-O chain?), CQ-CMP-02 (do all SHACL-passed observations carry a validation timestamp?), CQ-CMP-03 (are all compliance bundles signed and verifiable?), CQ-CMP-04 (is regulatory coverage ≥80% for loaded regulations?), CQ-CMP-05 (are all RESTRICTED-tier observations excluded from cross-enterprise federation?). Two new governance scorecard criteria: Regulatory Evidence Coverage and Audit Trail Completeness.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-gov">Governance</span></td>
+      <td class="t-dep">All compliance components</td>
+      <td class="t-effort">5d</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════ WORKSTREAM 5 ════════════════════════════════════════════════ -->
+<div class="ws-panel">
+  <div class="ws-panel-hdr" style="background:var(--s5l);border-bottom:1px solid var(--rule)">
+    <div class="ws-hdr-icon" style="background:var(--s5);color:#fff">🔍</div>
+    <div class="ws-hdr-text">
+      <h2 style="color:var(--s5)">Workstream 5 — Ontology-Bounded Vector Retrieval</h2>
+      <p>The OWL class hierarchy becomes a hard semantic filter on vector similarity search. Where RAG retrieves whatever is numerically closest in embedding space, ontology-bounded retrieval first constrains the search population by OWL class expression, then ranks within it by vector similarity. Precision increases; irrelevant-but-similar results are eliminated.</p>
+      <div style="margin-top:8px">
+        <span class="badge b-s5">M7–M13</span>
+        <span style="font-size:11px;color:var(--mid);margin-left:8px">Builds on: OWL 2 ontology · Flavor registry · ObservationRecord store · Graph store publishing · Runtime SDK (v2.0)</span>
+      </div>
+    </div>
+    <div class="ws-hdr-meta"><div class="effort" style="color:var(--s5)">56d</div><div class="effort-l">6 components</div></div>
+  </div>
+  <div class="callout" style="border-color:var(--s5);background:var(--s5l);margin:1rem 1.25rem">
+    <p><strong>Market position:</strong> Every enterprise running RAG against unstructured data faces the same problem — vector similarity retrieves plausible but semantically unrelated results. This workstream makes the toolkit the semantic scoping layer that sits in front of any vector store, compatible with existing RAG architectures. It opens the toolkit to teams already invested in vector search who need to make retrieval semantically governed.</p>
+  </div>
+  <table>
+    <colgroup><col style="width:55px"><col style="width:60px"><col style="width:195px"><col><col style="width:130px"><col style="width:130px"><col style="width:48px"></colgroup>
+    <thead><tr><th>WS</th><th>Sprint</th><th>Component</th><th>Scope &amp; deliverable</th><th>Roles</th><th>Depends on</th><th>Effort</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><span class="badge b-s5">S5</span></td>
+      <td class="t-sprint">S13–S15</td>
+      <td class="t-feat">Embedding pipeline — ontology-typed instance indexing</td>
+      <td class="t-detail">New <code>runtime/embeddings/pipeline.py</code>. Reads ontology-typed records from the enterprise database, generates text representations by serialising each record using its JSON-LD context (so field names appear as their ontology labels in the embedding text), and indexes each embedding with metadata: OWL class IRI, sensitivity tier, flavor membership, primary key, and creation timestamp. Embedding model is configurable (default: <code>sentence-transformers/all-MiniLM-L6-v2</code> for local; OpenAI <code>text-embedding-3-small</code> for cloud). Incremental indexing: only new or modified records are re-embedded on each pipeline run. CLI: <code>python3 toolkit.py --phase embed --flavor network-ops --model local</code>.</td>
+      <td><span class="role r-ml">ML Eng</span><span class="role r-eng">Data Eng</span></td>
+      <td class="t-dep">OWL ontology<br>JSON-LD context<br>Flavor registry<br>db_connector</td>
+      <td class="t-effort">10d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s5">S5</span></td>
+      <td class="t-sprint">S14–S15</td>
+      <td class="t-feat">OWL class hierarchy filter for vector search</td>
+      <td class="t-detail">Translates a SPARQL class expression (or a shorthand flavor name) into a metadata filter for the vector store. Given "retrieve instances of <code>:NetworkFunction</code> or its subclasses", the filter generates the complete list of OWL class IRIs in the subgraph (using the reasoner's class hierarchy) and passes them as an <code>in</code> filter on the <code>owl_class</code> metadata field before the vector similarity query runs. Supports OWL intersection and union expressions: <code>(:NetworkFunction AND :hasSeverity SOME :Critical)</code>. Sensitivity tier filtering is enforced as a second mandatory filter layer — no RESTRICTED-tier embeddings are accessible to agents whose flavor lacks RESTRICTED access.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-ml">ML Eng</span></td>
+      <td class="t-dep">Embedding pipeline<br>OWL reasoner (v2.0)<br>Flavor registry<br>Named-graph RBAC</td>
+      <td class="t-effort">8d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s5">S5</span></td>
+      <td class="t-sprint">S15–S17</td>
+      <td class="t-feat">Hybrid query executor (SPARQL + vector)</td>
+      <td class="t-detail">New <code>runtime/hybrid_retriever.py</code>. Accepts a natural language question and a SPARQL class expression filter. Execution: (1) translates the class expression to a vector store metadata filter via the OWL hierarchy filter; (2) generates a question embedding; (3) executes the filtered ANN (approximate nearest-neighbour) search in the vector store; (4) for each retrieved record, fetches the full typed JSON-LD representation from the graph store (to recover all properties, not just the indexed text); (5) ranks the combined results by a composite score (vector similarity × PROV-O confidence score × recency weight); (6) returns the top-k records as JSON-LD, ready for payload injection. Integrated into <code>RuntimeClient.ask()</code> via a <code>retrieval="hybrid"</code> parameter.</td>
+      <td><span class="role r-ml">ML Eng</span><span class="role r-ont">Ontology Eng</span></td>
+      <td class="t-dep">Embedding pipeline<br>OWL class filter<br>Graph store<br>RuntimeClient SDK</td>
+      <td class="t-effort">12d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s5">S5</span></td>
+      <td class="t-sprint">S16–S19</td>
+      <td class="t-feat">Vector store integrations</td>
+      <td class="t-detail">Adapter layer supporting four vector stores via a common interface: <code>Weaviate</code> (metadata filtering via GraphQL), <code>Qdrant</code> (payload filter syntax), <code>Chroma</code> (where-clause metadata filter), and <code>pgvector</code> (PostgreSQL SQL with <code>&lt;=&gt;</code> cosine operator and WHERE clause). Each adapter implements: <code>index(records)</code>, <code>search(query_embedding, filter, k)</code>, <code>delete(ids)</code>, and <code>reindex()</code>. The adapter is selected via connection string: <code>--vector-store weaviate://host:8080/OntologyIndex</code>. The Docker Compose kit (v2.0) is extended to include an optional Qdrant service for zero-config local development.</td>
+      <td><span class="role r-eng">Platform Eng</span><span class="role r-ml">ML Eng</span></td>
+      <td class="t-dep">Hybrid query executor<br>Docker Compose kit</td>
+      <td class="t-effort">14d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s5">S5</span></td>
+      <td class="t-sprint">S17–S18</td>
+      <td class="t-feat">Flavor-scoped embedding index configuration</td>
+      <td class="t-detail">Extends the flavor registry schema to include embedding configuration: which OWL classes to index for this flavor, the text serialisation template (which properties to include in the embedding text), the vector store connection string, and the model identifier. Enables different flavors to use different embedding models optimised for their domain (e.g. a Pharma flavor might use <code>allenai/scibert_scivocab_uncased</code>). Generates one named index per flavor, keeping domain-specific embeddings separate for better recall precision. Embedding index metadata (class coverage, record count, last indexed timestamp) added to the toolkit HTML report.</td>
+      <td><span class="role r-ont">Ontology Eng</span><span class="role r-ml">ML Eng</span></td>
+      <td class="t-dep">Flavor registry<br>Embedding pipeline<br>Vector store adapters</td>
+      <td class="t-effort">6d</td>
+    </tr>
+    <tr>
+      <td><span class="badge b-s5">S5</span></td>
+      <td class="t-sprint">S18–S19</td>
+      <td class="t-feat">Benchmarking suite + documentation</td>
+      <td class="t-detail">Benchmark suite comparing three retrieval strategies on the telecom and healthcare domain templates: (1) unfiltered vector search (baseline RAG), (2) ontology-bounded vector search (this workstream), (3) pure SPARQL structured retrieval (existing toolkit). Metrics: precision@k, recall@k, mean reciprocal rank, latency (p50/p95), and LLM answer quality score (SHACL conformance of the response). Results published to the HTML toolkit report. Documentation: "Hybrid Retrieval Guide" covering index setup, filter expressions, adapter configuration, and benchmark interpretation. Worked examples added to all 10 industry template notebooks.</td>
+      <td><span class="role r-ml">ML Eng</span><span class="role r-eng">Data Eng</span></td>
+      <td class="t-dep">All vector components<br>Industry templates</td>
+      <td class="t-effort">6d</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════ DEPENDENCY FLOW ═════════════════════════════════════════════ -->
+<div class="sec"><h2>Cross-workstream dependencies</h2></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem">
+  <div style="border:1px solid var(--rule);padding:1rem;border-radius:4px">
+    <h3 style="margin-bottom:.75rem;font-size:.85rem">Critical path</h3>
+    <div class="dep-flow">
+      <div class="dep-node" style="border-color:var(--s1)">S1 Memory API</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s2)">S2 Evolution monitor</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s2)">S2 Auto-versioning</div>
+    </div>
+    <div class="dep-flow" style="margin-top:.5rem">
+      <div class="dep-node" style="border-color:var(--s3)">S3 Manifest signing</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s3)">S3 SPARQL router</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s3)">S3 Trust protocol</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s3)">W3C spec</div>
+    </div>
+    <div class="dep-flow" style="margin-top:.5rem">
+      <div class="dep-node" style="border-color:var(--s4)">S4 Reg registry</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s4)">S4 Evidence assembler</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s4)">S4 Bundle signing</div>
+    </div>
+    <div class="dep-flow" style="margin-top:.5rem">
+      <div class="dep-node" style="border-color:var(--s5)">S5 Embeddings</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s5)">S5 OWL filter</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s5)">S5 Hybrid executor</div>
+      <div class="dep-arrow">→</div>
+      <div class="dep-node" style="border-color:var(--s5)">4 vector stores</div>
+    </div>
+  </div>
+  <div style="border:1px solid var(--rule);padding:1rem;border-radius:4px">
+    <h3 style="margin-bottom:.75rem;font-size:.85rem">Cross-workstream shared inputs (all from v2.0)</h3>
+    <table style="font-size:12px">
+      <thead><tr><th style="padding:5px 8px">v2.0 component</th><th style="padding:5px 8px">Used by</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:5px 8px">PROV-O + ObservationRecord</td><td style="padding:5px 8px"><span class="badge b-s1">S1</span> <span class="badge b-s2">S2</span> <span class="badge b-s4">S4</span></td></tr>
+        <tr><td style="padding:5px 8px">SPARQL CQ tests + CI/CD</td><td style="padding:5px 8px"><span class="badge b-s2">S2</span> <span class="badge b-s4">S4</span></td></tr>
+        <tr><td style="padding:5px 8px">Named-graph RBAC</td><td style="padding:5px 8px"><span class="badge b-s1">S1</span> <span class="badge b-s3">S3</span> <span class="badge b-s5">S5</span></td></tr>
+        <tr><td style="padding:5px 8px">SHACL shapes + agent-gate</td><td style="padding:5px 8px"><span class="badge b-s2">S2</span> <span class="badge b-s3">S3</span> <span class="badge b-s4">S4</span></td></tr>
+        <tr><td style="padding:5px 8px">Flavor registry</td><td style="padding:5px 8px"><span class="badge b-s1">S1</span> <span class="badge b-s3">S3</span> <span class="badge b-s5">S5</span></td></tr>
+        <tr><td style="padding:5px 8px">OWL 2 + reasoner integration</td><td style="padding:5px 8px"><span class="badge b-s2">S2</span> <span class="badge b-s5">S5</span></td></tr>
+        <tr><td style="padding:5px 8px">Graph store publishing</td><td style="padding:5px 8px"><span class="badge b-s1">S1</span> <span class="badge b-s3">S3</span> <span class="badge b-s4">S4</span></td></tr>
+        <tr><td style="padding:5px 8px">W3C Community Group</td><td style="padding:5px 8px"><span class="badge b-s3">S3</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ EXIT GATES ══════════════════════════════════════════════════ -->
+<div class="sec"><h2>Workstream exit gates</h2></div>
+<div class="gate-grid">
+  <div class="gate-card" style="border-color:var(--s1)">
+    <h3 style="color:var(--s1)">S1 — Memory exit</h3>
+    <ul>
+      <li><code>memory.recall()</code> returns typed JSON-LD</li>
+      <li>Temporal snapshot correct at T-1 and T-2</li>
+      <li>Cross-agent influence links in graph</li>
+      <li>Consolidation reduces graph by ≥20% on test corpus</li>
+      <li>CQ-MEM-01–05 all passing</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--s2)">
+    <h3 style="color:var(--s2)">S2 — Evolution exit</h3>
+    <ul>
+      <li>Monitor surfaces ≥1 candidate on test corpus</li>
+      <li>Scorer produces 0.0–1.0 composite score</li>
+      <li>Approved proposal → PR in &lt;5 minutes</li>
+      <li>No unsatisfiable classes after any approved axiom</li>
+      <li>CQ-EVO-01–05 all passing</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--s3)">
+    <h3 style="color:var(--s3)">S3 — Federation exit</h3>
+    <ul>
+      <li>Handshake completes between 2 test enterprises</li>
+      <li>RESTRICTED data never crosses boundary</li>
+      <li>Federated SPARQL returns partner-provenance results</li>
+      <li>W3C CG report published and open for comment</li>
+      <li>≥3 org signatures on Final Specification Agreement</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--s4)">
+    <h3 style="color:var(--s4)">S4 — Compliance exit</h3>
+    <ul>
+      <li>EU AI Act Art.13 bundle generated and verified</li>
+      <li>Basel IV SR 11-7 coverage ≥80%</li>
+      <li>Bundle signature verifies on cold machine</li>
+      <li>Dashboard shows per-regulation traffic-light status</li>
+      <li>CQ-CMP-01–05 all passing</li>
+    </ul>
+  </div>
+  <div class="gate-card" style="border-color:var(--s5)">
+    <h3 style="color:var(--s5)">S5 — Vector exit</h3>
+    <ul>
+      <li>Precision@5 ≥ 40% improvement over unfiltered RAG</li>
+      <li>OWL filter blocks 100% of wrong-class retrievals</li>
+      <li>All 4 vector store adapters passing integration tests</li>
+      <li>Latency p95 &lt;2× pure vector baseline</li>
+      <li>Benchmark published in HTML report</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════ RISKS ═══════════════════════════════════════════════════════ -->
+<div class="sec"><h2>Key risks and mitigations</h2></div>
+<table>
+<colgroup><col style="width:180px"><col style="width:55px"><col style="width:190px"><col></colgroup>
+<thead><tr><th>Risk</th><th>Level</th><th>Impact</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr>
+  <td class="t-feat">Memory graph grows unbounded</td>
+  <td><span class="risk-md">Medium</span></td>
+  <td class="t-detail">Unconsolidated ObservationRecords accumulate faster than the consolidation daemon removes them, degrading SPARQL query performance over time.</td>
+  <td class="t-detail">Enforce configurable retention caps per sensitivity tier. Implement time-to-live on INFERRED observations (default 90 days without confirmation). Add graph size to governance scorecard as a monitored metric.</td>
+</tr>
+<tr>
+  <td class="t-feat">Evolution proposals create ontology drift</td>
+  <td><span class="risk-hi">High</span></td>
+  <td class="t-detail">High-volume proposals, even with human review, could gradually shift the ontology away from its original design intent if reviewers lack domain context.</td>
+  <td class="t-detail">Require every APPROVED proposal to cite a primary Competency Question it satisfies or extends. Proposals that don't map to any CQ require Ontology Engineer co-approval, not just domain expert sign-off. CQ-EVO tests fail if any approved axiom is unreachable from any CQ graph path.</td>
+</tr>
+<tr>
+  <td class="t-feat">Cross-enterprise trust negotiation stalls</td>
+  <td><span class="risk-hi">High</span></td>
+  <td class="t-detail">Legal and security review of the trust bootstrap protocol adds months to partner onboarding, blocking the federation workstream's value.</td>
+  <td class="t-detail">Launch with an Enterprise Preview mode — federation uses read-only Public-tier data only, no trust bootstrap required. This demonstrates value while legal review proceeds. Use the W3C Community Group process to create an industry-accepted template bilateral agreement that reduces legal review to a signature.</td>
+</tr>
+<tr>
+  <td class="t-feat">Regulatory requirement mapping becomes stale</td>
+  <td><span class="risk-md">Medium</span></td>
+  <td class="t-detail">Regulations evolve. A toolkit mapping that was accurate at build time may misrepresent compliance evidence after a regulatory update.</td>
+  <td class="t-detail">Each regulation file carries a <code>last_verified_date</code> and a <code>regulatory_source_url</code>. The CI/CD pipeline warns when any regulation file is older than 180 days. The W3C Community Group maintains a public registry of up-to-date regulation mappings.</td>
+</tr>
+<tr>
+  <td class="t-feat">Embedding index and ontology diverge</td>
+  <td><span class="risk-md">Medium</span></td>
+  <td class="t-detail">When the ontology is updated (new classes, deprecated properties), the vector index may contain stale embeddings generated from the old context, producing incorrect OWL class filter results.</td>
+  <td class="t-detail">The CI/CD pipeline triggers a partial reindex whenever the ontology version is incremented. Records whose embedding text would change (based on which JSON-LD context terms changed) are flagged for re-embedding. Stale embeddings are excluded from results until reindexed.</td>
+</tr>
+<tr>
+  <td class="t-feat">Vector store fragmentation across workstreams</td>
+  <td><span class="risk-lo">Low</span></td>
+  <td class="t-detail">Different teams choose different vector stores, producing incompatible indexes and no shared benchmark baseline.</td>
+  <td class="t-detail">Designate Qdrant as the reference implementation (included in Docker Compose). pgvector as the zero-install option for teams already on PostgreSQL. Other adapters are optional. The benchmark suite runs on Qdrant only for reproducibility.</td>
+</tr>
+</tbody>
+</table>
+
+<!-- ════ TEAM ════════════════════════════════════════════════════════ -->
+<div class="sec"><h2>Team model — Generation 2</h2></div>
+<div class="team-grid">
+  <div class="team-card">
+    <span class="role r-ont" style="font-size:10px;margin-bottom:8px;display:inline-block">Ontology Engineer</span>
+    <div class="fte">1.0</div>
+    <p>Primary owner of S1 memory API, S2 evolution scoring, S3 federation protocol, S4 regulatory mapping, and S5 OWL class filter. All new CQ tests. W3C spec authorship.</p>
+  </div>
+  <div class="team-card">
+    <span class="role r-eng" style="font-size:10px;margin-bottom:8px;display:inline-block">Platform / Data Engineer</span>
+    <div class="fte">0.75</div>
+    <p>S1 consolidation daemon, S2 CI/CD auto-versioning, S3 SPARQL router + trust protocol, S4 bundle signing + export, S5 vector store adapters. Docker Compose extensions.</p>
+  </div>
+  <div class="team-card">
+    <span class="role r-ml" style="font-size:10px;margin-bottom:8px;display:inline-block">ML / AI Engineer</span>
+    <div class="fte">0.5</div>
+    <p>S2 anomaly monitor + candidate scoring, S5 embedding pipeline + hybrid query executor + benchmarking. Cross-cuts with drift detection (v2.0) and memory consolidation strategies.</p>
+  </div>
+  <div class="team-card">
+    <span class="role r-gov" style="font-size:10px;margin-bottom:8px;display:inline-block">Governance / Domain SME</span>
+    <div class="fte">0.2</div>
+    <p>S2 evolution proposal review + approvals. S4 regulatory requirement registry authorship, compliance dashboard review, bundle verification sign-off. W3C CG external engagement.</p>
+  </div>
+  <div class="team-card">
+    <span class="role r-gov" style="font-size:10px;margin-bottom:8px;display:inline-block">Legal / Security (part-time)</span>
+    <div class="fte">0.1</div>
+    <p>S3 trust bootstrap bilateral agreement template. S4 compliance bundle legal standing review. W3C CLA and Final Specification Agreement facilitation. On-call for federation partner onboarding.</p>
+  </div>
+</div>
+
+<footer>
+  <span>Ontology Toolkit — Generation 2 Roadmap · April 2026 · Framework v1.1 · Toolkit v2.0</span>
+  <span>Total: 260 engineering-days · 5 workstreams · 18 months · 30 sprint components</span>
+</footer>
+
+</div>
+</body>
+</html>

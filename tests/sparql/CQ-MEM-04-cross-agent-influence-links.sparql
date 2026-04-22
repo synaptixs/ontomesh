@@ -1,0 +1,32 @@
+# CQ-MEM-04 — Do cross-agent influence links propagate correctly?
+# ────────────────────────────────────────────────────────────────
+# Verifies that prov:wasInfluencedBy links are present in the memory
+# influence log when Agent B's reasoning cites an observation made by
+# Agent A.  This tests the cross-agent memory sharing component of
+# Workstream 1.
+#
+# Pass condition: at least one entry exists in memory_influence_log
+# connecting two distinct agent flavors with a prov:wasInfluencedBy link.
+#
+# Note: This query targets the memory_influence_log table via the RDF
+# projection of the AgentInfluenceGraph JSON-LD output.  In a full RDF
+# graph store deployment this would query named graph partitions directly.
+#
+# Bound variables:
+#   ?source, ?target, ?linkType, ?createdAt
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+
+SELECT ?source ?target ?linkType ?createdAt
+WHERE {
+    ?edge a tmf:InfluenceEdge ;
+          tmf:source_flavor ?source ;
+          tmf:target_flavor ?target ;
+          prov:wasInfluencedBy ?linkType ;
+          tmf:created_at ?createdAt .
+
+    FILTER (?source != ?target)
+}
+ORDER BY DESC(?createdAt)
+LIMIT 10
