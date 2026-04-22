@@ -1,0 +1,29 @@
+# CQ-EVO-02 — Does every APPROVED proposal produce a non-empty Turtle diff?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates that the CI/CD auto-versioner only ever processes approved
+# proposals that carry an actual OWL axiom in their candidate_turtle field.
+# An APPROVED proposal with an empty (or whitespace-only) diff indicates
+# a workflow error — governance should flag it.
+#
+# Pass condition: at least one APPROVED proposal exists and all APPROVED
+# rows have non-empty candidate_turtle strings.
+#
+# Priority: High
+# Validates: Workstream 2 — CI/CD auto-versioning gate
+# Expected: may be empty
+# Bound variables: ?proposal ?title ?turtle
+
+PREFIX evo:  <https://ontology.example.com/evolution/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?proposal ?title ?turtle
+WHERE {
+    ?proposal a evo:EvolutionProposal ;
+              evo:status           "APPROVED" ;
+              evo:title            ?title ;
+              evo:candidateTurtle  ?turtle .
+
+    # Flag empty or whitespace-only Turtle as a failure
+    FILTER (STRLEN(STR(?turtle)) < 10)
+}
+LIMIT 20

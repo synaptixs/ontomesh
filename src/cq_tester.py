@@ -499,6 +499,45 @@ def _score_governance(conn, tables: list) -> List[Dict]:
           f"JSON-LD ctx={'✓' if ctx_ready else '✗'}.",
           "mcp-tool-definitions.json + agent-gate.ttl + enterprise-context.json")
 
+    # ── Workstream 2: Autonomous Ontology Evolution ─────────────────
+    try:
+        proposal_total = qn("SELECT COUNT(*) FROM ontology_evolution_proposals")
+    except Exception:
+        proposal_total = 0
+    try:
+        pending_old = qn(
+            "SELECT COUNT(*) FROM ontology_evolution_proposals "
+            "WHERE status = 'PENDING' "
+            "AND julianday('now') - julianday(created_at) > 7"
+        )
+    except Exception:
+        pending_old = 0
+    try:
+        ledger_rows = qn("SELECT COUNT(*) FROM ontology_version_ledger")
+    except Exception:
+        ledger_rows = 0
+
+    if proposal_total == 0:
+        evo_score = 1   # Initial — infrastructure present but no data
+        evo_rat   = "Evolution-proposal store present; no proposals yet."
+    elif pending_old == 0 and ledger_rows > 0:
+        evo_score = 5   # Optimized — SLA met, approvals flowing
+        evo_rat   = (f"{proposal_total} proposal(s) processed. No PENDING "
+                     f"beyond 7-day SLA. {ledger_rows} ledger entries.")
+    elif pending_old == 0:
+        evo_score = 4   # Defined — SLA met, no approvals yet
+        evo_rat   = (f"{proposal_total} proposal(s). No PENDING beyond "
+                     "7-day SLA. No approvals recorded yet.")
+    else:
+        evo_score = 2   # Developing — SLA breached
+        evo_rat   = (f"{pending_old} proposal(s) past 7-day review SLA "
+                     f"of {proposal_total} total.")
+    check("Evolution proposals reviewed within 7-day SLA",
+          "Lifecycle",
+          "Are autonomous ontology-evolution proposals reviewed and resolved within the 7-day SLA?",
+          evo_score, evo_rat,
+          "ontology_evolution_proposals + ontology_version_ledger")
+
     return scores
 
 

@@ -169,6 +169,7 @@
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
+      <li data-step="evolve"><span class="step-num">E</span> Evolution Review</li>
     </ul>
     <div class="sidebar-footer">
       <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
@@ -318,6 +319,53 @@
       <div class="card" id="artifact-list-card" style="display:none">
         <h3>Generated Artifacts</h3>
         <div id="artifact-list"></div>
+      </div>
+    </div>
+
+    <!-- Evolution Review (Workstream 2) -->
+    <div class="step-panel" id="step-evolve">
+      <div class="step-title">Ontology Evolution Review</div>
+      <div class="step-subtitle">Workstream 2 — Review ontology-evolution proposals surfaced from production observations. Approve, reject, or defer each candidate. Approved proposals flow through the reasoner + SPARQL CQ gate before auto-bumping the ontology version.</div>
+
+      <div class="card">
+        <h3>Detection run</h3>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+          <label>Minimum evidence: <input type="number" id="ev-min-evidence" value="3" min="1" style="width:70px" /></label>
+          <label>Strategy:
+            <select id="ev-strategy">
+              <option value="">All strategies</option>
+              <option value="SHACL_VIOLATION_ACCUMULATION">SHACL violation accumulation</option>
+              <option value="CARDINALITY_BREACH">Cardinality breach</option>
+              <option value="CLASS_COOCCURRENCE">Class co-occurrence</option>
+              <option value="NLP_CANDIDATE_PROMOTION">NLP candidate promotion</option>
+            </select>
+          </label>
+          <button class="btn" onclick="evolveRun()">▶ Run monitor + scorer</button>
+          <button class="btn btn-ghost" onclick="evolveReload()">⟳ Refresh list</button>
+          <span id="ev-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+          <h3 style="margin:0">Pending proposals</h3>
+          <div>
+            <label style="font-size:12px">Band filter:
+              <select id="ev-band-filter" onchange="evolveReload()">
+                <option value="">All</option>
+                <option value="REVIEW_NOW">Review now (≥0.80)</option>
+                <option value="WEEKLY_BATCH">Weekly batch (0.50–0.80)</option>
+                <option value="CANDIDATE">Candidate (&lt;0.50)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div id="ev-list" style="overflow-x:auto">Run the monitor or click refresh to load proposals.</div>
+      </div>
+
+      <div class="card" id="ev-detail-card" style="display:none">
+        <h3>Proposal detail</h3>
+        <div id="ev-detail"></div>
       </div>
     </div>
 
@@ -745,6 +793,125 @@ function render() {
   renderEvents();
   renderRelationships();
   renderCQs();
+}
+
+// ── Workstream 2 — Evolution Review tab ──────────────────────────────────
+
+async function evolveRun() {
+  const min_evidence = parseInt(document.getElementById('ev-min-evidence').value||'3',10);
+  const strategy = document.getElementById('ev-strategy').value || null;
+  const status = document.getElementById('ev-status');
+  status.textContent = 'Running monitor + scorer…';
+  try {
+    const r = await fetch('/api/evolve/run', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({min_evidence, strategy}),
+    });
+    const j = await r.json();
+    status.textContent = `Scored ${j.pending_total} PENDING — review_now=${j.review_now}, weekly=${j.weekly_batch}, candidate=${j.candidates}`;
+  } catch (e) {
+    status.textContent = 'Error: '+e.message;
+  }
+  evolveReload();
+}
+
+async function evolveReload() {
+  const band = document.getElementById('ev-band-filter').value;
+  const url = band ? '/api/evolve/proposals?band='+encodeURIComponent(band) : '/api/evolve/proposals';
+  const r = await fetch(url);
+  const j = await r.json();
+  const list = document.getElementById('ev-list');
+  if (!j.proposals || !j.proposals.length) {
+    list.innerHTML = '<div style="color:var(--muted);padding:12px">No PENDING proposals.</div>';
+    return;
+  }
+  let html = '<table class="props-table"><thead><tr>'
+    + '<th>ID</th><th>Band</th><th>Score</th><th>Type</th><th>Strategy</th>'
+    + '<th>Title</th><th></th></tr></thead><tbody>';
+  for (const p of j.proposals) {
+    const score = (p.confidence_score==null) ? '—' : Number(p.confidence_score).toFixed(2);
+    html += '<tr>'
+      + `<td><code>${(p.proposal_id||'').slice(0,8)}</code></td>`
+      + `<td>${p.band||''}</td>`
+      + `<td>${score}</td>`
+      + `<td>${p.proposal_type||''}</td>`
+      + `<td>${p.detection_strategy||''}</td>`
+      + `<td>${(p.title||'').slice(0,80)}</td>`
+      + `<td><button class="btn btn-ghost" onclick="evolveShow('${p.proposal_id}')">View</button></td>`
+      + '</tr>';
+  }
+  html += '</tbody></table>';
+  list.innerHTML = html;
+}
+
+async function evolveShow(pid) {
+  const r = await fetch('/api/evolve/proposals/'+pid);
+  if (!r.ok) return;
+  const p = await r.json();
+  const dims = {
+    'evidence_volume':  p.dim_evidence_volume,
+    'evidence_recency': p.dim_evidence_recency,
+    'cross_domain':     p.dim_cross_domain,
+    'consistency_risk': p.dim_consistency_risk,
+    'schema_alignment': p.dim_schema_alignment,
+  };
+  let dimHtml = '<table class="props-table"><thead><tr><th>Dimension</th><th>Score</th></tr></thead><tbody>';
+  for (const [k,v] of Object.entries(dims)) {
+    const val = (v==null) ? '—' : Number(v).toFixed(3);
+    dimHtml += `<tr><td>${k}</td><td>${val}</td></tr>`;
+  }
+  dimHtml += '</tbody></table>';
+
+  document.getElementById('ev-detail-card').style.display = 'block';
+  document.getElementById('ev-detail').innerHTML =
+      `<div><b>${p.title||''}</b></div>`
+    + `<div style="color:var(--muted);font-size:12px">${p.detection_strategy} · ${p.proposal_type} · composite=${p.confidence_score??'—'}</div>`
+    + `<h4 style="margin-top:12px">Proposed axiom (Turtle)</h4>`
+    + `<pre style="background:#0f1117;padding:12px;border-radius:8px;overflow-x:auto">${escapeHtml(p.candidate_turtle||'')}</pre>`
+    + `<h4>Evidence SPARQL</h4>`
+    + `<pre style="background:#0f1117;padding:12px;border-radius:8px;overflow-x:auto">${escapeHtml(p.evidence_sparql||'')}</pre>`
+    + `<h4>Dimensional breakdown</h4>${dimHtml}`
+    + `<div style="display:flex;gap:8px;margin-top:12px">`
+    +   `<input id="ev-note-${pid}" placeholder="Reviewer note" style="flex:1" />`
+    +   `<input id="ev-ver-${pid}" placeholder="version_target (e.g. 1.1.0)" style="width:170px" />`
+    + `</div>`
+    + `<div style="display:flex;gap:8px;margin-top:8px">`
+    +   `<button class="btn" onclick="evolveDecide('${pid}','APPROVE')">Approve</button>`
+    +   `<button class="btn btn-ghost" onclick="evolveDecide('${pid}','REJECT')">Reject</button>`
+    +   `<button class="btn btn-ghost" onclick="evolveDecide('${pid}','DEFER')">Defer</button>`
+    +   `<button class="btn" onclick="evolveApply('${pid}')">Apply (CI/CD auto-versioner)</button>`
+    + `</div>`;
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+}
+
+async function evolveDecide(pid, action) {
+  const note = document.getElementById('ev-note-'+pid)?.value || '';
+  const ver  = document.getElementById('ev-ver-'+pid)?.value || null;
+  const r = await fetch('/api/evolve/proposals/'+pid+'/decision', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action, note, version_target: ver}),
+  });
+  const j = await r.json();
+  alert(`${action}: ${JSON.stringify(j)}`);
+  evolveReload();
+}
+
+async function evolveApply(pid) {
+  document.getElementById('ev-status').textContent = 'Applying '+pid+'…';
+  const r = await fetch('/api/evolve/proposals/'+pid+'/apply', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({open_pr:false, dry_run:false}),
+  });
+  const j = await r.json();
+  document.getElementById('ev-status').textContent =
+    j.ok ? `Applied → ${j.target_version}` : `Apply failed: ${j.error||'unknown'}`;
+  alert(JSON.stringify(j, null, 2));
 }
 
 init();

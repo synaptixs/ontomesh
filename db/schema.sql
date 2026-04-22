@@ -204,6 +204,61 @@ CREATE TABLE IF NOT EXISTS semantic_loss_log (
     resolved          INTEGER DEFAULT 0
 );
 
+-- ── ONTOLOGY EVOLUTION PROPOSALS ──────────────────────────────
+-- Workstream 2 (Gen2): autonomous ontology-evolution proposal store.
+-- Every candidate surfaced by the anomaly monitor lands here as
+-- PENDING, is scored, passes through a human review gate, and on
+-- APPROVED drives CI/CD-auto-versioning of the ontology.
+CREATE TABLE IF NOT EXISTS ontology_evolution_proposals (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    proposal_id        TEXT NOT NULL UNIQUE,          -- UUID
+    proposal_type      TEXT NOT NULL
+                       CHECK(proposal_type IN (
+                         'NEW_CLASS','NEW_PROPERTY','NEW_CONSTRAINT','DEPRECATE')),
+    title              TEXT NOT NULL,
+    candidate_turtle   TEXT NOT NULL,                 -- OWL axiom as Turtle
+    evidence_sparql    TEXT NOT NULL,                 -- query that surfaced it
+    detection_strategy TEXT NOT NULL
+                       CHECK(detection_strategy IN (
+                         'SHACL_VIOLATION_ACCUMULATION',
+                         'CARDINALITY_BREACH',
+                         'CLASS_COOCCURRENCE',
+                         'NLP_CANDIDATE_PROMOTION')),
+    confidence_score   REAL CHECK(confidence_score BETWEEN 0.0 AND 1.0),
+    dim_evidence_volume    REAL,
+    dim_evidence_recency   REAL,
+    dim_cross_domain       REAL,
+    dim_consistency_risk   REAL,
+    dim_schema_alignment   REAL,
+    status             TEXT DEFAULT 'PENDING'
+                       CHECK(status IN ('PENDING','APPROVED','REJECTED','DEFERRED')),
+    reviewer_id        TEXT,                          -- agent/user IRI
+    review_note        TEXT,
+    reviewed_at        TEXT,
+    defer_until        TEXT,
+    version_target     TEXT,                          -- e.g. '1.1.0'
+    primary_cq         TEXT,                          -- CQ-ID this proposal answers
+    created_at         TEXT DEFAULT (datetime('now')),
+    updated_at         TEXT DEFAULT (datetime('now'))
+);
+
+-- ── ONTOLOGY VERSION LEDGER ──────────────────────────────────
+-- Appended by the CI/CD auto-versioner whenever an APPROVED proposal
+-- increments the ontology version.  Supports forward/backward trace
+-- from any axiom to the decision that introduced it.
+CREATE TABLE IF NOT EXISTS ontology_version_ledger (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    version            TEXT NOT NULL UNIQUE,          -- semver '1.1.0'
+    parent_version     TEXT,                          -- version this builds on
+    proposal_id        TEXT REFERENCES ontology_evolution_proposals(proposal_id),
+    reasoner_status    TEXT,                          -- PASS/FAIL/SKIPPED
+    shacl_status       TEXT,                          -- PASS/FAIL/SKIPPED
+    sparql_status      TEXT,                          -- PASS/FAIL
+    pr_url             TEXT,                          -- GitHub PR link
+    scorecard_delta    TEXT,                          -- JSON delta blob
+    created_at         TEXT DEFAULT (datetime('now'))
+);
+
 -- ── INDEXES ─────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_assets_type     ON assets(asset_type_id);
 CREATE INDEX IF NOT EXISTS idx_assets_owner    ON assets(owner_org_id);
@@ -214,3 +269,7 @@ CREATE INDEX IF NOT EXISTS idx_obs_asset       ON observations(asset_id);
 CREATE INDEX IF NOT EXISTS idx_obs_agent       ON observations(recorded_by);
 CREATE INDEX IF NOT EXISTS idx_obs_event       ON observations(event_id);
 CREATE INDEX IF NOT EXISTS idx_pa_policy       ON policy_applications(policy_id);
+CREATE INDEX IF NOT EXISTS idx_evo_status      ON ontology_evolution_proposals(status);
+CREATE INDEX IF NOT EXISTS idx_evo_conf        ON ontology_evolution_proposals(confidence_score);
+CREATE INDEX IF NOT EXISTS idx_evo_strategy    ON ontology_evolution_proposals(detection_strategy);
+CREATE INDEX IF NOT EXISTS idx_version_ledger  ON ontology_version_ledger(version);

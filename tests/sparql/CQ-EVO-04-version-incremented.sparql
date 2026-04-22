@@ -1,0 +1,34 @@
+# CQ-EVO-04 — Does each APPROVED proposal receive a bumped ontology version?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates that the CI/CD auto-versioner correctly increments the ontology
+# version whenever a proposal is approved.  Every APPROVED row should map to
+# a ledger entry whose version is strictly greater than parent_version in
+# semver order.
+#
+# Pass condition: for every APPROVED proposal, a ledger entry exists with
+# a non-empty version and parent_version different from version.
+#
+# Priority: Medium
+# Validates: Workstream 2 — version auto-increment
+# Expected: may be empty
+# Bound variables: ?proposal ?version ?parentVersion
+
+PREFIX evo: <https://ontology.example.com/evolution/>
+
+SELECT ?proposal ?version ?parentVersion
+WHERE {
+    ?proposal a evo:EvolutionProposal ;
+              evo:proposalId ?pid ;
+              evo:status     "APPROVED" .
+
+    OPTIONAL {
+        ?ledger a evo:VersionLedgerEntry ;
+                evo:proposalId    ?pid ;
+                evo:version       ?version ;
+                evo:parentVersion ?parentVersion .
+    }
+
+    # Flag approved proposals with no ledger entry OR with version==parent
+    FILTER (!BOUND(?version) || ?version = ?parentVersion)
+}
+LIMIT 20

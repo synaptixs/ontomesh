@@ -245,6 +245,84 @@ def list_output():
     return jsonify(result)
 
 
+# ── Workstream 2 — Autonomous Ontology Evolution ──────────────────────────
+# Evolution Review tab — surfaces PENDING proposals, lets reviewers inspect,
+# approve, reject, or defer, and triggers CI/CD auto-versioning on APPROVAL.
+
+_DB_PATH = os.path.join(ROOT, "db", "enterprise.db")
+_OUT_DIR = os.path.join(ROOT, "output")
+
+
+@app.route("/api/evolve/proposals", methods=["GET"])
+def evolve_list_proposals():
+    try:
+        from evolution_reviewer import list_pending
+    except ImportError as exc:
+        return jsonify({"error": f"evolution module unavailable: {exc}"}), 500
+    band = request.args.get("band")
+    limit = int(request.args.get("limit", "100"))
+    return jsonify({"proposals": list_pending(_DB_PATH, band=band, limit=limit)})
+
+
+@app.route("/api/evolve/proposals/<proposal_id>", methods=["GET"])
+def evolve_get_proposal(proposal_id: str):
+    from evolution_reviewer import get_proposal
+    p = get_proposal(_DB_PATH, proposal_id)
+    if not p:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(p)
+
+
+@app.route("/api/evolve/proposals/<proposal_id>/decision", methods=["POST"])
+def evolve_record_decision(proposal_id: str):
+    from evolution_reviewer import record_decision
+    body = request.get_json(force=True) or {}
+    action = body.get("action", "").upper()
+    if action not in ("APPROVE", "REJECT", "DEFER"):
+        return jsonify({"error": "action must be APPROVE|REJECT|DEFER"}), 400
+    result = record_decision(
+        db_path=_DB_PATH,
+        proposal_id=proposal_id,
+        action=action,
+        reviewer_id=body.get("reviewer_id", "wizard:reviewer"),
+        note=body.get("note", ""),
+        version_target=body.get("version_target"),
+        defer_until=body.get("defer_until"),
+    )
+    return jsonify(result)
+
+
+@app.route("/api/evolve/proposals/<proposal_id>/apply", methods=["POST"])
+def evolve_apply(proposal_id: str):
+    from evolution_reviewer import apply_approved
+    body = request.get_json(silent=True) or {}
+    result = apply_approved(
+        db_path=_DB_PATH,
+        out_path=_OUT_DIR,
+        proposal_id=proposal_id,
+        open_pr=bool(body.get("open_pr", False)),
+        dry_run=bool(body.get("dry_run", False)),
+    )
+    return jsonify(result)
+
+
+@app.route("/api/evolve/run", methods=["POST"])
+def evolve_run_monitor():
+    """Kick the monitor + scorer.  Non-blocking for large runs is not
+    required yet — the monitor is quick against local SQLite."""
+    from evolution_monitor import run_evolution_monitor
+    from evolution_scorer  import score_pending
+    body = request.get_json(silent=True) or {}
+    _ = run_evolution_monitor(
+        db_path=_DB_PATH,
+        out_path=_OUT_DIR,
+        min_evidence=int(body.get("min_evidence", 3)),
+        strategy=body.get("strategy"),
+    )
+    summary = score_pending(db_path=_DB_PATH, out_path=_OUT_DIR)
+    return jsonify(summary)
+
+
 @app.route("/api/output/<subdir>/<filename>")
 def serve_output(subdir: str, filename: str):
     out_dir = os.path.join(ROOT, "output", subdir)

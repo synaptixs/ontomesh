@@ -1,0 +1,26 @@
+# CQ-EVO-03 — Did the reasoner pass on the most recent APPROVED proposal?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates the exit-gate requirement: "No unsatisfiable classes after any
+# approved axiom".  Every row in the version ledger must carry a reasoner
+# status of PASS or SKIPPED — never FAIL.  A ledger entry with FAIL means
+# an unsatisfiable axiom made it through the CI/CD gate.
+#
+# Pass condition: no version-ledger entry carries reasoner_status = FAIL.
+#
+# Priority: High
+# Validates: Workstream 2 — reasoner-gate enforcement
+# Expected: may be empty
+# Bound variables: ?ledger ?version ?proposalId ?status
+
+PREFIX evo:  <https://ontology.example.com/evolution/>
+
+SELECT ?ledger ?version ?proposalId ?status
+WHERE {
+    ?ledger a evo:VersionLedgerEntry ;
+            evo:version         ?version ;
+            evo:proposalId      ?proposalId ;
+            evo:reasonerStatus  ?status .
+
+    FILTER (?status = "FAIL")
+}
+LIMIT 20
