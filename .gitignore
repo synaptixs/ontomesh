@@ -65,3 +65,11 @@ htmlcov/
 federation/keys/*.sk
 federation/keys/*.pub
 federation/manifests/*.jsonld
+
+# ── Workstream 4 (compliance) local state ────────────────────────────────────
+# Signing keys and emitted evidence bundles are runtime state, not source.
+# The committed compliance/regulations/*.json files stay — they are the
+# declarative regulatory registry.
+compliance/keys/*.sk
+compliance/keys/*.pub
+compliance/bundles/*.zip

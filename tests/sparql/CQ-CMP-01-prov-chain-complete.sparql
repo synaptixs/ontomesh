@@ -1,0 +1,34 @@
+# CQ-CMP-01 — Does every high-confidence ObservationRecord have a complete PROV-O chain?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 4 invariant: any observation with confidence >= 0.8 must
+# carry full PROV-O attribution (prov:wasAttributedTo / wasGeneratedBy)
+# so compliance bundles can produce a reconstructible decision chain.
+#
+# Pass condition: the result set is empty — no high-confidence
+# observation lacks a prov:wasGeneratedBy or prov:wasAttributedTo link.
+#
+# Priority: Critical
+# Validates: Workstream 4 — provenance chain for audit-worthy outputs
+# Expected: empty
+# Bound variables: ?obs ?confidence
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX cmp:  <https://ontology.example.com/compliance/>
+
+SELECT ?obs ?confidence
+WHERE {
+    ?obs a tmf:ObservationRecord ;
+         tmf:confidence_score ?confidence .
+
+    FILTER (?confidence >= 0.8)
+
+    FILTER NOT EXISTS {
+        ?obs prov:wasGeneratedBy ?activity .
+        ?activity prov:wasAssociatedWith ?agent .
+    }
+    FILTER NOT EXISTS {
+        ?obs prov:wasAttributedTo ?agent2 .
+    }
+}
+LIMIT 20
