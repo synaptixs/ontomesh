@@ -6,14 +6,14 @@
 
 | Metric | Count |
 |--------|-------|
-| OWL classes | 48 |
-| Data properties | 427 |
-| Object properties | 91 |
-| **Total axioms (est.)** | **566** |
+| OWL classes | 51 |
+| Data properties | 452 |
+| Object properties | 96 |
+| **Total axioms (est.)** | **599** |
 
 ## Decision rationale
 
-Axiom count 566 is within EL limits and no DL constructs detected — OWL 2 EL profile is sufficient. ELK reasoner recommended.
+Axiom count 599 is within EL limits and no DL constructs detected — OWL 2 EL profile is sufficient. ELK reasoner recommended.
 
 ## Profile decision rules
 

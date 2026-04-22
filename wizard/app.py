@@ -323,6 +323,79 @@ def evolve_run_monitor():
     return jsonify(summary)
 
 
+# ── Workstream 4 — Regulatory AI Compliance Evidence Engine ────────────────
+
+@app.route("/api/comply/regulations", methods=["GET"])
+def comply_list_regulations():
+    try:
+        sys.path.insert(0, ROOT)
+        from compliance import registry as reg_mod
+    except ImportError as exc:
+        return jsonify({"error": f"compliance module unavailable: {exc}"}), 500
+    return jsonify({"regulations": reg_mod.list_regulations()})
+
+
+@app.route("/api/comply/coverage", methods=["GET"])
+def comply_coverage():
+    sys.path.insert(0, ROOT)
+    from compliance import mapping as map_mod
+    return jsonify(map_mod.coverage_score(
+        out_path=_OUT_DIR,
+        db_path=_DB_PATH,
+    ))
+
+
+@app.route("/api/comply/gap", methods=["GET"])
+def comply_gap():
+    sys.path.insert(0, ROOT)
+    from compliance import mapping as map_mod
+    return jsonify(map_mod.gap_analysis(out_path=_OUT_DIR))
+
+
+@app.route("/api/comply/bundles", methods=["GET"])
+def comply_bundles():
+    sys.path.insert(0, ROOT)
+    from compliance import bundle as bun_mod
+    return jsonify({"bundles": bun_mod.list_bundles(_DB_PATH)})
+
+
+@app.route("/api/comply/assemble", methods=["POST"])
+def comply_assemble():
+    sys.path.insert(0, ROOT)
+    from compliance import assembler as asm_mod, bundle as bun_mod
+    body = request.get_json(force=True) or {}
+    regulation_id = body.get("regulation_id")
+    if not regulation_id:
+        return jsonify({"error": "regulation_id is required"}), 400
+    decision_iri = body.get("decision_iri") or None
+    try:
+        ev = asm_mod.assemble_evidence(
+            regulation_id=regulation_id,
+            decision_iri=decision_iri,
+            db_path=_DB_PATH,
+            out_path=_OUT_DIR,
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    bundle = bun_mod.export_bundle(
+        ev,
+        publish_to_graph=True,
+        db_path=_DB_PATH,
+    )
+    return jsonify({"evidence": ev, "bundle": bundle})
+
+
+@app.route("/api/comply/verify", methods=["POST"])
+def comply_verify():
+    sys.path.insert(0, ROOT)
+    from compliance import bundle as bun_mod
+    body = request.get_json(force=True) or {}
+    path = body.get("bundle_path")
+    if not path:
+        return jsonify({"error": "bundle_path is required"}), 400
+    return jsonify(bun_mod.verify_bundle(path))
+
+
 @app.route("/api/output/<subdir>/<filename>")
 def serve_output(subdir: str, filename: str):
     out_dir = os.path.join(ROOT, "output", subdir)

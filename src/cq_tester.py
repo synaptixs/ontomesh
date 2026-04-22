@@ -538,6 +538,89 @@ def _score_governance(conn, tables: list) -> List[Dict]:
           evo_score, evo_rat,
           "ontology_evolution_proposals + ontology_version_ledger")
 
+    # ── Workstream 4: Regulatory AI Compliance Evidence Engine ──────────
+    # Criterion: Regulatory Evidence Coverage
+    # Scores the share of loaded regulations whose requirements are at
+    # least 80% SATISFIED against the current toolkit run.
+    try:
+        import sys as _sys
+        _repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if _repo not in _sys.path:
+            _sys.path.insert(0, _repo)
+        from compliance.mapping import coverage_score as _cov_score
+        cov = _cov_score(
+            out_path=os.path.join(_repo, "output"),
+            db_path=os.path.join(_repo, "db", "enterprise.db"),
+        )
+        total_regs = cov["total_regulations"]
+        pct = cov["coverage_percent"]
+        if total_regs == 0:
+            reg_score = 0
+            reg_rat = ("No regulations loaded under compliance/regulations/. "
+                       "Add at least one regulation file to light this gate.")
+        elif pct >= 75:
+            reg_score = 5
+            reg_rat = (f"{cov['regulations_at_80']}/{total_regs} regulations "
+                       f"at ≥80% coverage ({pct}% overall).")
+        elif pct >= 50:
+            reg_score = 4
+            reg_rat = (f"{cov['regulations_at_80']}/{total_regs} regulations "
+                       f"at ≥80% coverage ({pct}% overall).")
+        elif pct >= 25:
+            reg_score = 3
+            reg_rat = (f"{cov['regulations_at_80']}/{total_regs} regulations "
+                       f"at ≥80% coverage ({pct}% overall) — below target.")
+        else:
+            reg_score = 2
+            reg_rat = (f"Only {cov['regulations_at_80']}/{total_regs} "
+                       f"regulations at ≥80% coverage — remediation required.")
+    except Exception as _e:
+        reg_score = 1
+        reg_rat = (f"Compliance mapping layer unavailable ({_e}). Run "
+                   "`python3 toolkit.py --phase test --phase comply`.")
+    check("Regulatory Evidence Coverage", "Compliance",
+          "Do loaded regulations have ≥80% of their requirements satisfied?",
+          reg_score, reg_rat,
+          "compliance/mapping.py: coverage_score()")
+
+    # Criterion: Audit Trail Completeness
+    # High-confidence observations without full PROV-O attribution are
+    # audit-evidence gaps.
+    try:
+        hi_conf = qn(
+            "SELECT COUNT(*) FROM observations "
+            "WHERE confidence_score >= 0.8"
+        )
+        hi_conf_full = qn(
+            "SELECT COUNT(*) FROM observations "
+            "WHERE confidence_score >= 0.8 "
+            "AND recorded_by IS NOT NULL "
+            "AND observed_at IS NOT NULL"
+        )
+    except Exception:
+        hi_conf = 0
+        hi_conf_full = 0
+    audit_pct = round((hi_conf_full / max(hi_conf, 1)) * 100)
+    if hi_conf == 0:
+        audit_score = 2
+        audit_rat = "No high-confidence observations in the store."
+    elif audit_pct >= 95:
+        audit_score = 5
+        audit_rat = (f"{hi_conf_full}/{hi_conf} high-confidence observations "
+                     f"({audit_pct}%) carry full recorded_by + observed_at.")
+    elif audit_pct >= 80:
+        audit_score = 4
+        audit_rat = (f"{hi_conf_full}/{hi_conf} high-confidence observations "
+                     f"({audit_pct}%) carry full attribution.")
+    else:
+        audit_score = 2
+        audit_rat = (f"Only {hi_conf_full}/{hi_conf} high-confidence observations "
+                     f"({audit_pct}%) carry full attribution — audit gap.")
+    check("Audit Trail Completeness", "Compliance",
+          "Do high-confidence observations carry complete PROV-O attribution?",
+          audit_score, audit_rat,
+          "observations.recorded_by + observations.observed_at")
+
     return scores
 
 
