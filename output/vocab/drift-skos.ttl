@@ -1,0 +1,99 @@
+@prefix :      <https://ontology.example.com/enterprise/> .
+@prefix drift: <https://ontology.example.com/enterprise/drift/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix ssn:   <http://www.w3.org/ns/ssn/> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SKOS Vocabulary — Drift Detection Taxonomy
+#  Phase 3 · Sprint S14 · Generated 2026-04-21T02:57:44Z
+# ═══════════════════════════════════════════════════════════════════════════
+
+drift:DriftConceptScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Drift Detection Concept Scheme" ;
+  dcterms:description "Taxonomy of ML drift monitoring concepts for the Ontology Toolkit." ;
+  dcterms:created "2026-04-21T02:57:44Z"^^xsd:dateTime .
+
+drift:DriftMonitoring
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:topConceptOf drift:DriftConceptScheme ;
+  skos:prefLabel   "Drift Monitoring" ;
+  skos:definition  "The practice of detecting and measuring statistical drift in ML model inputs and outputs." .
+
+drift:DistributionDrift
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DriftMonitoring ;
+  skos:prefLabel   "Distribution Drift" ;
+  skos:definition  "Change in the statistical distribution of model input features over time." ;
+  skos:narrower    drift:CovariateShift, drift:ConceptDrift .
+
+drift:CovariateShift
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DistributionDrift ;
+  skos:prefLabel   "Covariate Shift" ;
+  skos:definition  "Input feature distribution changes while the conditional label distribution P(Y|X) stays constant." .
+
+drift:ConceptDrift
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DistributionDrift ;
+  skos:prefLabel   "Concept Drift" ;
+  skos:definition  "The relationship between inputs and outputs changes over time — P(Y|X) shifts." .
+
+drift:PSIConcept
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DistributionDrift ;
+  skos:prefLabel   "Population Stability Index" ;
+  skos:altLabel    "PSI" ;
+  skos:definition  "PSI < 0.1: no change. 0.1–0.25: moderate shift. > 0.25: significant drift." .
+
+drift:KLConcept
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DistributionDrift ;
+  skos:prefLabel   "KL Divergence" ;
+  skos:altLabel    "Kullback-Leibler divergence" ;
+  skos:definition  "Measures information lost when distribution Q is used to approximate P. Asymmetric." .
+
+drift:JSConcept
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DistributionDrift ;
+  skos:prefLabel   "JS Divergence" ;
+  skos:altLabel    "Jensen-Shannon divergence" ;
+  skos:definition  "Symmetric, smoothed version of KL divergence bounded between 0 and 1." .
+
+drift:ModelDegradation
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DriftMonitoring ;
+  skos:prefLabel   "Model Degradation" ;
+  skos:definition  "Decline in model performance metrics (accuracy, precision, AUC) over time." ;
+  skos:narrower    drift:CalibrationDrift .
+
+drift:CalibrationDrift
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:ModelDegradation ;
+  skos:prefLabel   "Calibration Drift" ;
+  skos:definition  "Model predicted probabilities diverge from empirical outcome frequencies." .
+
+drift:LogDrift
+  a skos:Concept ;
+  skos:inScheme    drift:DriftConceptScheme ;
+  skos:broader     drift:DriftMonitoring ;
+  skos:prefLabel   "Log Template Drift" ;
+  skos:definition  "New or changed log message templates indicate infrastructure or software changes." .

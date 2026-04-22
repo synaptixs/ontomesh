@@ -1,0 +1,506 @@
+@prefix :      <https://ontology.example.com/enterprise/> .
+@prefix ind:   <https://ontology.example.com/government/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+<https://ontology.example.com/government/>
+  a owl:Ontology ;
+  owl:versionIRI <https://ontology.example.com/government/1.0.0> ;
+  owl:imports <https://ontology.example.com/enterprise/> ;
+  rdfs:label "Government & Public Sector Ontology Module" ;
+  rdfs:comment "Domain template for government agencies, municipalities, and public sector organisations. Aligned with W3C DCAT v3, INSPIRE Directive (EU), and FOAF for agent descriptions. Suitable for open data portals, regulatory compliance, public service delivery, and e-government." ;
+  dcterms:created "2026-04-21T02:57:44Z"^^xsd:dateTime ;
+  dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
+
+
+:Citizen
+  a owl:Class ;
+  rdfs:label "Citizen" ;
+  rdfs:comment "A natural person interacting with government services." ;
+  owl:equivalentClass <foaf:Person> ;
+  :sensitivityTier :Restricted .
+
+:citizen_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :Citizen ;
+  rdfs:range xsd:string ;
+  rdfs:label "Citizen Id" ;
+  rdfs:comment "Anonymised/pseudonymised identifier" ;
+  :sensitivityTier :Restricted .
+
+:date_of_birth
+  a owl:DatatypeProperty ;
+  rdfs:domain :Citizen ;
+  rdfs:range xsd:date ;
+  rdfs:label "Date Of Birth" ;
+  :sensitivityTier :Restricted .
+
+:residency_status
+  a owl:DatatypeProperty ;
+  rdfs:domain :Citizen ;
+  rdfs:range xsd:string ;
+  rdfs:label "Residency Status" ;
+  :sensitivityTier :Restricted .
+
+:registration_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :Citizen ;
+  rdfs:range xsd:date ;
+  rdfs:label "Registration Date" ;
+  :sensitivityTier :Restricted .
+
+:preferred_language
+  a owl:DatatypeProperty ;
+  rdfs:domain :Citizen ;
+  rdfs:range xsd:string ;
+  rdfs:label "Preferred Language" ;
+  :sensitivityTier :Restricted .
+
+:accessibility_needs
+  a owl:DatatypeProperty ;
+  rdfs:domain :Citizen ;
+  rdfs:range xsd:string ;
+  rdfs:label "Accessibility Needs" ;
+  :sensitivityTier :Restricted .
+
+:GovernmentAgency
+  a owl:Class ;
+  rdfs:label "Government Agency" ;
+  rdfs:comment "A government body, ministry, department, or regulatory authority." ;
+  owl:equivalentClass <org:Organization> ;
+  :sensitivityTier :Public .
+
+:agency_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range xsd:string ;
+  rdfs:label "Agency Id" ;
+  :sensitivityTier :Public .
+
+:agency_name
+  a owl:DatatypeProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range xsd:string ;
+  rdfs:label "Agency Name" ;
+  :sensitivityTier :Public .
+
+:agency_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range xsd:string ;
+  rdfs:label "Agency Type" ;
+  :sensitivityTier :Public .
+
+:jurisdiction
+  a owl:DatatypeProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range xsd:string ;
+  rdfs:label "Jurisdiction" ;
+  :sensitivityTier :Public .
+
+:parent_agency_id
+  a owl:ObjectProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range :GovernmentAgency ;
+  rdfs:label "Parent Agency Id" ;
+  :sensitivityTier :Public .
+
+:official_url
+  a owl:DatatypeProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range xsd:string ;
+  rdfs:label "Official Url" ;
+  :sensitivityTier :Public .
+
+:established_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :GovernmentAgency ;
+  rdfs:range xsd:date ;
+  rdfs:label "Established Date" ;
+  :sensitivityTier :Public .
+
+:PublicService
+  a owl:Class ;
+  rdfs:label "Public Service" ;
+  rdfs:comment "A service provided by a government agency to citizens or businesses." ;
+  :sensitivityTier :Public .
+
+:service_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range xsd:string ;
+  rdfs:label "Service Id" ;
+  :sensitivityTier :Public .
+
+:service_name
+  a owl:DatatypeProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range xsd:string ;
+  rdfs:label "Service Name" ;
+  :sensitivityTier :Public .
+
+:owning_agency_id
+  a owl:ObjectProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range :GovernmentAgency ;
+  rdfs:label "Owning Agency Id" ;
+  :sensitivityTier :Public .
+
+:service_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range xsd:string ;
+  rdfs:label "Service Type" ;
+  :sensitivityTier :Public .
+
+:delivery_channel
+  a owl:DatatypeProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range xsd:string ;
+  rdfs:label "Delivery Channel" ;
+  :sensitivityTier :Public .
+
+:average_processing_days
+  a owl:DatatypeProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Average Processing Days" ;
+  :sensitivityTier :Public .
+
+:is_digital
+  a owl:DatatypeProperty ;
+  rdfs:domain :PublicService ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Is Digital" ;
+  :sensitivityTier :Public .
+
+:ServiceApplication
+  a owl:Class ;
+  rdfs:label "Service Application" ;
+  rdfs:comment "A citizen or business application for a public service." ;
+  :sensitivityTier :Restricted .
+
+:application_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range xsd:string ;
+  rdfs:label "Application Id" ;
+  :sensitivityTier :Restricted .
+
+:service_id
+  a owl:ObjectProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range :PublicService ;
+  rdfs:label "Service Id" ;
+  :sensitivityTier :Restricted .
+
+:applicant_id
+  a owl:ObjectProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range :Citizen ;
+  rdfs:label "Applicant Id" ;
+  :sensitivityTier :Restricted .
+
+:submission_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Submission Date" ;
+  :sensitivityTier :Restricted .
+
+:application_status
+  a owl:DatatypeProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range xsd:string ;
+  rdfs:label "Application Status" ;
+  :sensitivityTier :Restricted .
+
+:decision_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range xsd:date ;
+  rdfs:label "Decision Date" ;
+  :sensitivityTier :Restricted .
+
+:case_officer_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range xsd:string ;
+  rdfs:label "Case Officer Id" ;
+  :sensitivityTier :Restricted .
+
+:priority_flag
+  a owl:DatatypeProperty ;
+  rdfs:domain :ServiceApplication ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Priority Flag" ;
+  :sensitivityTier :Restricted .
+
+:Legislation
+  a owl:Class ;
+  rdfs:label "Legislation" ;
+  rdfs:comment "A law, regulation, directive, or statutory instrument." ;
+  :sensitivityTier :Public .
+
+:legislation_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:string ;
+  rdfs:label "Legislation Id" ;
+  :sensitivityTier :Public .
+
+:title
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:string ;
+  rdfs:label "Title" ;
+  :sensitivityTier :Public .
+
+:jurisdiction
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:string ;
+  rdfs:label "Jurisdiction" ;
+  :sensitivityTier :Public .
+
+:legislation_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:string ;
+  rdfs:label "Legislation Type" ;
+  :sensitivityTier :Public .
+
+:enactment_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:date ;
+  rdfs:label "Enactment Date" ;
+  :sensitivityTier :Public .
+
+:commencement_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:date ;
+  rdfs:label "Commencement Date" ;
+  :sensitivityTier :Public .
+
+:is_in_force
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Is In Force" ;
+  :sensitivityTier :Public .
+
+:eli_uri
+  a owl:DatatypeProperty ;
+  rdfs:domain :Legislation ;
+  rdfs:range xsd:string ;
+  rdfs:label "Eli Uri" ;
+  rdfs:comment "European Legislation Identifier URI" ;
+  :sensitivityTier :Public .
+
+:Dataset
+  a owl:Class ;
+  rdfs:label "Open Data Dataset" ;
+  rdfs:comment "A published government dataset available via an open data portal." ;
+  owl:equivalentClass <dcat:Dataset> ;
+  :sensitivityTier :Public .
+
+:dataset_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Dataset Id" ;
+  :sensitivityTier :Public .
+
+:title
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Title" ;
+  :sensitivityTier :Public .
+
+:owning_agency_id
+  a owl:ObjectProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range :GovernmentAgency ;
+  rdfs:label "Owning Agency Id" ;
+  :sensitivityTier :Public .
+
+:publisher
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Publisher" ;
+  :sensitivityTier :Public .
+
+:license
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "License" ;
+  rdfs:comment "SPDX license identifier or URL" ;
+  :sensitivityTier :Public .
+
+:theme
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Theme" ;
+  rdfs:comment "EU Data Theme (health, transport, environment...)" ;
+  :sensitivityTier :Public .
+
+:update_frequency
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Update Frequency" ;
+  :sensitivityTier :Public .
+
+:spatial_coverage
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Spatial Coverage" ;
+  rdfs:comment "WKT or ISO 3166 country/region code" ;
+  :sensitivityTier :Public .
+
+:temporal_start
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:date ;
+  rdfs:label "Temporal Start" ;
+  :sensitivityTier :Public .
+
+:temporal_end
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:date ;
+  rdfs:label "Temporal End" ;
+  :sensitivityTier :Public .
+
+:dcat_identifier
+  a owl:DatatypeProperty ;
+  rdfs:domain :Dataset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Dcat Identifier" ;
+  :sensitivityTier :Public .
+
+:GeoFeature
+  a owl:Class ;
+  rdfs:label "Geographic Feature" ;
+  rdfs:comment "A spatial entity in INSPIRE — administrative boundary, building, infrastructure." ;
+  owl:equivalentClass <inspire:SpatialObject> ;
+  :sensitivityTier :Public .
+
+:feature_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :GeoFeature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Feature Id" ;
+  :sensitivityTier :Public .
+
+:feature_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :GeoFeature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Feature Type" ;
+  :sensitivityTier :Public .
+
+:geometry_wkt
+  a owl:DatatypeProperty ;
+  rdfs:domain :GeoFeature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Geometry Wkt" ;
+  rdfs:comment "WKT geometry (POINT, LINESTRING, POLYGON)" ;
+  :sensitivityTier :Public .
+
+:inspire_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :GeoFeature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Inspire Id" ;
+  :sensitivityTier :Public .
+
+:country_code
+  a owl:DatatypeProperty ;
+  rdfs:domain :GeoFeature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Country Code" ;
+  :sensitivityTier :Public .
+
+:nuts_code
+  a owl:DatatypeProperty ;
+  rdfs:domain :GeoFeature ;
+  rdfs:range xsd:string ;
+  rdfs:label "Nuts Code" ;
+  rdfs:comment "EU NUTS region code" ;
+  :sensitivityTier :Public .
+
+:AuditRecord
+  a owl:Class ;
+  rdfs:label "Audit Record" ;
+  rdfs:comment "An immutable log of government decision or data access for accountability." ;
+  :sensitivityTier :Confidential .
+
+:audit_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Audit Id" ;
+  :sensitivityTier :Confidential .
+
+:actor_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Actor Id" ;
+  rdfs:comment "Officer or system that performed the action" ;
+  :sensitivityTier :Confidential .
+
+:action_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Action Type" ;
+  :sensitivityTier :Confidential .
+
+:subject_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Subject Id" ;
+  rdfs:comment "ID of the resource acted upon" ;
+  :sensitivityTier :Confidential .
+
+:subject_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Subject Type" ;
+  :sensitivityTier :Confidential .
+
+:timestamp
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Timestamp" ;
+  :sensitivityTier :Confidential .
+
+:outcome
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Outcome" ;
+  :sensitivityTier :Confidential .
+
+:ip_address
+  a owl:DatatypeProperty ;
+  rdfs:domain :AuditRecord ;
+  rdfs:range xsd:string ;
+  rdfs:label "Ip Address" ;
+  :sensitivityTier :Confidential .

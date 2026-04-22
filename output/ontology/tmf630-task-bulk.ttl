@@ -1,0 +1,84 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+
+# ── TMF630 Part 4 — Task Resource ─────────────────────────────────────────
+
+:TmfTask
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TMF Task" ;
+  rdfs:comment "TMF630 Part 4: asynchronous long-running operation. Enables async task management in ODA-compliant deployments." ;
+  skos:prefLabel "Task" ;
+  skos:altLabel "TMF Task Resource" ;
+  :sensitivityTier :Internal .
+
+:taskId          a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:string ; rdfs:label "Task ID" .
+:taskType        a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:string ; rdfs:label "Task Type" .
+:percentProgress a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:integer ; rdfs:label "Percent Progress" .
+:taskError       a owl:DatatypeProperty ; rdfs:domain :TmfTask ; rdfs:range xsd:string ; rdfs:label "Task Error" .
+:taskStatus      a owl:DatatypeProperty ; rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
+  rdfs:label "Task Status" ;
+  rdfs:comment "Values: inProgress | completed | failed | cancelled" .
+
+# ── TMF630 Part 7 — Bulk Import / Export ───────────────────────────────────
+
+:TmfImportJob
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TMF Import Job" ;
+  rdfs:comment "TMF630 Part 7: asynchronous bulk import of resource instances." ;
+  skos:prefLabel "ImportJob" ;
+  :sensitivityTier :Internal .
+
+:TmfExportJob
+  a owl:Class ;
+  rdfs:subClassOf :TmfEntity ;
+  rdfs:label "TMF Export Job" ;
+  rdfs:comment "TMF630 Part 7: asynchronous bulk export of resource instances." ;
+  skos:prefLabel "ExportJob" ;
+  :sensitivityTier :Internal .
+
+:importJobId  a owl:DatatypeProperty ; rdfs:domain :TmfImportJob ; rdfs:range xsd:string ; rdfs:label "Import Job ID" .
+:exportJobId  a owl:DatatypeProperty ; rdfs:domain :TmfExportJob ; rdfs:range xsd:string ; rdfs:label "Export Job ID" .
+:contentType  a owl:DatatypeProperty ; rdfs:domain :TmfEntity    ; rdfs:range xsd:string ; rdfs:label "Content Type" .
+:sourceUri    a owl:DatatypeProperty ; rdfs:domain :TmfImportJob ; rdfs:range xsd:anyURI ; rdfs:label "Source URI" .
+:exportQuery  a owl:DatatypeProperty ; rdfs:domain :TmfExportJob ; rdfs:range xsd:string ; rdfs:label "Export Query" .
+:bulkJobStatus a owl:DatatypeProperty ; rdfs:domain :TmfEntity ;
+  rdfs:range xsd:string ;
+  rdfs:label "Bulk Job Status" ;
+  rdfs:comment "Values: running | succeeded | failed" .
+
+
+# ── TMF630 Task SHACL Shape ────────────────────────────────────────────────
+
+:TmfTaskShape
+  a sh:NodeShape ;
+  sh:targetClass :TmfTask ;
+  rdfs:label "TMF Task Shape" ;
+
+  sh:property [ sh:path :taskId       ; sh:minCount 1 ; sh:datatype xsd:string ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :taskType     ; sh:minCount 1 ; sh:datatype xsd:string ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :taskStatus   ; sh:minCount 1 ;
+    sh:in ( "inProgress" "completed" "failed" "cancelled" ) ;
+    sh:severity sh:Violation ] ;
+  sh:property [ sh:path :percentProgress ; sh:datatype xsd:integer ;
+    sh:minInclusive 0 ; sh:maxInclusive 100 ; sh:severity sh:Warning ] .
+
+:TmfImportJobShape
+  a sh:NodeShape ;
+  sh:targetClass :TmfImportJob ;
+  sh:property [ sh:path :importJobId  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :contentType  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :bulkJobStatus ; sh:in ( "running" "succeeded" "failed" ) ; sh:severity sh:Violation ] .
+
+:TmfExportJobShape
+  a sh:NodeShape ;
+  sh:targetClass :TmfExportJob ;
+  sh:property [ sh:path :exportJobId  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :contentType  ; sh:minCount 1 ; sh:severity sh:Violation ] ;
+  sh:property [ sh:path :bulkJobStatus ; sh:in ( "running" "succeeded" "failed" ) ; sh:severity sh:Violation ] .
