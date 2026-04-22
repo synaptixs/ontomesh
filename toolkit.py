@@ -484,6 +484,15 @@ def phase_report(out_path: str):
     step(0, "HTML Report Generation")
     from reporter import generate_report
     generate_report(out_path)
+    # Generate compliance summary report alongside the toolkit report
+    try:
+        sys.path.insert(0, HERE)
+        from compliance import dashboard as _dash
+        _dash.write_summary(out_path=out_path,
+                            db_path=os.path.join(HERE, "db", "enterprise.db"))
+        print(f"  ✓ Compliance summary    → {out_path}/reports/compliance_summary.html")
+    except Exception as exc:
+        print(f"  ⚠  Compliance summary skipped: {exc}")
 
 
 # ── Main ─────────────────────────────────────────────────────────────────
@@ -496,7 +505,7 @@ def main():
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
                         choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
-                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate"],
+                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply"],
                         help="Run a specific phase only")
     # ── Workstream 2 (evolve) flags ────────────────────────────────────
     parser.add_argument("--review", action="store_true",
@@ -550,6 +559,21 @@ def main():
     parser.add_argument("--enterprise-iri",
                         default="https://enterprise.example.com/ontology#self",
                         help="Enterprise IRI used when building a capability manifest")
+    # ── Workstream 4 (comply) flags ────────────────────────────────────
+    parser.add_argument("--regulation", default=None,
+                        help="Regulation ID for --phase comply (e.g. eu-ai-act)")
+    parser.add_argument("--decision", default=None, metavar="IRI",
+                        help="Decision/ObservationRecord IRI for --phase comply")
+    parser.add_argument("--time-range", default=None, metavar="FROM,TO",
+                        help="Time range ISO8601 pair for --phase comply evidence assembly")
+    parser.add_argument("--verify", default=None, metavar="BUNDLE",
+                        help="Verify a compliance bundle zip (--phase comply)")
+    parser.add_argument("--list-regulations", action="store_true",
+                        help="List every loaded regulation (--phase comply)")
+    parser.add_argument("--gap-analysis", action="store_true",
+                        help="Run gap analysis across the registry (--phase comply)")
+    parser.add_argument("--bundle-signer", default="https://enterprise.example.com/compliance#signer",
+                        help="Signer IRI embedded in compliance bundles")
     parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
     parser.add_argument("--log-format", default="auto",
                         choices=["auto","jsonl","syslog","cef","otlp","regex"],
@@ -877,6 +901,110 @@ def main():
         print("    --register-partner <url>  — register a new partner")
         print("    --handshake <url>         — start bilateral trust handshake")
 
+    def phase_comply(db_path: str, out_path: str):
+        step(0, "Workstream 4 — Regulatory AI Compliance Evidence Engine")
+
+        sys.path.insert(0, HERE)
+        from compliance import (
+            registry as reg_mod,
+            assembler as asm_mod,
+            bundle    as bun_mod,
+            mapping   as map_mod,
+        )
+
+        # Route 1 — list regulations
+        if args.list_regulations:
+            regs = reg_mod.list_regulations()
+            if not regs:
+                print("  (no regulations registered)")
+                return
+            print(f"\n  {len(regs)} regulations loaded:\n")
+            print(f"  {'ID':<30} {'Jurisdiction':<22} {'Effective':<12} Reqs")
+            print(f"  {'─'*30} {'─'*22} {'─'*12} {'─'*5}")
+            for r in regs:
+                print(f"  {r['regulation_id']:<30} {r['jurisdiction'][:22]:<22} "
+                      f"{(r.get('effective_date') or '')[:10]:<12} "
+                      f"{r['requirement_count']}")
+            return
+
+        # Route 2 — verify a compliance bundle
+        if args.verify:
+            result = bun_mod.verify_bundle(args.verify)
+            if result.get("ok"):
+                print(f"  ✓ Bundle verified: {args.verify}")
+                print(f"    bundle_id   : {result.get('bundle_id')}")
+                print(f"    regulation  : {result.get('regulation_id')}")
+                print(f"    signer      : {result.get('signer_iri')}")
+                print(f"    file count  : {result.get('file_count')}")
+            else:
+                print(f"  ✗ Bundle verification FAILED: {result.get('reason')}")
+            return
+
+        # Route 3 — gap analysis
+        if args.gap_analysis:
+            gap = map_mod.gap_analysis(out_path=out_path)
+            print(f"\n  Gap analysis\n  {'─'*60}")
+            print(f"  Uncovered regulatory requirements: "
+                  f"{len(gap['uncovered_requirements'])}")
+            for g in gap["uncovered_requirements"][:20]:
+                print(f"    • [{g['regulation_id']}] {g['req_id']} — "
+                      f"{g['title']}  (wants {g['artefact_type']}:{g['selector']})")
+            print(f"  Orphan toolkit artefacts         : "
+                  f"{len(gap['orphan_artefacts'])}")
+            for o in gap["orphan_artefacts"][:20]:
+                print(f"    • {o['artefact_type']}:{o['selector']}")
+            print("\n  Recommendations:")
+            for rec in gap["recommendations"]:
+                print(f"    • {rec}")
+            return
+
+        # Route 4 (default) — assemble evidence and export a bundle
+        if not args.regulation:
+            from compliance import dashboard as dash_mod
+            regs = reg_mod.list_regulations()
+            print(f"  Compliance status — {len(regs)} regulation(s) loaded.")
+            summary = dash_mod.write_summary(out_path=out_path, db_path=db_path)
+            print(f"  ✓ Compliance summary    → {summary['html_path']}")
+            print(f"  ✓ Coverage CSV          → {summary['csv_path']}")
+            print("  CLI options:")
+            print("    --list-regulations                — show every loaded regulation")
+            print("    --regulation <id> [--decision <iri>] — assemble evidence + export bundle")
+            print("    --verify <bundle.zip>             — verify a signed compliance bundle")
+            print("    --gap-analysis                    — run coverage gap report")
+            return
+
+        tr = None
+        if args.time_range and "," in args.time_range:
+            a, b = args.time_range.split(",", 1)
+            tr = (a.strip(), b.strip())
+
+        ev = asm_mod.assemble_evidence(
+            regulation_id=args.regulation,
+            decision_iri=args.decision,
+            db_path=db_path,
+            out_path=out_path,
+            time_range=tr,
+        )
+        print(f"\n  {ev['name']} [{ev['regulation_id']}]")
+        print(f"  {'─'*62}")
+        for e in ev["evidence"]:
+            icon = {"SATISFIED": "✓", "INSUFFICIENT": "✗",
+                    "NOT_APPLICABLE": "~", "MISSING": "?"}.get(e["status"], "?")
+            print(f"    {icon} {e['req_id']:<18} [{e['status']:14s}] {e['title']}")
+        s = ev["summary"]
+        print(f"  Coverage: {s['coverage_percent']}%  "
+              f"({s['satisfied']}/{s['total_requirements']} satisfied)")
+
+        bundle = bun_mod.export_bundle(
+            ev,
+            signer_iri=args.bundle_signer,
+            publish_to_graph=True,
+            db_path=db_path,
+        )
+        print(f"\n  ✓ Bundle exported → {bundle['bundle_path']}")
+        print(f"    sha256   : {bundle['sha256']}")
+        print(f"    verified : {bundle['verified']}")
+
     def phase_wizard(db_path: str, out_path: str):
         step(0, "Phase 3 — Browser Wizard (Flask)")
         wizard_path = os.path.join(HERE, "wizard", "app.py")
@@ -913,6 +1041,7 @@ def main():
         "wizard":    [(phase_wizard,    [args.db, args.out])],
         "evolve":    [(phase_evolve,    [args.db, args.out])],
         "federate":  [(phase_federate,  [args.db, args.out])],
+        "comply":    [(phase_comply,    [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),

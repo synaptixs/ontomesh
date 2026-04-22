@@ -1,0 +1,32 @@
+# CQ-CMP-05 — Are RESTRICTED-tier observations excluded from federation?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 4 + Workstream 3 interaction: RESTRICTED-tier
+# observations must never appear in the federation query log
+# as having been exported to a partner.  This complements the
+# SHACL boundary gate (CQ-FED-02) by asserting the inverse rule
+# from the compliance side.
+#
+# Pass condition: the result set is empty — no Restricted-tier
+# observation was carried across a federated query.
+#
+# Priority: Critical
+# Validates: Workstream 4 — RESTRICTED-tier data never leaves the enterprise
+# Expected: empty
+# Bound variables: ?obs ?tier ?queryId
+
+PREFIX cmp:  <https://ontology.example.com/compliance/>
+PREFIX fed:  <https://ontology.example.com/federation/>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+
+SELECT ?obs ?tier ?queryId
+WHERE {
+    ?obs a tmf:ObservationRecord ;
+         tmf:sensitivityTier ?tier .
+
+    FILTER (?tier = "Restricted")
+
+    ?query a fed:FederationQuery ;
+           fed:queryId        ?queryId ;
+           fed:exportedResult ?obs .
+}
+LIMIT 20

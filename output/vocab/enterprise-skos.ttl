@@ -52,6 +52,13 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :Asset .
 
+:ComplianceBundlesConcept
+  a skos:Concept ;
+  skos:prefLabel "Compliance Bundles" ;
+  skos:definition "Vocabulary concept for Compliance Bundles." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ComplianceBundles .
+
 :DomainEventConcept
   a skos:Concept ;
   skos:prefLabel "Domain Event" ;
@@ -70,6 +77,27 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :EventParticipants .
 
+:FederationPartnersConcept
+  a skos:Concept ;
+  skos:prefLabel "Federation Partners" ;
+  skos:definition "Vocabulary concept for Federation Partners." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :FederationPartners .
+
+:FederationQueryLogConcept
+  a skos:Concept ;
+  skos:prefLabel "Federation Query Log" ;
+  skos:definition "Vocabulary concept for Federation Query Log." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :FederationQueryLog .
+
+:FederationTrustLedgerConcept
+  a skos:Concept ;
+  skos:prefLabel "Federation Trust Ledger" ;
+  skos:definition "Vocabulary concept for Federation Trust Ledger." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :FederationTrustLedger .
+
 :ObservationRecordConcept
   a skos:Concept ;
   skos:prefLabel "Observation" ;
@@ -80,6 +108,20 @@
   skos:definition "A measured, computed, or imported fact about an asset or event, with provenance." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ObservationRecord .
+
+:OntologyEvolutionProposalsConcept
+  a skos:Concept ;
+  skos:prefLabel "Ontology Evolution Proposals" ;
+  skos:definition "Vocabulary concept for Ontology Evolution Proposals." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :OntologyEvolutionProposals .
+
+:OntologyVersionLedgerConcept
+  a skos:Concept ;
+  skos:prefLabel "Ontology Version Ledger" ;
+  skos:definition "Vocabulary concept for Ontology Version Ledger." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :OntologyVersionLedger .
 
 :OrganizationConcept
   a skos:Concept ;
@@ -221,13 +263,6 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :EventSubscription .
 
-:TmfExportJobConcept
-  a skos:Concept ;
-  skos:prefLabel "Tmf Export Job" ;
-  skos:definition "Vocabulary concept for Tmf Export Job." ;
-  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
-  skos:exactMatch :TmfExportJob .
-
 :GeographicSiteConcept
   a skos:Concept ;
   skos:prefLabel "Geographic Site" ;
@@ -238,13 +273,6 @@
   skos:definition "A structured physical site record (data centre, cell tower, pop) per TMF674." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :GeographicSite .
-
-:TmfImportJobConcept
-  a skos:Concept ;
-  skos:prefLabel "Tmf Import Job" ;
-  skos:definition "Vocabulary concept for Tmf Import Job." ;
-  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
-  skos:exactMatch :TmfImportJob .
 
 :NetworkSliceProfileConcept
   a skos:Concept ;
@@ -435,13 +463,6 @@
   skos:definition "Catalog definition of a service type. Specification pattern per SID/TMF633." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ServiceSpecification .
-
-:TmfTaskConcept
-  a skos:Concept ;
-  skos:prefLabel "Tmf Task" ;
-  skos:definition "Vocabulary concept for Tmf Task." ;
-  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
-  skos:exactMatch :TmfTask .
 
 :TroubleTicketConcept
   a skos:Concept ;

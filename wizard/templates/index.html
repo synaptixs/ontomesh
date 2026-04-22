@@ -170,6 +170,7 @@
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
       <li data-step="evolve"><span class="step-num">E</span> Evolution Review</li>
+      <li data-step="comply"><span class="step-num">C</span> Compliance Dashboard</li>
     </ul>
     <div class="sidebar-footer">
       <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
@@ -366,6 +367,50 @@
       <div class="card" id="ev-detail-card" style="display:none">
         <h3>Proposal detail</h3>
         <div id="ev-detail"></div>
+      </div>
+    </div>
+
+    <!-- Compliance Dashboard (Workstream 4) -->
+    <div class="step-panel" id="step-comply">
+      <div class="step-title">Regulatory Compliance Dashboard</div>
+      <div class="step-subtitle">Workstream 4 — Assemble signed, machine-verifiable evidence bundles for named regulatory frameworks. Monitor per-regulation coverage, traffic-light status per requirement, and gap analysis.</div>
+
+      <div class="card">
+        <h3>Regulation coverage</h3>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+          <button class="btn" onclick="complyRefresh()">⟳ Refresh dashboard</button>
+          <button class="btn btn-ghost" onclick="complyGap()">Run gap analysis</button>
+          <span id="cmp-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div id="cmp-coverage-list" style="overflow-x:auto">Click refresh to load regulation coverage.</div>
+      </div>
+
+      <div class="card">
+        <h3>Assemble new evidence bundle</h3>
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">
+          <label>Regulation:
+            <select id="cmp-regulation" style="min-width:260px"></select>
+          </label>
+          <label>Decision IRI (optional):
+            <input id="cmp-decision" style="min-width:320px" placeholder="https://ontology.example.com/enterprise/observation/obs-001" />
+          </label>
+          <button class="btn btn-primary" onclick="complyAssemble()">▶ Assemble + sign bundle</button>
+        </div>
+      </div>
+
+      <div class="card" id="cmp-detail-card" style="display:none">
+        <h3>Evidence detail</h3>
+        <div id="cmp-detail"></div>
+      </div>
+
+      <div class="card">
+        <h3>Exported bundles</h3>
+        <div id="cmp-bundles" style="overflow-x:auto">Run an assembly to generate a bundle.</div>
+      </div>
+
+      <div class="card" id="cmp-gap-card" style="display:none">
+        <h3>Gap analysis</h3>
+        <div id="cmp-gap"></div>
       </div>
     </div>
 
@@ -912,6 +957,160 @@ async function evolveApply(pid) {
   document.getElementById('ev-status').textContent =
     j.ok ? `Applied → ${j.target_version}` : `Apply failed: ${j.error||'unknown'}`;
   alert(JSON.stringify(j, null, 2));
+}
+
+// ── Workstream 4 — Compliance Dashboard tab ──────────────────────────────
+
+function complyStatusColour(status){
+  if (status === 'SATISFIED')      return '#3fb950';
+  if (status === 'INSUFFICIENT')   return '#f85149';
+  if (status === 'NOT_APPLICABLE') return '#8b949e';
+  return '#d29922';
+}
+
+async function complyLoadRegulations(){
+  const r = await fetch('/api/comply/regulations');
+  const j = await r.json();
+  const sel = document.getElementById('cmp-regulation');
+  sel.innerHTML = '';
+  (j.regulations || []).forEach(reg => {
+    const opt = document.createElement('option');
+    opt.value = reg.regulation_id;
+    opt.textContent = (reg.short_name || reg.name) + '  ['+reg.regulation_id+']';
+    sel.appendChild(opt);
+  });
+}
+
+async function complyRefresh(){
+  document.getElementById('cmp-status').textContent = 'Loading coverage…';
+  await complyLoadRegulations();
+  const r = await fetch('/api/comply/coverage');
+  const j = await r.json();
+  const regs = j.regulations || [];
+  let html = '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+    + '<th style="text-align:left; padding:6px">Regulation</th>'
+    + '<th style="text-align:left; padding:6px">ID</th>'
+    + '<th style="text-align:right; padding:6px">Coverage</th>'
+    + '<th style="text-align:right; padding:6px">Satisfied</th>'
+    + '<th style="text-align:center; padding:6px">Traffic light</th>'
+    + '</tr></thead><tbody>';
+  regs.forEach(r => {
+    const light = r.coverage >= 80 ? '#3fb950'
+               : r.coverage >= 50 ? '#d29922'
+               : '#f85149';
+    html += `<tr style="border-top:1px solid var(--border)">`
+      + `<td style="padding:6px">${escapeHtml(r.name || '')}</td>`
+      + `<td style="padding:6px"><code>${escapeHtml(r.regulation_id)}</code></td>`
+      + `<td style="padding:6px; text-align:right">${r.coverage}%</td>`
+      + `<td style="padding:6px; text-align:right">${r.satisfied}/${r.applicable}</td>`
+      + `<td style="padding:6px; text-align:center">`
+      + `<span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:${light}"></span>`
+      + `</td></tr>`;
+  });
+  html += '</tbody></table>';
+  if (regs.length === 0) html = '<em>No regulations loaded.</em>';
+  document.getElementById('cmp-coverage-list').innerHTML = html;
+  document.getElementById('cmp-status').textContent =
+    `${j.regulations_at_80 || 0}/${j.total_regulations || 0} regulations at ≥80% coverage`;
+  complyLoadBundles();
+}
+
+async function complyLoadBundles(){
+  const r = await fetch('/api/comply/bundles');
+  const j = await r.json();
+  const rows = j.bundles || [];
+  if (!rows.length){
+    document.getElementById('cmp-bundles').innerHTML = '<em>No bundles exported yet.</em>';
+    return;
+  }
+  let html = '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+    + '<th style="text-align:left; padding:6px">Bundle</th>'
+    + '<th style="text-align:left; padding:6px">Regulation</th>'
+    + '<th style="text-align:right; padding:6px">Coverage</th>'
+    + '<th style="text-align:center; padding:6px">Verified</th>'
+    + '<th style="text-align:left; padding:6px">Stored at</th>'
+    + '</tr></thead><tbody>';
+  rows.forEach(b => {
+    html += `<tr style="border-top:1px solid var(--border)">`
+      + `<td style="padding:6px"><code>${escapeHtml(b.bundle_id || '')}</code></td>`
+      + `<td style="padding:6px">${escapeHtml(b.regulation_id || '')}</td>`
+      + `<td style="padding:6px; text-align:right">${b.coverage_percent || 0}%</td>`
+      + `<td style="padding:6px; text-align:center">${b.verified ? '✓' : '✗'}</td>`
+      + `<td style="padding:6px"><small>${escapeHtml(b.stored_at || '')}</small></td>`
+      + `</tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('cmp-bundles').innerHTML = html;
+}
+
+async function complyAssemble(){
+  const reg = document.getElementById('cmp-regulation').value;
+  const decision = document.getElementById('cmp-decision').value.trim();
+  if (!reg){ alert('Pick a regulation first'); return; }
+  document.getElementById('cmp-status').textContent = 'Assembling evidence for '+reg+'…';
+  const r = await fetch('/api/comply/assemble', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({regulation_id: reg, decision_iri: decision || null}),
+  });
+  const j = await r.json();
+  if (j.error){
+    document.getElementById('cmp-status').textContent = 'Error: '+j.error;
+    return;
+  }
+  document.getElementById('cmp-status').textContent =
+    `Bundle ${j.bundle.bundle_id} · ${j.evidence.summary.coverage_percent}% coverage · verified=${j.bundle.verified}`;
+
+  const rows = (j.evidence.evidence || []).map(ev => {
+    const colour = complyStatusColour(ev.status);
+    return `<tr style="border-top:1px solid var(--border)">`
+      + `<td style="padding:6px"><code>${escapeHtml(ev.req_id)}</code></td>`
+      + `<td style="padding:6px">${escapeHtml(ev.title)}</td>`
+      + `<td style="padding:6px"><span style="color:${colour}">●</span> ${ev.status}</td>`
+      + `<td style="padding:6px"><small>${escapeHtml(ev.note)}</small></td>`
+      + `<td style="padding:6px"><small>${escapeHtml(ev.artefact_type)}:${escapeHtml(ev.evidence_selector)}</small></td>`
+      + `</tr>`;
+  }).join('');
+  const html = `<p><strong>${escapeHtml(j.evidence.name || '')}</strong> — `
+    + `${j.evidence.summary.coverage_percent}% coverage `
+    + `(${j.evidence.summary.satisfied}/${j.evidence.summary.total_requirements} satisfied)</p>`
+    + `<p><small>Bundle sha256: <code>${escapeHtml(j.bundle.sha256)}</code></small></p>`
+    + `<table style="width:100%; border-collapse:collapse"><thead><tr>`
+    + `<th style="text-align:left; padding:6px">Req</th>`
+    + `<th style="text-align:left; padding:6px">Title</th>`
+    + `<th style="text-align:left; padding:6px">Status</th>`
+    + `<th style="text-align:left; padding:6px">Note</th>`
+    + `<th style="text-align:left; padding:6px">Artefact</th>`
+    + `</tr></thead><tbody>` + rows + `</tbody></table>`;
+  document.getElementById('cmp-detail').innerHTML = html;
+  document.getElementById('cmp-detail-card').style.display = 'block';
+  complyLoadBundles();
+  complyRefresh();
+}
+
+async function complyGap(){
+  const r = await fetch('/api/comply/gap');
+  const j = await r.json();
+  let html = '';
+  const unc = j.uncovered_requirements || [];
+  const orp = j.orphan_artefacts || [];
+  html += `<p><strong>Uncovered regulatory requirements (${unc.length}):</strong></p>`;
+  if (unc.length){
+    html += '<ul>' + unc.map(g =>
+      `<li><code>${escapeHtml(g.regulation_id)}</code> / <code>${escapeHtml(g.req_id)}</code> — ${escapeHtml(g.title)} (wants <code>${escapeHtml(g.artefact_type)}:${escapeHtml(g.selector)}</code>)</li>`
+    ).join('') + '</ul>';
+  } else { html += '<p><em>None.</em></p>'; }
+  html += `<p><strong>Orphan toolkit artefacts (${orp.length}):</strong></p>`;
+  if (orp.length){
+    html += '<ul>' + orp.map(o =>
+      `<li><code>${escapeHtml(o.artefact_type)}:${escapeHtml(o.selector)}</code></li>`
+    ).join('') + '</ul>';
+  } else { html += '<p><em>None.</em></p>'; }
+  html += `<p><strong>Recommendations:</strong></p><ul>`
+    + (j.recommendations || []).map(r => `<li>${escapeHtml(r)}</li>`).join('')
+    + '</ul>';
+  document.getElementById('cmp-gap').innerHTML = html;
+  document.getElementById('cmp-gap-card').style.display = 'block';
 }
 
 init();
