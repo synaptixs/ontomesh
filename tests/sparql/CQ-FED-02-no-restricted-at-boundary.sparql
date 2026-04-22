@@ -1,0 +1,27 @@
+# CQ-FED-02 — Has any Restricted-tier triple ever crossed the federation boundary?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates the central security invariant of Workstream 3: the boundary
+# MUST NEVER admit a triple whose sensitivity_tier = "Restricted".  The
+# federation_query_log table records every inbound row; any accepted
+# result carrying that tier is an immediate CRITICAL finding.
+#
+# Pass condition: the result set is empty.
+#
+# Priority: Critical
+# Validates: Workstream 3 — sensitivity enforcement at boundary
+# Expected: empty
+# Bound variables: ?queryLog ?partnerId ?tier
+
+PREFIX fed: <https://ontology.example.com/federation/>
+
+SELECT ?queryLog ?partnerId ?tier
+WHERE {
+    ?queryLog a fed:FederationQueryLog ;
+              fed:partnerId  ?partnerId ;
+              fed:status     ?status ;
+              fed:acceptedTier ?tier .
+
+    FILTER (?status = "OK")
+    FILTER (?tier  = "Restricted")
+}
+LIMIT 20

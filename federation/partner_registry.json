@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ontology.example.com/federation/partner-registry-v1.schema.json",
+  "version": "1.0.0",
+  "generated_at": "2026-04-22T00:00:00Z",
+  "description": "Registry of federated ontology partners. Each entry declares the partner's SPARQL endpoint, public Ed25519 signing key, exposed OWL classes, maximum sensitivity tier, and the bilateral trust state.",
+  "partners": [
+    {
+      "partner_id": "demo-partner-a",
+      "partner_iri": "https://partner-a.example.com/ontology#self",
+      "display_name": "Partner A (Telecom Operator)",
+      "sparql_endpoint": "https://partner-a.example.com/sparql",
+      "manifest_url": "https://partner-a.example.com/.well-known/ontology-capability.jsonld",
+      "public_key": "REPLACE_WITH_PUBLIC_KEY_AT_HANDSHAKE",
+      "exposed_classes": [
+        "https://ontology.example.com/tmf/NetworkFunction",
+        "https://ontology.example.com/tmf/PerformanceIndicator"
+      ],
+      "max_shareable_tier": "Internal",
+      "trust_state": "PROPOSED",
+      "valid_from": null,
+      "valid_until": null
+    }
+  ]
+}
