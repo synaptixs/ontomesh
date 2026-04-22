@@ -10,11 +10,12 @@ Usage:
 """
 
 import asyncio
+import json
 import os
 import sys
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
@@ -25,6 +26,7 @@ from grounder import Grounder
 from assembler import PayloadAssembler
 from output_gate import OutputGate
 from input_gate import InputGate
+from memory import AgentMemory
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -126,6 +128,7 @@ class RuntimeClient:
         self._input_gate = InputGate(db_path, min_confidence=min_confidence)
         self._output_gate = OutputGate(db_path)
         self._adapter_instance = self._init_adapter(adapter, model, api_key)
+        self._memory = AgentMemory(db_path)
 
     # ------------------------------------------------------------------
     # Properties
@@ -161,6 +164,11 @@ class RuntimeClient:
         """The active LLM adapter instance."""
         return self._adapter_instance
 
+    @property
+    def memory(self) -> AgentMemory:
+        """The active AgentMemory instance for this client."""
+        return self._memory
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -172,6 +180,9 @@ class RuntimeClient:
         max_records: int = 50,
         output_format: str = "json",
         save_payload: bool = False,
+        memory_recall: bool = False,
+        memory_recall_limit: int = 5,
+        memory_time_range: Optional[Tuple[str, str]] = None,
     ) -> dict:
         """Run the full pipeline for a single question.
 
@@ -181,11 +192,22 @@ class RuntimeClient:
             max_records: Maximum records to retrieve from the DB.
             output_format: Desired LLM response format (``"json"``, ``"text"``, etc.).
             save_payload: If ``True``, save the assembled payload to disk.
+            memory_recall: If ``True``, prepend relevant prior reasoning from
+                the memory layer to the assembled payload before calling the
+                LLM.  This gives the agent access to its own prior answers
+                on related topics, enabling progressive reasoning across
+                invocations.
+            memory_recall_limit: Maximum number of prior observations to
+                prepend (default 5).  Higher values increase context richness
+                but also token cost.
+            memory_time_range: Optional ``(iso_from, iso_to)`` tuple to
+                restrict which prior observations are recalled.  ``None``
+                returns the most recent regardless of age.
 
         Returns:
             A result dict with keys: ``question``, ``flavor``, ``answer``,
             ``valid``, ``violations``, ``observation_iri``, ``prov``,
-            ``model``, ``elapsed_ms``.
+            ``model``, ``elapsed_ms``, ``memory_context_count``.
         """
         t_start = time.monotonic()
 
@@ -199,6 +221,24 @@ class RuntimeClient:
         grounded_data["@graph"] = accepted
         grounded_data["meta"]["record_count"] = len(accepted)
         grounded_data["meta"]["rejected_count"] = len(rejected)
+
+        # Step 2b: Memory recall — prepend prior reasoning to the payload
+        memory_context_count = 0
+        if memory_recall:
+            recall_result = self._memory.recall(
+                query=question,
+                flavor=flavor,
+                time_range=memory_time_range,
+                limit=memory_recall_limit,
+            )
+            prior_graph = recall_result.get("@graph", [])
+            memory_context_count = len(prior_graph)
+            if prior_graph:
+                # Prepend prior observations to the grounded @graph so
+                # PayloadAssembler includes them in the system context
+                grounded_data["@graph"] = prior_graph + grounded_data["@graph"]
+                grounded_data["meta"]["memory_context_count"] = memory_context_count
+                grounded_data["meta"]["record_count"] += memory_context_count
 
         # Step 3: Assemble payload
         payload = self._assembler.assemble(
@@ -226,7 +266,46 @@ class RuntimeClient:
         )
 
         elapsed_ms = int((time.monotonic() - t_start) * 1000)
-        return self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result["memory_context_count"] = memory_context_count
+        return result
+
+    def remember(
+        self,
+        subject: str,
+        flavor: Optional[str] = None,
+        limit: int = 20,
+        time_range: Optional[Tuple[str, str]] = None,
+    ) -> dict:
+        """Convenience method: recall prior observations about a subject.
+
+        Wraps :meth:`AgentMemory.recall` for ergonomic use alongside
+        :meth:`ask`.  Returns a typed JSON-LD dict ready for inspection
+        or direct injection into a custom payload.
+
+        Args:
+            subject: Free-text subject string — matched against stored
+                     ``value_text`` and ``source_ref`` fields.
+            flavor: Optional flavor scope restriction.
+            limit: Maximum records to return (default 20).
+            time_range: Optional ``(iso_from, iso_to)`` tuple.
+
+        Returns:
+            A ``MemoryRecallResult`` JSON-LD dict (same as
+            :meth:`AgentMemory.recall`).
+
+        Example::
+
+            client = RuntimeClient(db_path="db/enterprise.db")
+            prior = client.remember("AMF-East-01", flavor="network-ops")
+            print(f"Found {prior['result_count']} prior observations")
+        """
+        return self._memory.recall(
+            query=subject,
+            flavor=flavor,
+            time_range=time_range,
+            limit=limit,
+        )
 
     async def ask_async(
         self,
@@ -235,6 +314,9 @@ class RuntimeClient:
         max_records: int = 50,
         output_format: str = "json",
         save_payload: bool = False,
+        memory_recall: bool = False,
+        memory_recall_limit: int = 5,
+        memory_time_range: Optional[Tuple[str, str]] = None,
     ) -> dict:
         """Async version of :meth:`ask`.
 
@@ -244,6 +326,10 @@ class RuntimeClient:
             max_records: Maximum records to retrieve from the DB.
             output_format: Desired LLM response format.
             save_payload: If ``True``, save the assembled payload to disk.
+            memory_recall: If ``True``, prepend relevant prior reasoning to
+                the payload before the LLM call (same as sync :meth:`ask`).
+            memory_recall_limit: Maximum prior observations to prepend.
+            memory_time_range: Optional ``(iso_from, iso_to)`` time filter.
 
         Returns:
             A result dict (same shape as :meth:`ask`).
@@ -264,6 +350,25 @@ class RuntimeClient:
         grounded_data["meta"]["record_count"] = len(accepted)
         grounded_data["meta"]["rejected_count"] = len(rejected)
 
+        # Memory recall (async-compatible: DB I/O in executor)
+        memory_context_count = 0
+        if memory_recall:
+            recall_result = await loop.run_in_executor(
+                None,
+                lambda: self._memory.recall(
+                    query=question,
+                    flavor=flavor,
+                    time_range=memory_time_range,
+                    limit=memory_recall_limit,
+                ),
+            )
+            prior_graph = recall_result.get("@graph", [])
+            memory_context_count = len(prior_graph)
+            if prior_graph:
+                grounded_data["@graph"] = prior_graph + grounded_data["@graph"]
+                grounded_data["meta"]["memory_context_count"] = memory_context_count
+                grounded_data["meta"]["record_count"] += memory_context_count
+
         payload = self._assembler.assemble(
             question=question,
             flavor_name=flavor,
@@ -281,7 +386,9 @@ class RuntimeClient:
         )
 
         elapsed_ms = int((time.monotonic() - t_start) * 1000)
-        return self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result["memory_context_count"] = memory_context_count
+        return result
 
     def list_flavors(self) -> list:
         """Return a sorted list of all registered flavor names."""
