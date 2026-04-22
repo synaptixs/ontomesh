@@ -1,0 +1,30 @@
+# CQ-VEC-05 — Does hybrid retrieval's p95 latency stay within 2× the
+#             pure-vector baseline?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 5 exit gate: the class-hierarchy resolution + OWL filter
+# should not blow the retrieval budget.  The benchmark suite records
+# ``latencyP95Ms`` per run.  If an ONTOLOGY_BOUNDED run's p95 exceeds
+# 2× the UNFILTERED_VECTOR p95, the filter expansion is too costly and
+# needs caching or reasoner pre-computation.
+#
+# Pass condition: the result set is empty — every ONTOLOGY_BOUNDED run
+# keeps p95 latency at or below 2× the baseline p95.
+#
+# Priority: High
+# Validates: Workstream 5 — latency budget for hybrid retrieval
+# Expected: empty
+# Bound variables: ?run ?p95 ?baseline
+
+PREFIX vec: <https://ontology.example.com/vector/>
+
+SELECT ?run ?p95 ?baseline
+WHERE {
+    ?run a vec:BenchmarkRun ;
+         vec:strategy "ONTOLOGY_BOUNDED" ;
+         vec:latencyP95Ms ?p95 ;
+         vec:baselineP95Ms ?baseline .
+
+    FILTER (?p95 > 2 * ?baseline)
+}
+ORDER BY DESC(?p95)
+LIMIT 20

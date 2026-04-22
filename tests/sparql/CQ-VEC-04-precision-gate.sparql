@@ -1,0 +1,29 @@
+# CQ-VEC-04 — Does the ontology-bounded strategy meet its precision gate?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 5 exit gate: precision@5 for ONTOLOGY_BOUNDED must be at
+# least 40% above the UNFILTERED_VECTOR baseline on the telecom test
+# corpus.  The benchmark suite persists an
+# ``improvementOverBaseline`` metric per run — a run that falls below
+# the 0.40 threshold is a gate failure and must surface in the
+# governance scorecard.
+#
+# Pass condition: the result set is empty — no recent ONTOLOGY_BOUNDED
+# run fell below the 0.40 improvement threshold.
+#
+# Priority: Critical
+# Validates: Workstream 5 — precision improvement gate (+40%)
+# Expected: empty
+# Bound variables: ?run ?improvement
+
+PREFIX vec: <https://ontology.example.com/vector/>
+
+SELECT ?run ?improvement
+WHERE {
+    ?run a vec:BenchmarkRun ;
+         vec:strategy "ONTOLOGY_BOUNDED" ;
+         vec:improvementOverBaseline ?improvement .
+
+    FILTER (?improvement < 0.40)
+}
+ORDER BY ?improvement
+LIMIT 20

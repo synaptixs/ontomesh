@@ -37,3 +37,8 @@ CQ-TMF10,High,PASS-STRUCTURAL,"Which trouble tickets are open or in-progress,",r
 CQ-TMF11,High,PASS-STRUCTURAL,"Which network slice profiles are active,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF11-network-slice-profiles.sparql
 CQ-TMF12,High,PASS-STRUCTURAL,"Which service quality reports show SLA non-compliance,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF12-service-quality-reports.sparql
 CQ-TMF13,High,PASS-STRUCTURAL,"Which customer bills are outstanding or disputed,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF13-customer-bills.sparql
+CQ-VEC-01,Critical,PASS-STRUCTURAL,Does every indexed embedding record carry a valid OWL class IRI?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 5 — type-safe vector index (class filter,CQ-VEC-01-index-records-typed.sparql
+CQ-VEC-02,Critical,PASS-STRUCTURAL,Does any hybrid retrieval hit leak a Restricted-tier record,rdflib,0,(TBox-only — no instance data in ontology),Workstream 5 — sensitivity-tier enforcement at retrieval,CQ-VEC-02-tier-enforced.sparql
+CQ-VEC-03,High,PASS-STRUCTURAL,Does every ontology-bounded query log a non-empty,rdflib,0,(TBox-only — no instance data in ontology),Workstream 5 — class-hierarchy resolution actually runs,CQ-VEC-03-class-filter-applied.sparql
+CQ-VEC-04,Critical,PASS-STRUCTURAL,Does the ontology-bounded strategy meet its precision gate?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 5 — precision improvement gate (+40%),CQ-VEC-04-precision-gate.sparql
+CQ-VEC-05,High,PASS-STRUCTURAL,Does hybrid retrieval's p95 latency stay within 2× the,rdflib,0,(TBox-only — no instance data in ontology),Workstream 5 — latency budget for hybrid retrieval,CQ-VEC-05-latency-bound.sparql
