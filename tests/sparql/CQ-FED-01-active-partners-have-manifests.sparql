@@ -1,0 +1,31 @@
+# CQ-FED-01 — Does every ACTIVE partner carry a verified capability manifest?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates Workstream 3 invariant: a partner cannot be in the ACTIVE
+# trust_state unless a signed, non-expired capability manifest is on
+# record.  Any ACTIVE partner with a missing manifest signature or
+# without a validUntil timestamp is a gate failure.
+#
+# Pass condition: the result set is empty (no ACTIVE partners lack a
+# manifest signature OR validity window).
+#
+# Priority: Critical
+# Validates: Workstream 3 — partner registry + manifest coupling
+# Expected: empty
+# Bound variables: ?partner ?displayName ?trustState
+
+PREFIX fed: <https://ontology.example.com/federation/>
+
+SELECT ?partner ?displayName ?trustState
+WHERE {
+    ?partner a fed:Partner ;
+             fed:displayName ?displayName ;
+             fed:trustState  ?trustState .
+
+    FILTER (?trustState = "ACTIVE")
+    FILTER NOT EXISTS {
+        ?partner fed:manifestSignature ?sig ;
+                 fed:validUntil        ?vu .
+        FILTER (STRLEN(STR(?sig)) > 40)
+    }
+}
+LIMIT 20
