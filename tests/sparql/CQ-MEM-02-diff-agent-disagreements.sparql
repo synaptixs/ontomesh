@@ -1,0 +1,36 @@
+# CQ-MEM-02 — Does diff correctly identify agent disagreements?
+# ──────────────────────────────────────────────────────────────
+# Verifies that pairs of ObservationRecord entries from different agent
+# flavors (identified by source_ref) that share the same entity_iri can
+# be found and compared.  The diff operation's correctness depends on
+# this query pattern being satisfiable.
+#
+# Pass condition: at least one entity_iri exists where two different
+# source_ref values (agent flavors) have produced observations, so
+# a diff can be computed.
+#
+# Bound variables:
+#   ?entity, ?srcA, ?srcB, ?valA, ?valB
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+
+SELECT DISTINCT ?entity ?srcA ?srcB ?valA ?valB
+WHERE {
+    ?recA a tmf:ObservationRecord ;
+          tmf:entity_iri  ?entity ;
+          tmf:source_ref  ?srcA ;
+          tmf:value_text  ?valA .
+
+    ?recB a tmf:ObservationRecord ;
+          tmf:entity_iri  ?entity ;
+          tmf:source_ref  ?srcB ;
+          tmf:value_text  ?valB .
+
+    FILTER (?recA != ?recB)
+    FILTER (?srcA != ?srcB)
+
+    FILTER NOT EXISTS { ?recA prov:wasInvalidatedBy ?x }
+    FILTER NOT EXISTS { ?recB prov:wasInvalidatedBy ?y }
+}
+LIMIT 10

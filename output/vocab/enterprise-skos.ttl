@@ -119,6 +119,34 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :Role .
 
+:RuntimeFlavorConcept
+  a skos:Concept ;
+  skos:prefLabel "Runtime Flavor" ;
+  skos:altLabel "Ontology Flavor" ;
+  skos:altLabel "Domain Flavor" ;
+  skos:altLabel "LLM Scope" ;
+  skos:definition "An ontology domain flavor configuration defining scope, OWL classes, SHACL shapes, and sensitivity tier for AI runtime sessions." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :RuntimeFlavor .
+
+:RuntimeGroundingConcept
+  a skos:Concept ;
+  skos:prefLabel "Runtime Grounding" ;
+  skos:altLabel "Data Grounding" ;
+  skos:altLabel "Context Retrieval" ;
+  skos:definition "A data grounding event linking a payload to the DB tables and records retrieved for context." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :RuntimeGrounding .
+
+:RuntimePayloadConcept
+  a skos:Concept ;
+  skos:prefLabel "Runtime Payload" ;
+  skos:altLabel "LLM Payload" ;
+  skos:altLabel "AI Payload" ;
+  skos:definition "A fully assembled LLM input payload capturing question, flavor, model, and token budget for a single AI call." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :RuntimePayload .
+
 :AgreementConcept
   a skos:Concept ;
   skos:prefLabel "Agreement" ;
@@ -156,6 +184,15 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :Characteristic .
 
+:ConflictEventConcept
+  a skos:Concept ;
+  skos:prefLabel "Conflict Event" ;
+  skos:altLabel "Assertion Conflict" ;
+  skos:altLabel "Semantic Conflict" ;
+  skos:definition "A detected conflict between two ontology assertions with 3-tier resolution chain tracking." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ConflictEvent .
+
 :CustomerAccountConcept
   a skos:Concept ;
   skos:prefLabel "Customer Account" ;
@@ -164,6 +201,60 @@
   skos:definition "A billing and service management account per TMF666." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :CustomerAccount .
+
+:CustomerBillConcept
+  a skos:Concept ;
+  skos:prefLabel "Customer Bill" ;
+  skos:altLabel "Invoice" ;
+  skos:altLabel "Bill" ;
+  skos:altLabel "Statement" ;
+  skos:definition "A customer invoice per TMF678 Customer Bill Management." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :CustomerBill .
+
+:EventSubscriptionConcept
+  a skos:Concept ;
+  skos:prefLabel "Event Subscription" ;
+  skos:altLabel "Notification Subscription" ;
+  skos:altLabel "Hub Subscription" ;
+  skos:definition "An async event subscription per TMF630 §5 notification pattern." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :EventSubscription .
+
+:TmfExportJobConcept
+  a skos:Concept ;
+  skos:prefLabel "Tmf Export Job" ;
+  skos:definition "Vocabulary concept for Tmf Export Job." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TmfExportJob .
+
+:GeographicSiteConcept
+  a skos:Concept ;
+  skos:prefLabel "Geographic Site" ;
+  skos:altLabel "Site" ;
+  skos:altLabel "Location" ;
+  skos:altLabel "Data Centre" ;
+  skos:altLabel "Cell Site" ;
+  skos:definition "A structured physical site record (data centre, cell tower, pop) per TMF674." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :GeographicSite .
+
+:TmfImportJobConcept
+  a skos:Concept ;
+  skos:prefLabel "Tmf Import Job" ;
+  skos:definition "Vocabulary concept for Tmf Import Job." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TmfImportJob .
+
+:NetworkSliceProfileConcept
+  a skos:Concept ;
+  skos:prefLabel "Network Slice Profile" ;
+  skos:altLabel "Slice Template" ;
+  skos:altLabel "NST" ;
+  skos:altLabel "Network Slice Specification" ;
+  skos:definition "A 3GPP S-NSSAI-aligned network slice profile with SLA parameters per TMF645." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :NetworkSliceProfile .
 
 :NoteConcept
   a skos:Concept ;
@@ -243,6 +334,15 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ProductOffering .
 
+:ProductOfferingQualificationConcept
+  a skos:Concept ;
+  skos:prefLabel "Product Offering Qualification" ;
+  skos:altLabel "Eligibility Check" ;
+  skos:altLabel "Feasibility Check" ;
+  skos:definition "Eligibility check for a product offering at a given location per TMF679." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ProductOfferingQualification .
+
 :ProductOrderConcept
   a skos:Concept ;
   skos:prefLabel "Product Order" ;
@@ -317,6 +417,16 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ServiceProblem .
 
+:ServiceQualityReportConcept
+  a skos:Concept ;
+  skos:prefLabel "Service Quality Report" ;
+  skos:altLabel "SLA Report" ;
+  skos:altLabel "KQI Report" ;
+  skos:altLabel "QoS Assessment" ;
+  skos:definition "An SLA compliance or KQI quality report per TMF657." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :ServiceQualityReport .
+
 :ServiceSpecificationConcept
   a skos:Concept ;
   skos:prefLabel "Service Specification" ;
@@ -325,6 +435,23 @@
   skos:definition "Catalog definition of a service type. Specification pattern per SID/TMF633." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ServiceSpecification .
+
+:TmfTaskConcept
+  a skos:Concept ;
+  skos:prefLabel "Tmf Task" ;
+  skos:definition "Vocabulary concept for Tmf Task." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TmfTask .
+
+:TroubleTicketConcept
+  a skos:Concept ;
+  skos:prefLabel "Trouble Ticket" ;
+  skos:altLabel "Incident" ;
+  skos:altLabel "Issue" ;
+  skos:altLabel "Problem Ticket" ;
+  skos:definition "A customer or resource trouble ticket per TMF621. Tracks issue lifecycle from New to Closed." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TroubleTicket .
 
 :UserRoleConcept
   a skos:Concept ;
@@ -531,6 +658,22 @@
   skos:notation "Active" ;
   skos:inScheme :AgreementStatusScheme .
 
+:ConflictEventStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Conflict Event Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:ConflictEventStatusEscalated
+  a skos:Concept ;
+  skos:prefLabel "Escalated" ;
+  skos:notation "Escalated" ;
+  skos:inScheme :ConflictEventStatusScheme .
+:ConflictEventStatusResolved
+  a skos:Concept ;
+  skos:prefLabel "Resolved" ;
+  skos:notation "Resolved" ;
+  skos:inScheme :ConflictEventStatusScheme .
+
 :CustomerAccountStatusScheme
   a skos:ConceptScheme ;
   skos:prefLabel "Customer Account Status Values" ;
@@ -541,6 +684,38 @@
   skos:prefLabel "Active" ;
   skos:notation "Active" ;
   skos:inScheme :CustomerAccountStatusScheme .
+
+:EventSubscriptionEventTypeScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Event Subscription Event Type Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:EventSubscriptionEventTypeAlarmstatechange
+  a skos:Concept ;
+  skos:prefLabel "Alarmstatechange" ;
+  skos:notation "AlarmStateChange" ;
+  skos:inScheme :EventSubscriptionEventTypeScheme .
+:EventSubscriptionEventTypeKpithresholdbreach
+  a skos:Concept ;
+  skos:prefLabel "Kpithresholdbreach" ;
+  skos:notation "KPIThresholdBreach" ;
+  skos:inScheme :EventSubscriptionEventTypeScheme .
+:EventSubscriptionEventTypeServiceorderstatechange
+  a skos:Concept ;
+  skos:prefLabel "Serviceorderstatechange" ;
+  skos:notation "ServiceOrderStateChange" ;
+  skos:inScheme :EventSubscriptionEventTypeScheme .
+
+:EventSubscriptionStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Event Subscription Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:EventSubscriptionStatusActive
+  a skos:Concept ;
+  skos:prefLabel "Active" ;
+  skos:notation "Active" ;
+  skos:inScheme :EventSubscriptionStatusScheme .
 
 :PartyRoleStatusScheme
   a skos:ConceptScheme ;
@@ -595,3 +770,30 @@
   skos:prefLabel "Resolved" ;
   skos:notation "Resolved" ;
   skos:inScheme :ServiceProblemStatusScheme .
+
+:ServiceQualityReportStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Service Quality Report Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:ServiceQualityReportStatusActive
+  a skos:Concept ;
+  skos:prefLabel "Active" ;
+  skos:notation "Active" ;
+  skos:inScheme :ServiceQualityReportStatusScheme .
+
+:TroubleTicketStatusScheme
+  a skos:ConceptScheme ;
+  skos:prefLabel "Trouble Ticket Status Values" ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
+
+:TroubleTicketStatusIn progress
+  a skos:Concept ;
+  skos:prefLabel "In Progress" ;
+  skos:notation "In Progress" ;
+  skos:inScheme :TroubleTicketStatusScheme .
+:TroubleTicketStatusResolved
+  a skos:Concept ;
+  skos:prefLabel "Resolved" ;
+  skos:notation "Resolved" ;
+  skos:inScheme :TroubleTicketStatusScheme .

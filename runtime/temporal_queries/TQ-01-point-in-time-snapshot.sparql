@@ -1,0 +1,43 @@
+# TQ-01 — Point-in-time ontology snapshot
+# ─────────────────────────────────────────
+# Returns all non-invalidated ObservationRecord triples that were valid
+# at the requested timestamp.  Supports the memory.snapshot() operation.
+#
+# Parameters (replace before execution):
+#   {{AT_TIMESTAMP}}   — ISO 8601 datetime, e.g. "2026-04-10T02:00:00Z"
+#   {{ENTITY_IRI}}     — (optional) entity IRI, or leave as "" to skip filter
+#
+# Bound variables returned:
+#   ?record ?entity ?type ?method ?generated ?confidence ?valueText
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+
+SELECT ?record ?entity ?type ?method ?generated ?confidence ?valueText
+WHERE {
+    ?record a tmf:ObservationRecord ;
+            tmf:entity_iri    ?entity ;
+            tmf:record_type   ?type ;
+            tmf:derivation_method ?method ;
+            prov:generatedAtTime  ?generated .
+
+    OPTIONAL { ?record tmf:confidence_score ?confidence }
+    OPTIONAL { ?record tmf:value_text       ?valueText  }
+
+    # Valid at snapshot time: generated at or before AT_TIMESTAMP
+    FILTER (?generated <= "{{AT_TIMESTAMP}}"^^xsd:dateTime)
+
+    # Exclude invalidated observations
+    FILTER NOT EXISTS {
+        ?record prov:wasInvalidatedBy ?inv .
+    }
+
+    # Optional entity filter
+    FILTER (
+        "{{ENTITY_IRI}}" = ""
+        || CONTAINS(STR(?entity), "{{ENTITY_IRI}}")
+    )
+}
+ORDER BY DESC(?generated)

@@ -25,5 +25,12 @@
   },
   "db_tables": ["tmf_resource", "tmf_alarm", "tmf_performance_indicator"],
   "system_prompt_hint": "You are a network operations AI assistant. Focus on resource operational states, alarm severity and correlation, KPI threshold breaches, and 5G network function health. Prioritise Critical and Major alarms. Use TMF639 and TMF642 terminology.",
-  "cq_ids": ["CQ-TMF1", "CQ-TMF2", "CQ-TMF3", "CQ-TMF4", "CQ-TMF5"]
+  "cq_ids": ["CQ-TMF1", "CQ-TMF2", "CQ-TMF3", "CQ-TMF4", "CQ-TMF5"],
+  "memory_sharing": {
+    "can_read_from": ["fault-management", "network-ops"],
+    "can_be_read_by": ["fault-management", "compliance", "network-ops"],
+    "max_readable_tier": "Internal",
+    "prov_influence_enabled": true,
+    "sharing_note": "Network-ops observations are shared with fault-management for cross-domain alarm correlation and with compliance for audit evidence."
+  }
 }

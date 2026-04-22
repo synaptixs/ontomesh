@@ -192,6 +192,82 @@ class FlavorRegistry:
         ]
         return "\n".join(lines)
 
+    def get_memory_sharing_policy(self, name: str) -> dict:
+        """Return the memory sharing policy for the named flavor.
+
+        Memory sharing policies define which agent flavors can read which
+        other agents' ObservationRecord partitions, and under what sensitivity
+        tier constraints.  Implements the cross-agent memory sharing component
+        of Workstream 1 (Agentic Semantic Memory Layer).
+
+        Args:
+            name: Flavor name.
+
+        Returns:
+            A memory sharing policy dict with keys:
+            - ``can_read_from``: list of flavor names this agent may read.
+            - ``can_be_read_by``: list of flavor names that may read this agent.
+            - ``max_readable_tier``: highest sensitivity tier accessible.
+            - ``prov_influence_enabled``: whether ``prov:wasInfluencedBy``
+              links are emitted when this agent cites another's observation.
+            - ``sharing_note``: human-readable policy rationale.
+
+            Returns a permissive default policy if no ``memory_sharing``
+            block is defined in the flavor JSON.
+        """
+        flavor = self.load(name)
+        default_policy = {
+            "can_read_from":         [name],
+            "can_be_read_by":        [],
+            "max_readable_tier":     "Internal",
+            "prov_influence_enabled": True,
+            "sharing_note":          "Default policy: isolated — reads only own observations.",
+        }
+        policy = flavor.get("memory_sharing", {})
+        return {**default_policy, **policy}
+
+    def check_memory_access(
+        self,
+        requesting_flavor: str,
+        target_flavor: str,
+        target_tier: str,
+    ) -> bool:
+        """Check whether *requesting_flavor* may read *target_flavor*'s observations.
+
+        Validates both directions:
+        1. The requesting flavor's ``can_read_from`` includes the target.
+        2. The target flavor's ``can_be_read_by`` includes the requester.
+        3. The target's sensitivity tier does not exceed the requester's
+           ``max_readable_tier``.
+
+        Args:
+            requesting_flavor: The agent flavor requesting access.
+            target_flavor: The agent flavor whose observations are being read.
+            target_tier: Sensitivity tier of the target observations.
+
+        Returns:
+            ``True`` if access is permitted, ``False`` otherwise.
+        """
+        _tier_rank = {"Public": 0, "Internal": 1, "Confidential": 2, "Restricted": 3}
+
+        req_policy  = self.get_memory_sharing_policy(requesting_flavor)
+        tgt_policy  = self.get_memory_sharing_policy(target_flavor)
+
+        # 1. Requester must list target in can_read_from
+        if target_flavor not in req_policy.get("can_read_from", []):
+            return False
+
+        # 2. Target must permit requester in can_be_read_by
+        if requesting_flavor not in tgt_policy.get("can_be_read_by", []):
+            return False
+
+        # 3. Sensitivity tier gate
+        max_tier = req_policy.get("max_readable_tier", "Internal")
+        if _tier_rank.get(target_tier, 0) > _tier_rank.get(max_tier, 1):
+            return False
+
+        return True
+
     def register(self, flavor_dict: dict, save: bool = False) -> None:
         """Register a flavor in-memory and optionally persist it to disk.
 
