@@ -1,0 +1,31 @@
+# CQ-VEC-03 — Does every ontology-bounded query log a non-empty
+#             resolved-classes list?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 5 invariant: the class-hierarchy resolver (OWL subclass
+# walk) must have expanded at least one class before the vector
+# similarity query ran.  An empty ``resolvedClasses`` payload on a
+# query tagged ``ONTOLOGY_BOUNDED`` means the filter was silently
+# skipped — precision@k degrades to unfiltered RAG.
+#
+# Pass condition: the result set is empty — every ONTOLOGY_BOUNDED
+# query log row has at least one resolved class.
+#
+# Priority: High
+# Validates: Workstream 5 — class-hierarchy resolution actually runs
+# Expected: empty
+# Bound variables: ?query ?strategy
+
+PREFIX vec: <https://ontology.example.com/vector/>
+
+SELECT ?query ?strategy
+WHERE {
+    ?query a vec:QueryLog ;
+           vec:strategy ?strategy .
+
+    FILTER (?strategy = "ONTOLOGY_BOUNDED")
+
+    FILTER NOT EXISTS {
+        ?query vec:resolvedClass ?cls .
+    }
+}
+LIMIT 20

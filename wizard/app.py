@@ -396,6 +396,66 @@ def comply_verify():
     return jsonify(bun_mod.verify_bundle(path))
 
 
+# ── Workstream 5 — Ontology-Bounded Vector Retrieval ──────────────────────
+
+@app.route("/api/retrieve/indexes", methods=["GET"])
+def retrieve_list_indexes():
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "runtime"))
+    from runtime.embeddings import pipeline as pipe_mod
+    return jsonify({"indexes": pipe_mod.list_indexes(_DB_PATH)})
+
+
+@app.route("/api/retrieve/index/<flavor>", methods=["POST"])
+def retrieve_index_flavor(flavor: str):
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "runtime"))
+    from runtime.embeddings import pipeline as pipe_mod
+    body = request.get_json(silent=True) or {}
+    return jsonify(pipe_mod.index_flavor(
+        flavor,
+        db_path=_DB_PATH,
+        connection_string=body.get("vector_store"),
+        model_id=body.get("model"),
+        force=bool(body.get("force", False)),
+    ))
+
+
+@app.route("/api/retrieve/query", methods=["POST"])
+def retrieve_query():
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "runtime"))
+    from runtime.hybrid_retriever import HybridRetriever
+    body = request.get_json(force=True) or {}
+    flavor = body.get("flavor")
+    question = body.get("question")
+    if not (flavor and question):
+        return jsonify({"error": "flavor and question are required"}), 400
+    retriever = HybridRetriever(flavor=flavor, db_path=_DB_PATH)
+    return jsonify(retriever.retrieve(
+        question,
+        class_expression=body.get("class_expression"),
+        k=int(body.get("k", 5)),
+        strategy=body.get("strategy", "ONTOLOGY_BOUNDED"),
+    ))
+
+
+@app.route("/api/retrieve/benchmark", methods=["POST"])
+def retrieve_benchmark():
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "runtime"))
+    from runtime.embeddings import benchmark as bench_mod
+    return jsonify(bench_mod.run_benchmark(db_path=_DB_PATH, out_path=_OUT_DIR))
+
+
+@app.route("/api/retrieve/benchmark", methods=["GET"])
+def retrieve_benchmark_latest():
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "runtime"))
+    from runtime.embeddings import benchmark as bench_mod
+    return jsonify({"strategies": bench_mod.read_latest_benchmark(_DB_PATH)})
+
+
 @app.route("/api/output/<subdir>/<filename>")
 def serve_output(subdir: str, filename: str):
     out_dir = os.path.join(ROOT, "output", subdir)

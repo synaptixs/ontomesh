@@ -171,6 +171,7 @@
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
       <li data-step="evolve"><span class="step-num">E</span> Evolution Review</li>
       <li data-step="comply"><span class="step-num">C</span> Compliance Dashboard</li>
+      <li data-step="retrieve"><span class="step-num">V</span> Vector Retrieval</li>
     </ul>
     <div class="sidebar-footer">
       <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
@@ -411,6 +412,59 @@
       <div class="card" id="cmp-gap-card" style="display:none">
         <h3>Gap analysis</h3>
         <div id="cmp-gap"></div>
+      </div>
+    </div>
+
+    <!-- Vector Retrieval (Workstream 5) -->
+    <div class="step-panel" id="step-retrieve">
+      <div class="step-title">Ontology-Bounded Vector Retrieval</div>
+      <div class="step-subtitle">Workstream 5 — The OWL class hierarchy becomes a hard semantic filter on vector similarity search. Inspect embedding indexes, query with class-scoped semantics, and compare retrieval strategies.</div>
+
+      <div class="card">
+        <h3>Embedding indexes</h3>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+          <button class="btn" onclick="vecRefreshIndexes()">⟳ Refresh indexes</button>
+          <span id="vec-idx-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div id="vec-index-list" style="overflow-x:auto">Click refresh to load indexes.</div>
+      </div>
+
+      <div class="card">
+        <h3>Hybrid retrieval — ontology-bounded query</h3>
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">
+          <label>Flavor:
+            <select id="vec-flavor" style="min-width:200px"></select>
+          </label>
+          <label>Class expression:
+            <input id="vec-class-expr" style="min-width:260px" placeholder="tmf:NetworkFunction | tmf:Alarm" />
+          </label>
+          <label>k:
+            <input id="vec-k" type="number" value="5" min="1" max="50" style="width:60px" />
+          </label>
+        </div>
+        <div style="margin-top:8px">
+          <label>Question:
+            <input id="vec-question" style="width:100%" placeholder="Which network functions are degraded?" />
+          </label>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px">
+          <button class="btn btn-primary" onclick="vecQuery()">▶ Run ontology-bounded query</button>
+          <button class="btn btn-ghost" onclick="vecCompare()">Compare all strategies</button>
+        </div>
+      </div>
+
+      <div class="card" id="vec-results-card" style="display:none">
+        <h3>Results</h3>
+        <div id="vec-results"></div>
+      </div>
+
+      <div class="card">
+        <h3>Retrieval benchmark</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+          <button class="btn btn-primary" onclick="vecBenchmarkRun()">▶ Run benchmark suite</button>
+          <button class="btn btn-ghost" onclick="vecBenchmarkLoad()">Load latest run</button>
+        </div>
+        <div id="vec-benchmark" style="overflow-x:auto">Click run to compare UNFILTERED_VECTOR vs ONTOLOGY_BOUNDED vs PURE_SPARQL.</div>
       </div>
     </div>
 
@@ -1111,6 +1165,172 @@ async function complyGap(){
     + '</ul>';
   document.getElementById('cmp-gap').innerHTML = html;
   document.getElementById('cmp-gap-card').style.display = 'block';
+}
+
+// ── Workstream 5 — Vector Retrieval tab ──────────────────────────────────
+
+async function vecRefreshIndexes(){
+  document.getElementById('vec-idx-status').textContent = 'Loading…';
+  const r = await fetch('/api/retrieve/indexes');
+  const j = await r.json();
+  const rows = j.indexes || [];
+  const sel = document.getElementById('vec-flavor');
+  sel.innerHTML = '';
+  const flavors = new Set();
+  rows.forEach(r => flavors.add(r.flavor));
+  ['network-ops','billing','compliance','customer','fault-management']
+    .concat([...flavors]).forEach(fl => {
+      if (![...sel.options].some(o => o.value === fl)){
+        const o = document.createElement('option'); o.value = fl; o.textContent = fl;
+        sel.appendChild(o);
+      }
+    });
+
+  if (!rows.length){
+    document.getElementById('vec-index-list').innerHTML =
+      '<em>No embedding indexes registered. Run <code>python3 toolkit.py --phase embed</code>.</em>';
+    document.getElementById('vec-idx-status').textContent = '';
+    return;
+  }
+  let html = '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+    + '<th style="text-align:left; padding:6px">Index</th>'
+    + '<th style="text-align:left; padding:6px">Flavor</th>'
+    + '<th style="text-align:left; padding:6px">Store</th>'
+    + '<th style="text-align:left; padding:6px">Model</th>'
+    + '<th style="text-align:right; padding:6px">Dim</th>'
+    + '<th style="text-align:right; padding:6px">Records</th>'
+    + '<th style="text-align:left; padding:6px">Tier</th>'
+    + '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += `<tr style="border-top:1px solid var(--border)">`
+      + `<td style="padding:6px"><code>${escapeHtml(r.index_name)}</code></td>`
+      + `<td style="padding:6px">${escapeHtml(r.flavor)}</td>`
+      + `<td style="padding:6px">${escapeHtml(r.vector_store)}</td>`
+      + `<td style="padding:6px">${escapeHtml(r.model_id || '')}</td>`
+      + `<td style="padding:6px; text-align:right">${r.dimensions}</td>`
+      + `<td style="padding:6px; text-align:right">${r.record_count}</td>`
+      + `<td style="padding:6px">${escapeHtml(r.max_sensitivity)}</td>`
+      + `</tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('vec-index-list').innerHTML = html;
+  document.getElementById('vec-idx-status').textContent =
+    `${rows.length} indexes · ${rows.reduce((s,r)=>s+r.record_count,0)} total records`;
+}
+
+async function _vecSearch(strategy){
+  const body = {
+    flavor: document.getElementById('vec-flavor').value,
+    question: document.getElementById('vec-question').value,
+    class_expression: document.getElementById('vec-class-expr').value || null,
+    k: parseInt(document.getElementById('vec-k').value || '5', 10),
+    strategy: strategy,
+  };
+  if (!body.question){ alert('Enter a question first'); return null; }
+  const r = await fetch('/api/retrieve/query', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body),
+  });
+  return await r.json();
+}
+
+function _vecRenderStrategy(label, j){
+  const results = j.results || [];
+  let html = `<h4>${escapeHtml(label)}</h4>`
+    + `<p style="font-size:12px;color:var(--muted)">`
+    + `${results.length} results · latency ${j.latency_ms}ms · `
+    + `classes resolved: ${(j.resolved_classes||[]).length} · tier ≤ ${escapeHtml(j.max_tier)}</p>`;
+  if (!results.length){ html += '<em>No results.</em>'; return html; }
+  html += '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+    + '<th style="text-align:left; padding:6px">#</th>'
+    + '<th style="text-align:left; padding:6px">OWL class</th>'
+    + '<th style="text-align:right; padding:6px">Similarity</th>'
+    + '<th style="text-align:right; padding:6px">Composite</th>'
+    + '<th style="text-align:left; padding:6px">Table</th>'
+    + '<th style="text-align:left; padding:6px">PK</th>'
+    + '<th style="text-align:left; padding:6px">Tier</th>'
+    + '</tr></thead><tbody>';
+  results.forEach((r,i) => {
+    const cls = (r.owl_class || '').split('/').pop();
+    html += `<tr style="border-top:1px solid var(--border)">`
+      + `<td style="padding:6px">${i+1}</td>`
+      + `<td style="padding:6px">${escapeHtml(cls)}</td>`
+      + `<td style="padding:6px; text-align:right">${(r.similarity||0).toFixed(3)}</td>`
+      + `<td style="padding:6px; text-align:right">${(r.composite_score||0).toFixed(3)}</td>`
+      + `<td style="padding:6px"><code>${escapeHtml(r.source_table||'')}</code></td>`
+      + `<td style="padding:6px">${escapeHtml(r.primary_key||'')}</td>`
+      + `<td style="padding:6px">${escapeHtml(r.sensitivity_tier||'')}</td>`
+      + `</tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+async function vecQuery(){
+  const j = await _vecSearch('ONTOLOGY_BOUNDED');
+  if (!j) return;
+  if (j.error){ alert(j.error); return; }
+  document.getElementById('vec-results').innerHTML =
+    _vecRenderStrategy('Ontology-bounded vector retrieval', j);
+  document.getElementById('vec-results-card').style.display = 'block';
+}
+
+async function vecCompare(){
+  const strategies = ['UNFILTERED_VECTOR','ONTOLOGY_BOUNDED','PURE_SPARQL'];
+  let html = '';
+  for (const s of strategies){
+    const j = await _vecSearch(s);
+    if (!j || j.error) continue;
+    html += _vecRenderStrategy(s, j);
+  }
+  document.getElementById('vec-results').innerHTML = html || '<em>No results.</em>';
+  document.getElementById('vec-results-card').style.display = 'block';
+}
+
+function _vecRenderBenchmark(rows){
+  if (!rows || !rows.length){
+    return '<em>No benchmark data yet.</em>';
+  }
+  let html = '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+    + '<th style="text-align:left; padding:6px">Strategy</th>'
+    + '<th style="text-align:left; padding:6px">Domain</th>'
+    + '<th style="text-align:right; padding:6px">Queries</th>'
+    + '<th style="text-align:right; padding:6px">P@5</th>'
+    + '<th style="text-align:right; padding:6px">MRR</th>'
+    + '<th style="text-align:right; padding:6px">p50 ms</th>'
+    + '<th style="text-align:right; padding:6px">p95 ms</th>'
+    + '<th style="text-align:right; padding:6px">Δ vs baseline</th>'
+    + '<th style="text-align:right; padding:6px">Wrong-class blocked</th>'
+    + '</tr></thead><tbody>';
+  rows.forEach(r => {
+    const delta = (r.improvement_over_baseline * 100).toFixed(1) + '%';
+    html += `<tr style="border-top:1px solid var(--border)">`
+      + `<td style="padding:6px"><code>${escapeHtml(r.strategy)}</code></td>`
+      + `<td style="padding:6px">${escapeHtml(r.domain||'')}</td>`
+      + `<td style="padding:6px; text-align:right">${r.queries}</td>`
+      + `<td style="padding:6px; text-align:right">${(r.precision_at_5||0).toFixed(3)}</td>`
+      + `<td style="padding:6px; text-align:right">${(r.mean_reciprocal_rank||0).toFixed(3)}</td>`
+      + `<td style="padding:6px; text-align:right">${r.latency_p50_ms}</td>`
+      + `<td style="padding:6px; text-align:right">${r.latency_p95_ms}</td>`
+      + `<td style="padding:6px; text-align:right">${delta}</td>`
+      + `<td style="padding:6px; text-align:right">${(r.wrong_class_blocked||0).toFixed(2)}</td>`
+      + `</tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+async function vecBenchmarkRun(){
+  document.getElementById('vec-benchmark').innerHTML = 'Running benchmark…';
+  const r = await fetch('/api/retrieve/benchmark', {method:'POST'});
+  const j = await r.json();
+  document.getElementById('vec-benchmark').innerHTML = _vecRenderBenchmark(j.strategies || []);
+}
+
+async function vecBenchmarkLoad(){
+  const r = await fetch('/api/retrieve/benchmark');
+  const j = await r.json();
+  document.getElementById('vec-benchmark').innerHTML = _vecRenderBenchmark(j.strategies || []);
 }
 
 init();

@@ -27,6 +27,7 @@ from assembler import PayloadAssembler
 from output_gate import OutputGate
 from input_gate import InputGate
 from memory import AgentMemory
+from hybrid_retriever import HybridRetriever
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -129,6 +130,8 @@ class RuntimeClient:
         self._output_gate = OutputGate(db_path)
         self._adapter_instance = self._init_adapter(adapter, model, api_key)
         self._memory = AgentMemory(db_path)
+        # Workstream 5 — lazy per-flavor HybridRetriever cache
+        self._retrievers: dict = {}
 
     # ------------------------------------------------------------------
     # Properties
@@ -183,6 +186,9 @@ class RuntimeClient:
         memory_recall: bool = False,
         memory_recall_limit: int = 5,
         memory_time_range: Optional[Tuple[str, str]] = None,
+        retrieval: str = "structured",
+        class_expression: Optional[str] = None,
+        retrieval_k: int = 5,
     ) -> dict:
         """Run the full pipeline for a single question.
 
@@ -203,6 +209,17 @@ class RuntimeClient:
             memory_time_range: Optional ``(iso_from, iso_to)`` tuple to
                 restrict which prior observations are recalled.  ``None``
                 returns the most recent regardless of age.
+            retrieval: Retrieval strategy — ``"structured"`` (default,
+                SQL grounding only), ``"hybrid"`` (ontology-bounded
+                vector search + SQL grounding via Workstream 5), or
+                ``"vector-only"`` (skip SQL grounding).
+            class_expression: OWL class expression restricting the
+                hybrid retriever's search population (e.g.
+                ``"tmf:NetworkFunction"`` or
+                ``"tmf:Alarm | tmf:TroubleTicket"``).  Defaults to the
+                flavor's declared OWL classes.
+            retrieval_k: Number of hybrid-retrieval results to prepend
+                to the payload (default 5).
 
         Returns:
             A result dict with keys: ``question``, ``flavor``, ``answer``,
@@ -221,6 +238,27 @@ class RuntimeClient:
         grounded_data["@graph"] = accepted
         grounded_data["meta"]["record_count"] = len(accepted)
         grounded_data["meta"]["rejected_count"] = len(rejected)
+
+        # Step 2a: Hybrid retrieval — ontology-bounded vector search (Workstream 5)
+        hybrid_context_count = 0
+        if retrieval in ("hybrid", "vector-only"):
+            retriever = self._get_retriever(flavor)
+            hybrid = retriever.retrieve(
+                question,
+                class_expression=class_expression,
+                k=retrieval_k,
+                strategy="ONTOLOGY_BOUNDED",
+            )
+            hybrid_records = [r["jsonld"] for r in hybrid["results"] if r.get("jsonld")]
+            hybrid_context_count = len(hybrid_records)
+            if hybrid_records:
+                if retrieval == "vector-only":
+                    grounded_data["@graph"] = hybrid_records
+                else:
+                    grounded_data["@graph"] = hybrid_records + grounded_data["@graph"]
+                grounded_data["meta"]["hybrid_context_count"] = hybrid_context_count
+                grounded_data["meta"]["record_count"] = len(grounded_data["@graph"])
+                grounded_data["meta"]["hybrid_resolved_classes"] = hybrid["resolved_classes"][:12]
 
         # Step 2b: Memory recall — prepend prior reasoning to the payload
         memory_context_count = 0
@@ -268,7 +306,41 @@ class RuntimeClient:
         elapsed_ms = int((time.monotonic() - t_start) * 1000)
         result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
         result["memory_context_count"] = memory_context_count
+        result["hybrid_context_count"] = hybrid_context_count
+        result["retrieval"] = retrieval
         return result
+
+    def retrieve(
+        self,
+        question: str,
+        flavor: str,
+        *,
+        class_expression: Optional[str] = None,
+        k: int = 5,
+        strategy: str = "ONTOLOGY_BOUNDED",
+    ) -> dict:
+        """Run ontology-bounded hybrid retrieval without calling the LLM.
+
+        Thin wrapper around :class:`HybridRetriever` for teams that want
+        the retrieval layer only (Workstream 5 — hybrid retrieval for
+        custom RAG pipelines).  Returns the raw
+        :meth:`HybridRetriever.retrieve` output.
+        """
+        return self._get_retriever(flavor).retrieve(
+            question,
+            class_expression=class_expression,
+            k=k,
+            strategy=strategy,
+        )
+
+    def _get_retriever(self, flavor: str) -> HybridRetriever:
+        """Cache one :class:`HybridRetriever` per flavor."""
+        if flavor not in self._retrievers:
+            self._retrievers[flavor] = HybridRetriever(
+                flavor=flavor,
+                db_path=self._db_path,
+            )
+        return self._retrievers[flavor]
 
     def remember(
         self,
@@ -317,6 +389,9 @@ class RuntimeClient:
         memory_recall: bool = False,
         memory_recall_limit: int = 5,
         memory_time_range: Optional[Tuple[str, str]] = None,
+        retrieval: str = "structured",
+        class_expression: Optional[str] = None,
+        retrieval_k: int = 5,
     ) -> dict:
         """Async version of :meth:`ask`.
 
@@ -349,6 +424,30 @@ class RuntimeClient:
         grounded_data["@graph"] = accepted
         grounded_data["meta"]["record_count"] = len(accepted)
         grounded_data["meta"]["rejected_count"] = len(rejected)
+
+        # Hybrid retrieval (async-compatible: DB I/O in executor)
+        hybrid_context_count = 0
+        if retrieval in ("hybrid", "vector-only"):
+            retriever = self._get_retriever(flavor)
+            hybrid = await loop.run_in_executor(
+                None,
+                lambda: retriever.retrieve(
+                    question,
+                    class_expression=class_expression,
+                    k=retrieval_k,
+                    strategy="ONTOLOGY_BOUNDED",
+                ),
+            )
+            hybrid_records = [r["jsonld"] for r in hybrid["results"] if r.get("jsonld")]
+            hybrid_context_count = len(hybrid_records)
+            if hybrid_records:
+                if retrieval == "vector-only":
+                    grounded_data["@graph"] = hybrid_records
+                else:
+                    grounded_data["@graph"] = hybrid_records + grounded_data["@graph"]
+                grounded_data["meta"]["hybrid_context_count"] = hybrid_context_count
+                grounded_data["meta"]["record_count"] = len(grounded_data["@graph"])
+                grounded_data["meta"]["hybrid_resolved_classes"] = hybrid["resolved_classes"][:12]
 
         # Memory recall (async-compatible: DB I/O in executor)
         memory_context_count = 0
@@ -388,6 +487,8 @@ class RuntimeClient:
         elapsed_ms = int((time.monotonic() - t_start) * 1000)
         result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
         result["memory_context_count"] = memory_context_count
+        result["hybrid_context_count"] = hybrid_context_count
+        result["retrieval"] = retrieval
         return result
 
     def list_flavors(self) -> list:

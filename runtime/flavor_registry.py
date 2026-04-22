@@ -268,6 +268,45 @@ class FlavorRegistry:
 
         return True
 
+    def get_embedding_config(self, name: str) -> dict:
+        """Return the embedding configuration for the named flavor.
+
+        Embedding configuration drives Workstream 5 — Ontology-Bounded
+        Vector Retrieval.  Each flavor can declare its own model,
+        vector-store connection string, indexable OWL classes and text
+        serialisation template.  Permissive defaults are returned when
+        the flavor JSON has no ``embedding`` block so the pipeline can
+        run immediately against the in-memory SQLite-backed reference
+        store.
+
+        Args:
+            name: Flavor name.
+
+        Returns:
+            Dict with keys:
+              - ``model``             : embedding model ID (default
+                                        ``"hash-local-384"``)
+              - ``vector_store``      : connection string
+                                        (default ``"memory://<flavor>"``)
+              - ``text_template``     : optional f-string-style template
+                                        applied to each record
+              - ``owl_classes``       : restrict indexing to these IRIs
+                                        (``None`` → every flavor class)
+              - ``chunk_size``        : records per embedding
+              - ``max_sensitivity``   : tier cap for indexed records
+        """
+        flavor = self.load(name)
+        defaults = {
+            "model":           "hash-local-384",
+            "vector_store":    f"memory://{name}",
+            "text_template":   None,
+            "owl_classes":     None,
+            "chunk_size":      1,
+            "max_sensitivity": flavor.get("sensitivity_tier", "Internal"),
+        }
+        cfg = flavor.get("embedding") or {}
+        return {**defaults, **cfg}
+
     def register(self, flavor_dict: dict, save: bool = False) -> None:
         """Register a flavor in-memory and optionally persist it to disk.
 

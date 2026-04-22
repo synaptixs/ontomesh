@@ -493,6 +493,16 @@ def phase_report(out_path: str):
         print(f"  ✓ Compliance summary    → {out_path}/reports/compliance_summary.html")
     except Exception as exc:
         print(f"  ⚠  Compliance summary skipped: {exc}")
+    # Workstream 5 — retrieval summary
+    try:
+        sys.path.insert(0, HERE)
+        sys.path.insert(0, os.path.join(HERE, "runtime"))
+        from runtime.embeddings import dashboard as _vec_dash
+        _vec_dash.write_summary(out_path=out_path,
+                                db_path=os.path.join(HERE, "db", "enterprise.db"))
+        print(f"  ✓ Retrieval summary     → {out_path}/reports/retrieval_summary.html")
+    except Exception as exc:
+        print(f"  ⚠  Retrieval summary skipped: {exc}")
 
 
 # ── Main ─────────────────────────────────────────────────────────────────
@@ -505,7 +515,8 @@ def main():
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
                         choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
-                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply"],
+                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
+                                 "embed","retrieve"],
                         help="Run a specific phase only")
     # ── Workstream 2 (evolve) flags ────────────────────────────────────
     parser.add_argument("--review", action="store_true",
@@ -574,6 +585,30 @@ def main():
                         help="Run gap analysis across the registry (--phase comply)")
     parser.add_argument("--bundle-signer", default="https://enterprise.example.com/compliance#signer",
                         help="Signer IRI embedded in compliance bundles")
+    # ── Workstream 5 (embed / retrieve) flags ──────────────────────────
+    parser.add_argument("--flavor", default=None,
+                        help="Flavor name for --phase embed / retrieve")
+    parser.add_argument("--vector-store", default=None, metavar="CONN",
+                        help="Vector store connection string "
+                             "(e.g. memory://net, qdrant://localhost:6333/net)")
+    parser.add_argument("--embed-model", default=None,
+                        help="Embedding model ID (default: flavor's declared model "
+                             "or hash-local-384)")
+    parser.add_argument("--force-reindex", action="store_true",
+                        help="Re-embed every record regardless of content hash")
+    parser.add_argument("--question", default=None,
+                        help="Natural-language question for --phase retrieve")
+    parser.add_argument("--class-expression", default=None,
+                        help="OWL class expression filter for --phase retrieve "
+                             "(e.g. tmf:NetworkFunction | tmf:Alarm)")
+    parser.add_argument("--top-k", type=int, default=5,
+                        help="Top-k hybrid-retrieval results to return")
+    parser.add_argument("--benchmark", action="store_true",
+                        help="Run the retrieval benchmark suite (--phase retrieve)")
+    parser.add_argument("--list-indexes", action="store_true",
+                        help="List every registered embedding index (--phase embed)")
+    parser.add_argument("--strategy-compare", action="store_true",
+                        help="Run all three strategies for the given question")
     parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
     parser.add_argument("--log-format", default="auto",
                         choices=["auto","jsonl","syslog","cef","otlp","regex"],
@@ -1005,6 +1040,132 @@ def main():
         print(f"    sha256   : {bundle['sha256']}")
         print(f"    verified : {bundle['verified']}")
 
+    def phase_embed(db_path: str, out_path: str):
+        step(0, "Workstream 5 — Ontology-Bounded Vector Retrieval · Indexing")
+
+        sys.path.insert(0, HERE)
+        sys.path.insert(0, os.path.join(HERE, "runtime"))
+        from runtime.embeddings import pipeline as pipe_mod
+        from runtime.embeddings import dashboard as emb_dash
+
+        if args.list_indexes:
+            rows = pipe_mod.list_indexes(db_path)
+            if not rows:
+                print("  (no embedding indexes registered)")
+                return
+            print(f"\n  {len(rows)} embedding indexes:\n")
+            print(f"  {'Flavor':<22} {'Store':<12} {'Model':<30} {'Dim':>4} "
+                  f"{'Records':>7}  Tier")
+            print(f"  {'─'*22} {'─'*12} {'─'*30} {'─'*4} {'─'*7}  {'─'*12}")
+            for r in rows:
+                print(f"  {r['flavor']:<22} {r['vector_store']:<12} "
+                      f"{(r['model_id'] or '')[:30]:<30} "
+                      f"{r['dimensions']:>4} {r['record_count']:>7}  "
+                      f"{r['max_sensitivity']}")
+            return
+
+        target = args.flavor
+        if target:
+            summary = pipe_mod.index_flavor(
+                target,
+                db_path=db_path,
+                connection_string=args.vector_store,
+                model_id=args.embed_model,
+                force=args.force_reindex,
+            )
+            print(f"  ✓ Indexed '{summary['flavor']}' → {summary['indexed']} "
+                  f"new, {summary['skipped_unchanged']} unchanged, "
+                  f"{summary['total_records']} total "
+                  f"(model={summary['model']}, dim={summary['dim']}, "
+                  f"store={summary['connection']})")
+        else:
+            results = pipe_mod.reindex_all(
+                db_path=db_path,
+                force=args.force_reindex,
+            )
+            for r in results:
+                if "error" in r:
+                    print(f"  ✗ {r['flavor']:<20} ERROR {r['error']}")
+                else:
+                    print(f"  ✓ {r['flavor']:<20} indexed={r['indexed']:<5} "
+                          f"total={r['total_records']:<5} "
+                          f"model={r['model']}")
+
+        emb_dash.write_summary(out_path=out_path, db_path=db_path)
+
+    def phase_retrieve(db_path: str, out_path: str):
+        step(0, "Workstream 5 — Ontology-Bounded Vector Retrieval · Query")
+
+        sys.path.insert(0, HERE)
+        sys.path.insert(0, os.path.join(HERE, "runtime"))
+        from runtime.embeddings import benchmark as bench_mod
+        from runtime.embeddings import dashboard as emb_dash
+        from runtime.embeddings import pipeline  as pipe_mod
+        from runtime.hybrid_retriever import HybridRetriever
+
+        if args.benchmark:
+            summary = bench_mod.run_benchmark(db_path=db_path, out_path=out_path)
+            print(f"\n  Retrieval benchmark run {summary['run_id'][:8]} "
+                  f"({summary['queries']} queries):")
+            print(f"  {'Strategy':<22} {'P@5':>6} {'MRR':>6} "
+                  f"{'p50ms':>6} {'p95ms':>6} {'Δ%':>6} {'WCB':>6}")
+            print(f"  {'─'*22} {'─'*6} {'─'*6} {'─'*6} {'─'*6} {'─'*6} {'─'*6}")
+            for s in summary["strategies"]:
+                print(f"  {s['strategy']:<22} "
+                      f"{s['precision_at_5']:>6} "
+                      f"{s['mean_reciprocal_rank']:>6} "
+                      f"{s['latency_p50_ms']:>6} "
+                      f"{s['latency_p95_ms']:>6} "
+                      f"{s['improvement_over_baseline']*100:>5.1f} "
+                      f"{s['wrong_class_blocked']:>6}")
+            print(f"  ✓ CSV → {summary['csv_path']}")
+            emb_dash.write_summary(out_path=out_path, db_path=db_path)
+            return
+
+        if not args.question or not args.flavor:
+            print("  ⚠  --question and --flavor are required for --phase retrieve")
+            print("    Example: python3 toolkit.py --phase retrieve "
+                  "--flavor network-ops --question 'degraded NFs?' "
+                  "--class-expression tmf:NetworkFunction")
+            return
+
+        # Lazy: make sure the flavor is indexed
+        rows = [i for i in pipe_mod.list_indexes(db_path) if i["flavor"] == args.flavor]
+        if not rows:
+            print(f"  (no index for flavor '{args.flavor}' — indexing now)")
+            pipe_mod.index_flavor(args.flavor, db_path=db_path,
+                                   connection_string=args.vector_store,
+                                   model_id=args.embed_model)
+
+        retriever = HybridRetriever(
+            flavor=args.flavor,
+            db_path=db_path,
+            connection_string=args.vector_store,
+            model_id=args.embed_model,
+        )
+
+        strategies = (["UNFILTERED_VECTOR", "ONTOLOGY_BOUNDED", "PURE_SPARQL"]
+                      if args.strategy_compare else ["ONTOLOGY_BOUNDED"])
+        for strat in strategies:
+            res = retriever.retrieve(
+                args.question,
+                class_expression=args.class_expression,
+                k=args.top_k,
+                strategy=strat,
+            )
+            print(f"\n  [{strat}] {res['result_count']} results "
+                  f"(k={res['k']}, latency={res['latency_ms']}ms, "
+                  f"classes_resolved={len(res['resolved_classes'])})")
+            for i, r in enumerate(res["results"], start=1):
+                cls = (r.get("owl_class") or "").split("/")[-1]
+                pk = r.get("primary_key") or ""
+                tier = r.get("sensitivity_tier") or ""
+                score = r.get("composite_score", 0.0)
+                print(f"    {i:>2}. [{cls:<24}] pk={pk:<8} tier={tier:<12} "
+                      f"score={score:.3f}")
+
+        emb_dash.write_summary(out_path=out_path, db_path=db_path)
+
     def phase_wizard(db_path: str, out_path: str):
         step(0, "Phase 3 — Browser Wizard (Flask)")
         wizard_path = os.path.join(HERE, "wizard", "app.py")
@@ -1042,6 +1203,8 @@ def main():
         "evolve":    [(phase_evolve,    [args.db, args.out])],
         "federate":  [(phase_federate,  [args.db, args.out])],
         "comply":    [(phase_comply,    [args.db, args.out])],
+        "embed":     [(phase_embed,     [args.db, args.out])],
+        "retrieve":  [(phase_retrieve,  [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
