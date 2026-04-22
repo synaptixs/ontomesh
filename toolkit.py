@@ -23,6 +23,7 @@ Options:
 
 import sys
 import os
+import json
 import argparse
 import sqlite3
 from datetime import datetime
@@ -495,8 +496,31 @@ def main():
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
                         choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
-                                 "publish","drift","templates","modular","discover","tmf630","wizard"],
+                                 "publish","drift","templates","modular","discover","tmf630","wizard","evolve"],
                         help="Run a specific phase only")
+    # ── Workstream 2 (evolve) flags ────────────────────────────────────
+    parser.add_argument("--review", action="store_true",
+                        help="Enter interactive review mode for pending evolution proposals (--phase evolve)")
+    parser.add_argument("--apply", default=None,
+                        help="Apply an APPROVED proposal (proposal-id) through the CI/CD auto-versioner")
+    parser.add_argument("--action", default=None, choices=["APPROVE", "REJECT", "DEFER"],
+                        help="Decision to record against a proposal (--phase evolve --proposal-id ...)")
+    parser.add_argument("--proposal-id", default=None,
+                        help="Proposal UUID for --action / --apply")
+    parser.add_argument("--reviewer-id", default="cli:reviewer",
+                        help="Reviewer identifier persisted on the proposal")
+    parser.add_argument("--note", default="",
+                        help="Reviewer note (APPROVE/REJECT/DEFER)")
+    parser.add_argument("--version-target", default=None,
+                        help="Explicit semver target on APPROVE (e.g. 1.2.0). Omit for MINOR auto-bump.")
+    parser.add_argument("--min-evidence", type=int, default=3,
+                        help="Minimum co-occurrence count required to promote a candidate (--phase evolve)")
+    parser.add_argument("--strategy", default=None,
+                        choices=["SHACL_VIOLATION_ACCUMULATION", "CARDINALITY_BREACH",
+                                 "CLASS_COOCCURRENCE", "NLP_CANDIDATE_PROMOTION"],
+                        help="Restrict --phase evolve to a single detection strategy")
+    parser.add_argument("--open-pr", action="store_true",
+                        help="On --apply, open a draft GitHub PR with the diff (requires gh CLI)")
     parser.add_argument("--log-path",  default=None, help="Log file path or glob (for --phase log)")
     parser.add_argument("--log-format", default="auto",
                         choices=["auto","jsonl","syslog","cef","otlp","regex"],
@@ -630,6 +654,76 @@ def main():
         from tmf_mapper import run_tmf630_task_phase
         run_tmf630_task_phase(db_path, out_path)
 
+    def phase_evolve(db_path: str, out_path: str):
+        step(0, "Workstream 2 — Autonomous Ontology Evolution")
+
+        from evolution_monitor import run_evolution_monitor
+        from evolution_scorer  import score_pending
+        from evolution_reviewer import (list_pending, get_proposal,
+                                         record_decision, apply_approved)
+
+        # Route 1 — record a decision on a specific proposal
+        if args.action and args.proposal_id:
+            result = record_decision(
+                db_path=db_path,
+                proposal_id=args.proposal_id,
+                action=args.action,
+                reviewer_id=args.reviewer_id,
+                note=args.note,
+                version_target=args.version_target,
+            )
+            print(f"  Decision: {result}")
+            return
+
+        # Route 2 — apply an APPROVED proposal (CI/CD auto-versioning)
+        if args.apply:
+            result = apply_approved(
+                db_path=db_path,
+                out_path=out_path,
+                proposal_id=args.apply,
+                open_pr=args.open_pr,
+            )
+            print(f"  Apply result: {json.dumps(result, indent=2)}")
+            return
+
+        # Route 3 — interactive review listing
+        if args.review:
+            pending = list_pending(db_path=db_path, limit=200)
+            print(f"\n  {len(pending)} PENDING proposals "
+                  "(sorted by composite score):\n")
+            print(f"  {'ID':<10} {'Band':<13} {'Score':>6}  Type             Title")
+            print(f"  {'─'*10} {'─'*13} {'─'*6}  {'─'*16} {'─'*40}")
+            for p in pending[:50]:
+                pid = (p["proposal_id"] or "")[:8]
+                band = p.get("band") or "CANDIDATE"
+                score = p["confidence_score"]
+                score_s = f"{score:.2f}" if score is not None else "  —  "
+                ptype = p["proposal_type"] or ""
+                title = (p["title"] or "")[:55]
+                print(f"  {pid:<10} {band:<13} {score_s:>6}  {ptype:<16} {title}")
+            print(
+                "\n  To act on a proposal:\n"
+                "    python3 toolkit.py --phase evolve --action APPROVE "
+                "--proposal-id <id>\n"
+                "    python3 toolkit.py --phase evolve --apply <id> --open-pr\n"
+            )
+            return
+
+        # Route 4 (default) — run the full monitor + scorer pipeline
+        _ = run_evolution_monitor(
+            db_path=db_path,
+            out_path=out_path,
+            min_evidence=args.min_evidence,
+            strategy=args.strategy,
+        )
+        scoring = score_pending(db_path=db_path, out_path=out_path)
+        print(
+            f"  {scoring['pending_total']} PENDING  "
+            f"| review_now={scoring['review_now']}  "
+            f"weekly={scoring['weekly_batch']}  "
+            f"candidate={scoring['candidates']}"
+        )
+
     def phase_wizard(db_path: str, out_path: str):
         step(0, "Phase 3 — Browser Wizard (Flask)")
         wizard_path = os.path.join(HERE, "wizard", "app.py")
@@ -664,6 +758,7 @@ def main():
         "discover":  [(phase_discover,  [args.db, args.out])],
         "tmf630":    [(phase_tmf630,    [args.db, args.out])],
         "wizard":    [(phase_wizard,    [args.db, args.out])],
+        "evolve":    [(phase_evolve,    [args.db, args.out])],
         "all": [
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
