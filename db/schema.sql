@@ -320,6 +320,26 @@ CREATE TABLE IF NOT EXISTS federation_trust_ledger (
     created_at         TEXT DEFAULT (datetime('now'))
 );
 
+-- ── COMPLIANCE BUNDLES ───────────────────────────────────────
+-- Workstream 4 (Gen2): Regulatory AI Compliance Evidence Engine.
+-- Every bundle emitted by compliance.bundle.export_bundle() is
+-- registered here so the graph carries an auditable pointer to
+-- the signed ZIP on disk.  Row-level sensitivity = Restricted.
+CREATE TABLE IF NOT EXISTS compliance_bundles (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    bundle_id          TEXT NOT NULL UNIQUE,
+    regulation_id      TEXT NOT NULL,
+    decision_iri       TEXT,
+    bundle_path        TEXT NOT NULL,
+    sha256             TEXT NOT NULL,
+    signer_iri         TEXT,
+    verified           INTEGER DEFAULT 1,
+    coverage_percent   INTEGER,
+    sensitivity_tier   TEXT DEFAULT 'Restricted',
+    assembled_at       TEXT,
+    stored_at          TEXT DEFAULT (datetime('now'))
+);
+
 -- ── INDEXES ─────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_assets_type     ON assets(asset_type_id);
 CREATE INDEX IF NOT EXISTS idx_assets_owner    ON assets(owner_org_id);
@@ -338,3 +358,5 @@ CREATE INDEX IF NOT EXISTS idx_fed_partner_state ON federation_partners(trust_st
 CREATE INDEX IF NOT EXISTS idx_fed_query_partner ON federation_query_log(partner_id);
 CREATE INDEX IF NOT EXISTS idx_fed_query_status  ON federation_query_log(status);
 CREATE INDEX IF NOT EXISTS idx_fed_ledger_partner ON federation_trust_ledger(partner_id);
+CREATE INDEX IF NOT EXISTS idx_cmp_bundle_regulation ON compliance_bundles(regulation_id);
+CREATE INDEX IF NOT EXISTS idx_cmp_bundle_decision  ON compliance_bundles(decision_iri);

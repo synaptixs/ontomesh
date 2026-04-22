@@ -1,0 +1,69 @@
+{
+  "regulation_id": "ofcom-network-transparency",
+  "name": "Ofcom Network Transparency Code (AI-Assisted Network Operations)",
+  "short_name": "Ofcom Network Transparency",
+  "jurisdiction": "United Kingdom (Ofcom)",
+  "effective_date": "2025-03-26",
+  "last_verified_date": "2026-04-01",
+  "regulatory_source_url": "https://www.ofcom.org.uk/publications/2025/network-transparency-code",
+  "scope": "UK-licensed telecommunications operators deploying AI in network planning, fault management, or customer-affecting automated decisions",
+  "summary": "Requires operators to publish machine-readable evidence of the provenance, validation, and confidence of automated network decisions. Affected customer decisions (service quality, outage attribution, performance throttling) must carry an auditable PROV-O chain.",
+  "requirements": [
+    {
+      "req_id": "OFCOM-NT-1",
+      "title": "Competency-question coverage for network events",
+      "description": "The ontology must answer the regulator's competency questions about asset ownership, event history, and observation provenance.",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Competency question coverage",
+      "pass_expression": "score >= 3"
+    },
+    {
+      "req_id": "OFCOM-NT-2",
+      "title": "Asset–event linkage",
+      "description": "Every network event must be associated with the affected asset.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-003",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "OFCOM-NT-3",
+      "title": "Event participant attribution",
+      "description": "Automated events must declare their initiating agent and any participating agents for customer-affecting decisions.",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Event participant coverage",
+      "pass_expression": "score >= 3"
+    },
+    {
+      "req_id": "OFCOM-NT-4",
+      "title": "Confidence disclosure for automated decisions",
+      "description": "Every AI observation affecting a customer must disclose a confidence score that an auditor can filter on.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-005",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "OFCOM-NT-5",
+      "title": "Policy governance on customer-impacting events",
+      "description": "Customer-affecting events must name the governing service-quality policy and its outcome.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-007",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "OFCOM-NT-6",
+      "title": "Exchange readiness — machine-readable transparency artefact",
+      "description": "Transparency disclosures must be available as JSON-LD with a documented context.",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Exchange readiness",
+      "pass_expression": "score >= 4"
+    },
+    {
+      "req_id": "OFCOM-NT-7",
+      "title": "Provenance of the decision under audit",
+      "description": "The decision identified in the audit must have a reconstructible PROV-O chain of depth at least 1.",
+      "artefact_type": "PROV_O_CHAIN",
+      "evidence_selector": "decision_iri",
+      "pass_expression": "chain_depth >= 1"
+    }
+  ]
+}

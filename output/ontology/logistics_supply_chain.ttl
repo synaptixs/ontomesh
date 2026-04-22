@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Logistics & Supply Chain Ontology Module" ;
   rdfs:comment "Domain template for freight, warehousing, last-mile delivery, and supply chain visibility. Suitable for 3PL providers, e-commerce fulfillment, cold chain, and customs/trade compliance." ;
-  dcterms:created "2026-04-21T02:57:44Z"^^xsd:dateTime ;
+  dcterms:created "2026-04-22T18:31:07Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 

@@ -7,27 +7,32 @@ CQ-005,Critical,PASS-STRUCTURAL,What is the confidence score and derivation meth
 CQ-006,High,PASS-STRUCTURAL,What role does each agent hold and in what scope?,rdflib,0,(TBox-only — no instance data in ontology),"Role separation, agent-role relationship",CQ-006-agent-roles.sparql
 CQ-007,Critical,PASS-STRUCTURAL,"Which policy governed each event, and what was the compliance outcome?",rdflib,0,(TBox-only — no instance data in ontology),"Policy-event relationship, compliance modeling",CQ-007-policy-governance.sparql
 CQ-008,High,PASS,Which assets have observations with confidence below 0.8 (low-trust data)?,rdflib,0,(empty),"Confidence filtering, trust-level querying",CQ-008-low-confidence-observations.sparql
-CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — scoring engine escalation,CQ-EVO-01-high-confidence-in-review.sparql
-CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — CI/CD auto-versioning gate,CQ-EVO-02-approved-turtle-valid.sparql
-CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — reasoner-gate enforcement,CQ-EVO-03-reasoner-consistency.sparql
-CQ-EVO,Medium,PASS,,rdflib,0,(empty),Workstream 2 — version auto-increment,CQ-EVO-04-version-incremented.sparql
-CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — proposal-store integrity,CQ-EVO-05-evidence-nonempty.sparql
-CQ-FED,Critical,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — partner registry + manifest coupling,CQ-FED-01-active-partners-have-manifests.sparql
-CQ-FED,Critical,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — sensitivity enforcement at boundary,CQ-FED-02-no-restricted-at-boundary.sparql
-CQ-FED,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — provenance annotation on inbound rows,CQ-FED-03-prov-attribution-complete.sparql
-CQ-FED,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — trust ledger completeness,CQ-FED-04-trust-ledger-bilateral.sparql
-CQ-FED,Medium,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — rejection → governance feedback loop,CQ-FED-05-rejections-escalated.sparql
-CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-01-recall-prior-reasoning.sparql
-CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-02-diff-agent-disagreements.sparql
-CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-03-superseded-invalidation.sparql
-CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-04-cross-agent-influence-links.sparql
-CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-05-temporal-snapshot-correctness.sparql
-CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-alignment-dolce.sparql
-CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-conflict-resolution.sparql
-CQ-P2B,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-event-subscriptions.sparql
-CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),FlavorRegistry correctness; runtime_flavor table population.,CQ-RT-01-flavor-registry.sparql
-CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Grounder.record_grounding(); ObservationRecord provenance stamping.,CQ-RT-02-grounding-records.sparql
-CQ-RT,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),PayloadAssembler output; runtime_payload and runtime_grounding,CQ-RT-03-runtime-payloads.sparql
+CQ-CMP-01,Critical,PASS-STRUCTURAL,Does every high-confidence ObservationRecord have a complete PROV-O chain?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 4 — provenance chain for audit-worthy outputs,CQ-CMP-01-prov-chain-complete.sparql
+CQ-CMP-02,High,PASS-STRUCTURAL,Do all SHACL-passed observations carry a validation timestamp?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 4 — validation timestamp completeness,CQ-CMP-02-shacl-passed-timestamped.sparql
+CQ-CMP-03,Critical,PASS-STRUCTURAL,Are all compliance bundles signed and verifiable?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 4 — bundle signing integrity,CQ-CMP-03-bundles-signed-verifiable.sparql
+CQ-CMP-04,High,PASS-STRUCTURAL,Does every loaded regulation have ≥80% evidence coverage?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 4 — per-regulation coverage threshold,CQ-CMP-04-regulatory-coverage.sparql
+CQ-CMP-05,Critical,PASS-STRUCTURAL,Are RESTRICTED-tier observations excluded from federation?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 4 — RESTRICTED-tier data never leaves the enterprise,CQ-CMP-05-restricted-not-federated.sparql
+CQ-EVO-01,High,PASS,Do all proposals with composite score > 0.8 appear in REVIEW?,rdflib,0,(empty),Workstream 2 — scoring engine escalation,CQ-EVO-01-high-confidence-in-review.sparql
+CQ-EVO-02,High,PASS,Does every APPROVED proposal produce a non-empty Turtle diff?,rdflib,0,(empty),Workstream 2 — CI/CD auto-versioning gate,CQ-EVO-02-approved-turtle-valid.sparql
+CQ-EVO-03,High,PASS,Did the reasoner pass on the most recent APPROVED proposal?,rdflib,0,(empty),Workstream 2 — reasoner-gate enforcement,CQ-EVO-03-reasoner-consistency.sparql
+CQ-EVO-04,Medium,PASS,Does each APPROVED proposal receive a bumped ontology version?,rdflib,0,(empty),Workstream 2 — version auto-increment,CQ-EVO-04-version-incremented.sparql
+CQ-EVO-05,High,PASS,Does every proposal carry a non-empty evidence SPARQL query?,rdflib,0,(empty),Workstream 2 — proposal-store integrity,CQ-EVO-05-evidence-nonempty.sparql
+CQ-FED-01,Critical,PASS-STRUCTURAL,Does every ACTIVE partner carry a verified capability manifest?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — partner registry + manifest coupling,CQ-FED-01-active-partners-have-manifests.sparql
+CQ-FED-02,Critical,PASS-STRUCTURAL,Has any Restricted-tier triple ever crossed the federation boundary?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — sensitivity enforcement at boundary,CQ-FED-02-no-restricted-at-boundary.sparql
+CQ-FED-03,High,PASS-STRUCTURAL,Does every accepted federated row carry partner provenance?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — provenance annotation on inbound rows,CQ-FED-03-prov-attribution-complete.sparql
+CQ-FED-04,High,PASS-STRUCTURAL,Is every ACTIVE partner backed by a full bilateral trust ledger?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — trust ledger completeness,CQ-FED-04-trust-ledger-bilateral.sparql
+CQ-FED-05,Medium,PASS-STRUCTURAL,Does every boundary rejection land in the governance queue?,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — rejection → governance feedback loop,CQ-FED-05-rejections-escalated.sparql
+CQ-MEM-01,High,PASS-STRUCTURAL,Can recall retrieve prior reasoning for a given subject?,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-01-recall-prior-reasoning.sparql
+CQ-MEM-02,High,PASS-STRUCTURAL,Does diff correctly identify agent disagreements?,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-02-diff-agent-disagreements.sparql
+CQ-MEM-03,High,PASS-STRUCTURAL,Do superseded observations carry prov:wasInvalidatedBy?,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-03-superseded-invalidation.sparql
+CQ-MEM-04,High,PASS-STRUCTURAL,Do cross-agent influence links propagate correctly?,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-04-cross-agent-influence-links.sparql
+CQ-MEM-05,High,PASS-STRUCTURAL,Does temporal snapshot return correct state at a given timestamp?,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-05-temporal-snapshot-correctness.sparql
+CQ-P2B-03,High,PASS-STRUCTURAL,Verify alignment axioms — check that aligned classes,rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-alignment-dolce.sparql
+CQ-P2B-01,High,PASS-STRUCTURAL,"Which conflict events are unresolved or escalated to humans,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-conflict-resolution.sparql
+CQ-P2B-02,High,PASS-STRUCTURAL,"Which event subscriptions are active, what event types",rdflib,0,(TBox-only — no instance data in ontology),,CQ-P2B-event-subscriptions.sparql
+CQ-RT-01,High,PASS-STRUCTURAL,Verify registered runtime flavors have all required ontology properties.,rdflib,0,(TBox-only — no instance data in ontology),FlavorRegistry correctness; runtime_flavor table population.,CQ-RT-01-flavor-registry.sparql
+CQ-RT-02,High,PASS-STRUCTURAL,Verify ObservationRecord instances created by the Grounder have,rdflib,0,(TBox-only — no instance data in ontology),Grounder.record_grounding(); ObservationRecord provenance stamping.,CQ-RT-02-grounding-records.sparql
+CQ-RT-03,High,PASS-STRUCTURAL,Verify runtime payloads link to a registered flavor and have,rdflib,0,(TBox-only — no instance data in ontology),PayloadAssembler output; runtime_payload and runtime_grounding,CQ-RT-03-runtime-payloads.sparql
 CQ-TMF10,High,PASS-STRUCTURAL,"Which trouble tickets are open or in-progress,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF10-trouble-tickets.sparql
 CQ-TMF11,High,PASS-STRUCTURAL,"Which network slice profiles are active,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF11-network-slice-profiles.sparql
 CQ-TMF12,High,PASS-STRUCTURAL,"Which service quality reports show SLA non-compliance,",rdflib,0,(TBox-only — no instance data in ontology),,CQ-TMF12-service-quality-reports.sparql

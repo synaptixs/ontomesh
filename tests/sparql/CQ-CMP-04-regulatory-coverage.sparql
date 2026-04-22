@@ -1,0 +1,26 @@
+# CQ-CMP-04 — Does every loaded regulation have ≥80% evidence coverage?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 4 gate: each regulation listed in the registry must
+# have at least 80% of its requirements SATISFIED against the
+# current run.  Falling below 80% triggers the Compliance
+# Dashboard's amber/red indicator.
+#
+# Pass condition: the result set is empty — no regulation reports
+# coverage < 80%.
+#
+# Priority: High
+# Validates: Workstream 4 — per-regulation coverage threshold
+# Expected: empty
+# Bound variables: ?regulation ?coverage
+
+PREFIX cmp:  <https://ontology.example.com/compliance/>
+
+SELECT ?regulation ?coverage
+WHERE {
+    ?regulation a cmp:Regulation ;
+                cmp:coveragePercent ?coverage .
+
+    FILTER (?coverage < 80)
+}
+ORDER BY ?coverage
+LIMIT 20
