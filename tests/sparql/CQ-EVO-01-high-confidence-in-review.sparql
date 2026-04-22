@@ -1,0 +1,29 @@
+# CQ-EVO-01 — Do all proposals with composite score > 0.8 appear in REVIEW?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates that the evolution scorer correctly escalates high-confidence
+# candidates to the REVIEW_NOW band.  A proposal with a composite ≥ 0.80
+# must carry status = PENDING (and is expected to be flagged REVIEW_NOW
+# by the dashboard), OR already be resolved with APPROVED/REJECTED/DEFERRED.
+#
+# Pass condition: no high-confidence proposal is stuck with status outside
+# the allowed set (i.e. no orphaned CANDIDATE-band rows with score ≥ 0.80).
+#
+# Priority: High
+# Validates: Workstream 2 — scoring engine escalation
+# Expected: may be empty
+# Bound variables: ?proposal ?title ?score ?status
+
+PREFIX evo:  <https://ontology.example.com/evolution/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?proposal ?title ?score ?status
+WHERE {
+    ?proposal a evo:EvolutionProposal ;
+              evo:title            ?title ;
+              evo:confidenceScore  ?score ;
+              evo:status           ?status .
+
+    FILTER (xsd:decimal(?score) >= 0.80)
+    FILTER (?status NOT IN ("PENDING", "APPROVED", "REJECTED", "DEFERRED"))
+}
+LIMIT 20

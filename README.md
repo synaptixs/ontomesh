@@ -1380,3 +1380,124 @@ New SDK additions:
 | Cross-agent influence links appear in graph | ✓ `prov:wasInfluencedBy` via diff() |
 | Consolidation reduces graph size by ≥20% on test corpus | ✓ Three-strategy daemon |
 | CQ-MEM-01 through CQ-MEM-05 all passing | ✓ Integrated into CI/CD gate |
+
+---
+
+## 20. Generation 2 — Autonomous Ontology Evolution ✓ Complete (Apr 2026)
+
+**Workstream 2 of the [Generation 2 Roadmap](ontology_gen2_roadmap.md).**
+
+Closes the loop between what AI agents observe in production and what the ontology formally models. A monitoring daemon detects patterns the ontology doesn't yet capture, scores them as evolution candidates across five dimensions, routes them through a human review gate, and auto-increments the ontology version when an approved axiom passes the full CI/CD reasoner + SPARQL CQ gate.
+
+> **Critical distinction:** This workstream does not auto-update the ontology. It surfaces *proposals*. Every proposed change passes through a human review gate and the existing CI/CD pipeline before any axiom is added. The autonomy is in detection and scoring — governance remains with the domain expert.
+
+**Builds on:** ObservationRecord store · NLP log entity discovery · CI/CD pipeline · SHACL shapes · SPARQL CQ tests (v2.0, WS1)
+
+### 20.1 Proposal store + SHACL shape
+
+- **SQL:** `ontology_evolution_proposals` + `ontology_version_ledger` tables in [db/schema.sql](db/schema.sql)
+- **SHACL:** [output/shapes/evolution-shapes.ttl](output/shapes/evolution-shapes.ttl) — validates proposal_id, type, turtle, sparql, strategy, score, and an approval gate that blocks APPROVED rows without `reviewer_id` + semver `version_target`.
+
+### 20.2 Production anomaly monitor (`src/evolution_monitor.py`)
+
+Four detection strategies — each writes scored PENDING proposals to the store:
+
+| Strategy | Trigger | Proposal type |
+|---|---|---|
+| `SHACL_VIOLATION_ACCUMULATION` | Repeated `sh:in` rejections on the same column | `NEW_CONSTRAINT` (extend enumeration) |
+| `CARDINALITY_BREACH` | FK-like IRI refs in payloads with no ObjectProperty counterpart | `NEW_PROPERTY` |
+| `CLASS_COOCCURRENCE` | Entity pairs repeatedly observed together without a declared relationship | `NEW_PROPERTY` |
+| `NLP_CANDIDATE_PROMOTION` | Log-discovery candidates seen in ≥N confirmed observations | `NEW_CLASS` |
+
+```bash
+# Run all 4 strategies + score all PENDING proposals
+python3 toolkit.py --phase evolve
+
+# Single-strategy run
+python3 toolkit.py --phase evolve --strategy NLP_CANDIDATE_PROMOTION --min-evidence 5
+```
+
+### 20.3 Candidate scoring engine (`src/evolution_scorer.py`)
+
+Composite 0.0–1.0 score from a weighted blend of five dimensions:
+
+| Dimension | Weight | What it measures |
+|---|---|---|
+| `evidence_volume` | 0.25 | Distinct occurrences of the candidate |
+| `evidence_recency` | 0.20 | Exponential decay on latest matching observation (30-day half-life) |
+| `cross_domain` | 0.20 | Number of distinct `source_ref` flavors that reference it |
+| `consistency_risk` | 0.20 | 1 − reasoner-hazard proxy by proposal type |
+| `schema_alignment` | 0.15 | Penalty if the term overlaps an existing class or metadata label |
+
+Bands: **≥ 0.80 → REVIEW_NOW** · **0.50–0.80 → WEEKLY_BATCH** · **< 0.50 → CANDIDATE**.
+
+### 20.4 Human review workflow
+
+**CLI:**
+```bash
+# List PENDING proposals sorted by composite score
+python3 toolkit.py --phase evolve --review
+
+# APPROVE / REJECT / DEFER
+python3 toolkit.py --phase evolve --action APPROVE \
+    --proposal-id 3c7d1e80-... --version-target 1.2.0 \
+    --reviewer-id nrohilla@fibonacci.example --note "extends CQ-003"
+
+# Apply an APPROVED proposal through the CI/CD auto-versioner
+python3 toolkit.py --phase evolve --apply 3c7d1e80-... --open-pr
+```
+
+**Browser wizard:** An *Evolution Review* tab is registered in [wizard/templates/index.html](wizard/templates/index.html). It lists PENDING proposals with band, score, and type; clicking a row opens a detail card rendering the proposed Turtle axiom, the evidence SPARQL, the dimensional breakdown, and APPROVE / REJECT / DEFER / Apply controls. All actions route through the Flask API (`/api/evolve/…`).
+
+### 20.5 CI/CD auto-versioning on approval (`src/evolution_reviewer.py::apply_approved`)
+
+On an APPROVED proposal:
+
+1. The candidate axiom is appended to `output/ontology/enterprise.ttl` inside a fenced `# ── Evolution proposal <id> ──` block.
+2. `owl:versionIRI` / `owl:versionInfo` are bumped to MINOR+1 (or an explicit `--version-target`).
+3. The ROBOT reasoner re-runs; any unsatisfiable class rolls the change back automatically.
+4. The SPARQL CQ suite re-runs; any failure rolls the change back automatically.
+5. A row is appended to `ontology_version_ledger` recording `reasoner_status`, `shacl_status`, `sparql_status`, and the (optional) GitHub PR URL.
+6. If `--open-pr` is set and `gh` is on PATH, a draft PR is opened on the branch `evolve/<pid>-v<version>`.
+
+Governance retains the final gate: the domain expert reviews the PR before merge.
+
+### 20.6 SPARQL CQ tests
+
+Five new tests integrated into the CI/CD gate:
+
+| CQ | Intent |
+|---|---|
+| [CQ-EVO-01](tests/sparql/CQ-EVO-01-high-confidence-in-review.sparql) | Proposals with composite ≥ 0.80 carry an allowed status |
+| [CQ-EVO-02](tests/sparql/CQ-EVO-02-approved-turtle-valid.sparql) | Every APPROVED proposal carries a non-empty Turtle diff |
+| [CQ-EVO-03](tests/sparql/CQ-EVO-03-reasoner-consistency.sparql) | No ledger entry records `reasoner_status = FAIL` |
+| [CQ-EVO-04](tests/sparql/CQ-EVO-04-version-incremented.sparql) | Every APPROVED proposal maps to a bumped ledger version |
+| [CQ-EVO-05](tests/sparql/CQ-EVO-05-evidence-nonempty.sparql) | Every proposal carries a non-empty evidence SPARQL + a valid strategy |
+
+### 20.7 Governance scorecard
+
+New criterion: **"Evolution proposals reviewed within 7-day SLA"** (domain: Lifecycle). The scorer reads `ontology_evolution_proposals` + `ontology_version_ledger` directly; maturity drops to 2 (Developing) as soon as any PENDING proposal crosses the 7-day mark.
+
+### Workstream 2 Exit Gates — ✓ Complete (Apr 2026)
+
+| Gate | Status |
+|---|---|
+| Monitor surfaces ≥1 candidate on the test corpus | ✓ 4 strategies operational (`run_evolution_monitor`) |
+| Scorer produces 0.0–1.0 composite with dimensional breakdown | ✓ 5-dim weighted composite, banded |
+| Approved proposal triggers a GitHub PR in under 5 minutes | ✓ `apply_approved(..., open_pr=True)` |
+| No unsatisfiable classes after any approved axiom (reasoner verified) | ✓ Auto-rollback on FAIL |
+| CQ-EVO-01 through CQ-EVO-05 all passing | ✓ Integrated into CI/CD gate (28 SPARQL CQ tests total) |
+
+### Deliverables
+
+| Artefact | Path |
+|---|---|
+| Evolution monitor (4 strategies) | [src/evolution_monitor.py](src/evolution_monitor.py) |
+| Candidate scoring engine (5 dimensions) | [src/evolution_scorer.py](src/evolution_scorer.py) |
+| Review workflow + CI/CD auto-versioner | [src/evolution_reviewer.py](src/evolution_reviewer.py) |
+| Proposal store + version ledger DDL | [db/schema.sql](db/schema.sql) |
+| SHACL proposal-validation shapes | [output/shapes/evolution-shapes.ttl](output/shapes/evolution-shapes.ttl) |
+| CQ tests (×5) | `tests/sparql/CQ-EVO-01` → `CQ-EVO-05.sparql` |
+| Wizard Evolution Review tab | [wizard/templates/index.html](wizard/templates/index.html) + [wizard/app.py](wizard/app.py) |
+| Governance scorecard criterion | [src/cq_tester.py](src/cq_tester.py) |
+| CLI wiring | [toolkit.py](toolkit.py) — `--phase evolve` |
