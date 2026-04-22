@@ -1,0 +1,32 @@
+# CQ-FED-04 — Is every ACTIVE partner backed by a full bilateral trust ledger?
+# ─────────────────────────────────────────────────────────────────────────
+# The trust-bootstrap protocol requires a four-event sequence per
+# bilateral relationship: MANIFEST_SENT, COUNTERSIGNED, ACTIVATED, and
+# an optional TEST_QUERY.  An ACTIVE partner whose ledger is missing
+# any of the first three events has a corrupted onboarding record and
+# MUST be re-bootstrapped.
+#
+# Pass condition: the result set is empty.
+#
+# Priority: High
+# Validates: Workstream 3 — trust ledger completeness
+# Expected: empty
+# Bound variables: ?partner ?missingEvent
+
+PREFIX fed: <https://ontology.example.com/federation/>
+
+SELECT ?partner ?missingEvent
+WHERE {
+    ?partner a fed:Partner ;
+             fed:trustState "ACTIVE" ;
+             fed:partnerId  ?pid .
+
+    VALUES ?missingEvent { "MANIFEST_SENT" "COUNTERSIGNED" "ACTIVATED" }
+
+    FILTER NOT EXISTS {
+        ?evt a fed:TrustLedgerEvent ;
+             fed:partnerId ?pid ;
+             fed:eventType ?missingEvent .
+    }
+}
+LIMIT 20

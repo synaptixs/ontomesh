@@ -1,0 +1,28 @@
+# CQ-FED-03 — Does every accepted federated row carry partner provenance?
+# ─────────────────────────────────────────────────────────────────────────
+# Every triple that survives the boundary gate MUST be reified with
+# prov:wasAttributedTo pointing at the partner's agent IRI so downstream
+# joins can separate local from federated facts.  An accepted row that
+# lacks prov attribution is a boundary-contract breach.
+#
+# Pass condition: the result set is empty.
+#
+# Priority: High
+# Validates: Workstream 3 — provenance annotation on inbound rows
+# Expected: empty
+# Bound variables: ?row ?partnerId
+
+PREFIX fed:  <https://ontology.example.com/federation/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT ?row ?partnerId
+WHERE {
+    ?row a fed:FederatedResult ;
+         fed:sourcePartner ?partnerId ;
+         fed:acceptedAt    ?when .
+
+    FILTER NOT EXISTS {
+        ?row prov:wasAttributedTo ?agent .
+    }
+}
+LIMIT 20

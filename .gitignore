@@ -58,3 +58,10 @@ htmlcov/
 # ── MyPy / type-checker caches ────────────────────────────────────────────────
 .mypy_cache/
 .ruff_cache/
+
+# ── Workstream 3 (federation) local state ────────────────────────────────────
+# Signing keys and the live runtime registry never enter source control.
+# The committed partner_registry.json stays — it's the declarative seed.
+federation/keys/*.sk
+federation/keys/*.pub
+federation/manifests/*.jsonld

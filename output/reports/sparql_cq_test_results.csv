@@ -12,6 +12,11 @@ CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — CI/CD auto-versioning gate,C
 CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — reasoner-gate enforcement,CQ-EVO-03-reasoner-consistency.sparql
 CQ-EVO,Medium,PASS,,rdflib,0,(empty),Workstream 2 — version auto-increment,CQ-EVO-04-version-incremented.sparql
 CQ-EVO,High,PASS,,rdflib,0,(empty),Workstream 2 — proposal-store integrity,CQ-EVO-05-evidence-nonempty.sparql
+CQ-FED,Critical,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — partner registry + manifest coupling,CQ-FED-01-active-partners-have-manifests.sparql
+CQ-FED,Critical,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — sensitivity enforcement at boundary,CQ-FED-02-no-restricted-at-boundary.sparql
+CQ-FED,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — provenance annotation on inbound rows,CQ-FED-03-prov-attribution-complete.sparql
+CQ-FED,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — trust ledger completeness,CQ-FED-04-trust-ledger-bilateral.sparql
+CQ-FED,Medium,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),Workstream 3 — rejection → governance feedback loop,CQ-FED-05-rejections-escalated.sparql
 CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-01-recall-prior-reasoning.sparql
 CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-02-diff-agent-disagreements.sparql
 CQ-MEM,High,PASS-STRUCTURAL,,rdflib,0,(TBox-only — no instance data in ontology),,CQ-MEM-03-superseded-invalidation.sparql

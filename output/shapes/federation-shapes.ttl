@@ -1,0 +1,129 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix shapes: <https://ontology.example.com/shapes/enterprise/> .
+@prefix fed:    <https://ontology.example.com/federation/> .
+
+# ────────────────────────────────────────────────────────────────
+# Cross-Enterprise Federation Boundary Shapes
+# Workstream 3 (Gen2) — every triple returned from a federated
+# partner must pass these shapes before it enters the local
+# reasoning scope.  Failures are logged to semantic_loss_log with
+# loss_type=FEDERATION_BOUNDARY_VIOLATION and escalated to the
+# governance queue.
+# ────────────────────────────────────────────────────────────────
+
+# ── Capability manifest structural shape ─────────────────────────
+shapes:CapabilityManifestShape
+  a sh:NodeShape ;
+  sh:targetClass fed:CapabilityManifest ;
+  sh:property [
+    sh:path fed:ontologyIri ;
+    sh:minCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Manifest must name the ontology IRI it exposes." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:exposedClasses ;
+    sh:minCount 1 ;
+    sh:message "Manifest must list at least one exposed OWL class." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:publicKey ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:minLength 32 ;
+    sh:message "Manifest must embed the signer's public key." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:signature ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:minLength 40 ;
+    sh:message "Manifest must carry an Ed25519 signature." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:validUntil ;
+    sh:minCount 1 ;
+    sh:datatype xsd:dateTime ;
+    sh:message "Manifest must declare an expiry timestamp." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:signatureAlgorithm ;
+    sh:in ( "Ed25519" ) ;
+    sh:message "Only Ed25519 signatures are accepted at the boundary." ;
+    sh:severity sh:Violation
+  ] .
+
+# ── Inbound-result provenance shape ──────────────────────────────
+# Every triple crossing the boundary must carry a reified
+# prov:wasAttributedTo link pointing at the partner IRI.
+shapes:FederatedResultShape
+  a sh:NodeShape ;
+  sh:targetClass fed:FederatedResult ;
+  sh:property [
+    sh:path prov:wasAttributedTo ;
+    sh:minCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Federated result must be attributed to the partner's agent IRI." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:sourcePartner ;
+    sh:minCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Federated result must name the source partner IRI." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:sensitivityTier ;
+    sh:minCount 1 ;
+    sh:in ( "Public" "Internal" "Confidential" "Restricted" ) ;
+    sh:message "Federated result must declare a sensitivity tier." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:sparql [
+    sh:message "RESTRICTED-tier data MUST NOT cross the federation boundary." ;
+    sh:select """
+      PREFIX fed: <https://ontology.example.com/federation/>
+      SELECT ?this ?tier WHERE {
+        ?this fed:sensitivityTier ?tier .
+        FILTER (?tier = "Restricted")
+      }
+    """
+  ] .
+
+# ── Partner-registry shape ───────────────────────────────────────
+shapes:FederationPartnerShape
+  a sh:NodeShape ;
+  sh:targetClass fed:Partner ;
+  sh:property [
+    sh:path fed:sparqlEndpoint ;
+    sh:minCount 1 ;
+    sh:pattern "^https://" ;
+    sh:message "Partner SPARQL endpoint must be HTTPS." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:trustState ;
+    sh:minCount 1 ;
+    sh:in ( "PROPOSED" "HANDSHAKE_SENT" "COUNTERSIGNED" "ACTIVE"
+            "EXPIRED" "REVOKED" ) ;
+    sh:message "Partner trust_state must be one of the six enumerated values." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path fed:maxShareableTier ;
+    sh:minCount 1 ;
+    sh:in ( "Public" "Internal" "Confidential" ) ;
+    sh:message "Partner maxShareableTier cannot exceed Confidential (Restricted is never federable)." ;
+    sh:severity sh:Violation
+  ] .
