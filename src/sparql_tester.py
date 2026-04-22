@@ -125,8 +125,15 @@ def _run_rdflib(sparql: str, turtle_paths: List[str]) -> Dict:
     try:
         results = g.query(sparql)
         rows = []
-        for row in results:
-            rows.append({str(var): {"value": str(val)} for var, val in zip(results.vars, row)})
+        # ASK queries return a boolean result — vars is None
+        if results.vars is None:
+            # Treat ASK=True as one synthetic row, ASK=False as empty
+            ask_val = bool(results.askAnswer) if hasattr(results, "askAnswer") else bool(results)
+            if ask_val:
+                rows = [{"ask_result": {"value": "true"}}]
+        else:
+            for row in results:
+                rows.append({str(var): {"value": str(val)} for var, val in zip(results.vars, row)})
         return {"backend": "rdflib", "available": True, "rows": rows, "error": None}
     except Exception as e:
         return {
