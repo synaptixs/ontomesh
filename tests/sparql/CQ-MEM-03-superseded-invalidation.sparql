@@ -1,0 +1,34 @@
+# CQ-MEM-03 — Do superseded observations carry prov:wasInvalidatedBy?
+# ─────────────────────────────────────────────────────────────────────
+# Verifies that the consolidation daemon's supersession strategy correctly
+# marks INFERRED observations as invalidated by their corresponding MEASURED
+# successor.  Tests the PROV-O invalidation pattern that is the core
+# correctness guarantee of the memory consolidation layer.
+#
+# Pass condition: at least one ObservationRecord carries a
+# prov:wasInvalidatedBy property pointing to another ObservationRecord.
+#
+# Exit gate condition (informational): any record where:
+#   (a) derivation_method = 'INFERRED'
+#   (b) prov:wasInvalidatedBy points to a MEASURED record
+#
+# Bound variables:
+#   ?inferred, ?entity, ?invalidatedBy, ?measuredMethod, ?invalidatedAt
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+
+SELECT ?inferred ?entity ?invalidatedBy ?measuredMethod ?invalidatedAt
+WHERE {
+    ?inferred a tmf:ObservationRecord ;
+              tmf:entity_iri            ?entity ;
+              tmf:derivation_method     "INFERRED" ;
+              prov:wasInvalidatedBy     ?invalidatedBy .
+
+    ?invalidatedBy a tmf:ObservationRecord ;
+                   tmf:derivation_method ?measuredMethod .
+
+    OPTIONAL { ?invalidatedBy prov:generatedAtTime ?invalidatedAt }
+}
+ORDER BY DESC(?invalidatedAt)
+LIMIT 10

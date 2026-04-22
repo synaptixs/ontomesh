@@ -1,0 +1,49 @@
+# TQ-02 — Sliding window aggregation over PerformanceIndicator time series
+# ─────────────────────────────────────────────────────────────────────────
+# Aggregates PerformanceIndicator observations within a rolling time window.
+# Used for trend analysis and anomaly detection over KPI time series.
+#
+# Parameters (replace before execution):
+#   {{WINDOW_START}}   — ISO 8601 datetime, start of the window
+#   {{WINDOW_END}}     — ISO 8601 datetime, end of the window
+#   {{KPI_TYPE}}       — KPI type string, e.g. "throughput" (or "" for all)
+#   {{ENTITY_IRI}}     — (optional) entity IRI filter
+#
+# Returns: per-entity, per-KPI aggregations within the window
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?entity ?kpiType
+       (COUNT(?obs) AS ?observationCount)
+       (AVG(?value) AS ?avgValue)
+       (MIN(?value) AS ?minValue)
+       (MAX(?value) AS ?maxValue)
+       (MIN(?generated) AS ?windowStart)
+       (MAX(?generated) AS ?windowEnd)
+WHERE {
+    ?obs a tmf:ObservationRecord ;
+         tmf:entity_iri       ?entity ;
+         tmf:kpi_type         ?kpiType ;
+         tmf:value_numeric    ?value ;
+         prov:generatedAtTime ?generated .
+
+    # Window filter
+    FILTER (?generated >= "{{WINDOW_START}}"^^xsd:dateTime)
+    FILTER (?generated <= "{{WINDOW_END}}"^^xsd:dateTime)
+
+    # Exclude invalidated
+    FILTER NOT EXISTS { ?obs prov:wasInvalidatedBy ?inv }
+
+    # Optional KPI type filter
+    FILTER ("{{KPI_TYPE}}" = "" || ?kpiType = "{{KPI_TYPE}}")
+
+    # Optional entity filter
+    FILTER (
+        "{{ENTITY_IRI}}" = ""
+        || CONTAINS(STR(?entity), "{{ENTITY_IRI}}")
+    )
+}
+GROUP BY ?entity ?kpiType
+ORDER BY ?entity ?kpiType
