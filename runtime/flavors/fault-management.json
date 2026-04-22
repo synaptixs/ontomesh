@@ -32,5 +32,16 @@
     "max_readable_tier": "Internal",
     "prov_influence_enabled": true,
     "sharing_note": "Fault-management observations are shared with network-ops for resource correlation and with compliance for SLA evidence. Can read network-ops observations for alarm root-cause analysis."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://fault-management",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/Alarm",
+      "https://ontology.example.com/tmf/TroubleTicket",
+      "https://ontology.example.com/tmf/ServiceQualityReport"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Internal"
   }
 }

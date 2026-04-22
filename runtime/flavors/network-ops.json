@@ -32,5 +32,17 @@
     "max_readable_tier": "Internal",
     "prov_influence_enabled": true,
     "sharing_note": "Network-ops observations are shared with fault-management for cross-domain alarm correlation and with compliance for audit evidence."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://network-ops",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/NetworkFunction",
+      "https://ontology.example.com/tmf/Alarm",
+      "https://ontology.example.com/tmf/PerformanceIndicator",
+      "https://ontology.example.com/tmf/Resource"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Internal"
   }
 }

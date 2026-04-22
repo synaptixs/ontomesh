@@ -32,5 +32,17 @@
     "max_readable_tier": "Confidential",
     "prov_influence_enabled": false,
     "sharing_note": "Billing data is Confidential. Only compliance can read billing observations for audit purposes. Billing agents cannot read from other flavors to prevent data leakage."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://billing",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/CustomerBill",
+      "https://ontology.example.com/tmf/BillingAccount",
+      "https://ontology.example.com/tmf/Product",
+      "https://ontology.example.com/tmf/Agreement"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Confidential"
   }
 }

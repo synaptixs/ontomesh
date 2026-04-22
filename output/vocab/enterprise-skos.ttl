@@ -70,6 +70,20 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :DomainEvent .
 
+:EmbeddingIndexesConcept
+  a skos:Concept ;
+  skos:prefLabel "Embedding Indexes" ;
+  skos:definition "Vocabulary concept for Embedding Indexes." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :EmbeddingIndexes .
+
+:EmbeddingRecordsConcept
+  a skos:Concept ;
+  skos:prefLabel "Embedding Records" ;
+  skos:definition "Vocabulary concept for Embedding Records." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :EmbeddingRecords .
+
 :EventParticipantsConcept
   a skos:Concept ;
   skos:prefLabel "Event Participants" ;
@@ -151,6 +165,13 @@
   skos:definition "Records the application of a policy to an event or asset with outcome." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :PolicyApplication .
+
+:RetrievalBenchmarksConcept
+  a skos:Concept ;
+  skos:prefLabel "Retrieval Benchmarks" ;
+  skos:definition "Vocabulary concept for Retrieval Benchmarks." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :RetrievalBenchmarks .
 
 :RoleConcept
   a skos:Concept ;
@@ -263,6 +284,13 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :EventSubscription .
 
+:TmfExportJobConcept
+  a skos:Concept ;
+  skos:prefLabel "Tmf Export Job" ;
+  skos:definition "Vocabulary concept for Tmf Export Job." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TmfExportJob .
+
 :GeographicSiteConcept
   a skos:Concept ;
   skos:prefLabel "Geographic Site" ;
@@ -273,6 +301,13 @@
   skos:definition "A structured physical site record (data centre, cell tower, pop) per TMF674." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :GeographicSite .
+
+:TmfImportJobConcept
+  a skos:Concept ;
+  skos:prefLabel "Tmf Import Job" ;
+  skos:definition "Vocabulary concept for Tmf Import Job." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TmfImportJob .
 
 :NetworkSliceProfileConcept
   a skos:Concept ;
@@ -464,6 +499,13 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ServiceSpecification .
 
+:TmfTaskConcept
+  a skos:Concept ;
+  skos:prefLabel "Tmf Task" ;
+  skos:definition "Vocabulary concept for Tmf Task." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :TmfTask .
+
 :TroubleTicketConcept
   a skos:Concept ;
   skos:prefLabel "Trouble Ticket" ;
@@ -480,6 +522,13 @@
   skos:definition "A named permission set for users per SID Enterprise ABE / TMF672." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :UserRole .
+
+:VectorQueryLogConcept
+  a skos:Concept ;
+  skos:prefLabel "Vector Query Log" ;
+  skos:definition "Vocabulary concept for Vector Query Log." ;
+  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
+  skos:exactMatch :VectorQueryLog .
 
 
 # ── Status and Type Enumerations ───────────────────────────────────
