@@ -1,0 +1,31 @@
+# CQ-VEC-01 — Does every indexed embedding record carry a valid OWL class IRI?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 5 invariant: an ontology-bounded retrieval index is only
+# useful when every indexed row is typed.  If any record in the
+# embedding index lacks an ``owl_class`` metadata value, the class
+# filter degrades to string matching and the sensitivity-tier gate
+# cannot be enforced reliably.
+#
+# Pass condition: the result set is empty — every embedding record
+# advertises a resolvable OWL class IRI.
+#
+# Priority: Critical
+# Validates: Workstream 5 — type-safe vector index (class filter
+#             precondition)
+# Expected: empty
+# Bound variables: ?record ?index
+
+PREFIX vec: <https://ontology.example.com/vector/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?record ?index
+WHERE {
+    ?record a vec:EmbeddingRecord ;
+            vec:inIndex ?index .
+
+    FILTER NOT EXISTS {
+        ?record vec:owlClass ?cls .
+        FILTER (STRLEN(STR(?cls)) > 8)
+    }
+}
+LIMIT 20

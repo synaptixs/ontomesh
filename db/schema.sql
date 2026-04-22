@@ -340,6 +340,87 @@ CREATE TABLE IF NOT EXISTS compliance_bundles (
     stored_at          TEXT DEFAULT (datetime('now'))
 );
 
+-- ── EMBEDDING INDEX METADATA ─────────────────────────────────
+-- Workstream 5 (Gen2): Ontology-Bounded Vector Retrieval.
+-- One row per named embedding index (typically one per flavor).
+-- Tracks OWL class coverage, record count, active model, and the
+-- connection string of the underlying vector store.
+CREATE TABLE IF NOT EXISTS embedding_indexes (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    index_name         TEXT NOT NULL UNIQUE,           -- e.g. "network-ops"
+    flavor             TEXT NOT NULL,
+    vector_store       TEXT NOT NULL,                  -- qdrant|chroma|weaviate|pgvector|memory
+    connection_string  TEXT NOT NULL,
+    model_id           TEXT NOT NULL,                  -- e.g. "hash-local-384" or model name
+    dimensions         INTEGER NOT NULL,
+    owl_classes        TEXT,                           -- JSON array of indexed IRIs
+    record_count       INTEGER DEFAULT 0,
+    max_sensitivity    TEXT DEFAULT 'Internal'
+                       CHECK(max_sensitivity IN ('Public','Internal','Confidential','Restricted')),
+    last_indexed_at    TEXT,
+    created_at         TEXT DEFAULT (datetime('now')),
+    updated_at         TEXT DEFAULT (datetime('now'))
+);
+
+-- ── EMBEDDING RECORDS ─────────────────────────────────────────
+-- Each row stores an embedding vector (b64-packed float32) alongside
+-- the ontology metadata needed for class-hierarchy and sensitivity
+-- filtering.  When an external vector store is used, this table acts
+-- as a cache + source-of-truth for reindexing.
+CREATE TABLE IF NOT EXISTS embedding_records (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    index_name         TEXT NOT NULL REFERENCES embedding_indexes(index_name),
+    record_iri         TEXT NOT NULL,                  -- IRI of the typed instance
+    owl_class          TEXT NOT NULL,                  -- full OWL class IRI
+    flavor             TEXT NOT NULL,
+    sensitivity_tier   TEXT NOT NULL
+                       CHECK(sensitivity_tier IN ('Public','Internal','Confidential','Restricted')),
+    primary_key        TEXT,                           -- source table primary key
+    source_table       TEXT,
+    text_repr          TEXT NOT NULL,                  -- serialised text used to embed
+    vector_b64         TEXT NOT NULL,                  -- base64-encoded float32 LE
+    content_hash       TEXT NOT NULL,                  -- sha256 of text_repr — drives incremental reindex
+    indexed_at         TEXT DEFAULT (datetime('now')),
+    UNIQUE(index_name, record_iri)
+);
+
+-- ── VECTOR QUERY LOG ─────────────────────────────────────────
+-- Captures every hybrid retrieval call for audit + benchmarking.
+CREATE TABLE IF NOT EXISTS vector_query_log (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    query_id           TEXT NOT NULL UNIQUE,
+    index_name         TEXT,
+    flavor             TEXT,
+    question           TEXT NOT NULL,
+    class_filter       TEXT,                           -- OWL class expression or flavor name
+    resolved_classes   TEXT,                           -- JSON array after hierarchy expansion
+    k_requested        INTEGER,
+    k_returned         INTEGER,
+    latency_ms         INTEGER,
+    strategy           TEXT CHECK(strategy IN (
+                         'UNFILTERED_VECTOR','ONTOLOGY_BOUNDED','PURE_SPARQL','HYBRID')),
+    executed_at        TEXT DEFAULT (datetime('now'))
+);
+
+-- ── RETRIEVAL BENCHMARKS ─────────────────────────────────────
+-- Persistent store for benchmark runs (precision@k, recall@k, MRR, latency).
+CREATE TABLE IF NOT EXISTS retrieval_benchmarks (
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id             TEXT NOT NULL UNIQUE,
+    domain             TEXT,                           -- telecom | healthcare | ...
+    strategy           TEXT NOT NULL,
+    corpus_size        INTEGER,
+    queries            INTEGER,
+    precision_at_5     REAL,
+    recall_at_5        REAL,
+    mean_reciprocal_rank REAL,
+    latency_p50_ms     INTEGER,
+    latency_p95_ms     INTEGER,
+    improvement_over_baseline REAL,                    -- precision@5 delta vs UNFILTERED_VECTOR
+    wrong_class_blocked REAL,                          -- fraction of wrong-class hits filtered out
+    executed_at        TEXT DEFAULT (datetime('now'))
+);
+
 -- ── INDEXES ─────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_assets_type     ON assets(asset_type_id);
 CREATE INDEX IF NOT EXISTS idx_assets_owner    ON assets(owner_org_id);
@@ -360,3 +441,11 @@ CREATE INDEX IF NOT EXISTS idx_fed_query_status  ON federation_query_log(status)
 CREATE INDEX IF NOT EXISTS idx_fed_ledger_partner ON federation_trust_ledger(partner_id);
 CREATE INDEX IF NOT EXISTS idx_cmp_bundle_regulation ON compliance_bundles(regulation_id);
 CREATE INDEX IF NOT EXISTS idx_cmp_bundle_decision  ON compliance_bundles(decision_iri);
+CREATE INDEX IF NOT EXISTS idx_emb_records_index  ON embedding_records(index_name);
+CREATE INDEX IF NOT EXISTS idx_emb_records_class  ON embedding_records(owl_class);
+CREATE INDEX IF NOT EXISTS idx_emb_records_flavor ON embedding_records(flavor);
+CREATE INDEX IF NOT EXISTS idx_emb_records_tier   ON embedding_records(sensitivity_tier);
+CREATE INDEX IF NOT EXISTS idx_vec_qlog_flavor    ON vector_query_log(flavor);
+CREATE INDEX IF NOT EXISTS idx_vec_qlog_strategy  ON vector_query_log(strategy);
+CREATE INDEX IF NOT EXISTS idx_rbench_strategy    ON retrieval_benchmarks(strategy);
+CREATE INDEX IF NOT EXISTS idx_rbench_domain      ON retrieval_benchmarks(domain);

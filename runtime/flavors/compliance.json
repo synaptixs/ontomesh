@@ -32,5 +32,16 @@
     "max_readable_tier": "Confidential",
     "prov_influence_enabled": true,
     "sharing_note": "Compliance has cross-flavor read access (up to Confidential tier) for audit and governance purposes. Compliance observations are not shared downstream to preserve audit independence."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://compliance",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/ObservationRecord",
+      "https://ontology.example.com/tmf/ConflictEvent",
+      "https://ontology.example.com/tmf/Policy"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Confidential"
   }
 }
