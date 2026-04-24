@@ -70,6 +70,19 @@ Prerequisites, driver installs, and connection strings for every backend: see [i
 
 ---
 
+## First-contact demos — ontology vs baseline LLM
+
+Two self-contained demos compare an LLM answering the same questions with and without the toolkit-generated ontology. Each runs end-to-end in ~4 seconds against SQLite, produces an engineering-facing full matrix (8 questions × 2 vendors × 2 modes) and an executive one-page view, and falls back to ground-truth-derived illustrative answers when no API keys are set.
+
+| Domain | Test plan | Schema | Runner | What it exposes |
+|---|---|---|---|---|
+| Retail | [test-plan.md](test-plan.md) · [demo.md](demo.md) | [db/demo.sql](db/demo.sql) | `./demo.sh` | `status` overload across 3 tables, PROV-O MEASURED vs INFERRED events, FK→object-property traversal, SHACL output gating |
+| 5G Core NFs | [test-plan-5g.md](test-plan-5g.md) | [db/demo_5g.sql](db/demo_5g.sql) | `./demo_5g.sh` | `active` overload across 5 tables (3GPP TS 29.510), composite S-NSSAI (TS 23.003), heartbeat-inferred deregistration (TS 29.510 §5.2.2), NR/LTE PM counter collision (TS 28.552 vs 32.425), SUPI redaction |
+
+Both use the same toolkit pipeline, SHACL gates, and `RuntimeClient` — only the schema, runtime flavor, and question bank differ. Run with `--live` and `ANTHROPIC_API_KEY` + `OPENAI_API_KEY` to swap the illustrative answers for real LLM output through the full governance pipeline.
+
+---
+
 ## Standards used
 
 | Standard | Body | Role |
@@ -94,6 +107,8 @@ Prerequisites, driver installs, and connection strings for every backend: see [i
 | [install.md](install.md) | All teams | Install, onboarding, CLI, database connection |
 | [features.md](features.md) | Engineers | Artifacts, metadata control, runtime, Gen 2 workstreams |
 | [gates.md](gates.md) | All teams | Governance scorecard, exit gates, CQ-test matrix |
+| [test-plan.md](test-plan.md) · [demo.md](demo.md) | Demo viewers | Retail first-contact test plan — ontology-vs-baseline LLM comparison |
+| [test-plan-5g.md](test-plan-5g.md) | Demo viewers · telco | 5G-NF first-contact test plan — 3GPP / GSMA / O-RAN-anchored semantic issues |
 | [docs/framework-whitepaper.md](docs/framework-whitepaper.md) | Architects | Full framework specification v1.1 |
 | [docs/executive-summary.md](docs/executive-summary.md) | Leadership | Non-technical overview — what, why, and first steps |
 | [docs/technical-blueprint.md](docs/technical-blueprint.md) | Engineers | Phase-by-phase implementation guide with code patterns |
