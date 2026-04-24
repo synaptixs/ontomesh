@@ -1,0 +1,282 @@
+{
+  "_NOTE": "Illustrative answers for offline demo. The report builder uses these ONLY when the live cache (output/demo/cache/*.json) is empty or marked NO_API_KEY. When you run the demo with real API keys set, the live cache takes precedence and these illustrative entries are ignored. Baseline answers are plain prose (that's how a raw-rows LLM replies). Grounded answers are structured objects with {summary, entities|chain, notes} — the report renderer displays them as a scannable block rather than a wall of text. Each pair is derived from the actual ground-truth rows in db/demo.db.",
+
+  "Q1": {
+    "ground_truth": "7 customers have status='Active' in the customers table: Ada, Alan, Grace, Margaret, Barbara, Ken, Donald.",
+    "baseline": {
+      "anthropic": "Looking at the data, several records have status 'Active'. Among customers: Ada Lovelace, Alan Turing, Grace Hopper, Margaret Hamilton, Barbara Liskov, Ken Thompson, and Donald Knuth. Among orders there are also Confirmed/Shipped rows but none literally labeled 'Active'. There are also Cleared payments which are effectively active. So it depends which table you mean.",
+      "openai": "Active status appears on customers (7 rows — Ada, Alan, Grace, Margaret, Barbara, Ken, Donald) and on payments (where 'Cleared' can be read as active). If you mean customers, there are 7. Note that the orders table uses different status values (Pending/Confirmed/Shipped/Delivered/Cancelled) so 'Active' does not directly apply there."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "7 retail:Customer instances have customerStatus = \"Active\".",
+        "entities": [
+          {"iri": "retail:Customer/1",  "label": "Ada Lovelace"},
+          {"iri": "retail:Customer/2",  "label": "Alan Turing"},
+          {"iri": "retail:Customer/3",  "label": "Grace Hopper"},
+          {"iri": "retail:Customer/5",  "label": "Margaret Hamilton"},
+          {"iri": "retail:Customer/7",  "label": "Barbara Liskov"},
+          {"iri": "retail:Customer/8",  "label": "Ken Thompson"},
+          {"iri": "retail:Customer/10", "label": "Donald Knuth"}
+        ],
+        "notes": "\"Active\" also appears on retail:Order and retail:Payment, but those are different OWL classes and are excluded from this answer."
+      },
+      "openai": {
+        "summary": "7 retail:Customer instances have customerStatus = \"Active\".",
+        "entities": [
+          {"iri": "retail:Customer/1",  "label": "Ada Lovelace"},
+          {"iri": "retail:Customer/2",  "label": "Alan Turing"},
+          {"iri": "retail:Customer/3",  "label": "Grace Hopper"},
+          {"iri": "retail:Customer/5",  "label": "Margaret Hamilton"},
+          {"iri": "retail:Customer/7",  "label": "Barbara Liskov"},
+          {"iri": "retail:Customer/8",  "label": "Ken Thompson"},
+          {"iri": "retail:Customer/10", "label": "Donald Knuth"}
+        ],
+        "notes": "Disambiguation: \"Active\" on Order/Payment refers to different OWL classes and is excluded."
+      }
+    },
+    "delta": "Baseline confuses 3 different 'status' columns. Grounded answer names retail:Customer explicitly and both vendors return the same 7 IRIs."
+  },
+
+  "Q2": {
+    "ground_truth": "Invoice 111 ($89.00) is Overdue, owed by Grace Hopper via order 11.",
+    "baseline": {
+      "anthropic": "Invoice 111 is marked Overdue with amount_due 89.00. It is linked to order_id 11. I don't have the customer_id from just the invoices table, but if the orders table is available, order 11 was placed by customer 3.",
+      "openai": "There is one overdue invoice: id=111, amount 89.00, due 2026-04-26. Via order 11 → customer_id 3, which is Grace Hopper."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "1 retail:Invoice is Overdue.",
+        "entities": [
+          {"iri": "retail:Invoice/111", "label": "Invoice #111",
+           "attrs": {"amountDue": "$89.00", "dueDate": "2026-04-26", "invoiceStatus": "Overdue"}}
+        ],
+        "chain": [
+          {"node": "retail:Invoice/111", "edge": "retail:orderOf"},
+          {"node": "retail:Order/11",    "edge": "retail:placedBy"},
+          {"node": "retail:Customer/3",  "label": "Grace Hopper"}
+        ],
+        "notes": "The full Customer → Order → Invoice chain is resolvable via JSON-LD @id links."
+      },
+      "openai": {
+        "summary": "1 retail:Invoice is Overdue.",
+        "entities": [
+          {"iri": "retail:Invoice/111", "label": "Invoice #111",
+           "attrs": {"amountDue": "$89.00", "invoiceStatus": "Overdue"}}
+        ],
+        "chain": [
+          {"node": "retail:Invoice/111", "edge": "orderOf"},
+          {"node": "retail:Order/11",    "edge": "placedBy"},
+          {"node": "retail:Customer/3",  "label": "Grace Hopper"}
+        ]
+      }
+    },
+    "delta": "Baseline forces the reader to mentally chain FK references. Grounded answer traverses Customer → Order → Invoice as OWL object properties with stable IRIs."
+  },
+
+  "Q3": {
+    "ground_truth": "Orders whose lifecycle never emitted a DELIVERED event: 5, 8, 9, 10, 11, 13, 15. Note that order 3 *does* have a DELIVERED event but it was INFERRED, not MEASURED.",
+    "baseline": {
+      "anthropic": "Based on the orders table, the following orders have status other than 'Delivered': 5 (Confirmed), 8 (Pending), 9 (Cancelled), 10 (Shipped), 11 (Pending), 13 (Confirmed), 15 (Shipped). That is 7 orders.",
+      "openai": "Orders where status != 'Delivered': 5, 8, 9, 10, 11, 13, 15. Seven orders total."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "7 retail:Order instances have no retail:DeliveredEvent in their lifecycle.",
+        "entities": [
+          {"iri": "retail:Order/5",  "attrs": {"orderStatus": "Confirmed"}},
+          {"iri": "retail:Order/8",  "attrs": {"orderStatus": "Pending"}},
+          {"iri": "retail:Order/9",  "attrs": {"orderStatus": "Cancelled"}},
+          {"iri": "retail:Order/10", "attrs": {"orderStatus": "Shipped"}},
+          {"iri": "retail:Order/11", "attrs": {"orderStatus": "Pending"}},
+          {"iri": "retail:Order/13", "attrs": {"orderStatus": "Confirmed"}},
+          {"iri": "retail:Order/15", "attrs": {"orderStatus": "Shipped"}}
+        ],
+        "notes": "retail:Order/3 does have a DeliveredEvent but its derivation is INFERRED (confidence 0.60). If you restrict to MEASURED events only, Order/3 also belongs in this list (8 total)."
+      },
+      "openai": {
+        "summary": "7 retail:Order instances have no retail:DeliveredEvent.",
+        "entities": [
+          {"iri": "retail:Order/5"}, {"iri": "retail:Order/8"},
+          {"iri": "retail:Order/9"}, {"iri": "retail:Order/10"},
+          {"iri": "retail:Order/11"}, {"iri": "retail:Order/13"},
+          {"iri": "retail:Order/15"}
+        ],
+        "notes": "Extension under MEASURED-only provenance: retail:Order/3 also qualifies — its DeliveredEvent is INFERRED."
+      }
+    },
+    "delta": "Baseline reads orders.status (a snapshot column). Grounded answer reads retail:OrderEvent (the lifecycle class), which surfaces the distinction between snapshot status and PROV-O-stamped transition history — and flags that one 'Delivered' event is actually INFERRED."
+  },
+
+  "Q4": {
+    "ground_truth": "Yes — Invoice 103 (Disputed) has payment 203 (Reversed), and Invoice 109 (Disputed) has payment 211 (Reversed).",
+    "baseline": {
+      "anthropic": "Yes. Invoice 103 is Disputed and has a payment id 203 of status Reversed. Invoice 109 is Disputed and has payment 211 of status Reversed. Two invoice-payment pairs match.",
+      "openai": "Two matches: invoice 103 ↔ payment 203 (both Disputed/Reversed), and invoice 109 ↔ payment 211."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "2 (retail:Invoice, retail:Payment) pairs satisfy invoiceStatus=Disputed AND paymentStatus=Reversed.",
+        "entities": [
+          {"iri": "retail:Invoice/103", "attrs": {"invoiceStatus": "Disputed"}},
+          {"iri": "retail:Payment/203", "attrs": {"paymentStatus": "Reversed", "amount": "$418.00"}},
+          {"iri": "retail:Invoice/109", "attrs": {"invoiceStatus": "Disputed"}},
+          {"iri": "retail:Payment/211", "attrs": {"paymentStatus": "Reversed", "amount": "$100.00"}}
+        ],
+        "notes": "retail:Payment is sensitivity tier Restricted. This answer is stored as an ObservationRecord and exposed only to the compliance flavor."
+      },
+      "openai": {
+        "summary": "2 matching pairs.",
+        "entities": [
+          {"iri": "retail:Invoice/103", "attrs": {"invoiceStatus": "Disputed"}},
+          {"iri": "retail:Payment/203", "attrs": {"paymentStatus": "Reversed"}},
+          {"iri": "retail:Invoice/109", "attrs": {"invoiceStatus": "Disputed"}},
+          {"iri": "retail:Payment/211", "attrs": {"paymentStatus": "Reversed"}}
+        ],
+        "notes": "Sensitivity: retail:Payment is Restricted — the response ObservationRecord is retained for audit."
+      }
+    },
+    "delta": "Similar truth in both modes, but the grounded answer annotates sensitivity and logs an ObservationRecord — auditable by design. Baseline leaves no trail."
+  },
+
+  "Q5": {
+    "ground_truth": "Order 7 → Customer: Alan Turing (id 2); Invoice 107 ($688); Payment 206 (Cleared, BANK).",
+    "baseline": {
+      "anthropic": "Order 7 was placed by customer_id 2 (Alan Turing). It was invoiced as invoice 107 for $688. Payment 206 cleared the invoice via BANK transfer. The chain is: Alan Turing → Order 7 → Invoice 107 → Payment 206.",
+      "openai": "Customer 2 (Alan Turing) placed Order 7 (total 688.00, Delivered). Invoice 107 was issued against it (688, Paid). Payment 206 cleared it (688, BANK, Cleared)."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "Full customer-to-payment chain for retail:Order/7.",
+        "chain": [
+          {"node": "retail:Order/7",    "label": "Order #7",     "edge": "retail:placedBy"},
+          {"node": "retail:Customer/2", "label": "Alan Turing",  "edge": "retail:hasOrder"},
+          {"node": "retail:Order/7",    "edge": "retail:hasInvoice"},
+          {"node": "retail:Invoice/107","label": "Invoice #107", "edge": "retail:paidBy",
+           "attrs": {"amountDue": "$688.00", "invoiceStatus": "Paid"}},
+          {"node": "retail:Payment/206","label": "Payment #206",
+           "attrs": {"amount": "$688.00", "method": "BANK", "paymentStatus": "Cleared"}}
+        ],
+        "notes": "Every node carries a resolvable IRI. The chain is directly consumable by a downstream agent or storable as an ObservationRecord subgraph."
+      },
+      "openai": {
+        "summary": "Customer → Order → Invoice → Payment chain for retail:Order/7.",
+        "chain": [
+          {"node": "retail:Customer/2", "label": "Alan Turing",  "edge": "retail:placedOrder"},
+          {"node": "retail:Order/7",    "edge": "retail:hasInvoice"},
+          {"node": "retail:Invoice/107","attrs": {"amountDue": "$688.00", "invoiceStatus": "Paid"}, "edge": "retail:paidBy"},
+          {"node": "retail:Payment/206","attrs": {"amount": "$688.00", "method": "BANK", "paymentStatus": "Cleared"}}
+        ],
+        "notes": "All four nodes @id-linked in the response envelope."
+      }
+    },
+    "delta": "Baseline produces a prose summary. Grounded produces a machine-traversable JSON-LD subgraph with stable IRIs — directly consumable by a downstream agent or stored as an ObservationRecord."
+  },
+
+  "Q6": {
+    "ground_truth": "One INFERRED cancellation: event id 23, order 9, confidence 0.72, actor 'fraud-rule'. Event id 16 on the same order is MEASURED.",
+    "baseline": {
+      "anthropic": "Looking at the order_events table, there is a field called 'derivation' with values like MEASURED and INFERRED. Row id 23 has event_type='CANCELLED' and derivation='INFERRED' on order 9. So one row matches.",
+      "openai": "One row: id=23, order_id=9, event_type=CANCELLED, derivation=INFERRED, confidence=0.72. Actor is 'fraud-rule'. Note: order 9 has another CANCELLED event (id=16) that is MEASURED."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "1 retail:CancelledEvent has prov:derivationMethod = INFERRED.",
+        "entities": [
+          {"iri": "retail:OrderEvent/23", "label": "Cancelled event on Order 9",
+           "attrs": {
+             "eventType": "CANCELLED",
+             "derivationMethod": "INFERRED",
+             "hasConfidenceScore": 0.72,
+             "wasAttributedTo": "fraud-rule",
+             "occurredAt": "2026-03-24T02:00:00Z"
+           }}
+        ],
+        "notes": "A competing retail:CancelledEvent/16 on the same Order is MEASURED (confidence 0.95). PROV-O records both as coexisting assertions until the 3-tier conflict resolver picks one — it would prefer /16."
+      },
+      "openai": {
+        "summary": "1 retail:CancelledEvent with derivationMethod = INFERRED.",
+        "entities": [
+          {"iri": "retail:OrderEvent/23",
+           "attrs": {
+             "eventType": "CANCELLED",
+             "derivationMethod": "INFERRED",
+             "hasConfidenceScore": 0.72,
+             "wasAttributedTo": "fraud-rule"
+           }}
+        ],
+        "notes": "Coexisting retail:OrderEvent/16 on the same Order is MEASURED (0.95). Conflict resolver would prefer /16."
+      }
+    },
+    "delta": "Baseline treats 'derivation' as a plain column. Grounded answer promotes it to prov:derivationMethod, names the OWL subclass retail:CancelledEvent, and flags that a measured counter-observation exists — setting up the conflict-resolution story."
+  },
+
+  "Q7": {
+    "ground_truth": "Definition-dependent. 'Active' has no literal value in orders.status. Most useful reading: orders not Delivered/Cancelled and missing a shipment row → Order 5 and Order 13 (both Confirmed, no shipment).",
+    "baseline": {
+      "anthropic": "The orders table has no 'Active' status value. Possible interpretations: (1) non-terminal orders (Pending/Confirmed/Shipped) without a shipment row; that gives orders 5, 8, 11, 13. (2) Only Confirmed orders without shipments → 5 and 13. I'll go with (2): 2 orders.",
+      "openai": "'Active' is not a valid order status in this schema. If I interpret active as non-Delivered/non-Cancelled, the orders without shipments are 5, 8, 11, 13. Among those, 5 and 13 are Confirmed. Four candidates under the looser definition."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "Vocabulary mismatch detected — interpreting narrowly.",
+        "vocabulary_warning": "\"Active\" is not a member of SKOS ConceptScheme retail:orderStatus. Valid terms: Pending, Confirmed, Shipped, Delivered, Cancelled. The SHACL input gate surfaced this as a definitional warning.",
+        "entities": [
+          {"iri": "retail:Order/5",  "attrs": {"orderStatus": "Confirmed", "hasShipment": "none"}},
+          {"iri": "retail:Order/13", "attrs": {"orderStatus": "Confirmed", "hasShipment": "none"}}
+        ],
+        "notes": "Narrow reading: orderStatus ∈ {Confirmed, Shipped} AND no retail:hasShipment edge — 2 Orders. Wider reading (include Pending) would add retail:Order/8 and retail:Order/11."
+      },
+      "openai": {
+        "summary": "Vocabulary mismatch on 'Active' — answering narrowly.",
+        "vocabulary_warning": "retail:orderStatus SKOS ConceptScheme does not contain 'Active'. Valid terms: Pending, Confirmed, Shipped, Delivered, Cancelled.",
+        "entities": [
+          {"iri": "retail:Order/5",  "attrs": {"orderStatus": "Confirmed"}},
+          {"iri": "retail:Order/13", "attrs": {"orderStatus": "Confirmed"}}
+        ],
+        "notes": "Wider reading adds retail:Order/8 and retail:Order/11."
+      }
+    },
+    "delta": "Grounded answer detects the vocabulary mismatch and surfaces it explicitly — a measurable reduction in hallucination risk. Baseline silently invents an interpretation."
+  },
+
+  "Q8": {
+    "ground_truth": "Customer 1 = Ada Lovelace; Active; 3 orders totalling $541; 3 invoices, all Paid; no disputes.",
+    "baseline": {
+      "anthropic": "Ada Lovelace is an Active customer with 3 orders totalling $541 across Delivered orders, and all 3 invoices are paid.",
+      "openai": "Ada Lovelace (customer 1) has Active status, three delivered orders totalling $541, and three paid invoices — a customer in good standing."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "retail:Customer/1 (Ada Lovelace) is in good standing — SHACL CustomerShape valid.",
+        "entities": [
+          {"iri": "retail:Customer/1", "label": "Ada Lovelace",
+           "attrs": {
+             "customerStatus": "Active",
+             "orderCount": 3,
+             "ordersDelivered": 3,
+             "invoiceCount": 3,
+             "invoicesPaid": 3,
+             "amountSettled": "$541.00",
+             "disputesOpen": 0
+           }}
+        ],
+        "notes": "All 3 retail:Order instances (IDs 1, 4, 14) reached Delivered state. No retail:Invoice is Disputed or Overdue."
+      },
+      "openai": {
+        "summary": "retail:Customer/1 — Active, 3 orders all Delivered, 3 invoices all Paid, no disputes.",
+        "entities": [
+          {"iri": "retail:Customer/1", "label": "Ada Lovelace",
+           "attrs": {
+             "customerStatus": "Active",
+             "orders": "3 (all Delivered: 1, 4, 14)",
+             "invoices": "3 (all Paid)",
+             "amountSettled": "$541.00"
+           }}
+        ],
+        "notes": "SHACL CustomerShape: valid."
+      }
+    },
+    "delta": "Prose summaries are similar. The grounded version additionally exposes IRI, counts per OWL class, and a SHACL validity stamp — enabling the answer to be stored as a first-class ObservationRecord."
+  }
+}
