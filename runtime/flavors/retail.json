@@ -1,0 +1,51 @@
+{
+  "name": "retail",
+  "description": "Retail domain — customers, products, orders, invoices, payments, shipments, and order-lifecycle events. Used by the first-contact demo comparing ontology-grounded vs raw LLM output.",
+  "sensitivity_tier": "Confidential",
+  "owl_classes": ["Customer", "Product", "Order", "OrderLine", "Invoice", "Payment", "Shipment", "OrderEvent"],
+  "shacl_shapes": ["CustomerShape", "OrderShape", "InvoiceShape", "PaymentShape", "ShipmentShape", "OrderEventShape"],
+  "context_terms": {
+    "Customer":   "https://ontology.example.com/retail/Customer",
+    "Product":    "https://ontology.example.com/retail/Product",
+    "Order":      "https://ontology.example.com/retail/Order",
+    "OrderLine":  "https://ontology.example.com/retail/OrderLine",
+    "Invoice":    "https://ontology.example.com/retail/Invoice",
+    "Payment":    "https://ontology.example.com/retail/Payment",
+    "Shipment":   "https://ontology.example.com/retail/Shipment",
+    "OrderEvent": "https://ontology.example.com/retail/OrderEvent",
+    "customerStatus": "https://ontology.example.com/retail/customerStatus",
+    "orderStatus":    "https://ontology.example.com/retail/orderStatus",
+    "invoiceStatus":  "https://ontology.example.com/retail/invoiceStatus",
+    "paymentStatus":  "https://ontology.example.com/retail/paymentStatus",
+    "eventType":      "https://ontology.example.com/retail/eventType",
+    "confidence":     "https://ontology.example.com/retail/confidence",
+    "derivation":     "https://ontology.example.com/retail/derivation",
+    "actorParty":     "https://ontology.example.com/retail/actorParty",
+    "totalAmount":    "https://ontology.example.com/retail/totalAmount",
+    "amountDue":      "https://ontology.example.com/retail/amountDue"
+  },
+  "db_tables": ["customers", "orders", "invoices", "payments", "shipments", "order_events", "order_items", "products"],
+  "system_prompt_hint": "You are a retail operations analyst. Answer every question in terms of the OWL classes Customer, Order, Invoice, Payment, Shipment, and OrderEvent. When a field such as 'status' could refer to multiple classes (customers.status, orders.status, invoices.status, payments.status) disambiguate it explicitly by naming the OWL class. For lifecycle questions, prefer OrderEvent rows over the orders.status column because OrderEvent carries PROV-O provenance (confidence, derivation). Never conflate a Customer's Active state with an Order's state.",
+  "cq_ids": ["CQ-001", "CQ-002", "CQ-003", "CQ-004", "CQ-005", "CQ-006", "CQ-007", "CQ-008", "CQ-009"],
+  "memory_sharing": {
+    "can_read_from": ["retail"],
+    "can_be_read_by": ["retail", "compliance"],
+    "max_readable_tier": "Confidential",
+    "prov_influence_enabled": true,
+    "sharing_note": "Retail observations may be read by compliance for audit-trail evidence."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://retail",
+    "owl_classes": [
+      "https://ontology.example.com/retail/Customer",
+      "https://ontology.example.com/retail/Order",
+      "https://ontology.example.com/retail/Invoice",
+      "https://ontology.example.com/retail/Payment",
+      "https://ontology.example.com/retail/Shipment",
+      "https://ontology.example.com/retail/OrderEvent"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Confidential"
+  }
+}
