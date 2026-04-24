@@ -1,0 +1,58 @@
+{
+  "name": "fiveg",
+  "description": "5G Core Network-Function domain — NRF NFProfile, NFService, AMF UE Registration Context, PDU Session, Network Slice Instance, PM counter, Alarm, and NF Lifecycle events. Modelled on 3GPP TS 23.501, TS 28.541, TS 29.510, TS 29.518, TS 23.502 / 29.502, TS 28.552, TS 28.532, and GSMA NG.116. Used by the first-contact 5G demo.",
+  "sensitivity_tier": "Confidential",
+  "owl_classes": ["NetworkFunction", "NFService", "UERegistrationContext", "PDUSession", "NetworkSliceInstance", "PMCounter", "Alarm", "NFLifecycleEvent"],
+  "shacl_shapes": ["NetworkFunctionShape", "NFServiceShape", "UERegistrationContextShape", "PDUSessionShape", "NetworkSliceInstanceShape", "PMCounterShape", "AlarmShape", "NFLifecycleEventShape"],
+  "context_terms": {
+    "NetworkFunction":         "https://ontology.example.com/fiveg/NetworkFunction",
+    "NFService":               "https://ontology.example.com/fiveg/NFService",
+    "UERegistrationContext":   "https://ontology.example.com/fiveg/UERegistrationContext",
+    "PDUSession":              "https://ontology.example.com/fiveg/PDUSession",
+    "NetworkSliceInstance":    "https://ontology.example.com/fiveg/NetworkSliceInstance",
+    "PMCounter":               "https://ontology.example.com/fiveg/PMCounter",
+    "Alarm":                   "https://ontology.example.com/fiveg/Alarm",
+    "NFLifecycleEvent":        "https://ontology.example.com/fiveg/NFLifecycleEvent",
+    "nfStatus":                "https://ontology.example.com/fiveg/nfStatus",
+    "serviceStatus":           "https://ontology.example.com/fiveg/serviceStatus",
+    "registrationState":       "https://ontology.example.com/fiveg/registrationState",
+    "connectionState":         "https://ontology.example.com/fiveg/connectionState",
+    "sessionStatus":           "https://ontology.example.com/fiveg/sessionStatus",
+    "alarmState":              "https://ontology.example.com/fiveg/alarmState",
+    "operationalState":        "https://ontology.example.com/fiveg/operationalState",
+    "sNssai":                  "https://ontology.example.com/fiveg/sNssai",
+    "snssaiSst":               "https://ontology.example.com/fiveg/snssaiSst",
+    "snssaiSd":                "https://ontology.example.com/fiveg/snssaiSd",
+    "sliceType":               "https://ontology.example.com/fiveg/sliceType",
+    "slaLatencyMs":            "https://ontology.example.com/fiveg/slaLatencyMs",
+    "slaAvailPct":             "https://ontology.example.com/fiveg/slaAvailPct",
+    "eventType":               "https://ontology.example.com/fiveg/eventType",
+    "confidence":              "https://ontology.example.com/fiveg/confidence",
+    "derivation":              "https://ontology.example.com/fiveg/derivation",
+    "actorParty":              "https://ontology.example.com/fiveg/actorParty",
+    "technology":              "https://ontology.example.com/fiveg/technology"
+  },
+  "db_tables": ["nf_instance", "nf_service", "ue_registration", "pdu_session", "slice_instance", "pm_counter", "alarm", "nf_event"],
+  "system_prompt_hint": "You are a 5G Core operations analyst. Answer every question in terms of the OWL classes NetworkFunction, NFService, UERegistrationContext, PDUSession, NetworkSliceInstance, PMCounter, Alarm, and NFLifecycleEvent. The word 'active' is ambiguous — it may refer to NetworkFunction.nfStatus (REGISTERED), NFService.serviceStatus (REGISTERED), UERegistrationContext.registrationState (REGISTERED) or .connectionState (CONNECTED), PDUSession.sessionStatus (ACTIVE), Alarm.alarmState (ACTIVE), or NetworkSliceInstance.operationalState (ENABLED). Always disambiguate by naming the OWL class explicitly. S-NSSAI is a composite identifier (SST + SD per 3GPP TS 23.003 §28.4) — render it as a single IRI `fiveg:snssai/<SST>-<SD>`. When a PDU session question is asked, always traverse UERegistrationContext → SMF → UPF using the FK-derived object properties. For lifecycle questions, prefer NFLifecycleEvent rows over status-column snapshots, and carry through the PROV-O derivation (MEASURED = explicit NFDeregister; INFERRED = NRF heartbeat-timeout). Disambiguate PM counter names by the `technology` attribute (NR vs LTE) — never conflate TS 28.552 counters with TS 32.425 counters.",
+  "cq_ids": ["CQ-5G-001", "CQ-5G-002", "CQ-5G-003", "CQ-5G-004", "CQ-5G-005", "CQ-5G-006", "CQ-5G-007", "CQ-5G-008", "CQ-5G-009", "CQ-5G-010"],
+  "memory_sharing": {
+    "can_read_from": ["fiveg"],
+    "can_be_read_by": ["fiveg", "fault-management", "compliance"],
+    "max_readable_tier": "Confidential",
+    "prov_influence_enabled": true,
+    "sharing_note": "5G operational observations may be read by fault-management (for incident correlation) and compliance (for regulatory audit)."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://fiveg",
+    "owl_classes": [
+      "https://ontology.example.com/fiveg/NetworkFunction",
+      "https://ontology.example.com/fiveg/PDUSession",
+      "https://ontology.example.com/fiveg/NetworkSliceInstance",
+      "https://ontology.example.com/fiveg/Alarm",
+      "https://ontology.example.com/fiveg/NFLifecycleEvent"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Confidential"
+  }
+}
