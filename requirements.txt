@@ -23,6 +23,7 @@ anthropic>=0.34.0               # Anthropic Messages API (claude-sonnet)
 openai>=1.40.0                  # OpenAI Chat Completions (GPT-4o)
 google-cloud-aiplatform>=1.60.0 # Vertex AI / Gemini
 requests>=2.32.3                # Ollama adapter + graph store HTTP calls
+oci>=2.126.0                    # Oracle Cloud Infrastructure Generative AI
 
 # ── Phase 3: Graph store publishing ─────────────────────────────────────────
 # sparqlwrapper covers Fuseki/Stardog/Oxigraph/Neptune SPARQL Update
