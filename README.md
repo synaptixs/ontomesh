@@ -70,6 +70,64 @@ Prerequisites, driver installs, and connection strings for every backend: see [i
 
 ---
 
+## OCI Generative AI setup
+
+The runtime layer ships with an Oracle Cloud Infrastructure (OCI) adapter alongside Anthropic, OpenAI, Vertex AI, and Ollama. Use it when you want to route the toolkit's governed payloads to Cohere or Llama models hosted on OCI Generative AI.
+
+**1. Install the SDK**
+
+```bash
+pip install oci
+```
+
+**2. Configure credentials**
+
+The adapter follows the standard OCI config-file pattern documented at [docs.oracle.com — Python SDK Configuration](https://docs.oracle.com/en-us/iaas/tools/python/latest/configuration.html). Create `~/.oci/config` (or run `oci setup config`) with at least:
+
+```ini
+[DEFAULT]
+user=ocid1.user.oc1..<your-user-ocid>
+fingerprint=<api-key-fingerprint>
+key_file=~/.oci/oci_api_key.pem
+tenancy=ocid1.tenancy.oc1..<your-tenancy-ocid>
+region=us-chicago-1
+```
+
+**3. Set the compartment**
+
+OCI Generative AI requires a compartment OCID for routing and billing:
+
+```bash
+export OCI_COMPARTMENT_ID=ocid1.compartment.oc1..<your-compartment-ocid>
+```
+
+Optional environment overrides:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OCI_CONFIG_FILE` | `~/.oci/config` | Path to the OCI config file |
+| `OCI_CONFIG_PROFILE` | `DEFAULT` | Profile name within the config file |
+| `OCI_GENAI_ENDPOINT` | `https://inference.generativeai.us-chicago-1.oci.oraclecloud.com` | Service endpoint (set this for non-Chicago regions) |
+
+**4. Use it from the runtime**
+
+```python
+from runtime import RuntimeClient
+
+client = RuntimeClient(
+    db_path="db/enterprise.db",
+    adapter="oci",
+    model="cohere.command-r-plus",   # or a Meta/Llama model OCID
+)
+
+result = client.ask(question="Which network functions are degraded?", flavor="network-ops")
+print(result["answer"])
+```
+
+The adapter defaults to the Cohere request shape. To target a Meta/generic model, instantiate `OCIAdapter` directly with `provider="meta"` and pass it via `RuntimeClient(adapter=<instance>)`.
+
+---
+
 ## Standards used
 
 | Standard | Body | Role |

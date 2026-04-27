@@ -109,7 +109,8 @@ ontology-toolkit/
 │       ├── anthropic_adapter.py ← Anthropic Messages API (with prompt caching)
 │       ├── openai_adapter.py    ← OpenAI Chat Completions
 │       ├── vertex_adapter.py    ← Google Vertex AI (Gemini)
-│       └── ollama_adapter.py    ← Ollama local LLM
+│       ├── ollama_adapter.py    ← Ollama local LLM
+│       └── oci_adapter.py       ← Oracle Cloud (OCI Generative AI)
 │
 ├── .github/
 │   └── workflows/
@@ -587,6 +588,7 @@ print(result["prov"])             # Full provenance dict: model, timestamp, conf
 | OpenAI Chat Completions | `"openai"` | `gpt-4o` | `pip install openai` |
 | Google Vertex AI (Gemini) | `"vertex"` | `gemini-1.5-pro` | `pip install google-cloud-aiplatform` |
 | Ollama (local) | `"ollama"` | `llama3` | Ollama server running at `localhost:11434` |
+| Oracle Cloud (OCI Generative AI) | `"oci"` | `cohere.command-r-plus` | `pip install oci` — see OCI setup in [README.md](README.md#oci-generative-ai-setup) |
 
 All adapters are optional — the core runtime modules (`grounder`, `assembler`, `input_gate`, `output_gate`) have zero external dependencies. Install only the adapter you need. The Anthropic adapter uses prompt caching on the system prompt for reduced latency and cost.
 

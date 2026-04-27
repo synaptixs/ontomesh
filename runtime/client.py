@@ -562,9 +562,16 @@ class RuntimeClient:
                 kwargs["model"] = model
             return OllamaAdapter(**kwargs)
 
+        if adapter_name == "oci":
+            from oci_adapter import OCIAdapter
+            kwargs = {}
+            if model:
+                kwargs["model"] = model
+            return OCIAdapter(**kwargs)
+
         raise ValueError(
             f"Unknown adapter '{adapter_name}'. "
-            "Choose from: anthropic, openai, vertex, ollama"
+            "Choose from: anthropic, openai, vertex, ollama, oci"
         )
 
     def _build_result(
