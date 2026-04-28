@@ -1,0 +1,254 @@
+{
+  "_NOTE": "Illustrative answers for the offline 5G demo. The report builder uses these ONLY when the live cache (output/demo-5g/cache/*.json) is empty or marked NO_API_KEY. Each pair is derived from the actual ground-truth rows in db/demo_5g.db. Baseline answers are plain prose. Grounded answers are structured objects rendered as scannable blocks. All class names / property names match the generated OWL ontology at output/demo-5g/ontology/.",
+
+  "Q1": {
+    "ground_truth": "'Active' has six distinct meanings in the seed data: 10 NFs with nf_status=REGISTERED (NRF sees them healthy), 8 UEs with registration_state=REGISTERED, 5 UEs with connection_state=CONNECTED, 9 PDU sessions with session_status=ACTIVE, 3 alarms with state=ACTIVE, 4 slices with operational_state=ENABLED. No single correct answer without disambiguation.",
+    "baseline": {
+      "anthropic": "Looking at the data, a few things are 'active'. The nf_instance table has 10 rows with nf_status='REGISTERED' (NRF considers them active): amf-01, smf-01, smf-02, upf-01, upf-02, upf-03, pcf-01, ausf-01, nrf-01, nssf-01. udm-01 is SUSPENDED and nef-01 is UNDISCOVERABLE. There are also 9 active PDU sessions and some active alarms, so it depends on what you mean by 'active'.",
+      "openai": "There are several kinds of 'active' entries. 10 NFs are REGISTERED at the NRF. 5 UEs are currently CONNECTED (the rest are IDLE). 9 PDU sessions have session_status = ACTIVE. 3 alarms are in ACTIVE state. 4 slices are ENABLED. If by 'active' you mean NFs with nf_status=REGISTERED the answer is the 10 NFs listed in nf_instance."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "The term 'active' maps to 6 distinct OWL classes/properties in the fiveg ontology. Grouping the answer by class.",
+        "vocabulary_warning": "'active' is not a standard value for any fiveg: class. Resolved to the closest enumerated states per class.",
+        "entities": [
+          {"iri": "fiveg:NetworkFunction",        "label": "10 instances with nfStatus = REGISTERED", "attrs": {"excluded": "udm-01 (SUSPENDED), nef-01 (UNDISCOVERABLE)"}},
+          {"iri": "fiveg:UERegistrationContext",  "label": "8 contexts with registrationState = REGISTERED", "attrs": {"of_which_connected": 5, "of_which_idle": 3}},
+          {"iri": "fiveg:PDUSession",             "label": "9 sessions with sessionStatus = ACTIVE"},
+          {"iri": "fiveg:Alarm",                  "label": "3 alarms with alarmState = ACTIVE", "attrs": {"on": "udm-01 ×2, nef-01 ×1"}},
+          {"iri": "fiveg:NetworkSliceInstance",   "label": "4 slices with operationalState = ENABLED"}
+        ],
+        "notes": "Operator-facing dashboards should always qualify 'active' with its owning OWL class. The NRF-level view (NetworkFunction.nfStatus) diverges from the data-plane view (PDUSession.sessionStatus): see Q4."
+      },
+      "openai": {
+        "summary": "'active' resolves to 6 different fiveg: properties; disambiguating by OWL class.",
+        "vocabulary_warning": "No single `isActive` property exists. Each OWL class has its own state enumeration.",
+        "entities": [
+          {"iri": "fiveg:NetworkFunction",       "label": "nfStatus=REGISTERED",       "attrs": {"count": 10}},
+          {"iri": "fiveg:UERegistrationContext", "label": "registrationState=REGISTERED","attrs": {"count": 8}},
+          {"iri": "fiveg:PDUSession",            "label": "sessionStatus=ACTIVE",       "attrs": {"count": 9}},
+          {"iri": "fiveg:Alarm",                 "label": "alarmState=ACTIVE",          "attrs": {"count": 3}},
+          {"iri": "fiveg:NetworkSliceInstance",  "label": "operationalState=ENABLED",   "attrs": {"count": 4}}
+        ],
+        "notes": "Cross-class reconciliation (e.g. NF suspended + session still active) is answered by Q4."
+      }
+    },
+    "delta": "Baseline gave one prose paragraph that conflates multiple layers; both vendors hedged with 'it depends'. Grounded output pivots on the OWL class so an operator can act on the right column — and it flags the cross-class inconsistency that Q4 then explores."
+  },
+
+  "Q2": {
+    "ground_truth": "Slice S-NSSAI (SST=1, SD=000001) is nssi-embb-01. PDU sessions on it: 1, 2 (both SUPI ...001), 3 (SUPI ...002, INACTIVE), 5 (SUPI ...004, RELEASED), 9 (SUPI ...008, ACTIVE), 10 (SUPI ...009, RELEASED). Of those, sessions 1, 2, 9 are ACTIVE — all anchored on UPF upf-01 (id=4).",
+    "baseline": {
+      "anthropic": "Filtering pdu_session on snssai_sst=1 AND snssai_sd='000001' yields 6 rows: session IDs 1,2,3,5,9,10. They map to UPF instance IDs 4,4,6,4,4,6 (i.e. upf-01 and upf-02). Session statuses vary: 1,2,9 are ACTIVE; 3 is INACTIVE; 5 and 10 are RELEASED.",
+      "openai": "There are 6 PDU sessions on slice (sst=1,sd=000001): sessions 1,2,3,5,9,10. UPFs involved: upf_instance_id 4 and 6. If you only want ACTIVE sessions, that narrows to 1,2,9, all on upf_instance_id=4."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "3 ACTIVE PDUSession instances on S-NSSAI fiveg:snssai/1-000001 (eMBB), all anchored on fiveg:NetworkFunction/4 (upf-01).",
+        "entities": [
+          {"iri": "fiveg:snssai/1-000001", "label": "S-NSSAI eMBB", "attrs": {"sst": 1, "sd": "000001", "sliceType": "eMBB"}},
+          {"iri": "fiveg:PDUSession/1",    "label": "session on UPF upf-01", "attrs": {"sessionStatus": "ACTIVE", "dnn": "internet"}},
+          {"iri": "fiveg:PDUSession/2",    "label": "session on UPF upf-01", "attrs": {"sessionStatus": "ACTIVE", "dnn": "ims"}},
+          {"iri": "fiveg:PDUSession/9",    "label": "session on UPF upf-01", "attrs": {"sessionStatus": "ACTIVE", "dnn": "internet"}}
+        ],
+        "chain": [
+          {"node": "fiveg:snssai/1-000001",      "edge": "fiveg:servedBy (PDUSession)"},
+          {"node": "fiveg:PDUSession/1",          "edge": "fiveg:anchoredOn (UPF)"},
+          {"node": "fiveg:NetworkFunction/4",    "label": "upf-01"}
+        ],
+        "notes": "S-NSSAI is resolved to a single IRI via TS 23.003 §28.4.2 composite-key rule (SST-SD). 3 additional sessions (#3 INACTIVE, #5 RELEASED, #10 RELEASED) are excluded."
+      },
+      "openai": {
+        "summary": "S-NSSAI fiveg:snssai/1-000001 → 3 ACTIVE PDUSessions → 1 anchor UPF.",
+        "entities": [
+          {"iri": "fiveg:snssai/1-000001", "attrs": {"sst": 1, "sd": "000001", "sliceType": "eMBB"}},
+          {"iri": "fiveg:PDUSession/1",    "attrs": {"dnn": "internet"}},
+          {"iri": "fiveg:PDUSession/2",    "attrs": {"dnn": "ims"}},
+          {"iri": "fiveg:PDUSession/9",    "attrs": {"dnn": "internet"}}
+        ],
+        "chain": [
+          {"node": "fiveg:snssai/1-000001", "edge": "servedBy"},
+          {"node": "fiveg:PDUSession/1",    "edge": "anchoredOn"},
+          {"node": "fiveg:NetworkFunction/4", "label": "upf-01"}
+        ]
+      }
+    },
+    "delta": "Baseline exposes SST and SD as separate columns — any join across a second OSS would have to re-implement the composite-key rule. Grounded answer renders S-NSSAI as a single IRI and types the UPF reference, so downstream tooling can resolve it directly."
+  },
+
+  "Q3": {
+    "ground_truth": "2 UEs have registration_state=DEREGISTERED: imsi-...004, imsi-...009. But the event log shows no UE-side registration-failure events for them — the deregistration was recorded as an NFLifecycleEvent against the AMF. The correct answer for 'failed to reach REGISTERED' is: 0 outright failures, 2 historical deregistrations (normal UE behaviour — mobility / battery).",
+    "baseline": {
+      "anthropic": "From ue_registration: 2 UEs have registration_state='DEREGISTERED' — imsi-001010000000004 and imsi-001010000000009. Neither is currently registered. I don't see a 'failure' flag in the schema so these could either be deliberate deregistrations or failed registrations.",
+      "openai": "Two UEs are currently DEREGISTERED: imsi-001010000000004 (last activity 2026-04-23 10:01) and imsi-001010000000009 (last activity 2026-04-23 10:52). The schema does not distinguish between failed registration and normal deregistration."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "0 UERegistrationContext instances failed to reach REGISTERED. 2 were DEREGISTERED after having reached REGISTERED — no failure signature in the NFLifecycleEvent log.",
+        "entities": [
+          {"iri": "fiveg:UERegistrationContext/4", "label": "SUPI imsi-***004 (redacted)", "attrs": {"registrationState": "DEREGISTERED", "firstSeen": "2026-04-23 09:30", "lastActivity": "2026-04-23 10:01"}},
+          {"iri": "fiveg:UERegistrationContext/9", "label": "SUPI imsi-***009 (redacted)", "attrs": {"registrationState": "DEREGISTERED", "firstSeen": "2026-04-23 10:40", "lastActivity": "2026-04-23 10:52"}}
+        ],
+        "notes": "Registration FAILURE would surface as an NFLifecycleEvent or as AMF.RegistrationReq.AuthFail > 0. The PM counter AMF.RegistrationReq.AuthFail shows 12 over the last 300 s, so some attempts did fail, but the failing SUPIs are not persisted in ue_registration (which only records successful anchor points). SUPI is Restricted — values are hashed before reaching the LLM."
+      },
+      "openai": {
+        "summary": "No fiveg:UERegistrationContext ended in a failed-registration state. 2 historical deregistrations on record.",
+        "entities": [
+          {"iri": "fiveg:UERegistrationContext/4", "attrs": {"registrationState": "DEREGISTERED"}},
+          {"iri": "fiveg:UERegistrationContext/9", "attrs": {"registrationState": "DEREGISTERED"}}
+        ],
+        "notes": "The 12 AuthFail counters (PMCounter AMF.RegistrationReq.AuthFail, NR) do not identify which SUPI failed — that telemetry lives outside this dataset."
+      }
+    },
+    "delta": "Baseline cannot distinguish failure from deliberate deregistration because the column doesn't say. Grounded answer bridges ue_registration + nf_event + PM counters, applies the SUPI sensitivity rule, and gives a correct 'zero failures' answer with supporting evidence."
+  },
+
+  "Q4": {
+    "ground_truth": "Yes. NF udm-01 (id=5) is SUSPENDED yet SMF-02 and UPF instances are still servicing ACTIVE PDU sessions whose SUPIs were originally authenticated via udm-01. Sessions 7 (URLLC), 9 (eMBB) were established during the UDM suspend window. This is a known hazard — sessions survive UDM outage until they renegotiate.",
+    "baseline": {
+      "anthropic": "Looking at nf_instance, the only SUSPENDED NF is udm-01 (id=5). The UDM doesn't own PDU sessions directly — SMFs do. So strictly speaking the query 'suspended NFs with active PDU sessions' returns no direct matches.",
+      "openai": "nf_instance shows udm-01 as SUSPENDED and nef-01 as UNDISCOVERABLE. The pdu_session table doesn't reference UDM directly, so I cannot link them. If you mean NFs that are not REGISTERED, only UDM and NEF qualify."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "YES — 1 fiveg:NetworkFunction with nfStatus = SUSPENDED has subscribers whose fiveg:PDUSession instances remain ACTIVE. This is a known 5GC failure-mode.",
+        "entities": [
+          {"iri": "fiveg:NetworkFunction/5", "label": "udm-01", "attrs": {"nfStatus": "SUSPENDED", "suspendedSince": "2026-04-23 11:42:05", "suspendReason": "NRF_HEARTBEAT_TIMEOUT"}},
+          {"iri": "fiveg:PDUSession/7",       "label": "URLLC session on UPF upf-02", "attrs": {"sessionStatus": "ACTIVE", "sliceType": "URLLC", "establishedAt": "2026-04-23 10:03"}},
+          {"iri": "fiveg:PDUSession/9",       "label": "eMBB session on UPF upf-01",  "attrs": {"sessionStatus": "ACTIVE", "sliceType": "eMBB",  "establishedAt": "2026-04-23 10:31"}}
+        ],
+        "chain": [
+          {"node": "fiveg:NetworkFunction/5", "edge": "authenticatedSupi (inferred)"},
+          {"node": "fiveg:UERegistrationContext/{6,8}", "edge": "ownsSession"},
+          {"node": "fiveg:PDUSession/{7,9}",  "edge": "anchoredOn"},
+          {"node": "fiveg:NetworkFunction/{6,4}", "label": "upf-02, upf-01"}
+        ],
+        "notes": "This is the known-hazard case: existing PDU sessions survive UDM suspend until Nudm_SDM_Subscribe refresh is required. Operator action: restore UDM before session refresh window expires, or force-release at the SMF."
+      },
+      "openai": {
+        "summary": "1 suspended NF (udm-01) has downstream active PDU sessions — 2 of them (sessions 7, 9).",
+        "entities": [
+          {"iri": "fiveg:NetworkFunction/5", "label": "udm-01 SUSPENDED"},
+          {"iri": "fiveg:PDUSession/7",       "label": "ACTIVE URLLC"},
+          {"iri": "fiveg:PDUSession/9",       "label": "ACTIVE eMBB"}
+        ],
+        "notes": "The UDM does not FK to pdu_session; the relationship is reconstructed via UERegistrationContext (fiveg:authenticatedSupi / fiveg:ownsSession)."
+      }
+    },
+    "delta": "Baseline concludes 'no direct matches' because it walks only FKs it can see. Grounded answer reconstructs the implicit relationship via the OWL object-property graph and surfaces the operationally-critical hazard."
+  },
+
+  "Q5": {
+    "ground_truth": "PDU session 7: SUPI imsi-001010000000006 → AMF amf-01 (id=1) → SMF smf-02 (id=3) → UPF upf-02 (id=6). Slice = URLLC (SST=3, SD=00A1B2).",
+    "baseline": {
+      "anthropic": "From pdu_session row 7: supi imsi-001010000000006, smf_instance_id=3, upf_instance_id=6. Joining with nf_instance: smf_instance_id=3 is smf-02; upf_instance_id=6 is upf-02. The AMF is not stored on the PDU session row directly, but ue_registration for that SUPI shows amf_instance_id=1 (amf-01).",
+      "openai": "Session 7 → SUPI imsi-001010000000006 → SMF id 3 (smf-02), UPF id 6 (upf-02). AMF id 1 (amf-01) via ue_registration. Slice SST=3."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "PDU session 7 chain, typed end-to-end.",
+        "entities": [
+          {"iri": "fiveg:UERegistrationContext/6", "label": "SUPI imsi-***006 (redacted)"}
+        ],
+        "chain": [
+          {"node": "fiveg:UERegistrationContext/6", "edge": "fiveg:registeredAt"},
+          {"node": "fiveg:NetworkFunction/1",       "label": "amf-01",  "edge": "fiveg:anchoringFor"},
+          {"node": "fiveg:PDUSession/7",             "edge": "fiveg:managedBy",   "attrs": {"sessionStatus": "ACTIVE"}},
+          {"node": "fiveg:NetworkFunction/3",       "label": "smf-02",  "edge": "fiveg:userPlaneOn"},
+          {"node": "fiveg:NetworkFunction/6",       "label": "upf-02",  "edge": "fiveg:servesSlice"},
+          {"node": "fiveg:snssai/3-00A1B2",         "label": "URLLC"}
+        ],
+        "notes": "Each node is a stable IRI. SUPI is redacted per sensitivity tier (Restricted). The chain doubles as a PROV-O agent/activity chain when correlated with NFLifecycleEvent."
+      },
+      "openai": {
+        "summary": "5-hop chain from UE context to slice.",
+        "chain": [
+          {"node": "fiveg:UERegistrationContext/6", "edge": "registeredAt"},
+          {"node": "fiveg:NetworkFunction/1", "label": "amf-01", "edge": "anchoringFor"},
+          {"node": "fiveg:PDUSession/7", "edge": "managedBy"},
+          {"node": "fiveg:NetworkFunction/3", "label": "smf-02", "edge": "userPlaneOn"},
+          {"node": "fiveg:NetworkFunction/6", "label": "upf-02", "edge": "servesSlice"},
+          {"node": "fiveg:snssai/3-00A1B2", "label": "URLLC"}
+        ]
+      }
+    },
+    "delta": "Baseline answers in SQL column references. Grounded answer returns a typed, click-through chain where every hop is an OWL object property, and SUPI is sensitivity-filtered."
+  },
+
+  "Q6": {
+    "ground_truth": "2 NF deregistrations were heartbeat-inferred (nf_event rows 8 and 11): NEF nef-01 on 2026-04-22, PCF pcf-01 on 2026-04-10. Both have actor_party='nrf-monitor' and derivation='INFERRED'. 2 others (rows 5, 14) were explicit NFDeregister calls (derivation='MEASURED').",
+    "baseline": {
+      "anthropic": "There are 4 DEREGISTERED events in nf_event (rows 5,8,11,14). Some have actor_party='nrf-monitor' (rows 8, 11) and some actor_party='nf' (rows 5, 14). The 'derivation' column is INFERRED on the nrf-monitor rows, MEASURED on the nf rows. I'd guess the nrf-monitor ones are automatic.",
+      "openai": "Looking at nf_event where event_type='DEREGISTERED', 2 rows are INFERRED (by nrf-monitor) and 2 are MEASURED (by nf). The INFERRED ones are for nf_instance_id 12 (nef-01) and nf_instance_id 8 (pcf-01)."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "2 fiveg:NFLifecycleEvent instances classified as fiveg:InferredDeregistration (PROV-O derivation=INFERRED, actor=nrf-monitor).",
+        "entities": [
+          {"iri": "fiveg:NFLifecycleEvent/8",  "label": "nef-01 DEREGISTERED", "attrs": {"occurredAt": "2026-04-22 18:15:00", "confidence": 0.78, "derivation": "INFERRED", "rootCause": "NRF heartbeat miss × 3"}},
+          {"iri": "fiveg:NFLifecycleEvent/11", "label": "pcf-01 DEREGISTERED", "attrs": {"occurredAt": "2026-04-10 03:14:00", "confidence": 0.74, "derivation": "INFERRED", "rootCause": "NRF heartbeat miss × 3"}}
+        ],
+        "notes": "Contrast: fiveg:NFLifecycleEvent/5 (upf-03) and /14 (upf-02) are fiveg:MeasuredDeregistration — explicit Nnrf_NFManagement_NFDeregister calls per TS 29.510 §5.2.2.4. The MEASURED vs INFERRED split is load-bearing for post-incident RCA: INFERRED implies an NRF-side decision, MEASURED implies an NF-side or operator-side decision."
+      },
+      "openai": {
+        "summary": "2 inferred deregistrations (PROV-O derivation=INFERRED) vs 2 measured.",
+        "entities": [
+          {"iri": "fiveg:NFLifecycleEvent/8",  "label": "nef-01", "attrs": {"derivation": "INFERRED", "confidence": 0.78}},
+          {"iri": "fiveg:NFLifecycleEvent/11", "label": "pcf-01", "attrs": {"derivation": "INFERRED", "confidence": 0.74}}
+        ]
+      }
+    },
+    "delta": "Baseline reports the column values but cannot bind them to a 5G concept — it speaks in terms of row numbers and actor_party strings. Grounded output carries the PROV-O derivation semantics (INFERRED → NRF heartbeat-timeout decision) that drives the RCA action."
+  },
+
+  "Q7": {
+    "ground_truth": "Active (operationalState=ENABLED) eMBB slices: 1 — nssi-embb-01. Its sla_latency_ms is NULL → SLA missing. nssi-urllc-01 has SST=2 (URLLC not eMBB) and is ENABLED with a 5ms latency target. Only the eMBB slice violates 'has an SLA'.",
+    "baseline": {
+      "anthropic": "Filtering slice_instance where slice_type_label='eMBB' and operational_state='ENABLED': slice 1 (nssi-embb-01). sla_latency_ms is NULL. So yes, the eMBB slice has a missing SLA value.",
+      "openai": "One eMBB slice is ENABLED (nssi-embb-01). sla_latency_ms is NULL, so the SLA is not set. The URLLC slice has SST=2 which is not eMBB."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "1 fiveg:NetworkSliceInstance of type eMBB (SST=1) is ENABLED; its latency SLA is missing.",
+        "vocabulary_warning": "SKOS resolution: 'eMBB' ↔ fiveg:sst/1 (TS 23.501 T.5.15.2.2-1). 'Active slice' maps to operationalState=ENABLED (TS 28.541), not to any column literally named 'active'.",
+        "entities": [
+          {"iri": "fiveg:NetworkSliceInstance/1", "label": "nssi-embb-01", "attrs": {"sliceType": "eMBB", "sst": 1, "operationalState": "ENABLED", "slaLatencyMs": "missing", "slaAvailPct": 99.9}}
+        ],
+        "notes": "Operator action: populate slaLatencyMs per GSMA NG.116 eMBB profile (typical target 50–100 ms). The other 3 slices (URLLC, MIoT, V2X) have non-null latency SLAs; none currently violate them."
+      },
+      "openai": {
+        "summary": "1 eMBB slice is ENABLED and missing an SLA (latency = NULL).",
+        "entities": [
+          {"iri": "fiveg:NetworkSliceInstance/1", "label": "nssi-embb-01", "attrs": {"sliceType": "eMBB", "slaLatencyMs": "missing"}}
+        ]
+      }
+    },
+    "delta": "Baseline matches on the free-text 'eMBB' string. Grounded answer resolves through the SKOS vocabulary (SST=1 ↔ eMBB per TS 23.501), ties the SLA gap to the GSMA NG.116 profile, and points at the corrective action."
+  },
+
+  "Q8": {
+    "ground_truth": "amf-01 (id=1): nf_status=REGISTERED, heartbeat=30s current. 3 NFServices all REGISTERED. 0 active alarms. PM counters (NR): 842 mean subs, 318 AuthSucc / 12 AuthFail (3.6% fail), 520 RRC attempts. Note: 140 LTE RRC.ConnEstabAtt co-mingled (namespace collision — should be filtered).",
+    "baseline": {
+      "anthropic": "amf-01 is REGISTERED with 3 services all REGISTERED and no active alarms. PM shows 842 registered subs on average, 12 AuthFail vs 318 AuthSucc, and 520 RRC connection establishment attempts. (Another 140 RRC.ConnEstabAtt are reported but those look like LTE.) It looks healthy.",
+      "openai": "amf-01 appears healthy: REGISTERED, 3 registered services, no active alarms. Registration success rate ~96%. 520 RRC attempts. One LTE counter co-located in the data."
+    },
+    "grounded": {
+      "anthropic": {
+        "summary": "fiveg:NetworkFunction/1 (amf-01) is healthy: nfStatus=REGISTERED, 3 services REGISTERED, 0 active alarms, NR registration-success rate 96.4%.",
+        "vocabulary_warning": "PMCounter 'RRC.ConnEstabAtt' appears in both NR (TS 28.552) and LTE (TS 32.425) namespaces. Only the NR row (value=520) is attributed to this NetworkFunction's health; the LTE row (value=140) is excluded by the fiveg flavor's technology discriminator.",
+        "entities": [
+          {"iri": "fiveg:NetworkFunction/1", "label": "amf-01", "attrs": {"nfStatus": "REGISTERED", "plmn": "001-01", "services": 3, "activeAlarms": 0, "nrRegistrationSuccessPct": 96.4, "nrRrcAttempts300s": 520}}
+        ],
+        "notes": "SHACL-validated NetworkFunction card. The vocabulary_warning makes the NR-vs-LTE disambiguation auditable rather than silent."
+      },
+      "openai": {
+        "summary": "amf-01 is healthy; NR RegistrationReq success 96.4%; 0 active alarms.",
+        "entities": [
+          {"iri": "fiveg:NetworkFunction/1", "label": "amf-01", "attrs": {"nfStatus": "REGISTERED", "nrRegistrationSuccessPct": 96.4, "activeAlarms": 0}}
+        ],
+        "notes": "LTE PM counter row for this NF is excluded by the NR/LTE technology discriminator."
+      }
+    },
+    "delta": "Baseline mentions the LTE row as a curiosity. Grounded answer applies the technology discriminator and flags the disambiguation as a vocabulary warning — the output is structurally valid (SHACL pass) and auditably drops the LTE reading."
+  }
+}
