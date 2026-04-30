@@ -107,6 +107,8 @@ class RuntimeClient:
         model: Optional[str] = None,
         api_key: Optional[str] = None,
         min_confidence: float = 0.0,
+        drift_monitor=None,
+        drift_propagator=None,
     ):
         """Initialise the RuntimeClient.
 
@@ -119,6 +121,15 @@ class RuntimeClient:
             model: Optional model override for the adapter.
             api_key: Optional API key override (defaults to env var).
             min_confidence: Minimum confidence score for InputGate screening.
+            drift_monitor: Optional :class:`runtime.drift.OntologyDriftMonitor`.
+                When provided, every :meth:`ask` call may inject the most
+                recent production drift alerts into the LLM payload (set
+                ``drift_alerts > 0`` on the call). See
+                ``runtime/drift/__init__.py`` for full integration notes.
+            drift_propagator: Optional :class:`runtime.drift.OWLPropagator`.
+                When set alongside ``drift_monitor``, every alert injected
+                into the payload also fires :meth:`OWLPropagator.propagate`,
+                escalating monitoring on dependent / sibling entities.
         """
         self._db_path = db_path
         self._out_path = out_path
@@ -132,6 +143,9 @@ class RuntimeClient:
         self._memory = AgentMemory(db_path)
         # Workstream 5 — lazy per-flavor HybridRetriever cache
         self._retrievers: dict = {}
+        # feature/monitordrift — production drift monitoring
+        self._drift_monitor = drift_monitor
+        self._drift_propagator = drift_propagator
 
     # ------------------------------------------------------------------
     # Properties
@@ -189,6 +203,7 @@ class RuntimeClient:
         retrieval: str = "structured",
         class_expression: Optional[str] = None,
         retrieval_k: int = 5,
+        drift_alerts: int = 0,
     ) -> dict:
         """Run the full pipeline for a single question.
 
@@ -278,6 +293,9 @@ class RuntimeClient:
                 grounded_data["meta"]["memory_context_count"] = memory_context_count
                 grounded_data["meta"]["record_count"] += memory_context_count
 
+        # Step 2c: Drift alerts — prepend production-drift context (feature/monitordrift)
+        drift_alert_count = self._inject_drift_context(grounded_data, drift_alerts)
+
         # Step 3: Assemble payload
         payload = self._assembler.assemble(
             question=question,
@@ -307,6 +325,7 @@ class RuntimeClient:
         result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
         result["memory_context_count"] = memory_context_count
         result["hybrid_context_count"] = hybrid_context_count
+        result["drift_alert_count"] = drift_alert_count
         result["retrieval"] = retrieval
         return result
 
@@ -332,6 +351,60 @@ class RuntimeClient:
             k=k,
             strategy=strategy,
         )
+
+    # ------------------------------------------------------------------
+    # feature/monitordrift — drift context injection
+    # ------------------------------------------------------------------
+
+    def _inject_drift_context(self, grounded_data: dict, drift_alerts: int) -> int:
+        """Prepend recent drift alerts as JSON-LD records and propagate.
+
+        Symmetric with the memory-recall block above. Returns the number
+        of alert records injected. When ``drift_alerts == 0`` or no
+        drift_monitor is wired into this client, this is a no-op
+        returning ``0``. When a propagator is also wired in, every
+        alert fires :meth:`OWLPropagator.propagate` to record
+        escalations on dependent entities.
+        """
+        if drift_alerts <= 0 or self._drift_monitor is None:
+            return 0
+        alerts = self._drift_monitor.recent_alerts(n=drift_alerts)
+        if not alerts:
+            return 0
+        nodes = [self._alert_to_jsonld(a) for a in alerts]
+        grounded_data["@graph"] = nodes + grounded_data.get("@graph", [])
+        grounded_data["meta"]["drift_alert_count"] = len(nodes)
+        grounded_data["meta"]["record_count"] = (
+            grounded_data["meta"].get("record_count", 0) + len(nodes)
+        )
+        if self._drift_propagator is not None:
+            for a in alerts:
+                self._drift_propagator.propagate(a)
+        return len(nodes)
+
+    @staticmethod
+    def _alert_to_jsonld(alert) -> dict:
+        """Convert a :class:`drift_monitor.Alert` (or dict) to JSON-LD."""
+        def _f(name, default=None):
+            if hasattr(alert, name):
+                return getattr(alert, name)
+            if isinstance(alert, dict):
+                return alert.get(name, default)
+            return default
+        ek = _f("entity_key", "")
+        return {
+            "@type":            "drift:DriftAlert",
+            "@id":              f"drift:alert/{ek}/{_f('timestamp', '')}",
+            "drift:entityKey":  ek,
+            "drift:severity":   _f("severity"),
+            "drift:metric":     _f("metric_type"),
+            "drift:observed":   _f("observed"),
+            "drift:threshold":  _f("threshold"),
+            "drift:message":    _f("message"),
+            "drift:recommendation": _f("recommendation"),
+            "drift:feature":    _f("feature"),
+            "drift:timestamp":  _f("timestamp"),
+        }
 
     def _get_retriever(self, flavor: str) -> HybridRetriever:
         """Cache one :class:`HybridRetriever` per flavor."""
@@ -392,6 +465,7 @@ class RuntimeClient:
         retrieval: str = "structured",
         class_expression: Optional[str] = None,
         retrieval_k: int = 5,
+        drift_alerts: int = 0,
     ) -> dict:
         """Async version of :meth:`ask`.
 
@@ -468,6 +542,9 @@ class RuntimeClient:
                 grounded_data["meta"]["memory_context_count"] = memory_context_count
                 grounded_data["meta"]["record_count"] += memory_context_count
 
+        # Drift alerts (feature/monitordrift) — same helper as sync ask()
+        drift_alert_count = self._inject_drift_context(grounded_data, drift_alerts)
+
         payload = self._assembler.assemble(
             question=question,
             flavor_name=flavor,
@@ -488,6 +565,7 @@ class RuntimeClient:
         result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
         result["memory_context_count"] = memory_context_count
         result["hybrid_context_count"] = hybrid_context_count
+        result["drift_alert_count"] = drift_alert_count
         result["retrieval"] = retrieval
         return result
 
