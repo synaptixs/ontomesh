@@ -32,6 +32,13 @@ boto3>=1.35.0                   # Amazon Neptune (AWS SDK — also used for IAM 
 # ── Phase 3: Drift detection ────────────────────────────────────────────────
 # No extra deps — drift_detector.py uses rdflib + stdlib
 
+# ── feature/monitordrift: production drift monitoring (runtime/drift/) ──────
+# Distribution name is "drift-monitor"; import as `drift_monitor`.
+# Repo branding is "infodrift" (https://github.com/nrohilla-fibonacci/infodrift).
+# Pulls in numpy / pandas / scipy / scikit-learn transitively.
+drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop
+drain3>=0.9                     # Optional — required only by LogTemplateMonitor
+
 # ── Phase 3: Log entity discovery (NLP) ─────────────────────────────────────
 spacy>=3.7.4                    # NLP pipeline for co-occurrence entity discovery
 # Download English model after install:
