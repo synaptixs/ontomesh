@@ -47,6 +47,9 @@ spacy>=3.7.4                    # NLP pipeline for co-occurrence entity discover
 # ── Phase 3: Browser wizard ──────────────────────────────────────────────────
 flask>=3.0.3                    # Browser wizard web server
 flask-cors>=4.0.1               # CORS for local dev wizard
+sqlglot>=25.0                   # SQL DDL parser for the wizard's /api/import (issue #16)
+                                # Optional — JSON import works without it; only the SQL path
+                                # surfaces a clear "pip install sqlglot" message if missing.
 
 # ── Phase 3: Modular OWL ────────────────────────────────────────────────────
 # rdflib covers owl:imports resolution — no extra deps
