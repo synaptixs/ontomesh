@@ -1,4 +1,4 @@
-# Ontology Engineering Toolkit — v2.0
+# Ontology Engineering Toolkit — v3.0
 
 **Domain-agnostic · Phase 3 complete · Scale & Community edition**
 
@@ -15,6 +15,7 @@ This README is the landing page. Detailed reference is split across three files:
 | **[install.md](install.md)** | Prerequisites · onboarding wizard · database connection strings (SQLite, PostgreSQL, MySQL, MSSQL, Oracle/ADB, DB2) · full pipeline walkthrough · CLI reference |
 | **[features.md](features.md)** | Repository structure · generated artifacts · semantic metadata control table · semantic loss detection · TM Forum alignment (24 Open APIs, 13 CQs) · standards · extending the toolkit · runtime layer · Phase 3 (Scale & Community) · all five Generation 2 workstreams |
 | **[gates.md](gates.md)** | Governance scorecard (34 criteria) · Phase 3 + Workstream 1–5 exit gates · consolidated 43-test SPARQL CQ matrix |
+| **[docs/sdk.md](docs/sdk.md)** | Python SDK reference (ReDoc-style) — `RuntimeClient`, `FlavorRegistry`, `Grounder`, `PayloadAssembler`, `InputGate`, `OutputGate`, `AgentMemory`, `HybridRetriever`, `runtime.drift.*` (P1–P5), all LLM adapters, vector store adapters, pipeline modules |
 
 ---
 
@@ -50,6 +51,7 @@ It reads your relational schema and a thin annotation table, then generates ever
 | **federate** | **Cross-Enterprise Federation ✓ Gen 2 / WS3** | **Partner registry (JSON + DB), Ed25519-signed capability manifests, cross-enterprise SPARQL router, boundary SHACL + RESTRICTED block, 3-step trust handshake + ledger, W3C CG draft spec, 5 CQ-FED tests** |
 | **comply** | **Regulatory AI Compliance Evidence Engine ✓ Gen 2 / WS4** | **4 pre-built regulation files (EU AI Act · Basel IV SR 11-7 · HIPAA §164.312 · Ofcom Network Transparency), evidence assembler, Ed25519-signed ZIP bundles with SHA-256 manifest, regulation↔toolkit mapping layer + gap analysis, Compliance Dashboard UI, compliance_summary.html, 5 CQ-CMP tests, 2 new scorecard criteria** |
 | **embed** / **retrieve** | **Ontology-Bounded Vector Retrieval ✓ Gen 2 / WS5** | **Flavor-scoped embedding indexes, OWL class-hierarchy filter + sensitivity tier gate, hybrid query executor (vector × PROV-O confidence × recency), 5 vector-store adapters (memory/Qdrant/Chroma/Weaviate/pgvector), benchmark suite (UNFILTERED_VECTOR vs ONTOLOGY_BOUNDED vs PURE_SPARQL — precision@k / MRR / latency p50/p95), retrieval_summary.html, Wizard Vector Retrieval tab, 5 CQ-VEC tests, RuntimeClient.ask(retrieval="hybrid", class_expression=...)** |
+| **monitor** | **Production Drift Monitoring ✓ v3.0 / infodrift** | **Runtime integration of [infodrift](https://github.com/nrohilla-fibonacci/infodrift) drift_monitor (P1–P5): `runtime/drift/` enricher + monitor + propagator + gate, ontology-aware PSI/KL/JS/Calibration/LogShift detectors wired into RuntimeClient, drift events propagated to PROV-O graph and SHACL agent gate, 12 integration tests** |
 
 ---
 
@@ -67,6 +69,31 @@ open output/reports/toolkit_report.html
 ```
 
 Prerequisites, driver installs, and connection strings for every backend: see [install.md](install.md).
+
+---
+
+## Install via pip
+
+The toolkit ships as a pip-installable package (sdist + wheel) built from `pyproject.toml`. Two console scripts (`ontology-toolkit`, `ontology-onboard`) are exposed on install.
+
+```bash
+# From a built wheel (see dist/)
+pip install dist/ontology_toolkit-3.0.0-py3-none-any.whl
+
+# With all DB drivers (postgres, mysql, mssql, oracle, db2, oci, neptune)
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[all]"
+
+# Pick individual extras instead
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[postgres,oracle]"
+```
+
+To rebuild the artifacts from source:
+
+```bash
+python -m build      # produces dist/*.whl and dist/*.tar.gz
+```
+
+Note: the `drift-monitor` dependency (the [infodrift](https://github.com/nrohilla-fibonacci/infodrift) runtime drift package) is a git+VCS reference, so the wheel is intended for private/internal distribution rather than PyPI.
 
 ---
 
@@ -167,6 +194,7 @@ The adapter defaults to the Cohere request shape. To target a Meta/generic model
 | [gates.md](gates.md) | All teams | Governance scorecard, exit gates, CQ-test matrix |
 | [test-plan.md](test-plan.md) · [demo.md](demo.md) | Demo viewers | Retail first-contact test plan — ontology-vs-baseline LLM comparison |
 | [test-plan-5g.md](test-plan-5g.md) | Demo viewers · telco | 5G-NF first-contact test plan — 3GPP / GSMA / O-RAN-anchored semantic issues |
+| [docs/sdk.md](docs/sdk.md) | Application developers | Python SDK reference — every public class/function with signature, parameters, returns, and examples |
 | [docs/framework-whitepaper.md](docs/framework-whitepaper.md) | Architects | Full framework specification v1.1 |
 | [docs/executive-summary.md](docs/executive-summary.md) | Leadership | Non-technical overview — what, why, and first steps |
 | [docs/technical-blueprint.md](docs/technical-blueprint.md) | Engineers | Phase-by-phase implementation guide with code patterns |
@@ -175,5 +203,5 @@ The adapter defaults to the Cohere request shape. To target a Meta/generic model
 
 ---
 
-*Framework: v1.1 · Toolkit: v2.0 · April 2026*
-*OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · TM Forum SID v23.0 · 6 database backends · Runtime layer (complete) · Generation 2 workstreams 1–5 complete*
+*Framework: v1.1 · Toolkit: v3.0 · April 2026*
+*OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · TM Forum SID v23.0 · 6 database backends · Runtime layer (complete) · Generation 2 workstreams 1–5 complete · Production drift monitoring (infodrift P1–P5) · pip-installable*
