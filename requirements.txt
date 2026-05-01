@@ -1,62 +1,22 @@
-# Ontology Engineering Toolkit — Python dependencies
-# conda env: ontology
-# Install: pip install -r requirements.txt
+# Ontology Engineering Toolkit — Python dependencies (everything)
 #
-# Core pipeline (phases 1–5, TMF, conflict, alignment, runtime, phase 3)
-# All listed here for explicit versioning; install only what you need.
+# This file pulls every dependency the toolkit can use, across all tiers.
+# For most projects you do NOT need this — install only the tiers you use:
+#
+#   pip install -r requirements-core.txt        # phases 1–5, tmf, test, report (~50 MB)
+#   pip install -r requirements-db.txt          # non-SQLite database drivers
+#   pip install -r requirements-runtime.txt     # LLM adapters (Anthropic / OpenAI / Vertex / OCI)
+#   pip install -r requirements-drift.txt       # drift_monitor (infodrift) integration
+#   pip install -r requirements-advanced.txt    # spaCy, Flask wizard, Neptune, sqlglot (#16)
+#
+# pip-install via wheel is also available — see install.md and pyproject.toml.
 
-# ── Database drivers ────────────────────────────────────────────────────────
-psycopg2-binary>=2.9.9          # PostgreSQL
-mysql-connector-python>=8.3.0   # MySQL / MariaDB
-pyodbc>=5.1.0                   # SQL Server (also needs ODBC Driver 17/18)
-oracledb>=2.3.0                 # Oracle thin mode (no Instant Client required)
-ibm_db>=3.2.3                   # IBM DB2 (needs DB2 CLI driver from IBM)
-ibm_db_dbi>=3.2.3               # IBM DB2 DBI interface
+-r requirements-core.txt
+-r requirements-db.txt
+-r requirements-runtime.txt
+-r requirements-drift.txt
+-r requirements-advanced.txt
 
-# ── RDF / OWL / SHACL ──────────────────────────────────────────────────────
-rdflib>=7.0.0                   # RDF graph, Turtle parsing, SPARQL queries
-pyshacl>=0.26.0                 # SHACL validation (used by InputGate/OutputGate)
-sparqlwrapper>=2.0.0            # SPARQL endpoint client (used by graph_publisher)
-
-# ── Runtime layer — LLM adapters ────────────────────────────────────────────
-anthropic>=0.34.0               # Anthropic Messages API (claude-sonnet)
-openai>=1.40.0                  # OpenAI Chat Completions (GPT-4o)
-google-cloud-aiplatform>=1.60.0 # Vertex AI / Gemini
-requests>=2.32.3                # Ollama adapter + graph store HTTP calls
-oci>=2.126.0                    # Oracle Cloud Infrastructure Generative AI
-
-# ── Phase 3: Graph store publishing ─────────────────────────────────────────
-# sparqlwrapper covers Fuseki/Stardog/Oxigraph/Neptune SPARQL Update
-boto3>=1.35.0                   # Amazon Neptune (AWS SDK — also used for IAM signing)
-
-# ── Phase 3: Drift detection ────────────────────────────────────────────────
-# No extra deps — drift_detector.py uses rdflib + stdlib
-
-# ── feature/monitordrift: production drift monitoring (runtime/drift/) ──────
-# Distribution name is "drift-monitor"; import as `drift_monitor`.
-# Repo branding is "infodrift" (https://github.com/nrohilla-fibonacci/infodrift).
-# Pulls in numpy / pandas / scipy / scikit-learn transitively.
-drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop
-drain3>=0.9                     # Optional — required only by LogTemplateMonitor
-
-# ── Phase 3: Log entity discovery (NLP) ─────────────────────────────────────
-spacy>=3.7.4                    # NLP pipeline for co-occurrence entity discovery
-# Download English model after install:
-#   python -m spacy download en_core_web_sm
-
-# ── Phase 3: Browser wizard ──────────────────────────────────────────────────
-flask>=3.0.3                    # Browser wizard web server
-flask-cors>=4.0.1               # CORS for local dev wizard
-sqlglot>=25.0                   # SQL DDL parser for the wizard's /api/import (issue #16)
-                                # Optional — JSON import works without it; only the SQL path
-                                # surfaces a clear "pip install sqlglot" message if missing.
-
-# ── Phase 3: Modular OWL ────────────────────────────────────────────────────
-# rdflib covers owl:imports resolution — no extra deps
-
-# ── CI/CD / testing ──────────────────────────────────────────────────────────
-pytest>=8.2.2                   # Test runner
-pyyaml>=6.0.2                   # YAML template parsing
-
-# ── Reporting ───────────────────────────────────────────────────────────────
-jinja2>=3.1.4                   # HTML report templating (optional; reporter.py uses stdlib)
+# CI / testing — kept here so a single `pip install -r requirements.txt`
+# in CI gets the test runner without an extras flag.
+pytest>=8.2.2

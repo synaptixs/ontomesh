@@ -1,6 +1,6 @@
 # First-Contact Demo — Engineering Guide
 
-How to run and interpret the "does an ontology actually help LLM output?" demo. Companion to [test-plan.md](test-plan.md).
+How to run and interpret the "does an ontology actually help LLM output?" demo. Companion to [tests/test-plan.md](../../tests/test-plan.md).
 
 **TL;DR for engineers.** Run `./demo.sh`. Open `output/demo/comparison.html`. That's the full matrix. For the 5-minute exec version, open `output/demo/executive.html`.
 
@@ -208,7 +208,7 @@ Source badges: `live` = real LLM output from cache; `illustrative` = scripted fa
 | [examples/retail/scripts/demo_baseline.py](examples/retail/scripts/demo_baseline.py) | Raw-rows LLM runner (no ontology) |
 | [examples/retail/scripts/demo_grounded.py](examples/retail/scripts/demo_grounded.py) | `RuntimeClient` runner |
 | [examples/retail/scripts/demo_report.py](examples/retail/scripts/demo_report.py) | Builds `comparison.html` + `executive.html` + `comparison.csv` |
-| [test-plan.md](test-plan.md) / [test-plan.html](test-plan.html) | Original test plan |
+| [tests/test-plan.md](../../tests/test-plan.md) / [tests/test-plan.html](../../tests/test-plan.html) | Original test plan |
 | [examples/retail/scripts/demo_illustrative.json](examples/retail/scripts/demo_illustrative.json) | Scripted answer fallback (ground-truth-derived; survives `--fresh`) |
 
 ---

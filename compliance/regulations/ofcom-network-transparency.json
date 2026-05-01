@@ -7,6 +7,9 @@
   "last_verified_date": "2026-04-01",
   "regulatory_source_url": "https://www.ofcom.org.uk/publications/2025/network-transparency-code",
   "scope": "UK-licensed telecommunications operators deploying AI in network planning, fault management, or customer-affecting automated decisions",
+  "applies_to": [
+    "telecom"
+  ],
   "summary": "Requires operators to publish machine-readable evidence of the provenance, validation, and confidence of automated network decisions. Affected customer decisions (service quality, outage attribution, performance throttling) must carry an auditable PROV-O chain.",
   "requirements": [
     {
@@ -19,7 +22,7 @@
     },
     {
       "req_id": "OFCOM-NT-2",
-      "title": "Asset–event linkage",
+      "title": "Asset\u2013event linkage",
       "description": "Every network event must be associated with the affected asset.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-003",
@@ -51,7 +54,7 @@
     },
     {
       "req_id": "OFCOM-NT-6",
-      "title": "Exchange readiness — machine-readable transparency artefact",
+      "title": "Exchange readiness \u2014 machine-readable transparency artefact",
       "description": "Transparency disclosures must be available as JSON-LD with a documented context.",
       "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
       "evidence_selector": "Exchange readiness",

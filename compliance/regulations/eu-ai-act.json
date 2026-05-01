@@ -1,12 +1,15 @@
 {
   "regulation_id": "eu-ai-act",
-  "name": "EU AI Act — Article 13 (Transparency and Provision of Information)",
+  "name": "EU AI Act \u2014 Article 13 (Transparency and Provision of Information)",
   "short_name": "EU AI Act Art. 13",
   "jurisdiction": "European Union",
   "effective_date": "2026-08-02",
   "last_verified_date": "2026-04-01",
   "regulatory_source_url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
   "scope": "High-risk AI systems placed on the EU market",
+  "applies_to": [
+    "all"
+  ],
   "summary": "High-risk AI systems must be designed so that their operation is sufficiently transparent to enable deployers to interpret and use the system output, including a complete description of model provenance, input data, decision logic, and confidence scoring.",
   "requirements": [
     {
