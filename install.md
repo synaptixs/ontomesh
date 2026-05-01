@@ -115,6 +115,36 @@ python3 onboard.py --industry healthcare --dry-run
                 from your domain description (needs ANTHROPIC_API_KEY)
 ```
 
+### Browser wizard
+
+Same six steps, but in a drag-and-drop web UI instead of the terminal. Useful if you'd rather click than type, or if a non-technical stakeholder is doing the onboarding.
+
+**Install the wizard's deps (Flask):**
+
+```bash
+pip install -r requirements-advanced.txt        # Flask + Flask-CORS + spaCy + boto3
+# or just the wizard, nothing else:
+pip install flask flask-cors
+```
+
+**Start the wizard:**
+
+```bash
+python3 wizard/app.py                           # dev server on http://localhost:5000
+python3 wizard/app.py --host 0.0.0.0 --port 5000   # listen on all interfaces
+```
+
+Open `http://localhost:5000` in a browser. The wizard walks through Domain → Entities → Events → Relationships → CQs → Generate. The "Generate" step runs the toolkit pipeline and links to the resulting `output/reports/toolkit_report.html`.
+
+**Load an industry template** in the UI (Templates tab) or via the CLI before launching:
+
+```bash
+python3 onboard.py --industry telecom --dry-run    # writes projects/telecom_network_operations/session.json
+python3 wizard/app.py                              # opens the same session for editing
+```
+
+**Stop the wizard:** `Ctrl+C` in the terminal. Sessions are saved to `projects/{your_domain}/session.json` and can be resumed from either the CLI (`onboard.py --from …`) or by reopening the wizard.
+
 ---
 
 ## 3. Connect to an existing database
