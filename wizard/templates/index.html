@@ -566,16 +566,21 @@
       <div class="card">
         <h3>Regulation coverage</h3>
         <div class="box-help">
-          Per-regulation traffic-light view of how well your ontology + observations cover each regulatory requirement.
+          Per-regulation traffic-light view of how well your ontology + observations cover each regulatory requirement, <b>scoped to your domain</b> so you don't see frameworks that don't apply.
           <ul>
-            <li><b>What's shown:</b> one row per loaded regulation (EU AI Act, Basel IV SR 11-7, HIPAA §164.312, Ofcom Network Transparency, plus any custom YAML you added). Columns: requirement count, evidence count, coverage %, traffic light.</li>
-            <li><b>Traffic lights:</b> 🟢 ≥90% covered · 🟡 50–90% partial · 🔴 &lt;50% — this requirement won't pass an audit yet.</li>
-            <li><b>How to use:</b> click <b>Refresh</b> after every pipeline run to get current numbers. Click <b>Gap analysis</b> for the per-requirement breakdown of what's missing.</li>
+            <li><b>What's shown:</b> one row per regulation that applies to your industry (set on Step&nbsp;1 — Domain Identity), plus any cross-cutting frameworks (e.g. EU AI Act). Columns: requirement count, evidence count, coverage %, traffic light.</li>
+            <li><b>How filtering works:</b> a healthcare project sees HIPAA + EU AI Act; a finance project sees Basel IV + EU AI Act; a telecom project sees Ofcom + EU AI Act. Custom regulations declare their industries via <code>applies_to</code> in their JSON.</li>
+            <li><b>Traffic lights:</b> 🟢 ≥80% covered · 🟡 50–80% partial · 🔴 &lt;50% — this regulation won't pass an audit yet.</li>
+            <li><b>How to use:</b> click <b>Refresh</b> after every pipeline run. Tick <b>Show all</b> to see every regulation regardless of domain (useful when reviewing a multi-jurisdiction deployment).</li>
           </ul>
         </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn" onclick="complyRefresh()">⟳ Refresh dashboard</button>
           <button class="btn btn-ghost" onclick="complyGap()">Run gap analysis</button>
+          <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px">
+            <input type="checkbox" id="cmp-show-all" onchange="complyRefresh()" /> Show all regulations
+          </label>
+          <span id="cmp-domain-badge" class="badge" style="display:none"></span>
           <span id="cmp-status" style="font-size:12px;color:var(--muted)"></span>
         </div>
         <div id="cmp-coverage-list" style="overflow-x:auto">Click refresh to load regulation coverage.</div>
@@ -1447,17 +1452,48 @@ function complyStatusColour(status){
   return '#d29922';
 }
 
+// ── Domain-aware filtering ────────────────────────────────────────────────
+//
+// A regulation `r` "applies to" the current domain if either:
+//   - r.applies_to includes the current industry slug, or
+//   - r.applies_to includes "all" (cross-cutting framework like EU AI Act).
+// The Show-all checkbox bypasses the filter for multi-jurisdiction reviews.
+
+function _currentIndustry(){
+  return ((session.domain && session.domain.industry) || '').toString().toLowerCase();
+}
+
+function _showAllRegs(){
+  const cb = document.getElementById('cmp-show-all');
+  return !!(cb && cb.checked);
+}
+
+function _isRegApplicable(reg){
+  if (_showAllRegs()) return true;
+  const ind = _currentIndustry();
+  if (!ind) return true;                                 // no domain set yet — show everything
+  const list = (reg.applies_to || ['all']).map(s => String(s).toLowerCase());
+  return list.includes('all') || list.includes(ind);
+}
+
 async function complyLoadRegulations(){
   const r = await fetch('/api/comply/regulations');
   const j = await r.json();
+  const all = j.regulations || [];
+  const visible = all.filter(_isRegApplicable);
   const sel = document.getElementById('cmp-regulation');
   sel.innerHTML = '';
-  (j.regulations || []).forEach(reg => {
+  visible.forEach(reg => {
     const opt = document.createElement('option');
     opt.value = reg.regulation_id;
     opt.textContent = (reg.short_name || reg.name) + '  ['+reg.regulation_id+']';
     sel.appendChild(opt);
   });
+  if (!visible.length) {
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = '— no regulations match this domain —';
+    sel.appendChild(opt);
+  }
 }
 
 async function complyRefresh(){
@@ -1465,10 +1501,33 @@ async function complyRefresh(){
   await complyLoadRegulations();
   const r = await fetch('/api/comply/coverage');
   const j = await r.json();
-  const regs = j.regulations || [];
-  let html = '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+  const all = j.regulations || [];
+  const regs = all.filter(_isRegApplicable);
+  const hidden = all.length - regs.length;
+
+  // Domain badge
+  const badge = document.getElementById('cmp-domain-badge');
+  const ind   = _currentIndustry();
+  if (ind) {
+    badge.style.display = '';
+    badge.textContent = 'domain: ' + ind.replace(/_/g,' ');
+  } else {
+    badge.style.display = 'none';
+  }
+
+  let html = '';
+  if (ind && !_showAllRegs() && hidden > 0) {
+    html += `<div class="box-help" style="margin:0 0 12px 0; border-left-color:var(--accent2)">`
+         +  `Filtered to <b>${escapeHtml(ind.replace(/_/g,' '))}</b>. `
+         +  `${hidden} regulation${hidden===1?'':'s'} hidden as not applicable to this domain. `
+         +  `Tick <b>Show all regulations</b> above to reveal them.`
+         +  `</div>`;
+  }
+
+  html += '<table style="width:100%; border-collapse:collapse"><thead><tr>'
     + '<th style="text-align:left; padding:6px">Regulation</th>'
     + '<th style="text-align:left; padding:6px">ID</th>'
+    + '<th style="text-align:left; padding:6px">Applies to</th>'
     + '<th style="text-align:right; padding:6px">Coverage</th>'
     + '<th style="text-align:right; padding:6px">Satisfied</th>'
     + '<th style="text-align:center; padding:6px">Traffic light</th>'
@@ -1477,9 +1536,11 @@ async function complyRefresh(){
     const light = r.coverage >= 80 ? '#3fb950'
                : r.coverage >= 50 ? '#d29922'
                : '#f85149';
+    const at = (r.applies_to || ['all']).join(', ');
     html += `<tr style="border-top:1px solid var(--border)">`
       + `<td style="padding:6px">${escapeHtml(r.name || '')}</td>`
       + `<td style="padding:6px"><code>${escapeHtml(r.regulation_id)}</code></td>`
+      + `<td style="padding:6px; font-size:12px; color:var(--muted)">${escapeHtml(at)}</td>`
       + `<td style="padding:6px; text-align:right">${r.coverage}%</td>`
       + `<td style="padding:6px; text-align:right">${r.satisfied}/${r.applicable}</td>`
       + `<td style="padding:6px; text-align:center">`
@@ -1487,10 +1548,17 @@ async function complyRefresh(){
       + `</td></tr>`;
   });
   html += '</tbody></table>';
-  if (regs.length === 0) html = '<em>No regulations loaded.</em>';
+  if (regs.length === 0) {
+    html = ind && !_showAllRegs()
+      ? `<em>No regulations apply to <b>${escapeHtml(ind)}</b>. Tick <b>Show all regulations</b> to review the rest.</em>`
+      : '<em>No regulations loaded.</em>';
+  }
   document.getElementById('cmp-coverage-list').innerHTML = html;
+
+  const visAt80 = regs.filter(r => r.coverage >= 80).length;
   document.getElementById('cmp-status').textContent =
-    `${j.regulations_at_80 || 0}/${j.total_regulations || 0} regulations at ≥80% coverage`;
+    `${visAt80}/${regs.length} visible regulation${regs.length===1?'':'s'} at ≥80% coverage`
+    + (hidden && !_showAllRegs() ? `  ·  ${hidden} hidden (not applicable to this domain)` : '');
   complyLoadBundles();
 }
 

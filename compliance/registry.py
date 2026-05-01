@@ -64,6 +64,11 @@ def list_regulations(*, regulations_dir: Optional[str] = None) -> List[Dict[str,
             "effective_date":    reg.get("effective_date"),
             "last_verified_date": reg.get("last_verified_date"),
             "requirement_count": len(reg.get("requirements", [])),
+            # Industries this regulation applies to. Use ["all"] for cross-cutting
+            # frameworks (e.g. EU AI Act). Defaults to ["all"] for older
+            # regulation files that pre-date this field.
+            "applies_to":        reg.get("applies_to", ["all"]),
+            "scope":             reg.get("scope"),
             "path":              path,
         })
     return out
