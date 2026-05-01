@@ -121,7 +121,7 @@ These are **opt-in**. Skip them on day 1 — the pipeline runs fine without any 
 | When you want to… | Install | Read |
 |---|---|---|
 | Wire LLM calls through the SHACL gates and OWL grounding | `pip install -r requirements-runtime.txt` | [features.md §8 Runtime](../features.md#8-runtime--connecting-the-toolkit-to-ai-and-llms) · [docs/sdk.md](sdk.md) |
-| Monitor production data drift against the ontology | `pip install -r requirements-drift.txt` | [examples/infodrift/README.md](../examples/infodrift/README.md) · [ontology_infodrift_integration.md](../ontology_infodrift_integration.md) |
+| Monitor production data drift against the ontology | `pip install -r requirements-drift.txt` | [examples/infodrift/README.md](../examples/infodrift/README.md) |
 | Use the browser-based wizard | `pip install -r requirements-advanced.txt` | [install.md §2](../install.md#2-onboarding--start-a-new-project) |
 | Publish to Fuseki / Stardog / Neptune / GraphDB | `pip install -r requirements-advanced.txt` (Neptune only) | [features.md §9](../features.md#9-phase-3--scale--community) |
 | Federate with another organisation's ontology | core only | [features.md §12](../features.md#12-generation-2--cross-enterprise-federated-ontology-network) |

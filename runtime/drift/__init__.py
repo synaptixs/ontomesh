@@ -3,7 +3,7 @@
 Wraps the `drift_monitor` package (formerly known as *infodrift*) with the
 toolkit's OWL class hierarchy, SHACL shapes, and JSON-LD context.
 
-Five phases (per ontology_infodrift_integration.md):
+Five phases:
 
   P1 — pip dependency declared in requirements.txt
   P2 — :class:`OntologyDriftMonitor` registers OWL individuals as monitored

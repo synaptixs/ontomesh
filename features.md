@@ -916,7 +916,7 @@ Open `http://localhost:5000` in your browser.
 
 ## 10. Generation 2 — Agentic Semantic Memory Layer
 
-**Workstream 1 of the [Generation 2 Roadmap](ontology_gen2_roadmap.md).** Exit gates in [gates.md §3](gates.md#3-workstream-1-exit-gates--agentic-semantic-memory).
+**Workstream 1 — Generation 2.** Exit gates in [gates.md §3](gates.md#3-workstream-1-exit-gates--agentic-semantic-memory).
 
 Transforms the ontology graph store from a static semantic schema into the long-term working memory of AI agents. Every reasoning chain, observation, and decision is now a queryable, temporally-ordered fact. Agents build on prior reasoning rather than starting from scratch on every invocation.
 
@@ -1084,7 +1084,7 @@ New SDK additions:
 
 ## 11. Generation 2 — Autonomous Ontology Evolution
 
-**Workstream 2 of the [Generation 2 Roadmap](ontology_gen2_roadmap.md).** Exit gates in [gates.md §4](gates.md#4-workstream-2-exit-gates--autonomous-ontology-evolution).
+**Workstream 2 — Generation 2.** Exit gates in [gates.md §4](gates.md#4-workstream-2-exit-gates--autonomous-ontology-evolution).
 
 Closes the loop between what AI agents observe in production and what the ontology formally models. A monitoring daemon detects patterns the ontology doesn't yet capture, scores them as evolution candidates across five dimensions, routes them through a human review gate, and auto-increments the ontology version when an approved axiom passes the full CI/CD reasoner + SPARQL CQ gate.
 
@@ -1177,7 +1177,7 @@ Governance retains the final gate: the domain expert reviews the PR before merge
 
 ## 12. Generation 2 — Cross-Enterprise Federated Ontology Network
 
-**Workstream 3 of the [Generation 2 Roadmap](ontology_gen2_roadmap.md).** Exit gates in [gates.md §5](gates.md#5-workstream-3-exit-gates--cross-enterprise-federation).
+**Workstream 3 — Generation 2.** Exit gates in [gates.md §5](gates.md#5-workstream-3-exit-gates--cross-enterprise-federation).
 
 Extends the toolkit from single-enterprise to multi-enterprise semantic interoperability. Each organisation retains full sovereignty over its ontology: partners publish cryptographically signed capability manifests declaring what they expose, to whom, and at what sensitivity tier. A boundary gate validates every inbound triple before any partner data enters local reasoning scope.
 
@@ -1303,7 +1303,7 @@ Reference implementation: the toolkit's `federation/` module.
 
 ## 13. Generation 2 — Regulatory AI Compliance Evidence Engine
 
-**Workstream 4 of the [Generation 2 Roadmap](ontology_gen2_roadmap.md).** Exit gates in [gates.md §6](gates.md#6-workstream-4-exit-gates--regulatory-ai-compliance).
+**Workstream 4 — Generation 2.** Exit gates in [gates.md §6](gates.md#6-workstream-4-exit-gates--regulatory-ai-compliance).
 
 Turns the toolkit's existing governance outputs — PROV-O chains, SHACL validation records, governance scorecard, SPARQL CQ results — into on-demand, signed, machine-verifiable evidence packages mapped to named regulatory frameworks. Compliance evidence becomes automatic rather than manually reconstructed.
 
