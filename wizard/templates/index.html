@@ -156,18 +156,31 @@
     .sidebar-logo strong { font-size: 15px; color: var(--text);
                            letter-spacing: -0.015em; }
     .step-nav  { list-style: none; padding: 0 10px; }
-    .step-nav li { padding: 8px 12px; border-radius: var(--radius-sm);
-                   cursor: pointer; color: var(--muted); font-size: 13px;
-                   display: flex; align-items: center; gap: 10px;
-                   transition: background .12s, color .12s; margin-bottom: 1px; }
+    .step-nav li { padding: 9px 12px; border-radius: var(--radius-sm);
+                   cursor: pointer; color: var(--muted); font-size: 14px;
+                   display: flex; align-items: center; gap: 11px;
+                   transition: background .12s, color .12s; margin-bottom: 1px;
+                   letter-spacing: -0.005em; }
     .step-nav li:hover  { background: var(--surface-2); color: var(--text); }
     .step-nav li.active { background: var(--accent-soft); color: var(--accent);
                           font-weight: 500; }
-    .step-num { width: 20px; height: 20px; border-radius: 50%;
+    .step-num { width: 24px; height: 24px; border-radius: 50%;
                 background: var(--surface-2); display: flex; align-items: center;
-                justify-content: center; font-size: 10.5px; font-weight: 600;
+                justify-content: center; font-size: 12px; font-weight: 600;
                 flex-shrink: 0; color: var(--muted-2);
                 transition: background .12s, color .12s; }
+    /* Section divider in the sidebar nav — separates the linear "build"
+       steps (1–6) from the post-generation tools (7–9). Not interactive,
+       no hover, no click target. Continuous numbering avoids the
+       letter-vs-number mismatch users found confusing. */
+    .step-nav li.step-divider {
+      cursor: default; padding: 14px 14px 6px 14px;
+      font-size: 11px; font-weight: 500; color: var(--muted-2);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      pointer-events: none; margin-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .step-nav li.step-divider:hover { background: transparent; color: var(--muted-2); }
     .step-nav li.active .step-num { background: var(--accent); color: #fff; }
     .step-nav li.done .step-num   { background: var(--success); color: #fff; }
     .sidebar-footer { margin-top: auto; padding: 14px 20px;
@@ -436,9 +449,10 @@
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
-      <li data-step="evolve"><span class="step-num">E</span> Evolution Review</li>
-      <li data-step="comply"><span class="step-num">C</span> Compliance Dashboard</li>
-      <li data-step="retrieve"><span class="step-num">V</span> Vector Retrieval</li>
+      <li class="step-divider" aria-hidden="true">After generation</li>
+      <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
+      <li data-step="comply"><span class="step-num">8</span> Compliance Dashboard</li>
+      <li data-step="retrieve"><span class="step-num">9</span> Vector Retrieval</li>
     </ul>
     <div class="sidebar-footer">
       <div class="theme-picker" role="radiogroup" aria-label="Theme">
@@ -1116,6 +1130,8 @@ function goStep(name) {
 }
 
 document.querySelectorAll('.step-nav li').forEach(li => {
+  // Section dividers carry no data-step and shouldn't navigate.
+  if (!li.dataset.step) return;
   li.addEventListener('click', () => goStep(li.dataset.step));
 });
 
