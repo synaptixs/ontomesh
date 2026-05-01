@@ -634,6 +634,241 @@ def _diff(new: Dict[str, Any], existing: Optional[Dict[str, Any]]) -> Dict[str, 
     }
 
 
+# ── SQL comment extraction (issue #16 step 4) ───────────────────────────
+#
+# sqlglot strips comments while parsing, so we run a parallel regex pass
+# over the raw SQL to harvest column-level descriptions and attach them
+# back to the parsed schema.  Four comment forms are supported, covering
+# Postgres, MySQL, SQL Server, Oracle, and SQLite usage in the wild.
+
+# `COMMENT ON COLUMN tab.col IS 'text';`  (Postgres / SQLite-friendly)
+_RE_COMMENT_ON_COLUMN = re.compile(
+    r"""COMMENT\s+ON\s+COLUMN\s+
+        (?:(?P<schema>\w+)\s*\.\s*)?       # optional schema
+        (?P<table>\w+)\s*\.\s*(?P<column>\w+)\s+
+        IS\s+'(?P<text>(?:''|[^'])*)'\s*;""",
+    re.IGNORECASE | re.VERBOSE,
+)
+
+# `COMMENT ON TABLE tab IS 'text';`
+_RE_COMMENT_ON_TABLE = re.compile(
+    r"""COMMENT\s+ON\s+TABLE\s+
+        (?:(?P<schema>\w+)\s*\.\s*)?
+        (?P<table>\w+)\s+
+        IS\s+'(?P<text>(?:''|[^'])*)'\s*;""",
+    re.IGNORECASE | re.VERBOSE,
+)
+
+# Inline MySQL column comment: `email VARCHAR(255) NOT NULL COMMENT 'text'`
+_RE_INLINE_MYSQL_COMMENT = re.compile(
+    r"""COMMENT\s+'(?P<text>(?:''|[^'])*)'""",
+    re.IGNORECASE | re.VERBOSE,
+)
+
+# Match the start of a CREATE TABLE block so we can scan its body separately.
+_RE_CREATE_TABLE = re.compile(
+    r"""CREATE\s+(?:TEMP(?:ORARY)?\s+|GLOBAL\s+TEMPORARY\s+)?TABLE\s+
+        (?:IF\s+NOT\s+EXISTS\s+)?
+        (?:(?P<schema>\w+)\s*\.\s*)?
+        (?P<table>"?[\w]+"?)\s*\(""",
+    re.IGNORECASE | re.VERBOSE,
+)
+
+# Identify the column name on a column line — first identifier-looking word.
+_RE_COLUMN_LINE = re.compile(r"^\s*(?P<col>\w+)\b")
+
+
+def _extract_sql_comments(text: str) -> Dict[str, Dict[str, str]]:
+    """Return {table_name: {col_name: comment_text}} where col_name='' is the table-level comment.
+
+    Strategy: walk each CREATE TABLE body line by line. For every line that
+    looks like a column declaration:
+      - keep any `-- text` trailing the line as the column comment;
+      - if the *previous* non-blank line was a `--` line, attach that too;
+      - if the previous non-blank line was a `/* ... */`, attach it;
+      - if the line itself contains an inline `COMMENT 'text'` clause
+        (MySQL), attach that.
+    Then post-process the entire script for `COMMENT ON COLUMN/TABLE`
+    statements (Postgres) and merge them in (these win over inline).
+
+    Comment unescape: doubled single-quotes ('') → single quote (').
+    """
+    out: Dict[str, Dict[str, str]] = {}
+
+    def _unesc(s: str) -> str:
+        return s.replace("''", "'").strip()
+
+    def _set(table: str, col: str, text: str) -> None:
+        if not table or text is None:
+            return
+        out.setdefault(table, {})
+        # Don't overwrite a richer comment with an empty one.
+        if col not in out[table] or out[table][col].strip() == "":
+            out[table][col] = text
+
+    # ── Pass 1: walk CREATE TABLE bodies line-by-line ───────────────────
+    pos = 0
+    while True:
+        m = _RE_CREATE_TABLE.search(text, pos)
+        if not m:
+            break
+        tname = m.group("table").strip().strip('"')
+        # Find the matching closing paren by depth-walking from the `(`.
+        depth = 0
+        i = m.end() - 1            # the `(`
+        body_start = m.end()
+        body_end = body_start
+        while i < len(text):
+            ch = text[i]
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    body_end = i
+                    break
+            i += 1
+        pos = max(body_end, m.end())
+        body = text[body_start:body_end]
+        prev_block_comment: Optional[str] = None
+        prev_line_comment: Optional[str] = None
+        for raw_line in body.split("\n"):
+            line = raw_line.rstrip()
+            stripped = line.strip()
+            if not stripped:
+                continue
+
+            # Standalone /* ... */ on its own (single-line) line.
+            block_only = re.match(r"^/\*\s*(.*?)\s*\*/\s*$", stripped, re.DOTALL)
+            if block_only:
+                prev_block_comment = block_only.group(1).strip()
+                continue
+
+            # Standalone -- line.
+            if stripped.startswith("--"):
+                prev_line_comment = stripped[2:].strip()
+                continue
+
+            # Otherwise it's (probably) a column declaration. First word is the name.
+            cm = _RE_COLUMN_LINE.match(line)
+            if not cm:
+                prev_block_comment = prev_line_comment = None
+                continue
+            col_name = cm.group("col")
+            # Skip table-level constraints (PRIMARY KEY, FOREIGN KEY, …).
+            if col_name.upper() in ("PRIMARY", "FOREIGN", "UNIQUE", "CHECK",
+                                    "CONSTRAINT", "INDEX", "KEY"):
+                prev_block_comment = prev_line_comment = None
+                continue
+
+            comment = None
+            # Trailing `-- ...`
+            tail = re.search(r"--\s*(.*?)\s*$", line)
+            if tail:
+                comment = tail.group(1).strip()
+            # Inline MySQL `COMMENT 'text'`
+            inline = _RE_INLINE_MYSQL_COMMENT.search(line)
+            if inline:
+                comment = _unesc(inline.group("text"))
+            # Adjacent block / line comment from the previous statement
+            if not comment:
+                comment = prev_block_comment or prev_line_comment
+
+            if comment:
+                _set(tname, col_name, comment)
+            prev_block_comment = prev_line_comment = None
+
+    # ── Pass 2: COMMENT ON statements (anywhere in the script) ──────────
+    for m in _RE_COMMENT_ON_TABLE.finditer(text):
+        _set(m.group("table"), "", _unesc(m.group("text")))
+    for m in _RE_COMMENT_ON_COLUMN.finditer(text):
+        # Postgres COMMENT ON wins over inline forms — overwrite.
+        out.setdefault(m.group("table"), {})[m.group("column")] = _unesc(m.group("text"))
+
+    return out
+
+
+# ── Soft-FK detection (issue #16 step 4) ────────────────────────────────
+#
+# A "soft FK" is a column whose name strongly suggests a foreign-key
+# relationship to another table even though no `FOREIGN KEY` constraint
+# was declared. Common in legacy schemas, MySQL ISAM tables, and ORMs
+# that manage referential integrity in application code rather than DDL.
+#
+# Confidence scoring:
+#   1.00  declared FK (always wins; emitted as a real relationship)
+#   0.85  `<table>_id`     where <table> is an exact table name
+#   0.75  `<table>_id`     where <table>+s / +es is a table name
+#   0.60  `<table>_id`     where <table> is the singular of a table name
+#                          ending in 's' or 'ies'
+#
+# Below 0.6 we don't emit — too noisy.
+
+def _singularise(s: str) -> Optional[str]:
+    if s.endswith("ies") and len(s) > 3:
+        return s[:-3] + "y"
+    if s.endswith("ses") and len(s) > 3:
+        return s[:-2]
+    if s.endswith("s") and len(s) > 1 and not s.endswith("ss"):
+        return s[:-1]
+    return None
+
+
+def _pluralise(s: str) -> List[str]:
+    out = []
+    if s.endswith("y"):
+        out.append(s[:-1] + "ies")
+    if s.endswith(("s", "x", "z", "ch", "sh")):
+        out.append(s + "es")
+    out.append(s + "s")
+    return out
+
+
+def _detect_soft_fks(tables: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Return a list of soft-FK suggestions:
+        {from_table, from_column, to_table, confidence, basis}
+    """
+    table_names = {t["name"] for t in tables}
+    # Build singular/plural index for matching.
+    sing_to_table: Dict[str, str] = {}
+    for nm in table_names:
+        sing_to_table[nm] = nm
+        s = _singularise(nm)
+        if s:
+            sing_to_table.setdefault(s, nm)
+    sugs: List[Dict[str, Any]] = []
+    for t in tables:
+        declared_cols = {fk["column"] for fk in (t.get("foreign_keys") or [])}
+        for c in t.get("columns", []):
+            cname = c.get("name", "")
+            if not cname or cname in declared_cols:
+                continue
+            low = cname.lower()
+            if not low.endswith("_id"):
+                continue
+            stem = low[:-3]
+            if stem == t["name"].lower():
+                continue                   # self-pointer, e.g. parent_id; skip
+            target = None; conf = 0.0; basis = ""
+            if stem in table_names:
+                target = stem; conf = 0.85; basis = "exact table-name match"
+            elif any(p in table_names for p in _pluralise(stem)):
+                target = next(p for p in _pluralise(stem) if p in table_names)
+                conf = 0.75; basis = f"matches plural form '{target}'"
+            elif stem in sing_to_table and sing_to_table[stem] != stem:
+                target = sing_to_table[stem]
+                conf = 0.60; basis = f"matches singularised table '{target}'"
+            if target and conf >= 0.60:
+                sugs.append({
+                    "from_table":  t["name"],
+                    "from_column": cname,
+                    "to_table":    target,
+                    "confidence":  conf,
+                    "basis":       basis,
+                })
+    return sugs
+
+
 # ── SQL parser (issue #16 step 3 — sqlglot AST → schema-shape dict) ─────
 
 def _xsd_for(sql_type: str) -> str:
@@ -794,6 +1029,22 @@ def _parse_sql(
         ))
         return result
 
+    # ── Step 4: comment harvest + attach to columns / table description
+    comments = _extract_sql_comments(text)
+    described_cols = 0
+    for t in tables:
+        ctab = comments.get(t["name"], {})
+        if ctab.get("") and not t.get("description"):
+            t["description"] = ctab[""]
+        for col in t["columns"]:
+            txt = ctab.get(col["name"])
+            if txt:
+                col["description"] = txt
+                described_cols += 1
+
+    # ── Step 4: soft-FK suggestions (declared FKs always win) ───────────
+    soft_fks = _detect_soft_fks(tables)
+
     schema_doc = {
         "domain":   _label_from_snake(filename.rsplit(".", 1)[0]) if filename else "Imported Schema",
         "description": f"Imported from {filename or 'SQL DDL'} ({resolved_dialect or 'default'} dialect).",
@@ -806,9 +1057,33 @@ def _parse_sql(
     result.errors.extend(errors)
     result.warnings.extend(warnings)
     result.suggestions.extend(suggestions)
+
+    # Attach soft-FK suggestions in the same Issue tier as sensitivity
+    # / event suggestions so the UI's Suggestions tab renders them
+    # uniformly. The basis + confidence ride along in fix_hint so
+    # reviewers can sort by signal strength.
+    for sf in soft_fks:
+        result.suggestions.append(Issue(
+            code="SUGGEST_SOFT_FK",
+            severity="suggestion",
+            message=(f"'{sf['from_table']}.{sf['from_column']}' looks like a foreign key to "
+                     f"'{sf['to_table']}' but no FOREIGN KEY constraint is declared."),
+            location=f"tables.{sf['from_table']}.columns.{sf['from_column']}",
+            fix_hint=(f"Confidence {sf['confidence']:.2f} — {sf['basis']}. "
+                      f"Accept to add a relationship "
+                      f"{_table_name_to_label(sf['from_table'])} → references → "
+                      f"{_table_name_to_label(sf['to_table'])}."),
+        ))
+
     result.stats = _stats(session)
     result.stats["sql_dialect"] = resolved_dialect or "(default)"
     result.stats["table_count"] = len(tables)
+    total_cols = sum(len(t["columns"]) for t in tables)
+    result.stats["column_count"] = total_cols
+    result.stats["sql_column_description_coverage_pct"] = (
+        round(described_cols / max(total_cols, 1) * 100) if total_cols else None
+    )
+    result.stats["soft_fk_count"] = len(soft_fks)
     result.diff = _diff(session, existing_session)
     return result
 
