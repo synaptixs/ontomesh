@@ -1,0 +1,21 @@
+# Core pipeline — minimum to run phases 1–5, tmf, test, report.
+#
+# This is the smallest install that produces a working ontology, SHACL
+# shapes, JSON-LD context, mapping workbook, and HTML report from a
+# SQLite database. ~50 MB on disk, no compilation, no model downloads.
+#
+# Install: pip install -r requirements-core.txt
+#
+# Add other tiers only when you need them:
+#   requirements-db.txt        non-SQLite database drivers
+#   requirements-runtime.txt   LLM adapters (Anthropic / OpenAI / Vertex / Ollama / OCI)
+#   requirements-drift.txt     production drift monitoring (drift_monitor / infodrift)
+#   requirements-advanced.txt  spaCy NLP, Flask wizard, Neptune, etc.
+#
+# Or pip install -r requirements.txt to pull everything at once.
+
+rdflib>=7.0.0                   # RDF graph, Turtle parsing, SPARQL queries
+pyshacl>=0.26.0                 # SHACL validation
+sparqlwrapper>=2.0.0            # SPARQL endpoint client (graph_publisher)
+pyyaml>=6.0.2                   # YAML template parsing
+jinja2>=3.1.4                   # HTML report templating

@@ -15,9 +15,21 @@ How to install drivers, start a new project, and point the toolkit at an existin
 
 ## 1. Prerequisites
 
-**Core pipeline:** Python 3.8 or later. No packages required — stdlib only.
+**Python:** 3.10 or later.
 
-**Database drivers** — install only what you need:
+**Dependencies are tiered.** Install only what you need — most projects need only the core tier.
+
+```bash
+pip install -r requirements-core.txt        # phases 1–5, tmf, test, report (~50 MB)
+pip install -r requirements-db.txt          # non-SQLite database drivers
+pip install -r requirements-runtime.txt     # LLM adapters (Anthropic / OpenAI / Vertex / OCI / Ollama)
+pip install -r requirements-drift.txt       # drift_monitor (infodrift) integration
+pip install -r requirements-advanced.txt    # spaCy NLP, Flask wizard, Neptune
+```
+
+`pip install -r requirements.txt` pulls everything (CI / kitchen-sink installs).
+
+**Database drivers** — install only the one(s) you actually use. SQLite is built into Python; no driver needed.
 
 ```bash
 pip install psycopg2-binary          # PostgreSQL
@@ -27,7 +39,29 @@ pip install oracledb                 # Oracle / Oracle ADB (thin mode — no Ins
 pip install ibm_db ibm_db_dbi        # IBM DB2 (also needs DB2 ODBC/CLI driver from IBM)
 ```
 
-SQLite is built into Python — no driver needed.
+### Install via pip wheel
+
+The toolkit also ships as a pip-installable package (sdist + wheel) built from `pyproject.toml`. Two console scripts (`ontology-toolkit`, `ontology-onboard`) are exposed on install.
+
+```bash
+# From a built wheel (see dist/)
+pip install dist/ontology_toolkit-3.0.0-py3-none-any.whl
+
+# Pick extras: db drivers, runtime adapters, drift, advanced features
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[db,runtime]"
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[postgres,oracle,anthropic]"
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[all]"
+```
+
+Available extras: `postgres`, `mysql`, `mssql`, `oracle`, `db2`, `db` (all DB drivers), `anthropic`, `openai`, `vertex`, `ollama`, `oci`, `runtime` (all runtime adapters), `drift`, `wizard`, `discover`, `neptune`, `test`, `all`.
+
+To rebuild from source:
+
+```bash
+python -m build      # produces dist/*.whl and dist/*.tar.gz
+```
+
+> Note: the `drift-monitor` dependency (the [infodrift](https://github.com/nrohilla-fibonacci/infodrift) runtime drift package) is a git+VCS reference, so the wheel is intended for private/internal distribution rather than PyPI.
 
 ---
 
