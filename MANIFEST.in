@@ -6,7 +6,6 @@ include requirements-runtime.txt
 include requirements-drift.txt
 include requirements-advanced.txt
 include install.md
-include gates.md
 include features.md
 recursive-include docs *.md
 
