@@ -13,37 +13,38 @@
   <style>
     /* ── Reset & Variables ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Three themes ship out of the box. Picker lives in the sidebar
+       footer; choice persists to localStorage; system preference seeds
+       the first visit. All component CSS uses tokens only — to add a
+       theme, add another [data-theme="..."] block below. */
     :root {
-      /* Light, layered surfaces — Linear / Vercel feel.
-         bg = page colour, surface = cards, surface-2 = nested fills. */
-      --bg:        #f6f7f9;
-      --surface:   #ffffff;
-      --surface-2: #f3f4f6;
+      /* ────────── LIGHT (default) ── Linear / Vercel feel ────────── */
+      --bg:            #f6f7f9;
+      --surface:       #ffffff;
+      --surface-2:     #f3f4f6;
       --surface-hover: #fafbfc;
-      /* Borders sit very low contrast — depth comes from elevation. */
       --border:        rgba(15,23,42,0.07);
       --border-strong: rgba(15,23,42,0.14);
-      /* Single accent — refined indigo. accent-2 retained only for the
-         relationship-graph Event nodes; no gradients elsewhere. */
       --accent:        #4f46e5;
       --accent-hover:  #4338ca;
       --accent-soft:   rgba(79,70,229,0.08);
       --accent-2:      #a855f7;
-      --success: #16a34a;
-      --success-soft: rgba(22,163,74,0.10);
-      --warn:    #d97706;
-      --warn-soft: rgba(217,119,6,0.10);
-      --danger:  #dc2626;
-      --danger-soft: rgba(220,38,38,0.10);
-      /* Text — near-black for primary, calm gray scale for the rest. */
-      --text:    #0f172a;
-      --text-2:  #1f2937;
-      --muted:   #4b5563;
-      --muted-2: #6b7280;
-      /* Slightly larger radii for a contemporary feel. */
+      --success:       #16a34a;
+      --success-soft:  rgba(22,163,74,0.10);
+      --warn:          #d97706;
+      --warn-soft:     rgba(217,119,6,0.10);
+      --danger:        #dc2626;
+      --danger-soft:   rgba(220,38,38,0.10);
+      --text:          #0f172a;
+      --text-2:        #1f2937;
+      --muted:         #4b5563;
+      --muted-2:       #6b7280;
+      --on-accent:     #ffffff;       /* text colour drawn on solid accent fills */
+
+      /* Shared across all themes. */
       --radius:    10px;
       --radius-sm: 7px;
-      /* Elevation tokens — one for resting, one for hover. */
       --shadow-1: 0 1px 2px rgba(15,23,42,0.04),
                   0 1px 3px rgba(15,23,42,0.04);
       --shadow-2: 0 1px 2px rgba(15,23,42,0.04),
@@ -54,6 +55,77 @@
               system-ui, sans-serif;
       --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     }
+
+    /* ────────── DARK ── Tokyo-night-ish, indigo accent on near-black ────────── */
+    [data-theme="dark"] {
+      --bg:            #0a0c10;
+      --surface:       #11141a;
+      --surface-2:     #181b22;
+      --surface-hover: #1c2029;
+      --border:        rgba(255,255,255,0.06);
+      --border-strong: rgba(255,255,255,0.14);
+      --accent:        #818cf8;
+      --accent-hover:  #a5b0fb;
+      --accent-soft:   rgba(129,140,248,0.14);
+      --accent-2:      #c084fc;
+      --success:       #4ade80;
+      --success-soft:  rgba(74,222,128,0.12);
+      --warn:          #fbbf24;
+      --warn-soft:     rgba(251,191,36,0.12);
+      --danger:        #f87171;
+      --danger-soft:   rgba(248,113,113,0.12);
+      --text:          #e6e8ee;
+      --text-2:        #c5cad4;
+      --muted:         #9aa3b6;
+      --muted-2:       #6b7388;
+      --on-accent:     #0a0c10;
+      --shadow-1:  0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
+      --shadow-2:  0 1px 2px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.32);
+      --shadow-modal: 0 24px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    /* ────────── MONO ── high-contrast monochrome, status-only colour ────────── */
+    [data-theme="mono"] {
+      --bg:            #ffffff;
+      --surface:       #ffffff;
+      --surface-2:     #f5f5f5;
+      --surface-hover: #fafafa;
+      --border:        rgba(0,0,0,0.10);
+      --border-strong: rgba(0,0,0,0.24);
+      --accent:        #0f172a;     /* near-black accent — Notion / Apple feel */
+      --accent-hover:  #000000;
+      --accent-soft:   rgba(15,23,42,0.06);
+      --accent-2:      #475569;     /* slate for the secondary node colour */
+      --success:       #15803d;
+      --success-soft:  rgba(21,128,61,0.10);
+      --warn:          #b45309;
+      --warn-soft:     rgba(180,83,9,0.10);
+      --danger:        #b91c1c;
+      --danger-soft:   rgba(185,28,28,0.10);
+      --text:          #0a0a0a;
+      --text-2:        #262626;
+      --muted:         #525252;
+      --muted-2:       #737373;
+      --on-accent:     #ffffff;
+    }
+
+    /* ─────── Theme picker (sidebar footer) ─────── */
+    .theme-picker { display: grid; grid-template-columns: repeat(3, 1fr);
+                    gap: 4px; padding: 4px; margin-bottom: 10px;
+                    background: var(--surface-2);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius-sm); }
+    .theme-btn { background: transparent; border: 1px solid transparent;
+                 border-radius: 5px; padding: 6px 4px; cursor: pointer;
+                 font-size: 11px; font-weight: 500;
+                 color: var(--muted); font-family: inherit;
+                 letter-spacing: -0.005em;
+                 display: flex; flex-direction: column; align-items: center;
+                 gap: 2px; transition: background .12s, color .12s; }
+    .theme-btn:hover         { color: var(--text); background: var(--surface); }
+    .theme-btn.active        { color: var(--accent); background: var(--surface);
+                               border-color: var(--border); }
+    .theme-btn .theme-icon   { font-size: 13px; line-height: 1; }
     body { background: var(--bg); color: var(--text); font-family: var(--font);
            font-size: 14px; line-height: 1.55;
            -webkit-font-smoothing: antialiased;
@@ -369,6 +441,17 @@
       <li data-step="retrieve"><span class="step-num">V</span> Vector Retrieval</li>
     </ul>
     <div class="sidebar-footer">
+      <div class="theme-picker" role="radiogroup" aria-label="Theme">
+        <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
+          <span class="theme-icon">☀</span><span>Light</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-name="dark"  onclick="setTheme('dark')"  title="Dark theme">
+          <span class="theme-icon">☾</span><span>Dark</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-name="mono"  onclick="setTheme('mono')"  title="Monochrome theme">
+          <span class="theme-icon">◐</span><span>Mono</span>
+        </button>
+      </div>
       <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
       <button class="btn-run" id="btn-run-pipeline" onclick="runPipeline()">▶ Run Pipeline</button>
     </div>
@@ -957,6 +1040,46 @@ const TEMPLATE_ICONS = {
   logistics_supply_chain:'🚚', government:'🏛️', insurance:'🛡️', pharmaceuticals:'💊', custom:'⚙️'
 };
 
+// ── Theme switcher ───────────────────────────────────────────────────────
+//
+// Three themes: light (default), dark, mono. Choice persists in
+// localStorage; first visit seeds from the user's system preference
+// (prefers-color-scheme). The graph view re-reads CSS vars on each
+// draw, so node/edge colours follow the active theme automatically.
+const THEMES = ['light', 'dark', 'mono'];
+
+function setTheme(name) {
+  if (!THEMES.includes(name)) name = 'light';
+  document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.themeName === name);
+  });
+  try { localStorage.setItem('wizard-theme', name); } catch(_) {}
+  // If the relationship graph is currently visible, redraw so node
+  // colours pick up the new accent / surface tokens.
+  const gp = document.getElementById('rel-tab-graph');
+  if (gp && gp.classList.contains('active') && typeof renderRelGraph === 'function') {
+    renderRelGraph(true);
+  }
+}
+
+function _initTheme() {
+  let stored = null;
+  try { stored = localStorage.getItem('wizard-theme'); } catch(_) {}
+  if (stored && THEMES.includes(stored)) { setTheme(stored); return; }
+  const prefersDark = window.matchMedia &&
+                      window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(prefersDark ? 'dark' : 'light');
+}
+_initTheme();   // run before first paint to avoid a flash of wrong theme
+
+// Resolve a CSS custom property at runtime — used by vis-network so the
+// graph follows the active theme without hard-coding hex values in JS.
+function _cssVar(name, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 async function init() {
   await loadSession();
@@ -1256,13 +1379,15 @@ function _buildRelGraphData() {
       id: label,
       label: label,
       shape: 'box',
-      color: evt
-        ? { background: '#a855f7', border: '#a855f7',
-            highlight: { background: '#9333ea', border: '#9333ea' } }   // event = purple
-        : { background: '#4f46e5', border: '#4f46e5',
-            highlight: { background: '#4338ca', border: '#4338ca' } },  // entity = indigo
-      font: { color: '#ffffff', size: 14, face: 'Inter, system-ui, sans-serif',
-              vadjust: 0 },
+      // Pull node colours from the active theme's CSS vars so the graph
+      // stays in sync with Light / Dark / Mono without per-theme branches.
+      color: (() => {
+        const c1 = _cssVar(evt ? '--accent-2' : '--accent', evt ? '#a855f7' : '#4f46e5');
+        const c2 = _cssVar(evt ? '--accent-2' : '--accent-hover', c1);
+        return { background: c1, border: c1, highlight: { background: c2, border: c2 } };
+      })(),
+      font: { color: _cssVar('--on-accent', '#ffffff'), size: 14,
+              face: 'Inter, system-ui, sans-serif', vadjust: 0 },
       borderWidth: 0,
       shadow: { enabled: true, color: 'rgba(15,23,42,0.10)', size: 6, x: 0, y: 1 },
       margin: 12,
@@ -1292,9 +1417,11 @@ function _buildRelGraphData() {
       from, to,
       label: verb,
       arrows: 'to',
-      color: { color: '#9aa3b6', highlight: '#4f46e5', hover: '#4f46e5' },
-      font: { color: '#0f172a', size: 11, strokeWidth: 0,
-              background: 'rgba(255,255,255,0.92)', align: 'middle',
+      color: { color: _cssVar('--muted-2', '#9aa3b6'),
+               highlight: _cssVar('--accent', '#4f46e5'),
+               hover:     _cssVar('--accent', '#4f46e5') },
+      font: { color: _cssVar('--text', '#0f172a'), size: 11, strokeWidth: 0,
+              background: _cssVar('--surface', '#ffffff'), align: 'middle',
               face: 'Inter, system-ui, sans-serif' },
       smooth: { type: 'curvedCW', roundness: 0.15 },
     });
