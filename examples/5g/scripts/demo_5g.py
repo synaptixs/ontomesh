@@ -29,17 +29,18 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = SCRIPT_DIR.parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "runtime"))
-sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(SCRIPT_DIR))
 
 from demo_5g_questions import QUESTIONS  # noqa: E402
 
 DB_PATH = ROOT / "db" / "demo_5g.db"
 OUT_DIR = ROOT / "output" / "demo-5g"
 CACHE_DIR = OUT_DIR / "cache"
-ILLUSTRATIVE_PATH = ROOT / "scripts" / "demo_5g_illustrative.json"
+ILLUSTRATIVE_PATH = SCRIPT_DIR / "demo_5g_illustrative.json"
 FLAVOR = "fiveg"
 VENDORS = ["anthropic", "openai"]
 EXEC_PICKS = ["Q1", "Q4", "Q6"]   # biggest teaching moments for 5G

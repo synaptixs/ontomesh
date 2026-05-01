@@ -31,7 +31,8 @@ for a in "$@"; do
   esac
 done
 
-cd "$(dirname "$0")"
+# cd to repo root (this script lives in examples/5g/)
+cd "$(dirname "$0")/../.."
 
 step() { printf '\n\033[1;36m▸ %s\033[0m\n' "$*"; }
 
@@ -51,13 +52,13 @@ step "2/5  Generate the ontology"
 python3 toolkit.py --db db/demo_5g.db --out output/demo-5g 2>&1 | tail -8
 
 step "3/5  Baseline LLM calls (no ontology)"
-python3 scripts/demo_5g.py baseline $LIVE
+python3 examples/5g/scripts/demo_5g.py baseline $LIVE
 
 step "4/5  Ontology-grounded LLM calls"
-python3 scripts/demo_5g.py grounded $LIVE
+python3 examples/5g/scripts/demo_5g.py grounded $LIVE
 
 step "5/5  Build comparison reports"
-python3 scripts/demo_5g.py report
+python3 examples/5g/scripts/demo_5g.py report
 
 cat <<EOF
 

@@ -22,14 +22,15 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = SCRIPT_DIR.parents[2]
+sys.path.insert(0, str(SCRIPT_DIR))
 from demo_questions import QUESTIONS  # noqa: E402
 
 DEMO_DIR = ROOT / "output" / "demo"
 CACHE = DEMO_DIR / "cache"
-# Illustrative answers live under scripts/ (persistent — output/demo/ gets wiped by --fresh)
-ILLUSTRATIVE_PATH = ROOT / "scripts" / "demo_illustrative.json"
+# Illustrative answers live alongside this script (persistent — output/demo/ gets wiped by --fresh)
+ILLUSTRATIVE_PATH = SCRIPT_DIR / "demo_illustrative.json"
 
 VENDORS = ["anthropic", "openai"]
 
