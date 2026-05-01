@@ -223,6 +223,86 @@ class ImportResult:
         }
 
 
+# ── JSON Schema structural validation ────────────────────────────────────
+# A formal JSON Schema lives at wizard/import_schema.json. It accepts the
+# three shapes via oneOf and is loaded lazily so the importer can run on
+# environments where the optional `jsonschema` package isn't installed —
+# semantic checks in `_validate_session` run regardless.
+
+import os as _os
+import pathlib as _pathlib
+
+_IMPORT_SCHEMA_PATH = _pathlib.Path(_os.path.dirname(__file__)) / "import_schema.json"
+_IMPORT_SCHEMA_CACHE: Optional[Dict[str, Any]] = None
+
+
+def _load_import_schema() -> Optional[Dict[str, Any]]:
+    global _IMPORT_SCHEMA_CACHE
+    if _IMPORT_SCHEMA_CACHE is not None:
+        return _IMPORT_SCHEMA_CACHE
+    if not _IMPORT_SCHEMA_PATH.exists():
+        return None
+    try:
+        with _IMPORT_SCHEMA_PATH.open() as f:
+            _IMPORT_SCHEMA_CACHE = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        _IMPORT_SCHEMA_CACHE = None
+    return _IMPORT_SCHEMA_CACHE
+
+
+def _jsonschema_validate(doc: Dict[str, Any]) -> List["Issue"]:
+    """Return SCHEMA_VIOLATION Issue records, or [] if validation passes
+    or jsonschema isn't available.
+
+    Per-error pointer (`location`) follows JSON Pointer convention so the
+    review modal can highlight the offending field; the `oneOf` matcher
+    is run by jsonschema itself and the *best-fitting branch's* errors
+    are surfaced (avoids the noise where every `oneOf` branch contributes).
+    """
+    schema = _load_import_schema()
+    if schema is None:
+        return []
+    try:
+        import jsonschema
+        from jsonschema import Draft202012Validator
+    except ImportError:
+        return []                              # optional dep — skip silently
+    out: List["Issue"] = []
+    try:
+        validator = Draft202012Validator(schema)
+    except Exception:                          # malformed schema file — fail open
+        return []
+    errors = sorted(validator.iter_errors(doc), key=lambda e: list(e.absolute_path))
+    if not errors:
+        return []
+    # When the top-level oneOf doesn't match, jsonschema returns a single
+    # "is not valid under any of the given schemas" error with sub-errors
+    # under .context. Pick the branch with the FEWEST sub-errors — that's
+    # the shape the user *probably* meant — and surface only its issues.
+    primary = errors[0]
+    if primary.validator == "oneOf" and getattr(primary, "context", None):
+        ctx = sorted(primary.context, key=lambda e: (len(list(e.absolute_path)), e.message))
+        # Group by branch (schema_path[1] = which oneOf member)
+        branches: Dict[Any, List] = {}
+        for sub in ctx:
+            key = sub.schema_path[1] if len(sub.schema_path) > 1 else None
+            branches.setdefault(key, []).append(sub)
+        # Pick the branch with the fewest errors → most likely intended shape.
+        best = min(branches.values(), key=len)
+        errors = best
+    for err in errors[:25]:                    # cap — modal unusable beyond ~25
+        ptr = "/" + "/".join(str(p) for p in err.absolute_path) if err.absolute_path else "(root)"
+        out.append(Issue(
+            code="SCHEMA_VIOLATION",
+            severity="error",
+            message=f"JSON Schema: {err.message}",
+            location=ptr,
+            fix_hint="The file's structure doesn't match any of the three accepted shapes "
+                     "(wizard-session, CLI session, or {tables: [...]}). Check the field type and required keys.",
+        ))
+    return out
+
+
 # ── Format detection ──────────────────────────────────────────────────────
 
 def _detect_format(raw: bytes, fmt_hint: str, filename: Optional[str]) -> str:
@@ -393,6 +473,74 @@ def _looks_like_event(name: str) -> bool:
     # Normalise so "Audit Log" matches the same hint as "audit_log".
     low = re.sub(r"[\s\-]+", "_", (name or "").lower())
     return any(h in low for h in EVENT_NAME_HINTS)
+
+
+def _suggested_description(col_name: str, col_type: str = "", entity_label: str = "") -> Optional[str]:
+    """Heuristic one-line description for a column with no documentation.
+
+    Strategy: pattern-match on the *suffix* of the snake-case name first
+    (most informative — `_at`, `_id`, `_count`, `_url`, `_email`), then
+    on the bare type, then fall back to a generic "<noun> of the <entity>"
+    sentence. Returns None when nothing useful can be said.
+
+    The output is conservative — better to say nothing than to fabricate
+    a confident-sounding wrong description that the LLM grounding step
+    would later quote verbatim.
+    """
+    if not col_name:
+        return None
+    n = col_name.lower().strip()
+    t = (col_type or "").upper().split("(", 1)[0].strip()
+    ent = (entity_label or "").strip()
+    ent_low = ent.lower() if ent else "row"
+
+    # Identifier-shaped columns
+    if n in ("id", "uuid", "guid"):
+        return f"Surrogate identifier for the {ent_low}." if ent else "Surrogate primary key."
+    if n.endswith("_id") and n not in ("uuid",):
+        target = n[:-3].replace("_", " ")
+        return f"Foreign key reference to the {target} this {ent_low} belongs to."
+
+    # Timestamp / date suffixes
+    if n.endswith("_at") or n in ("created", "updated", "deleted"):
+        verb = n.replace("_at", "").replace("_", " ").strip() or n
+        return f"Timestamp at which this {ent_low} was {verb} (UTC)."
+    if n.endswith("_on") or n.endswith("_date") or t in ("DATE",):
+        return f"Calendar date associated with this {ent_low}."
+
+    # Common bool / count / total / amount / name patterns
+    if n.startswith("is_") or n.startswith("has_") or n in ("active", "enabled", "deleted"):
+        return f"Flag indicating whether this {ent_low} is {n.replace('is_','').replace('has_','').replace('_',' ')}."
+    if n.endswith("_count") or n in ("count",):
+        thing = n[:-6].replace("_", " ") if n.endswith("_count") else "items"
+        return f"Number of {thing} associated with this {ent_low}."
+    if n in ("total", "subtotal", "amount", "balance", "price"):
+        return f"Monetary {n} for this {ent_low}, in the smallest currency unit unless noted."
+    if n.endswith("_amount") or n.endswith("_total"):
+        return f"Monetary value associated with this {ent_low}."
+
+    # Communication / web identifiers
+    if "email" in n:           return f"Email address — primary contact for this {ent_low}."
+    if "phone" in n or "mobile" in n: return f"Phone number — contact for this {ent_low}."
+    if n.endswith("_url") or n == "url":   return f"URL associated with this {ent_low}."
+    if n.endswith("_uri") or n == "uri":   return f"URI associated with this {ent_low}."
+    if n.endswith("_ip")  or n == "ip_address": return f"IP address recorded for this {ent_low}."
+
+    # Names / labels / descriptions / status
+    if n in ("name", "full_name", "label", "title", "description"):
+        return f"Human-readable {n.replace('_',' ')} for this {ent_low}."
+    if n in ("status", "state", "kind", "type", "category"):
+        return f"Classification {n} for this {ent_low}."
+
+    # Type-only fallbacks
+    if t in ("BOOLEAN", "BOOL", "BIT"):
+        return f"Boolean flag attached to this {ent_low}."
+    if t in ("JSON", "JSONB"):
+        return f"JSON document attached to this {ent_low}."
+    if t in ("TIMESTAMP", "TIMESTAMPTZ", "DATETIME", "DATETIME2"):
+        return f"Timestamp recorded against this {ent_low} (UTC)."
+
+    return None
 
 
 def _suggested_sensitivity(name: str) -> Optional[str]:
@@ -594,19 +742,33 @@ def _validate_session(s: Dict[str, Any]) -> Tuple[List[Issue], List[Issue], List
                        "name": e.get("name", ""), "label": label,
                        "description": e.get("description", "")},
             ))
-        # Per-property sensitivity suggestions
+        # Per-property sensitivity + description suggestions
         for j, p in enumerate(e.get("properties") or []):
-            if p.get("sensitivity"): continue
-            sug = _suggested_sensitivity(p.get("name", ""))
-            if sug:
-                suggestions.append(Issue(
-                    code="SUGGEST_PROPERTY_SENSITIVITY",
-                    message=f"Property '{p.get('name')}' on '{label}' looks like {sug.lower()}-tier data.",
-                    location=f"entities[{i}].properties[{j}].sensitivity",
-                    fix_hint=f"Suggested sensitivity tier: {sug}.",
-                    severity="suggestion",
-                    apply={"path": ["entities", i, "properties", j, "sensitivity"], "value": sug},
-                ))
+            if not p.get("sensitivity"):
+                sug = _suggested_sensitivity(p.get("name", ""))
+                if sug:
+                    suggestions.append(Issue(
+                        code="SUGGEST_PROPERTY_SENSITIVITY",
+                        message=f"Property '{p.get('name')}' on '{label}' looks like {sug.lower()}-tier data.",
+                        location=f"entities[{i}].properties[{j}].sensitivity",
+                        fix_hint=f"Suggested sensitivity tier: {sug}.",
+                        severity="suggestion",
+                        apply={"path": ["entities", i, "properties", j, "sensitivity"], "value": sug},
+                    ))
+            # Suggested wording for any column lacking a description.
+            # The LLM's grounding step uses descriptions verbatim — better
+            # to surface a heuristic the user can edit than leave nothing.
+            if not (p.get("description") or "").strip():
+                sug_text = _suggested_description(p.get("name", ""), p.get("type", ""), label)
+                if sug_text:
+                    suggestions.append(Issue(
+                        code="SUGGEST_DESCRIPTION",
+                        message=f"Property '{p.get('name')}' on '{label}' has no description.",
+                        location=f"entities[{i}].properties[{j}].description",
+                        fix_hint=f"Suggested wording: \"{sug_text}\"",
+                        severity="suggestion",
+                        apply={"path": ["entities", i, "properties", j, "description"], "value": sug_text},
+                    ))
 
     return errors, warnings, suggestions
 
@@ -1238,6 +1400,16 @@ def parse_and_validate(
 
     shape = _detect_json_shape(doc)
     result.format = shape
+
+    # Structural schema validation (jsonschema) — runs before normalisation
+    # so unknown shapes / type errors are caught with a precise pointer.
+    # Optional dep: if jsonschema isn't installed, skip silently and rely
+    # on the in-code semantic checks below.
+    schema_errs = _jsonschema_validate(doc)
+    result.errors.extend(schema_errs)
+    if schema_errs:
+        # Don't try to normalise an obviously-malformed doc — would crash.
+        return result
 
     if shape == "json-wizard":
         session = _norm_wizard(doc)

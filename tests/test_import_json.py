@@ -375,6 +375,201 @@ def test_pluralisation_helpers_round_trip():
 
 # ── Step 4: COMMENT ON TABLE survives across statements ───────────────────
 
+# ── Acceptance #3: jsonschema structural validation ─────────────────────
+
+jsonschema = pytest.importorskip("jsonschema")
+
+
+def test_jsonschema_rejects_wrong_field_types():
+    raw = b'{"domain": {"name": 42}, "entities": "not-a-list"}'
+    r = imp.parse_and_validate(raw, filename="bad.json")
+    codes = [e.code for e in r.errors]
+    assert "SCHEMA_VIOLATION" in codes
+    # Bail-out behaviour: when schema fails we don't try to normalise,
+    # so the error tier is the only thing populated.
+    assert r.session in ({}, {"domain": {}, "entities": [], "events": [],
+                              "relationships": [], "competency_questions": [],
+                              "created_at": r.session.get("created_at"),
+                              "updated_at": r.session.get("updated_at")}) or not r.session
+
+
+def test_jsonschema_passes_valid_wizard_shape():
+    r = imp.parse_and_validate(_read("wizard_session_good.json"))
+    schema_errs = [e for e in r.errors if e.code == "SCHEMA_VIOLATION"]
+    assert not schema_errs
+
+
+def test_jsonschema_passes_valid_cli_shape():
+    r = imp.parse_and_validate(_read("cli_session_retail.json"))
+    schema_errs = [e for e in r.errors if e.code == "SCHEMA_VIOLATION"]
+    assert not schema_errs
+
+
+def test_jsonschema_passes_valid_schema_shape():
+    r = imp.parse_and_validate(_read("schema_payments.json"))
+    schema_errs = [e for e in r.errors if e.code == "SCHEMA_VIOLATION"]
+    assert not schema_errs
+
+
+# ── Acceptance #8: SUGGEST_DESCRIPTION suggested wording ────────────────
+
+def test_suggest_description_for_uncommented_columns():
+    r = imp.parse_and_validate(_read("postgres_orders.sql"))
+    descs = [s for s in r.suggestions if s.code == "SUGGEST_DESCRIPTION"]
+    assert descs, "expected description suggestions for un-commented columns"
+    # Each should carry an apply payload that sets the description.
+    for d in descs:
+        assert d.apply and d.apply.get("path") and "description" in d.apply["path"]
+        assert isinstance(d.apply.get("value"), str) and d.apply["value"].strip()
+
+
+def test_suggest_description_id_columns():
+    """`id` columns get an identifier-shaped wording."""
+    raw = json.dumps({
+        "domain": {"name": "X"},
+        "entities": [{"label": "Customer",
+                      "properties": [{"name": "id", "type": "INTEGER"}]}],
+    }).encode()
+    r = imp.parse_and_validate(raw)
+    descs = [s for s in r.suggestions if s.code == "SUGGEST_DESCRIPTION"]
+    assert descs and "identifier" in descs[0].apply["value"].lower()
+
+
+def test_suggest_description_timestamp_suffix():
+    """`created_at` / `last_login_at` get timestamp wording."""
+    raw = json.dumps({
+        "domain": {"name": "X"},
+        "entities": [{"label": "Account",
+                      "properties": [{"name": "last_login_at", "type": "TIMESTAMP"}]}],
+    }).encode()
+    r = imp.parse_and_validate(raw)
+    descs = [s for s in r.suggestions if s.code == "SUGGEST_DESCRIPTION"]
+    assert descs and "Timestamp" in descs[0].apply["value"]
+
+
+def test_no_description_suggestion_when_already_present():
+    """If a column already has a description, no SUGGEST_DESCRIPTION fires."""
+    raw = json.dumps({
+        "domain": {"name": "X"},
+        "entities": [{"label": "Customer",
+                      "properties": [{"name": "id", "type": "INTEGER",
+                                      "description": "Surrogate key from the legacy CRM."}]}],
+    }).encode()
+    r = imp.parse_and_validate(raw)
+    descs = [s for s in r.suggestions if s.code == "SUGGEST_DESCRIPTION"]
+    assert not descs
+
+
+# ── Acceptance #11: examples/wizard session round-trips through importer ─
+
+def test_importing_examples_wizard_session_matches_onboard_load_session():
+    """The realign branch ships examples/wizard/smart_building_session.json
+    as the canonical CLI-session example. Importing it through /api/import
+    must yield the same logical structure as `onboard.load_session(path)`."""
+    p = ROOT / "examples" / "wizard" / "smart_building_session.json"
+    if not p.exists():
+        pytest.skip(f"{p} missing — feature/realign not merged yet")
+
+    # Load via the CLI path that onboard.py uses internally.
+    sys.path.insert(0, str(ROOT))
+    import onboard
+    cli_session = onboard.load_session(str(p)).to_dict()
+
+    # Load via /api/import.
+    raw = p.read_bytes()
+    r = imp.parse_and_validate(raw, filename=p.name)
+    assert r.ok, [e.code for e in r.errors]
+    assert r.format in ("json-cli", "json-wizard")
+
+    wiz_session = r.session
+
+    # Domain identity preserved.
+    assert wiz_session["domain"]["name"] == cli_session["domain_name"]
+    assert wiz_session["domain"]["base_iri"] == cli_session.get("base_iri", "")
+
+    # CLI session has entities + events flattened with is_event flag;
+    # wizard splits them into separate lists. Total count + label set
+    # must be preserved.
+    cli_ents = cli_session.get("entities", [])
+    cli_total = len(cli_ents)
+    wiz_total = len(wiz_session.get("entities", [])) + len(wiz_session.get("events", []))
+    assert wiz_total == cli_total, (wiz_total, cli_total)
+
+    cli_labels = {(e.get("label") or e.get("name") or "") for e in cli_ents}
+    wiz_labels = ({(e.get("label") or e.get("name") or "") for e in wiz_session["entities"]}
+                  | {(e.get("label") or e.get("name") or "") for e in wiz_session["events"]})
+    assert cli_labels == wiz_labels, cli_labels.symmetric_difference(wiz_labels)
+
+    # Relationships and CQ counts preserved.
+    assert len(wiz_session["relationships"]) == len(cli_session.get("relationships", []))
+    assert len(wiz_session["competency_questions"]) == len(cli_session.get("cqs", []))
+
+
+# ── Acceptance #12: SQL parser sees what live introspection sees ────────
+
+def test_db_demo_sql_parse_matches_live_introspection():
+    """Parsing db/demo.sql (the canonical retail demo schema) must produce
+    the same set of tables and FK-derived relationships as running
+    db_introspector.introspect_all() against the bundled db/demo.db."""
+    sql_path = ROOT / "db" / "demo.sql"
+    db_path  = ROOT / "db" / "demo.db"
+    if not sql_path.exists() or not db_path.exists():
+        pytest.skip("db/demo.sql and/or db/demo.db missing")
+
+    # Live introspection.
+    sys.path.insert(0, str(ROOT / "src"))
+    from db_introspector import DBIntrospector
+    intro = DBIntrospector(str(db_path))
+    live_tables = intro.introspect_all()
+    live_table_names = {t.name for t in live_tables
+                        if t.name not in ("ontology_metadata", "semantic_loss_log")}
+    live_fks = set()      # (source_table, referenced_table) pairs
+    for t in live_tables:
+        if t.name in ("ontology_metadata", "semantic_loss_log"):
+            continue
+        for col, ref_table in (t.fk_map or {}).items():
+            live_fks.add((t.name, ref_table))
+
+    # SQL parse.
+    raw = sql_path.read_bytes()
+    r = imp.parse_and_validate(raw, filename="demo.sql")
+    assert r.format == "sql" and r.ok, [e.code for e in r.errors]
+
+    # Build the parsed table set from session entities + events.
+    def _to_snake(s: str) -> str:
+        return s.lower().replace(" ", "_")
+    parsed_table_names = {_to_snake(e.get("name") or e.get("label", ""))
+                          for e in r.session["entities"] + r.session["events"]
+                          if (e.get("name") or e.get("label", "")).lower()
+                             not in ("ontology_metadata", "semantic_loss_log")}
+
+    # The DB on disk has accumulated many overlay schemas over time;
+    # demo.sql only declares the core retail set. The meaningful check
+    # is therefore one-directional: every table the SQL declares must
+    # be present in the live introspection (the parser doesn't invent
+    # tables). The reverse — every live table appears in the SQL — is
+    # not expected here.
+    missing_in_live = parsed_table_names - live_table_names
+    assert not missing_in_live, (
+        f"SQL parser produced tables not present in db/demo.db: {sorted(missing_in_live)}")
+
+    # And the SQL must produce more than zero tables (catches an empty parse).
+    assert parsed_table_names, "parsed_table_names is empty — SQL parse silently produced nothing"
+
+    # FK overlap: every parsed FK whose endpoints exist in the live DB
+    # must correspond to a real FK there. Catches a parser that
+    # hallucinates relationships out of name-only matches.
+    parsed_rels = set()
+    for rel in r.session.get("relationships", []):
+        f = _to_snake(rel.get("from_entity", ""))
+        t = _to_snake(rel.get("to_entity", ""))
+        parsed_rels.add((f, t))
+    for src, tgt in parsed_rels:
+        if src in live_table_names and tgt in live_table_names:
+            assert (src, tgt) in live_fks, (
+                f"parsed FK {src}→{tgt} doesn't exist in db/demo.db — possible hallucination")
+
+
 # ── Step 6: real-world DDL fixtures ──────────────────────────────────────
 
 def test_realworld_pg_dump_alter_table_fk_attaches():

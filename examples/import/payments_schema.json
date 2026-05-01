@@ -18,6 +18,8 @@
     "  Suggestions: SUGGEST_PROPERTY_SENSITIVITY × 3",
     "               (customer.email + customer.ssn → Confidential,",
     "                customer.password → Restricted)",
+    "               SUGGEST_DESCRIPTION × 1",
+    "               (column with no description gets a heuristic wording)",
     "",
     "The transaction_log table is auto-routed to events at parse time",
     "because of the `_log` suffix — no SUGGEST_EVENT row appears.",

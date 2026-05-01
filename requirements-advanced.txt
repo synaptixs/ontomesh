@@ -10,6 +10,10 @@ sqlglot>=25.0                   # SQL DDL parser for /api/import (issue #16).
                                 # Optional — JSON import works without it; the
                                 # SQL path surfaces a clear "pip install sqlglot"
                                 # message if missing rather than 500ing.
+jsonschema>=4.20                # Structural validation for /api/import JSON
+                                # against wizard/import_schema.json. Optional —
+                                # if missing, in-code semantic checks still run
+                                # (just no SCHEMA_VIOLATION errors).
 
 # ── Log entity discovery — toolkit.py --phase discover ──────────────────
 # After install, also run:  python -m spacy download en_core_web_sm
