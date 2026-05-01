@@ -1,0 +1,32 @@
+{
+  "domain": "Payments",
+  "description": "Card and bank-transfer payment processing.",
+  "base_iri": "https://ontology.example.com/payments/",
+  "tables": [
+    {
+      "name": "customer",
+      "description": "Person or business that owns an account.",
+      "columns": [
+        { "name": "id",       "type": "INTEGER",  "description": "Primary key.", "required": true },
+        { "name": "email",    "type": "VARCHAR",  "description": "Primary contact." },
+        { "name": "ssn",      "type": "VARCHAR",  "description": "Social security number." },
+        { "name": "password", "type": "VARCHAR",  "description": "Hashed login password." }
+      ],
+      "primary_key": ["id"]
+    },
+    {
+      "name": "transaction_log",
+      "description": "Every settled or attempted transaction.",
+      "columns": [
+        { "name": "id",          "type": "INTEGER" },
+        { "name": "customer_id", "type": "INTEGER" },
+        { "name": "amount",      "type": "NUMERIC", "description": "Settled amount." },
+        { "name": "occurred_at", "type": "TIMESTAMP" }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        { "column": "customer_id", "references_table": "customer", "references_column": "id" }
+      ]
+    }
+  ]
+}
