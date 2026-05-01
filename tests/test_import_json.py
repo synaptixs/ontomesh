@@ -375,6 +375,80 @@ def test_pluralisation_helpers_round_trip():
 
 # ── Step 4: COMMENT ON TABLE survives across statements ───────────────────
 
+# ── Step 6: real-world DDL fixtures ──────────────────────────────────────
+
+def test_realworld_pg_dump_alter_table_fk_attaches():
+    r = imp.parse_and_validate(_read("realworld_pg_dump.sql"),
+                               filename="realworld_pg_dump.sql")
+    assert r.format == "sql" and r.ok
+    assert r.stats["sql_dialect"] == "postgres"        # detected via SET / OWNER TO / nextval
+    assert r.stats["table_count"] == 2
+    # FK declared in ALTER TABLE ADD CONSTRAINT, not in CREATE TABLE — must be picked up.
+    rels = r.session["relationships"]
+    assert any(rel["from_entity"] == "Orders" and rel["to_entity"] == "Customers" for rel in rels)
+    # COMMENT ON TABLE/COLUMN at the bottom must round-trip.
+    customers = next(e for e in r.session["entities"] if e["label"] == "Customers")
+    assert "Registered customers" in customers["description"]
+    email = next(p for p in customers["properties"] if p["name"] == "email")
+    assert "Login" in email["description"]
+
+
+def test_realworld_pg_dump_no_soft_fk_when_real_fk_via_alter():
+    # orders.customer_id → customers.id is now declared via ALTER TABLE,
+    # so the soft-FK heuristic must NOT fire (would be a duplicate).
+    r = imp.parse_and_validate(_read("realworld_pg_dump.sql"))
+    softs = [s for s in r.suggestions if s.code == "SUGGEST_SOFT_FK"]
+    assert not any("customer_id" in s.location for s in softs)
+
+
+def test_realworld_sqlserver_brackets_and_identity():
+    r = imp.parse_and_validate(_read("realworld_sqlserver.sql"),
+                               filename="realworld_sqlserver.sql")
+    assert r.format == "sql" and r.ok
+    assert r.stats["sql_dialect"] == "tsql"
+    assert {e["label"] for e in r.session["entities"]} == {"Employees", "Time Entries"}
+    # Table-level FK on time_entries → employees.
+    rels = r.session["relationships"]
+    assert any(rel["from_entity"] == "Time Entries" and rel["to_entity"] == "Employees" for rel in rels)
+
+
+def test_realworld_oracle_named_constraint_fk():
+    # Oracle wraps `CONSTRAINT name FOREIGN KEY (...) REFERENCES ...`
+    # in exp.Constraint — must drill into the inner FK.
+    r = imp.parse_and_validate(_read("realworld_oracle.sql"),
+                               filename="realworld_oracle.sql")
+    assert r.format == "sql" and r.ok
+    assert r.stats["sql_dialect"] == "oracle"
+    rels = r.session["relationships"]
+    assert any(rel["from_entity"] == "Encounters" and rel["to_entity"] == "Patients" for rel in rels)
+
+
+def test_realworld_oracle_comment_on_with_schema_qualifier():
+    # COMMENT ON TABLE HR.PATIENTS / COMMENT ON COLUMN HR.PATIENTS.DOB
+    # must attach despite the HR. schema prefix.
+    r = imp.parse_and_validate(_read("realworld_oracle.sql"))
+    patients = next(e for e in r.session["entities"] if e["label"] == "Patients")
+    assert "Patient master" in patients["description"]
+    by_name = {p["name"]: p for p in patients["properties"]}
+    assert "Date of birth" in by_name["DOB"]["description"]
+
+
+# ── Step 5: suggestion apply payloads (backend half) ──────────────────────
+
+def test_suggestion_apply_payloads_present_and_well_formed():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    sugs = r.suggestions
+    assert sugs, "expected at least one suggestion in this fixture"
+    for s in sugs:
+        assert s.apply is not None, f"{s.code} has no apply payload"
+        # Either a setter (path + value) or a named op.
+        if "path" in s.apply:
+            assert isinstance(s.apply["path"], list) and s.apply["path"]
+            assert "value" in s.apply
+        else:
+            assert "op" in s.apply, f"{s.code} apply has neither path nor op"
+
+
 def test_yaml_relationship_parser_handles_real_template_sentences():
     """Regression for the bug where energy_utilities and four other YAML
     templates loaded with un-parseable relationships, leaving the

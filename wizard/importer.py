@@ -141,16 +141,29 @@ SQL_TO_XSD: Dict[str, str] = {
 
 def _detect_sql_dialect(raw_text: str) -> str:
     """Return a sqlglot-recognised dialect name from content cues, or "" for default."""
-    head = raw_text[:8192].upper()
-    if "JSONB" in head or "SERIAL " in head or "BIGSERIAL" in head:
+    head = raw_text[:16384]
+    head_u = head.upper()
+    head_l = head.lower()
+    # Postgres: includes patterns common to pg_dump output.
+    if any(s in head_u for s in ("JSONB", "SERIAL ", "BIGSERIAL", "::REGCLASS")):
         return "postgres"
-    if "AUTO_INCREMENT" in head or "ENGINE=" in head or "TINYINT(" in head:
+    if "NEXTVAL(" in head_u and ("'PUBLIC." in head_u or "'PG_" in head_u or "::REGCLASS" in head_u):
+        return "postgres"
+    if "SET SEARCH_PATH" in head_u or "OWNER TO" in head_u:
+        return "postgres"
+    # MySQL.
+    if any(s in head_u for s in ("AUTO_INCREMENT", "ENGINE=", "TINYINT(")):
         return "mysql"
-    if "NVARCHAR" in head or "IDENTITY(" in head or "[dbo]" in head.lower():
-        return "tsql"            # SQL Server
-    if "VARCHAR2" in head or "NUMBER(" in head or "NOCYCLE" in head:
+    # SQL Server: bracketed identifiers, IDENTITY, sp_*, NVARCHAR.
+    if "NVARCHAR" in head_u or "IDENTITY(" in head_u:
+        return "tsql"
+    if "[dbo]" in head_l or "EXEC SP_" in head_u or head_l.startswith("use ["):
+        return "tsql"
+    # Oracle.
+    if "VARCHAR2" in head_u or "NUMBER(" in head_u or "NOCYCLE" in head_u:
         return "oracle"
-    if "PRAGMA " in head or "AUTOINCREMENT" in head:
+    # SQLite.
+    if "PRAGMA " in head_u or "AUTOINCREMENT" in head_u:
         return "sqlite"
     return ""                    # let sqlglot use its default
 
@@ -159,12 +172,25 @@ def _detect_sql_dialect(raw_text: str) -> str:
 
 @dataclass
 class Issue:
-    """A single error / warning / suggestion entry."""
+    """A single error / warning / suggestion entry.
+
+    Suggestions also carry an ``apply`` payload describing how the
+    frontend should mutate the session if the user clicks Accept on
+    that row. Two flavours:
+
+      • ``{"path": [..segments..], "value": <new value>}``
+            simple setter — walks the path inside session and assigns.
+      • ``{"op": "<name>", ...}``
+            named operation — handled by a frontend dispatch table.
+
+    Errors and warnings leave ``apply=None`` (no mechanical fix exists).
+    """
     code: str             # short machine code, e.g. "ORPHAN_ENTITY"
     message: str          # human-readable
     location: Optional[str] = None    # e.g. "entities[3]" or "tables.orders.col 4"
     fix_hint: Optional[str] = None
     severity: str = "warning"         # error | warning | suggestion
+    apply: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -555,6 +581,7 @@ def _validate_session(s: Dict[str, Any]) -> Tuple[List[Issue], List[Issue], List
                 location=f"entities[{i}].sensitivity",
                 fix_hint=f"Suggested: change sensitivity from {current} to {suggested}.",
                 severity="suggestion",
+                apply={"path": ["entities", i, "sensitivity"], "value": suggested},
             ))
         if not e.get("is_event") and _looks_like_event(label):
             suggestions.append(Issue(
@@ -563,6 +590,9 @@ def _validate_session(s: Dict[str, Any]) -> Tuple[List[Issue], List[Issue], List
                 location=f"entities[{i}].is_event",
                 fix_hint="Move it to events with is_event=true so it becomes a subclass of Event.",
                 severity="suggestion",
+                apply={"op": "move_to_events", "entity_index": i,
+                       "name": e.get("name", ""), "label": label,
+                       "description": e.get("description", "")},
             ))
         # Per-property sensitivity suggestions
         for j, p in enumerate(e.get("properties") or []):
@@ -575,6 +605,7 @@ def _validate_session(s: Dict[str, Any]) -> Tuple[List[Issue], List[Issue], List
                     location=f"entities[{i}].properties[{j}].sensitivity",
                     fix_hint=f"Suggested sensitivity tier: {sug}.",
                     severity="suggestion",
+                    apply={"path": ["entities", i, "properties", j, "sensitivity"], "value": sug},
                 ))
 
     return errors, warnings, suggestions
@@ -884,6 +915,37 @@ def _table_name_to_label(name: str) -> str:
     return _label_from_snake(bare)
 
 
+def _fk_from_node(node, exp_module) -> List[Dict[str, str]]:
+    """Resolve {column, references_table, references_column} dicts from a
+    sqlglot ``ForeignKey`` node — used for inline CREATE columns,
+    table-level constraints, and ALTER TABLE ADD CONSTRAINT alike.
+
+    The reference's referenced table comes back schema-qualified for
+    `public.customers` style names; we strip the schema prefix to match
+    how we name tables in the parsed `tables` list.
+    """
+    src_cols = [x.name for x in node.expressions if hasattr(x, "name")]
+    ref = node.args.get("reference")
+    if not src_cols or ref is None:
+        return []
+    rtab = ref.find(exp_module.Table)
+    if rtab is None:
+        return []
+    ref_table = rtab.name
+    # Identifiers under the Reference: table-name first, then the
+    # referenced column(s). Strip the table-name occurrence(s).
+    ref_cols = [x.name for x in ref.find_all(exp_module.Identifier)
+                if x.name and x.name != ref_table]
+    out: List[Dict[str, str]] = []
+    for i, sc in enumerate(src_cols):
+        out.append({
+            "column":            sc,
+            "references_table":  ref_table,
+            "references_column": ref_cols[i] if i < len(ref_cols) else "id",
+        })
+    return out
+
+
 def _parse_sql(
     raw: bytes,
     *,
@@ -994,22 +1056,19 @@ def _parse_sql(
                         if nm: pk_cols.append(nm)
                 # ── table-level FOREIGN KEY (col) REFERENCES t (col) ─
                 elif isinstance(el, exp.ForeignKey):
-                    src_cols = [x.name for x in el.expressions if hasattr(x, "name")]
-                    ref = el.args.get("reference")
-                    ref_table = None; ref_cols: List[str] = []
-                    if ref is not None:
-                        rtab = ref.find(exp.Table)
-                        if rtab is not None:
-                            ref_table = rtab.name
-                        ref_cols = [x.name for x in ref.find_all(exp.Identifier)
-                                    if hasattr(x, "name") and x.name and x.name != ref_table]
-                    if ref_table and src_cols:
-                        for i, sc in enumerate(src_cols):
-                            fks.append({
-                                "column":            sc,
-                                "references_table":  ref_table,
-                                "references_column": ref_cols[i] if i < len(ref_cols) else "id",
-                            })
+                    fks.extend(_fk_from_node(el, exp))
+                # ── CONSTRAINT name PRIMARY KEY|FOREIGN KEY (Oracle) ─
+                # sqlglot wraps named constraints in exp.Constraint;
+                # the actual PrimaryKey / ForeignKey is nested inside.
+                elif el.__class__.__name__ == "Constraint":
+                    inner_pk = el.find(exp.PrimaryKey)
+                    inner_fk = el.find(exp.ForeignKey)
+                    if inner_pk:
+                        for x in inner_pk.expressions:
+                            nm = x.name if hasattr(x, "name") else x.sql()
+                            if nm: pk_cols.append(nm)
+                    if inner_fk:
+                        fks.extend(_fk_from_node(inner_fk, exp))
 
         tables.append({
             "name":         tname_bare,
@@ -1028,6 +1087,36 @@ def _parse_sql(
             fix_hint="The importer reads CREATE TABLE only — drop indexes, views, and stored procs are skipped.",
         ))
         return result
+
+    # ── Step 6: walk ALTER TABLE … ADD CONSTRAINT FOREIGN KEY ───────────
+    # Standard pg_dump pattern is to declare the FK in a separate
+    # ALTER TABLE block after every CREATE TABLE. Walk those and attach
+    # to whichever table we already parsed.
+    by_name = {t["name"]: t for t in tables}
+    for stmt in (trees or []):
+        if not isinstance(stmt, exp.Alter):
+            continue
+        atab = stmt.find(exp.Table)
+        if atab is None or atab.name not in by_name:
+            continue
+        for fk_node in stmt.find_all(exp.ForeignKey):
+            for fk in _fk_from_node(fk_node, exp):
+                # Avoid duplicates if the same FK was also declared inline.
+                if not any(
+                    f.get("column") == fk["column"]
+                    and f.get("references_table") == fk["references_table"]
+                    for f in by_name[atab.name]["foreign_keys"]
+                ):
+                    by_name[atab.name]["foreign_keys"].append(fk)
+        # ALTER TABLE … ADD CONSTRAINT pk_x PRIMARY KEY (col)
+        for pk_node in stmt.find_all(exp.PrimaryKey):
+            existing = by_name[atab.name].get("primary_key") or []
+            if existing is None or by_name[atab.name].get("primary_key") is None:
+                by_name[atab.name]["primary_key"] = []
+            for x in pk_node.expressions:
+                nm = x.name if hasattr(x, "name") else x.sql()
+                if nm and nm not in by_name[atab.name]["primary_key"]:
+                    by_name[atab.name]["primary_key"].append(nm)
 
     # ── Step 4: comment harvest + attach to columns / table description
     comments = _extract_sql_comments(text)
@@ -1063,6 +1152,8 @@ def _parse_sql(
     # uniformly. The basis + confidence ride along in fix_hint so
     # reviewers can sort by signal strength.
     for sf in soft_fks:
+        from_label = _table_name_to_label(sf["from_table"])
+        to_label   = _table_name_to_label(sf["to_table"])
         result.suggestions.append(Issue(
             code="SUGGEST_SOFT_FK",
             severity="suggestion",
@@ -1071,8 +1162,12 @@ def _parse_sql(
             location=f"tables.{sf['from_table']}.columns.{sf['from_column']}",
             fix_hint=(f"Confidence {sf['confidence']:.2f} — {sf['basis']}. "
                       f"Accept to add a relationship "
-                      f"{_table_name_to_label(sf['from_table'])} → references → "
-                      f"{_table_name_to_label(sf['to_table'])}."),
+                      f"{from_label} → references → {to_label}."),
+            apply={"op": "add_relationship",
+                   "from_entity": from_label,
+                   "label":       "references",
+                   "to_entity":   to_label,
+                   "confidence":  sf["confidence"]},
         ))
 
     result.stats = _stats(session)
