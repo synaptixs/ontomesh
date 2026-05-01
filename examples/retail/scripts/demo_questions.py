@@ -1,7 +1,7 @@
 """Question bank for the first-contact demo.
 
 Each question is chosen so that the ontology-grounded answer materially differs
-from the baseline (raw-rows) answer. See test-plan.md §5 Phase 3 for rationale.
+from the baseline (raw-rows) answer. See tests/test-plan.md §5 Phase 3 for rationale.
 """
 
 QUESTIONS = [
