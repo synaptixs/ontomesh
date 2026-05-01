@@ -579,11 +579,22 @@ async function loadTemplate(name) {
   try {
     const r = await fetch('/api/template/'+name);
     if (r.ok) {
+      // Replace the in-memory session wholesale so no fields from the
+      // previously-selected template leak into the new one.
       session = await r.json();
       render();
       showToast('Template loaded: '+name.replace(/_/g,' '));
+    } else {
+      let msg = 'Failed to load template "'+name+'" ('+r.status+')';
+      try {
+        const err = await r.json();
+        if (err && err.error) msg = err.error;
+      } catch(_) {}
+      showToast(msg);
     }
-  } catch(e) {}
+  } catch(e) {
+    showToast('Network error loading template: '+name);
+  }
 }
 
 // ── Domain ────────────────────────────────────────────────────────────────
