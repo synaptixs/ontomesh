@@ -1,6 +1,58 @@
 # Features & Capabilities
 
-Detailed reference for what the toolkit produces, how it's structured, and what each phase and runtime layer adds. For install and onboarding see [install.md](install.md). For governance thresholds, exit gates, and CQ-test matrix see [gates.md](gates.md).
+Detailed reference for what the toolkit produces, how it's structured, and what each phase and runtime layer adds. For install and onboarding see [install.md](install.md). For the 5-minute integration recipe see [docs/integrate.md](docs/integrate.md). For governance thresholds, exit gates, and CQ-test matrix see [gates.md](gates.md).
+
+---
+
+## Capability map
+
+The toolkit is organised in tiers. Most projects use Tier 1 only — everything else is opt-in.
+
+### Tier 1 — Core pipeline (always run)
+
+Generates the OWL ontology, SHACL shapes, JSON-LD context, mapping workbook, and HTML report from any relational schema.
+
+| Phase | What runs | Output |
+|---|---|---|
+| Onboard (`onboard.py`) | Interactive wizard for new projects | Schema, seed data, scope charter, CQ catalog |
+| 1 — Foundation | Schema introspection | Annotated class and property inventory |
+| 2 — Modeling | OWL 2 generator | `enterprise.ttl`, `events.ttl`, `provenance.ttl` |
+| 3 — Validation | SHACL generator | `enterprise-shapes.ttl`, `agent-gate.ttl` |
+| 4 — Mapping | Semantic loss detector | Mapping workbook, semantic loss report, orphan analysis |
+| 5 — Exchange | JSON-LD + SKOS + MCP | Context file, sample payloads, MCP tool definitions, vocabulary |
+| TMF | TM Forum alignment | SID OWL hierarchy (24 APIs, 13 CQs) |
+| test | CQ runner + governance scorer | 18+ SPARQL CQ tests, scorecard |
+| report | HTML reporter | Self-contained run summary |
+
+### Tier 2 — Choose what you need
+
+| Group | Phases | Why you'd add it |
+|---|---|---|
+| **Runtime layer** — connect ontology to LLMs | `runtime` | SHACL input/output gates, OWL grounding, prompt assembly, 5 LLM adapters (Anthropic, OpenAI, Vertex, Ollama, OCI). See §8. |
+| **Drift monitoring** — production-grade | `drift`, `monitor` | OWL hierarchy + SHACL shapes drive `drift_monitor` (infodrift) entity registration. Drift events become PROV-O records. See §9 + [examples/infodrift/](../examples/infodrift/). |
+| **Graph publishing** | `publish` | One-command upload to Fuseki / Stardog / Oxigraph / Neptune / GraphDB with named-graph sensitivity partitioning. |
+| **Industry templates** | `--industry <name>` | 10 pre-built domains: telecom, healthcare, finance, manufacturing, retail, energy (IEC CIM), logistics, government (DCAT/INSPIRE), insurance, pharma (IDMP). |
+| **Wizard (browser)** | `wizard/app.py` | Flask web app — drag-and-drop entity/relationship builder. |
+
+### Tier 3 — Advanced / opt-in
+
+These are real features for specific needs but distract on day 1. Each has its own §-number below.
+
+- **Conflict resolution** — multi-agent 3-tier resolution, PROV-O invalidation (§ Phase 2B in §9)
+- **Alignment & federation (basic)** — DOLCE/FOAF/Schema.org/SOSA alignment + SPARQL federation
+- **Modular OWL** — `modules.json`, `master.ttl` with `owl:imports`, cycle detection
+- **Log entity discovery** — NLP co-occurrence on log corpora (spaCy)
+- **TMF630 Task + Bulk** — TmfTask / Import / Export OWL+SHACL
+- **Reasoner** — ROBOT-driven OWL 2 consistency (ELK / HermiT)
+- **Agentic Semantic Memory** — recall/diff/consolidate (§10)
+- **Autonomous Ontology Evolution** — proposal store, anomaly monitor, review workflow (§11)
+- **Cross-Enterprise Federation** — Ed25519-signed manifests, trust handshake, W3C CG draft (§12)
+- **Regulatory Compliance Evidence** — EU AI Act, Basel IV, HIPAA, Ofcom (§13)
+- **Ontology-Bounded Vector Retrieval** — hybrid retriever, 5 vector store adapters (§14)
+
+Run `python3 toolkit.py --help` for every flag.
+
+---
 
 ## Contents
 
@@ -612,6 +664,62 @@ The runtime layer also does not choose which LLM to use. That is an enterprise d
 | PayloadAssembler | 5-component payload, token budget, LLM-agnostic dict output |
 | OutputGate | SHACL response validation, PROV-O stamping, `ObservationRecord` storage |
 | RuntimeClient | Full pipeline in one call, async support, 4 LLM adapters |
+
+### 8.x OCI Generative AI setup
+
+The runtime layer ships with an Oracle Cloud Infrastructure (OCI) adapter alongside Anthropic, OpenAI, Vertex AI, and Ollama. Use it when you want to route the toolkit's governed payloads to Cohere or Llama models hosted on OCI Generative AI.
+
+**1. Install the SDK**
+
+```bash
+pip install oci
+```
+
+**2. Configure credentials**
+
+The adapter follows the standard OCI config-file pattern documented at [docs.oracle.com — Python SDK Configuration](https://docs.oracle.com/en-us/iaas/tools/python/latest/configuration.html). Create `~/.oci/config` (or run `oci setup config`) with at least:
+
+```ini
+[DEFAULT]
+user=ocid1.user.oc1..<your-user-ocid>
+fingerprint=<api-key-fingerprint>
+key_file=~/.oci/oci_api_key.pem
+tenancy=ocid1.tenancy.oc1..<your-tenancy-ocid>
+region=us-chicago-1
+```
+
+**3. Set the compartment**
+
+OCI Generative AI requires a compartment OCID for routing and billing:
+
+```bash
+export OCI_COMPARTMENT_ID=ocid1.compartment.oc1..<your-compartment-ocid>
+```
+
+Optional environment overrides:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OCI_CONFIG_FILE` | `~/.oci/config` | Path to the OCI config file |
+| `OCI_CONFIG_PROFILE` | `DEFAULT` | Profile name within the config file |
+| `OCI_GENAI_ENDPOINT` | `https://inference.generativeai.us-chicago-1.oci.oraclecloud.com` | Service endpoint (set this for non-Chicago regions) |
+
+**4. Use it from the runtime**
+
+```python
+from runtime import RuntimeClient
+
+client = RuntimeClient(
+    db_path="db/enterprise.db",
+    adapter="oci",
+    model="cohere.command-r-plus",   # or a Meta/Llama model OCID
+)
+
+result = client.ask(question="Which network functions are degraded?", flavor="network-ops")
+print(result["answer"])
+```
+
+The adapter defaults to the Cohere request shape. To target a Meta/generic model, instantiate `OCIAdapter` directly with `provider="meta"` and pass it via `RuntimeClient(adapter=<instance>)`.
 
 ---
 
