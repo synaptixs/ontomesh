@@ -7,8 +7,8 @@ End-to-end examples for the wizard's **Import from file** feature (issue #16). D
 | File | Format | What it demonstrates |
 |---|---|---|
 | [`smart_building.json`](smart_building.json) | wizard-session JSON | The happy path. Clean import: 0 errors, 0 warnings, 0 suggestions. Hydrates a complete Smart Building Operations domain ready to generate. |
-| [`payments_schema.json`](payments_schema.json) | data-catalog / dbt-style JSON | A `{tables: [...]}` schema description. Triggers warnings (no base IRI, no CQs) + 3 sensitivity suggestions for PII columns (`email`, `ssn`, `password`). |
-| [`retail_orders.sql`](retail_orders.sql) | Postgres pg_dump-style SQL | The full SQL feature set: `ALTER TABLE` foreign keys, `COMMENT ON TABLE/COLUMN`, line + block comments, PII-named columns, an event-shaped table, and a soft FK. |
+| [`payments_schema.json`](payments_schema.json) | data-catalog / dbt-style JSON | A `{tables: [...]}` schema description. Triggers 2 warnings + 3 sensitivity suggestions + 1 description-wording suggestion. |
+| [`retail_orders.sql`](retail_orders.sql) | Postgres pg_dump-style SQL | The full SQL feature set: `ALTER TABLE` foreign keys, `COMMENT ON TABLE/COLUMN`, line + block comments, PII-named columns, an event-shaped table, a soft FK, and 4 description-wording suggestions for un-commented columns. |
 
 ## Run the wizard
 
@@ -58,7 +58,7 @@ Warnings don't block — Accept is still available. The footer status reads:
 
 > 2 warnings — import is allowed; quality may be lower than ideal.
 
-### 5. Suggestions tab (4) — interactive
+### 5. Suggestions tab (8) — interactive
 
 Each row has Accept / Reject buttons. Try **Accept all pending** to apply every fix at once.
 
@@ -68,6 +68,7 @@ Each row has Accept / Reject buttons. Try **Accept all pending** to apply every 
 | `SUGGEST_PROPERTY_SENSITIVITY` | `customer.dob` looks like Confidential-tier data. | Same, on `dob`. |
 | `SUGGEST_PROPERTY_SENSITIVITY` | `customer.password_hash` looks like Restricted-tier data. | Sets to `"Restricted"`. |
 | `SUGGEST_SOFT_FK` | `order_event_log.order_id` looks like a foreign key to `orders`. Confidence 0.75 — plural-form match. | Adds a relationship `Order Event Log → references → Orders` to the session. |
+| `SUGGEST_DESCRIPTION` × 4 | Un-commented columns get heuristic wording (e.g. *"Surrogate identifier for the customer."* for `customer.id`, *"Timestamp at which this customer was created (UTC)."* for `created_at`). | Sets `entities[i].properties[j].description = "<suggested text>"`. |
 
 Accepted rows go green and dim out; rejected rows strike-through. The Summary stat counts refresh in real time.
 
@@ -169,6 +170,7 @@ What every import is checked against, per [the issue #16 design](../../docs/inte
 | `SUGGEST_SENSITIVITY` | Sets entity sensitivity tier from PII-shaped name. |
 | `SUGGEST_PROPERTY_SENSITIVITY` | Sets property sensitivity tier. |
 | `SUGGEST_EVENT` | Moves a non-event entity into the events list. |
+| `SUGGEST_DESCRIPTION` | Sets a heuristic wording for any column with no description (uses suffix patterns: `_id` → identifier, `_at` → timestamp, `_amount` → monetary, etc.). |
 | `SUGGEST_SOFT_FK` (SQL only) | Adds a relationship from a name-only FK match (confidence 0.60–0.85). |
 
 ## API direct (no browser)
