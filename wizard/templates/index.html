@@ -1686,24 +1686,51 @@ function _getKnownLabels() {
 }
 
 function _parseRelString(s, knownLabels) {
-  // Return {from, verb, to} by finding the first and last known label inside s.
-  // Sort labels longest-first so "Network Element" wins over "Network".
-  const sorted = [...knownLabels].sort((a,b) => b.length - a.length);
-  let firstHit = null, lastHit = null;
-  for (const lbl of sorted) {
-    const idx = s.indexOf(lbl);
-    if (idx === -1) continue;
-    if (!firstHit || idx < firstHit.idx) firstHit = {lbl, idx, end: idx + lbl.length};
-    const last = s.lastIndexOf(lbl);
-    const lastEnd = last + lbl.length;
-    if (last !== -1 && (!lastHit || lastEnd > lastHit.end)) lastHit = {lbl, idx: last, end: lastEnd};
+  // Return {from, verb, to} by finding the first and last alias hit in s.
+  // Aliases include: the label as written, space-stripped form, hyphen→space,
+  // and the unique trailing word of multi-word labels (so "Insurance Policy"
+  // also matches the bare "Policy"). Self-references (first === last) are
+  // treated as legitimate tree-shaped relationships, not rejected.
+  const aliasMap = {};   // alias → canonical label
+  const suffixCount = {};
+  for (const lbl of knownLabels) {
+    if (!lbl) continue;
+    [lbl, lbl.replace(/\s+/g,''), lbl.replace(/-/g,' ')].forEach(a => aliasMap[a] = lbl);
+    const parts = lbl.split(/\s+/).filter(Boolean);
+    if (parts.length > 1) suffixCount[parts[parts.length-1]] = (suffixCount[parts[parts.length-1]]||0) + 1;
   }
-  if (!firstHit || !lastHit || firstHit.lbl === lastHit.lbl || firstHit.idx >= lastHit.idx) {
-    // Couldn't separate from/to — bail with a single-node "free-floating" rel.
-    return null;
+  for (const lbl of knownLabels) {
+    const parts = (lbl||'').split(/\s+/).filter(Boolean);
+    if (parts.length > 1 && suffixCount[parts[parts.length-1]] === 1) {
+      const tail = parts[parts.length-1];
+      if (aliasMap[tail] === undefined) aliasMap[tail] = lbl;
+    }
+  }
+  // Sort longest-first so multi-word aliases win over their suffixes.
+  const aliases = Object.keys(aliasMap).sort((a,b) => b.length - a.length);
+
+  let firstHit = null, lastHit = null;
+  for (const a of aliases) {
+    const idx = s.indexOf(a);
+    if (idx === -1) continue;
+    const end = idx + a.length;
+    if (!firstHit || idx < firstHit.idx) firstHit = {lbl: aliasMap[a], idx, end};
+    const last = s.lastIndexOf(a);
+    const lastEnd = last + a.length;
+    if (last !== -1 && (!lastHit || lastEnd > lastHit.end)) lastHit = {lbl: aliasMap[a], idx: last, end: lastEnd};
+  }
+  if (!firstHit || !lastHit) return null;
+
+  // Self-reference: same canonical label appears once or twice — keep it.
+  if (firstHit.lbl === lastHit.lbl) {
+    const verb = (s.slice(firstHit.end).replace(/[.,;]/g,'').replace(/\s+another\s+/i,' ').trim()
+                  || 'related to')
+                 .replace(/^(?:is|are|may\s+be|can\s+be)\s+/i,'').trim() || 'related to';
+    return { from: firstHit.lbl, verb, to: firstHit.lbl };
   }
   const verb = s.slice(firstHit.end, lastHit.idx)
-    .replace(/[.,;]/g, '').replace(/\s+/g, ' ').trim() || 'related to';
+    .replace(/[.,;]/g, '').replace(/\s+/g, ' ').trim().replace(/^(?:is|are|may\s+be|can\s+be)\s+/i,'')
+    || 'related to';
   return { from: firstHit.lbl, verb, to: lastHit.lbl };
 }
 
