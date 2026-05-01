@@ -1,0 +1,176 @@
+{
+  "domain_name": "Smart Building Operations",
+  "domain_slug": "smart_building",
+  "domain_description": "Real-time sensing, HVAC control, occupancy tracking, access management, and maintenance ticketing across a portfolio of commercial smart buildings.",
+  "author": "Ontology Toolkit Wizard Example",
+  "base_iri": "https://ontology.example.com/smart_building/",
+  "sensitivity_default": "Internal",
+  "entities": [
+    {
+      "name": "building",
+      "label": "Building",
+      "description": "A physical building in the portfolio with an address, gross floor area, and certification level.",
+      "sensitivity": "Internal",
+      "is_event": false,
+      "table_name": "building"
+    },
+    {
+      "name": "floor",
+      "label": "Floor",
+      "description": "A floor within a Building, identified by floor number and tenant zoning.",
+      "sensitivity": "Internal",
+      "is_event": false,
+      "table_name": "floor"
+    },
+    {
+      "name": "room",
+      "label": "Room",
+      "description": "A leasable or service space on a Floor (office, meeting room, plant room, etc.).",
+      "sensitivity": "Internal",
+      "is_event": false,
+      "table_name": "room"
+    },
+    {
+      "name": "sensor",
+      "label": "Sensor",
+      "description": "A physical sensor (temperature, CO2, occupancy, door state, light level) installed in a Room.",
+      "sensitivity": "Internal",
+      "is_event": false,
+      "table_name": "sensor"
+    },
+    {
+      "name": "hvac_unit",
+      "label": "HVAC Unit",
+      "description": "A heating/ventilation/air-conditioning unit serving one or more Floors.",
+      "sensitivity": "Internal",
+      "is_event": false,
+      "table_name": "hvac_unit"
+    },
+    {
+      "name": "tenant",
+      "label": "Tenant",
+      "description": "An organisation leasing one or more Rooms in a Building.",
+      "sensitivity": "Confidential",
+      "is_event": false,
+      "table_name": "tenant"
+    },
+    {
+      "name": "access_card",
+      "label": "Access Card",
+      "description": "A physical or virtual credential issued to a person granting entry to specific Rooms.",
+      "sensitivity": "Confidential",
+      "is_event": false,
+      "table_name": "access_card"
+    },
+    {
+      "name": "temperature_reading",
+      "label": "Temperature Reading",
+      "description": "An observation event \u2014 a temperature sample produced by a Sensor at a point in time.",
+      "sensitivity": "Internal",
+      "is_event": true,
+      "table_name": "temperature_reading"
+    },
+    {
+      "name": "occupancy_event",
+      "label": "Occupancy Event",
+      "description": "An observation event \u2014 count of occupants in a Room at a point in time.",
+      "sensitivity": "Internal",
+      "is_event": true,
+      "table_name": "occupancy_event"
+    },
+    {
+      "name": "access_event",
+      "label": "Access Event",
+      "description": "An entry/exit event raised when an Access Card is presented at a Room reader.",
+      "sensitivity": "Confidential",
+      "is_event": true,
+      "table_name": "access_event"
+    },
+    {
+      "name": "maintenance_ticket",
+      "label": "Maintenance Ticket",
+      "description": "A work item raised against an HVAC Unit, Sensor, or Room with a severity and assigned engineer.",
+      "sensitivity": "Internal",
+      "is_event": true,
+      "table_name": "maintenance_ticket"
+    },
+    {
+      "name": "alert",
+      "label": "Alert",
+      "description": "A system-generated alert (high temperature, intrusion, equipment failure) produced from sensor readings or rule triggers.",
+      "sensitivity": "Internal",
+      "is_event": true,
+      "table_name": "alert"
+    }
+  ],
+  "relationships": [
+    {
+      "from_entity": "Floor",
+      "label": "located in",
+      "to_entity": "Building"
+    },
+    {
+      "from_entity": "Room",
+      "label": "located on",
+      "to_entity": "Floor"
+    },
+    {
+      "from_entity": "Sensor",
+      "label": "installed in",
+      "to_entity": "Room"
+    },
+    {
+      "from_entity": "HVAC Unit",
+      "label": "serves",
+      "to_entity": "Floor"
+    },
+    {
+      "from_entity": "Tenant",
+      "label": "occupies",
+      "to_entity": "Room"
+    },
+    {
+      "from_entity": "Access Card",
+      "label": "grants entry to",
+      "to_entity": "Room"
+    },
+    {
+      "from_entity": "Temperature Reading",
+      "label": "produced by",
+      "to_entity": "Sensor"
+    },
+    {
+      "from_entity": "Occupancy Event",
+      "label": "observed in",
+      "to_entity": "Room"
+    },
+    {
+      "from_entity": "Access Event",
+      "label": "uses",
+      "to_entity": "Access Card"
+    },
+    {
+      "from_entity": "Maintenance Ticket",
+      "label": "raised against",
+      "to_entity": "HVAC Unit"
+    },
+    {
+      "from_entity": "Alert",
+      "label": "triggered by",
+      "to_entity": "Sensor"
+    }
+  ],
+  "cqs": [
+    "Which rooms are currently above their temperature setpoint?",
+    "Which HVAC units have open critical maintenance tickets?",
+    "Which sensors have not produced a reading in the last 30 minutes?",
+    "Which tenants occupy rooms with abnormal occupancy patterns this week?",
+    "Which access cards were used to enter restricted rooms outside business hours?",
+    "What is the average occupancy of each floor by hour of day?",
+    "Which buildings have the highest energy consumption per square metre?",
+    "Which alerts were raised but not acknowledged within their SLA?"
+  ],
+  "out_dir": "projects/smart_building",
+  "db_path": "projects/smart_building/smart_building.db",
+  "created_at": "2026-05-01T00:00:00Z"
+}
