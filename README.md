@@ -55,6 +55,7 @@ Three runnable demos under [`examples/`](examples/) — each ~5 seconds, no API 
 
 | Demo | What it shows | Runner |
 |---|---|---|
+| [Wizard](examples/wizard/) | Smart Building Operations end-to-end via the onboarding wizard — plain-language → schema → ontology → report | `./examples/wizard/demo_wizard.sh` |
 | [Retail](examples/retail/) | Ontology-vs-baseline LLM comparison (8 questions × 2 vendors × 2 modes) | `./examples/retail/demo.sh` |
 | [5G Core NFs](examples/5g/) | 3GPP semantic issues — `active` overload, S-NSSAI composition, heartbeat-inferred deregistration | `./examples/5g/demo_5g.sh` |
 | [Drift monitoring](examples/infodrift/) | OWL-driven `drift_monitor` (infodrift) integration: discovery, SHACL gating, JSON-LD/PROV-O records, OWL escalation | `./examples/infodrift/demo_infodrift.sh` |
