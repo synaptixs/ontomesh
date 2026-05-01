@@ -195,6 +195,30 @@
       </div>
 
       <div class="card">
+        <h3>Import from file</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
+          Drop a <code>.json</code> session file (wizard or onboard.py format) or a
+          <code>.json</code> schema. SQL DDL import lands in a follow-up step (#16).
+        </p>
+        <label id="import-drop"
+               style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                      padding:24px;border:2px dashed var(--border);border-radius:8px;
+                      cursor:pointer;background:rgba(91,138,247,.04);
+                      transition:border-color .15s,background .15s">
+          <span style="font-size:24px;opacity:.55">⤓</span>
+          <span style="font-size:13px;color:var(--muted)">
+            Drag &amp; drop, or <span style="color:var(--accent);font-weight:600">click to browse</span>
+          </span>
+          <span id="import-filename" style="font-size:11px;color:var(--muted-2)"></span>
+          <input type="file" id="import-file" accept=".json,.sql" style="display:none"
+                 onchange="onImportPicked(event)" />
+        </label>
+        <div id="import-error" style="display:none;color:var(--danger);font-size:12px;
+                                       margin-top:8px;padding:8px 12px;
+                                       background:rgba(247,107,107,.08);border-radius:4px"></div>
+      </div>
+
+      <div class="card">
         <h3>Domain details</h3>
         <div class="field"><label>Domain Name</label>
           <input id="d-name" placeholder="e.g. Enterprise Network Operations" /></div>
@@ -510,6 +534,76 @@
   </div>
 </div>
 
+<!-- ── Import Review Modal ─────────────────────────────────────────────── -->
+<!--
+  Hosts the parse/validate/diff result returned by POST /api/import.
+  User picks a tab (Summary · Errors · Warnings · Suggestions · Preview),
+  optionally toggles individual suggestions, then clicks Accept to commit
+  via POST /api/import/commit (which final-guard re-validates).
+-->
+<div id="import-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:780px;width:92%">
+    <div class="modal-header">
+      <h2 style="margin:0">Import review</h2>
+      <span id="im-format-pill" class="badge" style="margin-left:auto;margin-right:12px"></span>
+      <button class="btn btn-ghost" onclick="closeImportModal()">✕</button>
+    </div>
+
+    <!-- Tab strip -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px">
+      <button class="im-tab-btn active" data-im-tab="summary"     onclick="imSwitchTab('summary')">Summary</button>
+      <button class="im-tab-btn"        data-im-tab="errors"      onclick="imSwitchTab('errors')">Errors <span id="im-c-errors" class="badge" style="margin-left:4px"></span></button>
+      <button class="im-tab-btn"        data-im-tab="warnings"    onclick="imSwitchTab('warnings')">Warnings <span id="im-c-warnings" class="badge" style="margin-left:4px"></span></button>
+      <button class="im-tab-btn"        data-im-tab="suggestions" onclick="imSwitchTab('suggestions')">Suggestions <span id="im-c-suggestions" class="badge" style="margin-left:4px"></span></button>
+      <button class="im-tab-btn"        data-im-tab="preview"     onclick="imSwitchTab('preview')">Preview</button>
+    </div>
+
+    <div id="im-tab-summary"     class="im-tab-panel" style="min-height:280px"></div>
+    <div id="im-tab-errors"      class="im-tab-panel" style="display:none;min-height:280px"></div>
+    <div id="im-tab-warnings"    class="im-tab-panel" style="display:none;min-height:280px"></div>
+    <div id="im-tab-suggestions" class="im-tab-panel" style="display:none;min-height:280px"></div>
+    <div id="im-tab-preview"     class="im-tab-panel" style="display:none;min-height:280px"></div>
+
+    <div class="modal-footer" style="border-top:1px solid var(--border);padding-top:14px">
+      <span id="im-status" style="font-size:12px;color:var(--muted);margin-right:auto"></span>
+      <button class="btn btn-ghost"   onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" id="im-accept" onclick="imAccept()">Accept &amp; replace session</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Import modal — tab strip + issue rows */
+  .im-tab-btn { background:transparent;border:none;color:var(--muted);
+                padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;
+                border-bottom:2px solid transparent;font-family:inherit;
+                transition:color .15s,border-color .15s }
+  .im-tab-btn:hover  { color:var(--text) }
+  .im-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent) }
+  .im-tab-panel .badge { font-size:10.5px }
+  .im-issue { border:1px solid var(--border);border-radius:6px;
+              padding:10px 12px;margin-bottom:8px;font-size:12.5px;
+              background:rgba(255,255,255,.02) }
+  .im-issue .im-code { font-family:monospace;font-size:10.5px;color:var(--muted-2);
+                       background:rgba(255,255,255,.04);padding:1px 6px;
+                       border-radius:4px;margin-right:6px }
+  .im-issue .im-loc  { color:var(--muted-2);font-size:11px;float:right;
+                       font-family:monospace }
+  .im-issue .im-hint { color:var(--muted);margin-top:4px;font-size:12px }
+  .im-issue.error    { border-left:3px solid var(--danger) }
+  .im-issue.warning  { border-left:3px solid var(--warn) }
+  .im-issue.suggest  { border-left:3px solid var(--accent) }
+  .im-stat-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px }
+  .im-stat { background:var(--surface-2,rgba(255,255,255,.03));
+             border:1px solid var(--border);border-radius:6px;padding:10px 14px }
+  .im-stat .lbl { font-size:11px;color:var(--muted);text-transform:uppercase;
+                  letter-spacing:.04em;font-weight:600 }
+  .im-stat .val { font-size:20px;font-weight:600;color:var(--text);margin-top:2px }
+  #im-tab-preview pre { background:var(--bg);border:1px solid var(--border);
+                        border-radius:6px;padding:12px;font-size:11.5px;
+                        max-height:340px;overflow:auto;line-height:1.4 }
+</style>
+
 <script>
 // ── State ─────────────────────────────────────────────────────────────────
 let session = {
@@ -525,6 +619,7 @@ const TEMPLATE_ICONS = {
 async function init() {
   await loadSession();
   loadTemplateList();
+  _imSetupDropZone();
   render();
 }
 
@@ -584,6 +679,202 @@ async function loadTemplate(name) {
       showToast('Template loaded: '+name.replace(/_/g,' '));
     }
   } catch(e) {}
+}
+
+// ── Import (issue #16, step 2) ────────────────────────────────────────────
+//
+// Drop-zone + review-modal flow. Backend does the heavy lifting in
+// /api/import; the frontend just renders the structured result and
+// posts /api/import/commit when the user accepts.
+
+let _importResult = null;          // last parse result (kept for Accept)
+
+function _imSetupDropZone() {
+  const dz = document.getElementById('import-drop');
+  const input = document.getElementById('import-file');
+  if (!dz || !input) return;
+  ['dragenter','dragover'].forEach(ev =>
+    dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)';
+                                   dz.style.background = 'rgba(91,138,247,.10)'; }));
+  ['dragleave','drop'].forEach(ev =>
+    dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = '';
+                                   dz.style.background = ''; }));
+  dz.addEventListener('drop', e => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) _imUploadFile(f);
+  });
+}
+
+function onImportPicked(ev) {
+  const f = ev.target.files && ev.target.files[0];
+  if (f) _imUploadFile(f);
+  ev.target.value = '';   // allow picking the same file twice
+}
+
+async function _imUploadFile(file) {
+  const errBox = document.getElementById('import-error');
+  errBox.style.display = 'none';
+  document.getElementById('import-filename').textContent = file.name + '  (' + Math.round(file.size/1024) + ' KB)';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('format', 'auto');
+  let res;
+  try {
+    const r = await fetch('/api/import', { method: 'POST', body: fd });
+    res = await r.json();
+  } catch(e) {
+    errBox.textContent = 'Network error: ' + (e && e.message || e);
+    errBox.style.display = '';
+    return;
+  }
+  if (res && res.error && !res.session) {
+    errBox.textContent = res.error;
+    errBox.style.display = '';
+    return;
+  }
+  _importResult = res;
+  _imRenderModal(res);
+  document.getElementById('import-modal').style.display = 'flex';
+  imSwitchTab(res.errors && res.errors.length ? 'errors' : 'summary');
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+}
+
+function imSwitchTab(name) {
+  document.querySelectorAll('#import-modal .im-tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.imTab === name));
+  ['summary','errors','warnings','suggestions','preview'].forEach(t =>
+    document.getElementById('im-tab-' + t).style.display = (t === name) ? '' : 'none');
+}
+
+function _imBadge(n, severity) {
+  if (!n) return '';
+  const colour = severity === 'error'  ? 'var(--danger)'
+              : severity === 'warning' ? 'var(--warn)'
+              : 'var(--accent)';
+  return `<span class="badge" style="color:${colour};border-color:${colour}">${n}</span>`;
+}
+
+function _imIssueRow(it, severity) {
+  const cls = severity === 'error' ? 'error' : severity === 'warning' ? 'warning' : 'suggest';
+  return `<div class="im-issue ${cls}">
+    ${it.location ? `<span class="im-loc">${escapeHtml(it.location)}</span>` : ''}
+    <span class="im-code">${escapeHtml(it.code)}</span>
+    <b style="color:var(--text)">${escapeHtml(it.message)}</b>
+    ${it.fix_hint ? `<div class="im-hint">${escapeHtml(it.fix_hint)}</div>` : ''}
+  </div>`;
+}
+
+function _imRenderModal(res) {
+  // Format pill
+  const pill = document.getElementById('im-format-pill');
+  pill.textContent = res.format || '';
+  pill.style.color = res.ok ? 'var(--accent)' : 'var(--danger)';
+  pill.style.borderColor = res.ok ? 'var(--accent)' : 'var(--danger)';
+
+  // Tab counts
+  const eN = (res.errors||[]).length, wN = (res.warnings||[]).length, sN = (res.suggestions||[]).length;
+  document.getElementById('im-c-errors').textContent      = eN || '';
+  document.getElementById('im-c-warnings').textContent    = wN || '';
+  document.getElementById('im-c-suggestions').textContent = sN || '';
+
+  // Status footer
+  const status = document.getElementById('im-status');
+  if (eN) {
+    status.textContent = eN + ' error' + (eN===1?'':'s') + ' must be fixed in the file before this import can be accepted.';
+    status.style.color = 'var(--danger)';
+  } else if (wN) {
+    status.textContent = wN + ' warning' + (wN===1?'':'s') + ' — import is allowed; quality may be lower than ideal.';
+    status.style.color = 'var(--warn)';
+  } else {
+    status.textContent = 'No issues — ready to accept.';
+    status.style.color = 'var(--success, var(--accent))';
+  }
+
+  // Accept button gating
+  document.getElementById('im-accept').disabled = !!eN;
+
+  // ── Summary tab ─────────────────────────────────────────────────────
+  const st = res.stats || {}, df = res.diff || {};
+  document.getElementById('im-tab-summary').innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+      <b style="color:var(--text)">${escapeHtml(res.session?.domain?.name || '(no domain name)')}</b>
+      <span style="color:var(--muted);font-size:12px">${escapeHtml(res.session?.domain?.industry || '')}</span>
+    </div>
+    <div style="color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:6px">
+      ${escapeHtml(res.session?.domain?.description || '')}
+    </div>
+    <div class="im-stat-grid">
+      <div class="im-stat"><div class="lbl">Entities</div><div class="val">${st.entities ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">Events</div><div class="val">${st.events ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">Relationships</div><div class="val">${st.relationships ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">CQs</div><div class="val">${st.competency_questions ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">Description coverage</div><div class="val">${st.entity_description_coverage_pct ?? 0}%</div></div>
+      <div class="im-stat"><div class="lbl">Property count</div><div class="val">${st.property_count ?? 0}</div></div>
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--muted)">
+      <b style="color:var(--text)">Diff vs current session</b> &nbsp;
+      added: ${df.added?.entities ?? 0}E / ${df.added?.events ?? 0}V ·
+      replaced: ${df.replaced?.entities ?? 0}E / ${df.replaced?.events ?? 0}V ·
+      removed: ${df.removed?.entities ?? 0}E / ${df.removed?.events ?? 0}V
+      ${df.domain_change ? '· <b style="color:var(--warn)">domain name changes</b>' : ''}
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--muted-2);line-height:1.5">
+      <b style="color:var(--text)">What happens on Accept:</b>
+      this imported session replaces your current session in memory and on disk
+      (the file you uploaded is parsed only — never persisted). You can still
+      edit everything afterwards on Steps 2–5 before clicking Generate.
+    </div>
+  `;
+
+  // ── Errors / Warnings / Suggestions ────────────────────────────────
+  document.getElementById('im-tab-errors').innerHTML = eN
+    ? (res.errors.map(it => _imIssueRow(it, 'error')).join(''))
+    : '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No errors — file parses cleanly.</div>';
+
+  document.getElementById('im-tab-warnings').innerHTML = wN
+    ? (res.warnings.map(it => _imIssueRow(it, 'warning')).join(''))
+    : '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No warnings — quality looks good.</div>';
+
+  document.getElementById('im-tab-suggestions').innerHTML = sN
+    ? (res.suggestions.map(it => _imIssueRow(it, 'suggest')).join(''))
+    + '<div style="color:var(--muted-2);font-size:11.5px;margin-top:8px;font-style:italic">Suggestions are not auto-applied. Edit the imported entities on Step 2 after accepting.</div>'
+    : '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No suggestions.</div>';
+
+  // ── Preview tab ────────────────────────────────────────────────────
+  document.getElementById('im-tab-preview').innerHTML =
+    '<pre>' + escapeHtml(JSON.stringify(res.session, null, 2)) + '</pre>';
+}
+
+async function imAccept() {
+  if (!_importResult) return;
+  const btn = document.getElementById('im-accept');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch('/api/import/commit', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ session: _importResult.session }),
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      const msg = (j.errors && j.errors[0] && j.errors[0].message) || j.error || 'Commit failed';
+      showToast(msg);
+      btn.textContent = 'Accept & replace session'; btn.disabled = false;
+      return;
+    }
+    session = j.session;
+    closeImportModal();
+    render();
+    showToast('Imported '
+      + (session.entities?.length || 0) + ' entities · '
+      + (session.events?.length   || 0) + ' events · '
+      + (session.relationships?.length || 0) + ' relationships');
+    goStep('entities');
+  } finally {
+    btn.textContent = 'Accept & replace session';
+  }
 }
 
 // ── Domain ────────────────────────────────────────────────────────────────
