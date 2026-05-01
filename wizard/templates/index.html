@@ -4,143 +4,418 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ontology Toolkit — Browser Wizard</title>
+  <!-- Inter and JetBrains Mono — modern sans + mono pair. Falls back to
+       system font stack if the CDN is blocked. preconnect first to keep
+       cold-load latency tight. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* ── Reset & Variables ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Three themes ship out of the box. Picker lives in the sidebar
+       footer; choice persists to localStorage; system preference seeds
+       the first visit. All component CSS uses tokens only — to add a
+       theme, add another [data-theme="..."] block below. */
     :root {
-      --bg: #0f1117; --surface: #1a1d2e; --border: #2d3058;
-      --accent: #5b8af7; --accent2: #7c5bf7; --success: #3ddc84;
-      --warn: #f7c948; --danger: #f76b6b; --text: #e2e8f0; --muted: #8892b0;
-      --radius: 8px; --font: 'Segoe UI', system-ui, sans-serif;
+      /* ────────── LIGHT (default) ── Linear / Vercel feel ────────── */
+      --bg:            #f6f7f9;
+      --surface:       #ffffff;
+      --surface-2:     #f3f4f6;
+      --surface-hover: #fafbfc;
+      --border:        rgba(15,23,42,0.07);
+      --border-strong: rgba(15,23,42,0.14);
+      --accent:        #4f46e5;
+      --accent-hover:  #4338ca;
+      --accent-soft:   rgba(79,70,229,0.08);
+      --accent-2:      #a855f7;
+      --success:       #16a34a;
+      --success-soft:  rgba(22,163,74,0.10);
+      --warn:          #d97706;
+      --warn-soft:     rgba(217,119,6,0.10);
+      --danger:        #dc2626;
+      --danger-soft:   rgba(220,38,38,0.10);
+      --text:          #0f172a;
+      --text-2:        #1f2937;
+      --muted:         #4b5563;
+      --muted-2:       #6b7280;
+      --on-accent:     #ffffff;       /* text colour drawn on solid accent fills */
+
+      /* Shared across all themes. */
+      --radius:    10px;
+      --radius-sm: 7px;
+      --shadow-1: 0 1px 2px rgba(15,23,42,0.04),
+                  0 1px 3px rgba(15,23,42,0.04);
+      --shadow-2: 0 1px 2px rgba(15,23,42,0.04),
+                  0 6px 16px rgba(15,23,42,0.06);
+      --shadow-modal: 0 24px 60px rgba(15,23,42,0.18),
+                      0 1px 0 rgba(15,23,42,0.04);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+              system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     }
+
+    /* ────────── DARK ── Tokyo-night-ish, indigo accent on near-black ────────── */
+    [data-theme="dark"] {
+      --bg:            #0a0c10;
+      --surface:       #11141a;
+      --surface-2:     #181b22;
+      --surface-hover: #1c2029;
+      --border:        rgba(255,255,255,0.06);
+      --border-strong: rgba(255,255,255,0.14);
+      --accent:        #818cf8;
+      --accent-hover:  #a5b0fb;
+      --accent-soft:   rgba(129,140,248,0.14);
+      --accent-2:      #c084fc;
+      --success:       #4ade80;
+      --success-soft:  rgba(74,222,128,0.12);
+      --warn:          #fbbf24;
+      --warn-soft:     rgba(251,191,36,0.12);
+      --danger:        #f87171;
+      --danger-soft:   rgba(248,113,113,0.12);
+      --text:          #e6e8ee;
+      --text-2:        #c5cad4;
+      --muted:         #9aa3b6;
+      --muted-2:       #6b7388;
+      --on-accent:     #0a0c10;
+      --shadow-1:  0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
+      --shadow-2:  0 1px 2px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.32);
+      --shadow-modal: 0 24px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    /* ────────── MONO ── high-contrast monochrome, status-only colour ────────── */
+    [data-theme="mono"] {
+      --bg:            #ffffff;
+      --surface:       #ffffff;
+      --surface-2:     #f5f5f5;
+      --surface-hover: #fafafa;
+      --border:        rgba(0,0,0,0.10);
+      --border-strong: rgba(0,0,0,0.24);
+      --accent:        #0f172a;     /* near-black accent — Notion / Apple feel */
+      --accent-hover:  #000000;
+      --accent-soft:   rgba(15,23,42,0.06);
+      --accent-2:      #475569;     /* slate for the secondary node colour */
+      --success:       #15803d;
+      --success-soft:  rgba(21,128,61,0.10);
+      --warn:          #b45309;
+      --warn-soft:     rgba(180,83,9,0.10);
+      --danger:        #b91c1c;
+      --danger-soft:   rgba(185,28,28,0.10);
+      --text:          #0a0a0a;
+      --text-2:        #262626;
+      --muted:         #525252;
+      --muted-2:       #737373;
+      --on-accent:     #ffffff;
+    }
+
+    /* ─────── Theme picker (sidebar footer) ─────── */
+    .theme-picker { display: grid; grid-template-columns: repeat(3, 1fr);
+                    gap: 4px; padding: 4px; margin-bottom: 10px;
+                    background: var(--surface-2);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius-sm); }
+    .theme-btn { background: transparent; border: 1px solid transparent;
+                 border-radius: 5px; padding: 6px 4px; cursor: pointer;
+                 font-size: 11px; font-weight: 500;
+                 color: var(--muted); font-family: inherit;
+                 letter-spacing: -0.005em;
+                 display: flex; flex-direction: column; align-items: center;
+                 gap: 2px; transition: background .12s, color .12s; }
+    .theme-btn:hover         { color: var(--text); background: var(--surface); }
+    .theme-btn.active        { color: var(--accent); background: var(--surface);
+                               border-color: var(--border); }
+    .theme-btn .theme-icon   { font-size: 13px; line-height: 1; }
     body { background: var(--bg); color: var(--text); font-family: var(--font);
-           font-size: 14px; line-height: 1.6; }
+           font-size: 14px; line-height: 1.55;
+           -webkit-font-smoothing: antialiased;
+           text-rendering: optimizeLegibility; }
     a    { color: var(--accent); text-decoration: none; }
-    h2   { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
-    h3   { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+    a:hover { text-decoration: underline; text-underline-offset: 2px; }
+    h2   { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px;
+           letter-spacing: -0.01em; }
+    h3   { font-size: 0.875rem; font-weight: 600; color: var(--text);
+           margin-bottom: 10px; letter-spacing: -0.005em; }
+    code { font-family: var(--mono); font-size: 0.86em; padding: 1px 6px;
+           background: var(--surface-2); border-radius: 4px;
+           color: var(--text); }
 
     /* ── Layout ─────────────────────────────────────────────────────────── */
     .app   { display: flex; height: 100vh; overflow: hidden; }
-    .sidebar { width: 220px; min-width: 220px; background: var(--surface);
-               border-right: 1px solid var(--border); padding: 20px 0; display: flex;
-               flex-direction: column; }
-    .main  { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .sidebar { width: 240px; min-width: 240px; background: var(--surface);
+               border-right: 1px solid var(--border);
+               padding: 22px 0; display: flex; flex-direction: column; }
+    .main  { flex: 1; overflow-y: auto; padding: 36px 40px; background: var(--bg); }
 
     /* ── Sidebar ─────────────────────────────────────────────────────────── */
-    .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border);
-                    margin-bottom: 16px; }
-    .sidebar-logo span { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
-    .sidebar-logo strong { font-size: 15px; color: var(--text); }
-    .step-nav  { list-style: none; padding: 0 12px; }
-    .step-nav li { padding: 8px 12px; border-radius: var(--radius); cursor: pointer;
-                   color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 8px;
-                   transition: background 0.15s; margin-bottom: 2px; }
-    .step-nav li:hover  { background: rgba(91,138,247,.12); color: var(--text); }
-    .step-nav li.active { background: rgba(91,138,247,.2); color: var(--accent); font-weight: 600; }
-    .step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--border);
-                display: flex; align-items: center; justify-content: center;
-                font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .sidebar-logo { padding: 0 22px 18px; margin-bottom: 14px;
+                    border-bottom: 1px solid var(--border); }
+    .sidebar-logo span { font-size: 11px; color: var(--muted-2); display: block;
+                         margin-top: 2px; letter-spacing: 0.04em;
+                         text-transform: uppercase; font-weight: 500; }
+    .sidebar-logo strong { font-size: 15px; color: var(--text);
+                           letter-spacing: -0.015em; }
+    .step-nav  { list-style: none; padding: 0 10px; }
+    .step-nav li { padding: 9px 12px; border-radius: var(--radius-sm);
+                   cursor: pointer; color: var(--muted); font-size: 14px;
+                   display: flex; align-items: center; gap: 11px;
+                   transition: background .12s, color .12s; margin-bottom: 1px;
+                   letter-spacing: -0.005em; }
+    .step-nav li:hover  { background: var(--surface-2); color: var(--text); }
+    .step-nav li.active { background: var(--accent-soft); color: var(--accent);
+                          font-weight: 500; }
+    .step-num { width: 24px; height: 24px; border-radius: 50%;
+                background: var(--surface-2); display: flex; align-items: center;
+                justify-content: center; font-size: 12px; font-weight: 600;
+                flex-shrink: 0; color: var(--muted-2);
+                transition: background .12s, color .12s; }
+    /* Section divider in the sidebar nav — separates the linear "build"
+       steps (1–6) from the post-generation tools (7–9). Not interactive,
+       no hover, no click target. Continuous numbering avoids the
+       letter-vs-number mismatch users found confusing. */
+    .step-nav li.step-divider {
+      cursor: default; padding: 14px 14px 6px 14px;
+      font-size: 11px; font-weight: 500; color: var(--muted-2);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      pointer-events: none; margin-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .step-nav li.step-divider:hover { background: transparent; color: var(--muted-2); }
     .step-nav li.active .step-num { background: var(--accent); color: #fff; }
-    .step-nav li.done .step-num   { background: var(--success); color: #0f1117; }
-    .sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
-    .btn-run { width: 100%; padding: 10px; border: none; border-radius: var(--radius);
-               background: linear-gradient(135deg, var(--accent), var(--accent2));
-               color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
-               transition: opacity 0.15s; }
-    .btn-run:hover { opacity: 0.85; }
-    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+    .step-nav li.done .step-num   { background: var(--success); color: #fff; }
+    .sidebar-footer { margin-top: auto; padding: 14px 20px;
+                      border-top: 1px solid var(--border); }
+    .btn-run { width: 100%; padding: 10px 12px; border: none;
+               border-radius: var(--radius-sm); background: var(--accent);
+               color: #fff; font-weight: 600; font-size: 13px;
+               cursor: pointer; letter-spacing: -0.005em;
+               box-shadow: var(--shadow-1);
+               transition: background .12s, box-shadow .15s, transform .1s; }
+    .btn-run:hover { background: var(--accent-hover); box-shadow: var(--shadow-2); }
+    .btn-run:active { transform: translateY(1px); }
+    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
     /* ── Cards & Inputs ─────────────────────────────────────────────────── */
     .card { background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+            border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
+            box-shadow: var(--shadow-1);
+            transition: box-shadow .2s, border-color .15s, transform .15s; }
+    .card:hover { box-shadow: var(--shadow-2); }
+    .card:focus-within { border-color: var(--accent); box-shadow: var(--shadow-2); }
+
+    /* ── Tabs (e.g. Relationships List/Graph) ──────────────────────────── */
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border);
+            margin: 0 0 16px 0; padding: 0; list-style: none; }
+    .tab-btn { background: transparent; border: none; color: var(--muted);
+               padding: 8px 14px; font-size: 13px; font-weight: 500;
+               cursor: pointer; border-bottom: 1.5px solid transparent;
+               transition: color .12s, border-color .12s; letter-spacing: -0.005em; }
+    .tab-btn:hover  { color: var(--text); }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab-panel      { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Relationship graph ────────────────────────────────────────────── */
+    .rel-graph-wrap { background: var(--surface); border: 1px solid var(--border);
+                      border-radius: var(--radius); padding: 0; overflow: hidden;
+                      box-shadow: var(--shadow-1); }
+    .rel-graph-toolbar { display: flex; gap: 12px; align-items: center;
+                         padding: 10px 14px;
+                         border-bottom: 1px solid var(--border);
+                         background: var(--surface-2);
+                         font-size: 12px; color: var(--muted); }
+    .rel-graph-toolbar .legend-dot { width: 8px; height: 8px; border-radius: 50%;
+                                     display: inline-block; margin-right: 6px;
+                                     vertical-align: 0; }
+    .rel-graph-empty { padding: 48px 20px; text-align: center; color: var(--muted-2);
+                       font-size: 13px; }
+    #rel-graph { height: 480px; width: 100%; background: var(--surface); }
+
+    /* ── Per-box help text ─────────────────────────────────────────────── */
+    .box-help { background: var(--accent-soft);
+                border-left: 2px solid var(--accent);
+                border-radius: var(--radius-sm); padding: 11px 14px;
+                margin: 0 0 16px 0; font-size: 12.5px; color: var(--muted);
+                line-height: 1.55; }
+    .box-help b { color: var(--text); font-weight: 600; }
+    .box-help ul { margin: 6px 0 0 0; padding-left: 18px; }
+    .box-help li { margin-bottom: 3px; }
+    .box-help li b { color: var(--text); }
+
+    /* ── Form fields ───────────────────────────────────────────────────── */
     .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 12px; font-weight: 600;
-                   text-transform: uppercase; letter-spacing: .5px;
-                   color: var(--muted); margin-bottom: 4px; }
+    .field label { display: block; font-size: 11px; font-weight: 500;
+                   text-transform: uppercase; letter-spacing: .06em;
+                   color: var(--muted); margin-bottom: 6px; }
     .field input, .field textarea, .field select {
-      width: 100%; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text); padding: 8px 12px; font-size: 14px;
-      outline: none; transition: border-color 0.15s; }
+      width: 100%; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); padding: 9px 12px; font-size: 13.5px;
+      font-family: inherit; outline: none;
+      transition: border-color .12s, box-shadow .12s; }
+    .field input:hover, .field textarea:hover, .field select:hover {
+      border-color: var(--border-strong); }
     .field input:focus, .field textarea:focus, .field select:focus {
-      border-color: var(--accent); }
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft); }
     .field textarea { resize: vertical; min-height: 72px; }
 
     /* ── Buttons ─────────────────────────────────────────────────────────── */
-    .btn { padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
-           font-size: 13px; font-weight: 600; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.8; }
-    .btn-primary  { background: var(--accent); color: #fff; }
-    .btn-danger   { background: var(--danger); color: #fff; }
-    .btn-ghost    { background: transparent; border: 1px solid var(--border); color: var(--muted); }
-    .btn-success  { background: var(--success); color: #0f1117; }
+    .btn { padding: 7px 14px; border-radius: var(--radius-sm); border: none;
+           cursor: pointer; font-size: 13px; font-weight: 500;
+           font-family: inherit; letter-spacing: -0.005em;
+           transition: background .12s, border-color .12s, color .12s,
+                       box-shadow .15s, transform .1s; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary  { background: var(--accent); color: #fff; font-weight: 600;
+                    box-shadow: var(--shadow-1); }
+    .btn-primary:hover  { background: var(--accent-hover);
+                          box-shadow: var(--shadow-2); }
+    .btn-danger   { background: var(--danger);  color: #fff; font-weight: 600;
+                    box-shadow: var(--shadow-1); }
+    .btn-danger:hover   { filter: brightness(0.95); box-shadow: var(--shadow-2); }
+    .btn-ghost    { background: var(--surface); border: 1px solid var(--border);
+                    color: var(--muted); }
+    .btn-ghost:hover    { color: var(--text); border-color: var(--border-strong);
+                          background: var(--surface-2); }
+    .btn-success  { background: var(--success); color: #fff; font-weight: 600;
+                    box-shadow: var(--shadow-1); }
+    .btn-success:hover  { filter: brightness(0.95); box-shadow: var(--shadow-2); }
 
     /* ── Entity/Event chips ─────────────────────────────────────────────── */
     .item-list { display: flex; flex-direction: column; gap: 8px; }
-    .item-card { background: var(--bg); border: 1px solid var(--border);
-                 border-radius: var(--radius); padding: 12px 14px;
-                 display: flex; align-items: flex-start; gap: 12px; }
+    .item-card { background: var(--surface);
+                 border: 1px solid var(--border); border-radius: var(--radius);
+                 padding: 12px 14px; display: flex; align-items: flex-start;
+                 gap: 12px;
+                 transition: border-color .12s, box-shadow .15s, background .12s; }
+    .item-card:hover    { border-color: var(--border-strong);
+                          background: var(--surface-hover);
+                          box-shadow: var(--shadow-1); }
     .item-card.dragging { opacity: 0.5; }
-    .item-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .item-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; opacity: .85; }
     .item-body { flex: 1; min-width: 0; }
-    .item-name { font-weight: 600; font-size: 14px; }
+    .item-name { font-weight: 600; font-size: 13.5px; letter-spacing: -0.005em; }
     .item-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
     .item-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-    .tag  { font-size: 11px; padding: 2px 8px; border-radius: 12px;
-            background: rgba(91,138,247,.15); color: var(--accent); }
-    .tag.restricted { background: rgba(247,107,107,.15); color: var(--danger); }
-    .tag.confidential { background: rgba(247,201,72,.15); color: var(--warn); }
+    .tag  { font-size: 11px; padding: 2px 8px; border-radius: 999px;
+            background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+    .tag.restricted   { background: var(--danger-soft); color: var(--danger); }
+    .tag.confidential { background: var(--warn-soft);   color: var(--warn);   }
     .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
     /* ── Property sub-table ─────────────────────────────────────────────── */
     .props-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
-    .props-table th { text-align: left; padding: 4px 8px; color: var(--muted); border-bottom: 1px solid var(--border); }
-    .props-table td { padding: 4px 8px; border-bottom: 1px solid rgba(45,48,88,.4); }
+    .props-table th { text-align: left; padding: 6px 8px; color: var(--muted-2);
+                      font-weight: 500; text-transform: uppercase; letter-spacing: .05em;
+                      font-size: 11px; border-bottom: 1px solid var(--border); }
+    .props-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
 
     /* ── CQ list ─────────────────────────────────────────────────────────── */
-    .cq-item { background: var(--bg); border: 1px solid var(--border);
-               border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;
-               display: flex; gap: 10px; align-items: flex-start; }
-    .cq-id   { font-size: 11px; color: var(--accent); font-weight: 700;
-               background: rgba(91,138,247,.12); padding: 2px 8px; border-radius: 12px;
-               flex-shrink: 0; margin-top: 2px; }
+    .cq-item { background: var(--surface);
+               border: 1px solid var(--border); border-radius: var(--radius-sm);
+               padding: 10px 14px; margin-bottom: 8px;
+               display: flex; gap: 10px; align-items: flex-start;
+               transition: border-color .12s, box-shadow .15s; }
+    .cq-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-1); }
+    .cq-id   { font-size: 10.5px; color: var(--accent); font-weight: 600;
+               background: var(--accent-soft); padding: 2px 8px;
+               border-radius: 999px; flex-shrink: 0; margin-top: 2px;
+               letter-spacing: .02em; font-family: var(--mono); }
 
     /* ── Relationship chips ─────────────────────────────────────────────── */
-    .rel-item { background: var(--bg); border: 1px solid var(--border);
-                border-radius: 6px; padding: 8px 12px; margin-bottom: 6px;
-                display: flex; gap: 8px; align-items: center; }
-    .rel-arrow { color: var(--accent2); font-weight: 700; }
+    .rel-item { background: var(--surface);
+                border: 1px solid var(--border); border-radius: var(--radius-sm);
+                padding: 9px 12px; margin-bottom: 6px;
+                display: flex; gap: 10px; align-items: center;
+                transition: border-color .12s, box-shadow .15s; }
+    .rel-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-1); }
+    .rel-arrow { color: var(--accent); font-weight: 600; opacity: .7; }
 
     /* ── Template picker ─────────────────────────────────────────────────── */
-    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-    .template-card { background: var(--bg); border: 1px solid var(--border);
-                     border-radius: var(--radius); padding: 14px; cursor: pointer;
-                     text-align: center; transition: border-color 0.15s; }
-    .template-card:hover { border-color: var(--accent); }
-    .template-card .t-icon { font-size: 28px; margin-bottom: 8px; }
-    .template-card .t-name { font-size: 12px; font-weight: 600; }
+    .template-grid { display: grid;
+                     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                     gap: 10px; }
+    .template-card { background: var(--surface);
+                     border: 1px solid var(--border); border-radius: var(--radius);
+                     padding: 16px 12px; cursor: pointer; text-align: center;
+                     transition: border-color .12s, box-shadow .15s, transform .1s; }
+    .template-card:hover  { border-color: var(--accent); box-shadow: var(--shadow-2); }
+    .template-card:active { transform: translateY(1px); }
+    .template-card .t-icon { font-size: 24px; margin-bottom: 8px; opacity: .9; }
+    .template-card .t-name { font-size: 12.5px; font-weight: 500;
+                             letter-spacing: -0.005em; }
 
     /* ── Pipeline log ─────────────────────────────────────────────────────── */
-    #pipeline-log { background: #0a0c14; border: 1px solid var(--border);
-                    border-radius: var(--radius); padding: 16px; font-family: monospace;
-                    font-size: 12px; height: 320px; overflow-y: auto; color: #c8e6c9; }
-    .log-ok   { color: #3ddc84; }
-    .log-warn { color: #f7c948; }
-    .log-err  { color: #f76b6b; }
+    /* GitHub-style code surface — light theme keeps the log readable
+       without flipping to a dark island. */
+    #pipeline-log { background: var(--surface-2); border: 1px solid var(--border);
+                    border-radius: var(--radius); padding: 16px;
+                    font-family: var(--mono); font-size: 12px; line-height: 1.55;
+                    height: 320px; overflow-y: auto; color: var(--text-2); }
+    .log-ok   { color: var(--success); }
+    .log-warn { color: var(--warn); }
+    .log-err  { color: var(--danger); }
 
     /* ── Modal ─────────────────────────────────────────────────────────────── */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7);
-                      display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal { background: var(--surface); border: 1px solid var(--border);
-             border-radius: var(--radius); padding: 24px; min-width: 480px; max-width: 640px; width: 90%; }
+    .modal-backdrop { position: fixed; inset: 0;
+                      background: rgba(15,23,42,0.45);
+                      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+                      display: flex; align-items: center; justify-content: center;
+                      z-index: 100; }
+    .modal { background: var(--surface);
+             border: 1px solid var(--border);
+             border-radius: var(--radius); padding: 26px;
+             min-width: 480px; max-width: 640px; width: 90%;
+             box-shadow: var(--shadow-modal); }
     .modal-header { display: flex; justify-content: space-between; align-items: center;
-                    margin-bottom: 16px; }
-    .modal-footer { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
+                    margin-bottom: 18px; }
+    .modal-footer { margin-top: 18px; display: flex; justify-content: flex-end; gap: 8px; }
 
     /* ── Step panels ─────────────────────────────────────────────────────── */
     .step-panel { display: none; }
     .step-panel.active { display: block; }
-    .step-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
-    .step-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    .step-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 6px;
+                  letter-spacing: -0.02em; }
+    .step-subtitle { color: var(--muted); font-size: 13.5px; margin-bottom: 26px;
+                     line-height: 1.55; max-width: 760px; }
+
+    /* Domain pill — solid accent tint, no gradient. */
+    .domain-pill { display: inline-block; margin-left: 12px; padding: 3px 10px;
+                   font-size: 0.62em; font-weight: 600; vertical-align: middle;
+                   background: var(--accent-soft); color: var(--accent);
+                   border: 1px solid rgba(79,70,229,0.18);
+                   border-radius: 999px; letter-spacing: .02em;
+                   text-transform: lowercase; }
+
+    /* Generic chip-badge for inline metadata (counts, statuses). */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px;
+             background: var(--surface-2); border: 1px solid var(--border);
+             color: var(--muted); font-size: 11px; font-weight: 500;
+             letter-spacing: .01em; }
+
+    /* Vector-retrieval example chips — clickable, prefill the query form. */
+    .vec-examples { display: grid; gap: 10px; margin-top: 12px; }
+    .vec-example  { background: var(--surface);
+                    border: 1px solid var(--border); border-radius: var(--radius);
+                    padding: 12px 14px; cursor: pointer;
+                    transition: border-color .12s, box-shadow .15s, transform .1s; }
+    .vec-example:hover   { border-color: var(--accent); box-shadow: var(--shadow-2); }
+    .vec-example:active  { transform: translateY(1px); }
+    .vec-example-q { font-size: 13.5px; color: var(--text); font-weight: 500;
+                     letter-spacing: -0.005em; }
+    .vec-example-cls { font-family: var(--mono); font-size: 11px;
+                       color: var(--accent); margin-top: 4px; }
+    .vec-example-why { font-size: 12px; color: var(--muted); margin-top: 6px;
+                       line-height: 1.5; }
+
+    /* ── Custom scrollbars (subtle, light) ───────────────────────────── */
+    *::-webkit-scrollbar         { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track   { background: transparent; }
+    *::-webkit-scrollbar-thumb   { background: rgba(15,23,42,0.10);
+                                   border-radius: 999px;
+                                   border: 2px solid var(--bg); }
+    *::-webkit-scrollbar-thumb:hover { background: rgba(15,23,42,0.18); }
 
     /* ── Misc ─────────────────────────────────────────────────────────────── */
     .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
@@ -153,6 +428,11 @@
              animation: fadeIn .3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
   </style>
+  <!-- vis-network: force-directed graph rendering for the Relationships > Graph tab.
+       MIT-licensed, ~150 KB minified. Loaded from unpkg. If offline / CDN-blocked,
+       the Graph tab falls back to a friendly "couldn't load" message. -->
+  <link  rel="stylesheet" href="https://unpkg.com/vis-network@9.1.9/styles/vis-network.css" />
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -169,13 +449,30 @@
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
-      <li data-step="evolve"><span class="step-num">E</span> Evolution Review</li>
-      <li data-step="comply"><span class="step-num">C</span> Compliance Dashboard</li>
-      <li data-step="retrieve"><span class="step-num">V</span> Vector Retrieval</li>
+      <li class="step-divider" aria-hidden="true">After generation</li>
+      <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
+      <li data-step="comply"><span class="step-num">8</span> Compliance Dashboard</li>
+      <li data-step="retrieve"><span class="step-num">9</span> Vector Retrieval</li>
     </ul>
     <div class="sidebar-footer">
+      <div class="theme-picker" role="radiogroup" aria-label="Theme">
+        <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
+          <span class="theme-icon">☀</span><span>Light</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-name="dark"  onclick="setTheme('dark')"  title="Dark theme">
+          <span class="theme-icon">☾</span><span>Dark</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-name="mono"  onclick="setTheme('mono')"  title="Monochrome theme">
+          <span class="theme-icon">◐</span><span>Mono</span>
+        </button>
+      </div>
       <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
-      <button class="btn-run" id="btn-run-pipeline" onclick="runPipeline()">▶ Run Pipeline</button>
+      <!-- Sidebar nav button — does NOT run the pipeline. It only takes
+           you to step 6 (Generate), where the actual run button lives
+           with its prerequisite checklist. Disabled until at least the
+           domain name is set; tooltip explains why. -->
+      <button class="btn-run" id="btn-goto-generate" onclick="goStep('generate')"
+              title="Go to step 6 (Generate)">Go to Generate →</button>
     </div>
   </aside>
 
@@ -189,6 +486,14 @@
 
       <div class="card">
         <h3>Load a starter template</h3>
+        <div class="box-help">
+          Pre-built domains that fill in entities, events, relationships, and competency questions for you.
+          <ul>
+            <li><b>What's shown:</b> 10 industry templates — five built-in (telecom, healthcare, finance, manufacturing, retail) and five YAML-defined (energy, logistics, government, insurance, pharmaceuticals).</li>
+            <li><b>Why it matters:</b> a starter saves 30+ minutes of typing and gives you a known-good shape to edit. You can change anything afterwards.</li>
+            <li><b>How to use:</b> click any tile to load it. The whole session is replaced — fields below, entities, events, relationships, and CQs all update at once.</li>
+          </ul>
+        </div>
         <div class="template-grid" id="template-grid">
           <!-- Populated by JS -->
         </div>
@@ -196,6 +501,15 @@
 
       <div class="card">
         <h3>Domain details</h3>
+        <div class="box-help">
+          The identity of your ontology — used in every generated IRI, SHACL shape, and report.
+          <ul>
+            <li><b>Domain Name:</b> human-readable name shown in the report header (e.g. "Smart Building Operations").</li>
+            <li><b>Description:</b> one or two sentences. Goes into the auto-generated scope charter and is read by the LLM if you use <code>--llm</code> suggestions.</li>
+            <li><b>Base IRI:</b> the namespace every OWL class lives under. Pick once and stick with it — changing it later breaks downstream graph stores.</li>
+            <li><b>Industry:</b> selects sensible defaults for sensitivity tiers and standards alignment (e.g. TM Forum SID for telecom).</li>
+          </ul>
+        </div>
         <div class="field"><label>Domain Name</label>
           <input id="d-name" placeholder="e.g. Enterprise Network Operations" /></div>
         <div class="field"><label>Description</label>
@@ -228,6 +542,14 @@
           <h3 style="margin:0">Entities <span id="entity-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="openEntityModal()">+ Add Entity</button>
         </div>
+        <div class="box-help">
+          The persistent <b>nouns</b> of your domain — the things your data is <i>about</i>.
+          <ul>
+            <li><b>What's shown:</b> one chip per entity, with its sensitivity tier and a delete button. The badge in the heading is the live count.</li>
+            <li><b>Why it matters:</b> every entity becomes an <code>owl:Class</code> in the generated ontology, a <code>sh:NodeShape</code> in the SHACL file, and a <code>@type</code> in the JSON-LD context.</li>
+            <li><b>How to read:</b> aim for 5–10 entities. If you have more than 15, you're probably modelling implementation details rather than domain concepts. Click a chip to edit; drag to reorder.</li>
+          </ul>
+        </div>
         <div class="item-list" id="entity-list"></div>
       </div>
     </div>
@@ -241,6 +563,14 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
           <h3 style="margin:0">Events <span id="event-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="openEventModal()">+ Add Event</button>
+        </div>
+        <div class="box-help">
+          The <b>verbs</b> — things that happen at a point in time.
+          <ul>
+            <li><b>What's shown:</b> one chip per event, the live count in the heading badge.</li>
+            <li><b>Why it matters:</b> events become <code>owl:Class</code> subclasses of a base <code>Event</code> class with <code>prov:atTime</code> and <code>prov:wasAttributedTo</code> properties — drift detection, audit logs, and PROV-O lineage all hang off them.</li>
+            <li><b>How to read:</b> entities answer "what exists?", events answer "what happened?". A good rule: if you'd record it in a log line or audit trail, it's an event. 3–8 event types is typical.</li>
+          </ul>
         </div>
         <div class="item-list" id="event-list"></div>
       </div>
@@ -256,11 +586,52 @@
           <h3 style="margin:0">Relationships <span id="rel-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="addRelationship()">+ Add</button>
         </div>
-        <div id="rel-list"></div>
-        <div style="margin-top:12px; display:flex; gap:8px">
-          <input id="new-rel" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
-                 placeholder="A Customer places one or more Orders." />
-          <button class="btn btn-primary" onclick="addRelationship()">Add</button>
+        <div class="box-help">
+          How your entities connect — written as plain English sentences.
+          <ul>
+            <li><b>What's shown:</b> a <b>List</b> tab for editing and a <b>Graph</b> tab for a force-directed view of your domain.</li>
+            <li><b>Why it matters:</b> each sentence becomes an <code>owl:ObjectProperty</code> with proper <code>rdfs:domain</code> and <code>rdfs:range</code>. The graph view exposes structural problems (orphan entities, missing back-edges, accidental cycles) at a glance — issues you'd miss scanning a flat list.</li>
+            <li><b>How to read:</b> always source entity → verb phrase → target entity, e.g. "A Customer places one or more Orders." Cardinality words become SHACL constraints automatically. Drag nodes to explore; the layout settles after a second.</li>
+          </ul>
+        </div>
+
+        <ul class="tabs" role="tablist">
+          <li><button type="button" class="tab-btn active" data-tab="list" role="tab" onclick="switchRelTab('list')">List</button></li>
+          <li><button type="button" class="tab-btn" data-tab="graph" role="tab" onclick="switchRelTab('graph')">Graph</button></li>
+        </ul>
+
+        <div id="rel-tab-list" class="tab-panel active" role="tabpanel">
+          <div id="rel-list"></div>
+          <div style="margin-top:12px; display:flex; gap:8px">
+            <input id="new-rel" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
+                   placeholder="A Customer places one or more Orders." />
+            <button class="btn btn-primary" onclick="addRelationship()">Add</button>
+          </div>
+        </div>
+
+        <div id="rel-tab-graph" class="tab-panel" role="tabpanel">
+          <div class="rel-graph-wrap">
+            <div class="rel-graph-toolbar">
+              <span><span class="legend-dot" style="background:var(--accent)"></span>Entity</span>
+              <span><span class="legend-dot" style="background:var(--accent-2)"></span>Event</span>
+              <span style="margin-left:auto">
+                <button class="btn btn-ghost" style="padding:3px 8px;font-size:11px" onclick="renderRelGraph(true)">⟳ Re-layout</button>
+                <button class="btn btn-ghost" style="padding:3px 8px;font-size:11px" onclick="fitRelGraph()">Fit</button>
+              </span>
+            </div>
+            <div id="rel-graph"></div>
+            <div id="rel-graph-empty" class="rel-graph-empty" style="display:none">
+              No relationships to draw yet — add a few on the List tab.
+            </div>
+          </div>
+          <div class="box-help" style="margin-top:14px;margin-bottom:0">
+            <b>Reading the graph.</b>
+            <ul>
+              <li><b>Nodes</b> = your entities and events. Blue = persistent things, purple = events. Orphan nodes (no edges) usually mean you've defined an entity but never connected it.</li>
+              <li><b>Arrows</b> point from <i>source</i> entity to <i>target</i> entity, labelled with the verb phrase. Bidirectional concepts need two relationships, one each way.</li>
+              <li><b>Drag</b> a node to rearrange. <b>Scroll</b> to zoom. <b>⟳ Re-layout</b> kicks the physics simulation; <b>Fit</b> centres everything in view.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -274,6 +645,14 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
           <h3 style="margin:0">Questions <span id="cq-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="addCQ()">+ Add</button>
+        </div>
+        <div class="box-help">
+          The questions your ontology must be able to answer.
+          <ul>
+            <li><b>What's shown:</b> one row per CQ, count in the heading badge. New ones go in the input below.</li>
+            <li><b>Why it matters:</b> each CQ becomes a SPARQL test in the generated test suite. Their pass rate is one of the 34 inputs to the governance scorecard, and a failed CQ on CI blocks merge.</li>
+            <li><b>How to read:</b> a good CQ is specific and answerable from the data — "Which assets have been in outage for more than 4 hours?" beats "Are assets healthy?". Aim for 5–8 to start; you can always add more later.</li>
+          </ul>
         </div>
         <div id="cq-list"></div>
         <div style="margin-top:12px; display:flex; gap:8px">
@@ -289,13 +668,55 @@
       <div class="step-title">Generate Ontology</div>
       <div class="step-subtitle">Review your session and run the toolkit pipeline to generate OWL, SHACL, JSON-LD, SKOS, and the governance report.</div>
 
+      <!-- Pre-flight + run CTA. Surfaces prereqs first so the user knows
+           why the button is disabled (or what's missing for a quality run). -->
+      <div class="card" id="preflight-card">
+        <h3>Pre-flight check &amp; run</h3>
+        <div class="box-help">
+          The pipeline reads your wizard session, generates the full ontology bundle (OWL, SHACL, JSON-LD, SKOS), runs the SPARQL competency-question tests, and writes the HTML governance report. Typical run on a small domain: 3–10 seconds.
+          <ul>
+            <li><b>Required:</b> a domain name and at least one entity. Without these the pipeline runs but produces an empty graph.</li>
+            <li><b>Recommended:</b> a base IRI and at least one competency question. CQs drive the governance scorecard, so a run without them won't score above the minimum gate.</li>
+            <li><b>Reversible:</b> nothing in your input is changed. Outputs land under <code>output/</code> (or your wizard project directory) and can be regenerated freely.</li>
+          </ul>
+        </div>
+        <ul id="preflight-list" style="list-style:none; padding:0; margin:0 0 14px 0; display:flex; flex-direction:column; gap:6px"></ul>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+          <button class="btn btn-primary" id="btn-run-pipeline" onclick="runPipeline()" disabled>
+            ▶ Run Pipeline
+          </button>
+          <span id="preflight-summary" style="font-size:12px; color:var(--muted)"></span>
+        </div>
+      </div>
+
       <div class="card">
         <h3>Session Summary</h3>
+        <div class="box-help">
+          A read-only roll-up of everything you've defined so far.
+          <ul>
+            <li><b>What's shown:</b> domain identity + counts of entities, events, relationships, and CQs.</li>
+            <li><b>Why it matters:</b> last sanity check before generation. If a count looks wrong, jump back to that step before clicking run.</li>
+            <li><b>How to read:</b> rough sizing — under 5 entities is probably too thin; over 20 is probably too detailed. Same shape rule for CQs.</li>
+          </ul>
+        </div>
         <div id="session-summary"></div>
       </div>
 
       <div class="card">
         <h3>Pipeline phases</h3>
+        <div class="box-help">
+          Which steps of the toolkit pipeline to run. Default = all of them.
+          <ul>
+            <li><b>1 — Foundation:</b> introspects your schema and writes the annotated class/property inventory.</li>
+            <li><b>2 — OWL Modeling:</b> generates <code>enterprise.ttl</code> + <code>events.ttl</code> + <code>provenance.ttl</code>.</li>
+            <li><b>3 — SHACL:</b> generates validation shapes (<code>enterprise-shapes.ttl</code>, <code>agent-gate.ttl</code>).</li>
+            <li><b>4 — Mapping:</b> writes the mapping workbook + semantic loss report so you can see which DB columns didn't map cleanly.</li>
+            <li><b>5 — JSON-LD:</b> emits the JSON-LD context, sample payloads, SKOS vocab, and MCP tool definitions.</li>
+            <li><b>Test:</b> runs the SPARQL CQ suite and computes the 34-criterion governance scorecard.</li>
+            <li><b>Report:</b> renders the visual HTML run summary.</li>
+          </ul>
+          Uncheck individual phases only if you're iterating on a specific output and want a faster loop.
+        </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px">
           <label><input type="checkbox" id="ph-all" checked onchange="toggleAllPhases(this)"> All phases</label>
         </div>
@@ -315,11 +736,28 @@
           <h3 style="margin:0">Pipeline Output</h3>
           <span id="pipeline-badge" class="badge" style="display:none"></span>
         </div>
+        <div class="box-help">
+          Live tail of the toolkit pipeline as it runs.
+          <ul>
+            <li><b>What's shown:</b> the last ~50 lines of stdout/stderr from <code>toolkit.py</code>, refreshed every second while running.</li>
+            <li><b>Why it matters:</b> this is where you see <code>✓ PASS</code> / <code>✗ FAIL</code> on each phase, the SPARQL CQ results, and the final governance score.</li>
+            <li><b>How to read:</b> green ticks = phase succeeded. Red <code>FAIL</code> / <code>ERROR</code> = look at the line above for the cause (commonly a missing entity or a malformed relationship). The badge top-right turns green on success.</li>
+          </ul>
+        </div>
         <div id="pipeline-log">Waiting to run pipeline...</div>
       </div>
 
       <div class="card" id="artifact-list-card" style="display:none">
         <h3>Generated Artifacts</h3>
+        <div class="box-help">
+          The files <code>toolkit.py</code> just wrote, with one-click open.
+          <ul>
+            <li><b>Open the HTML report first</b> — it's the visual summary of everything that ran (governance score, CQ pass rate, semantic loss findings).</li>
+            <li><b>Then <code>enterprise.ttl</code></b> — the OWL ontology you can hand to any RDF tool, reasoner, or graph store.</li>
+            <li><b>Then <code>enterprise-context.json</code></b> — the JSON-LD context that downstream agent payloads bind to.</li>
+            <li>Everything else (SHACL shapes, SKOS vocab, mapping CSVs, MCP tools) is real value but not required to evaluate the pipeline's output.</li>
+          </ul>
+        </div>
         <div id="artifact-list"></div>
       </div>
     </div>
@@ -331,6 +769,14 @@
 
       <div class="card">
         <h3>Detection run</h3>
+        <div class="box-help">
+          Trigger the anomaly monitor to scan production observations and surface candidate ontology changes.
+          <ul>
+            <li><b>Minimum evidence:</b> how many independent observations a candidate needs before it becomes a proposal. Higher = fewer, better-supported proposals; lower = more noise.</li>
+            <li><b>Strategy:</b> which detector to run. <i>SHACL violation accumulation</i> spots constraints that fire repeatedly; <i>cardinality breach</i> flags real-world data exceeding declared <code>min/maxCount</code>; <i>class co-occurrence</i> finds entities that always appear together; <i>NLP candidate promotion</i> promotes terms from log corpora.</li>
+            <li><b>How to use:</b> run with the default settings first, refresh the proposal list, then tighten <code>min evidence</code> if you're drowning in low-signal candidates.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
           <label>Minimum evidence: <input type="number" id="ev-min-evidence" value="3" min="1" style="width:70px" /></label>
           <label>Strategy:
@@ -362,11 +808,27 @@
             </label>
           </div>
         </div>
+        <div class="box-help">
+          Every candidate change the monitor surfaced, scored against five dimensions and bucketed by urgency.
+          <ul>
+            <li><b>What's shown:</b> proposal ID, type (new class / new property / cardinality change), composite score (0–1), urgency band, evidence count, and a "View detail" link per row.</li>
+            <li><b>Band filter:</b> <b>Review now</b> (≥0.80) — high-confidence, look at this week. <b>Weekly batch</b> (0.50–0.80) — defer to a bulk review. <b>Candidate</b> (&lt;0.50) — let the monitor accumulate more evidence first.</li>
+            <li><b>How to read:</b> sort by score descending. The score weighs evidence volume, schema fit, query impact, novelty, and downstream blast radius — five inputs visible in the detail card below.</li>
+          </ul>
+        </div>
         <div id="ev-list" style="overflow-x:auto">Run the monitor or click refresh to load proposals.</div>
       </div>
 
       <div class="card" id="ev-detail-card" style="display:none">
         <h3>Proposal detail</h3>
+        <div class="box-help">
+          The full evidence and decision form for the proposal you clicked.
+          <ul>
+            <li><b>What's shown:</b> the five score components, the actual production observations that triggered detection, the proposed OWL/SHACL diff, and the approval form.</li>
+            <li><b>Why it matters:</b> approving here triggers the reasoner + SPARQL CQ gate. Only proposals that pass both auto-bump the ontology version and write a PROV-O lineage record.</li>
+            <li><b>How to use:</b> read the evidence first — does the data really support this change? Then enter a reviewer note and (optionally) a target version. <b>Approve</b> applies, <b>Reject</b> archives, <b>Defer</b> bumps it to the next weekly batch.</li>
+          </ul>
+        </div>
         <div id="ev-detail"></div>
       </div>
     </div>
@@ -378,9 +840,22 @@
 
       <div class="card">
         <h3>Regulation coverage</h3>
+        <div class="box-help">
+          Per-regulation traffic-light view of how well your ontology + observations cover each regulatory requirement, <b>scoped to your domain</b> so you don't see frameworks that don't apply.
+          <ul>
+            <li><b>What's shown:</b> one row per regulation that applies to your industry (set on Step&nbsp;1 — Domain Identity), plus any cross-cutting frameworks (e.g. EU AI Act). Columns: requirement count, evidence count, coverage %, traffic light.</li>
+            <li><b>How filtering works:</b> a healthcare project sees HIPAA + EU AI Act; a finance project sees Basel IV + EU AI Act; a telecom project sees Ofcom + EU AI Act. Custom regulations declare their industries via <code>applies_to</code> in their JSON.</li>
+            <li><b>Traffic lights:</b> 🟢 ≥80% covered · 🟡 50–80% partial · 🔴 &lt;50% — this regulation won't pass an audit yet.</li>
+            <li><b>How to use:</b> click <b>Refresh</b> after every pipeline run. Tick <b>Show all</b> to see every regulation regardless of domain (useful when reviewing a multi-jurisdiction deployment).</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn" onclick="complyRefresh()">⟳ Refresh dashboard</button>
           <button class="btn btn-ghost" onclick="complyGap()">Run gap analysis</button>
+          <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px">
+            <input type="checkbox" id="cmp-show-all" onchange="complyRefresh()" /> Show all regulations
+          </label>
+          <span id="cmp-domain-badge" class="badge" style="display:none"></span>
           <span id="cmp-status" style="font-size:12px;color:var(--muted)"></span>
         </div>
         <div id="cmp-coverage-list" style="overflow-x:auto">Click refresh to load regulation coverage.</div>
@@ -388,6 +863,14 @@
 
       <div class="card">
         <h3>Assemble new evidence bundle</h3>
+        <div class="box-help">
+          Build a signed, machine-verifiable ZIP containing every artifact relevant to the chosen regulation.
+          <ul>
+            <li><b>Regulation:</b> the framework you're building evidence for. Each loaded regulation lists its requirements, controls, and the toolkit artifacts that satisfy them.</li>
+            <li><b>Decision IRI (optional):</b> point at a specific <code>ObservationRecord</code> to scope the bundle to one decision (e.g. one credit-risk score, one care-plan recommendation). Leave blank for a full coverage bundle.</li>
+            <li><b>How to read:</b> the bundle includes the OWL ontology, SHACL shapes, evidence records, an Ed25519 signature, and a SHA-256 manifest. Auditors verify with one command — see "Exported bundles" below.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">
           <label>Regulation:
             <select id="cmp-regulation" style="min-width:260px"></select>
@@ -401,16 +884,40 @@
 
       <div class="card" id="cmp-detail-card" style="display:none">
         <h3>Evidence detail</h3>
+        <div class="box-help">
+          Per-requirement drill-down for the assembly you just ran.
+          <ul>
+            <li><b>What's shown:</b> each requirement of the regulation paired with the artifacts (OWL classes, SHACL shapes, observation records) the assembler matched to it.</li>
+            <li><b>Why it matters:</b> this is the audit narrative — "requirement X is satisfied by evidence Y, Z, W". Empty rows = unmet requirements (visible in <b>Gap analysis</b> below).</li>
+            <li><b>How to read:</b> green ✓ = requirement covered. Click any artifact to see its full record. The signature footer at the bottom is what auditors verify offline.</li>
+          </ul>
+        </div>
         <div id="cmp-detail"></div>
       </div>
 
       <div class="card">
         <h3>Exported bundles</h3>
+        <div class="box-help">
+          History of every signed bundle you've generated.
+          <ul>
+            <li><b>What's shown:</b> bundle ID, regulation, assembly timestamp, file size, signature status, and a download link.</li>
+            <li><b>Why it matters:</b> bundles are immutable evidence — auditors verify them with the public key in <code>compliance/keys/</code> without needing access to your live system.</li>
+            <li><b>Verify offline:</b> <code>python3 -m compliance.bundle verify path/to/bundle.zip</code> — checks SHA-256 manifest + Ed25519 signature.</li>
+          </ul>
+        </div>
         <div id="cmp-bundles" style="overflow-x:auto">Run an assembly to generate a bundle.</div>
       </div>
 
       <div class="card" id="cmp-gap-card" style="display:none">
         <h3>Gap analysis</h3>
+        <div class="box-help">
+          The "what's missing" view across every loaded regulation.
+          <ul>
+            <li><b>What's shown:</b> requirements with no matching evidence, grouped by regulation, with the closest near-miss artifact (if any).</li>
+            <li><b>Why it matters:</b> this is your remediation backlog — fix these and the traffic light goes green.</li>
+            <li><b>How to read:</b> top of the list = highest-severity uncovered requirements. The "Suggested artifact" column tells you which OWL class or SHACL shape would close the gap if added.</li>
+          </ul>
+        </div>
         <div id="cmp-gap"></div>
       </div>
     </div>
@@ -422,6 +929,14 @@
 
       <div class="card">
         <h3>Embedding indexes</h3>
+        <div class="box-help">
+          The vector indexes the toolkit has built per flavor. One row per index.
+          <ul>
+            <li><b>What's shown:</b> flavor name, vector store backend (memory / Qdrant / Chroma / Weaviate / pgvector), embedding dimension, record count, and last-built timestamp.</li>
+            <li><b>Why it matters:</b> a query can only return results from an existing index. If you don't see one for your flavor, run <code>python3 toolkit.py --phase embed --flavor &lt;name&gt;</code> first.</li>
+            <li><b>How to read:</b> high record counts on indexes you don't query are a cost signal — consider scoping flavors more tightly.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn" onclick="vecRefreshIndexes()">⟳ Refresh indexes</button>
           <span id="vec-idx-status" style="font-size:12px;color:var(--muted)"></span>
@@ -431,6 +946,16 @@
 
       <div class="card">
         <h3>Hybrid retrieval — ontology-bounded query</h3>
+        <div class="box-help">
+          Run a single query against the index, with the OWL class hierarchy as a hard pre-filter.
+          <ul>
+            <li><b>Flavor:</b> which agent's view to query against (matches a file under <code>runtime/flavors/</code>).</li>
+            <li><b>Class expression:</b> the OWL class filter — only embeddings tagged with this class (or a subclass) are eligible. Multi-class with <code>|</code> (OR), e.g. <code>tmf:NetworkFunction | tmf:Alarm</code>.</li>
+            <li><b>k:</b> top-k vector neighbours to return after filtering.</li>
+            <li><b>Question:</b> the natural-language query that gets embedded and compared.</li>
+            <li><b>How to read:</b> click <b>Run</b> for one strategy, or <b>Compare all strategies</b> to see UNFILTERED_VECTOR vs ONTOLOGY_BOUNDED vs PURE_SPARQL on the same question side-by-side.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">
           <label>Flavor:
             <select id="vec-flavor" style="min-width:200px"></select>
@@ -451,15 +976,49 @@
           <button class="btn btn-primary" onclick="vecQuery()">▶ Run ontology-bounded query</button>
           <button class="btn btn-ghost" onclick="vecCompare()">Compare all strategies</button>
         </div>
+
+        <div style="margin-top:18px">
+          <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:6px">
+            <h4 style="margin:0; font-size:13px; color:var(--accent); font-weight:600">
+              Examples for your domain <span id="vec-ex-domain" class="domain-pill" style="display:none"></span>
+            </h4>
+            <span style="font-size:11.5px; color:var(--muted)">— click any example to prefill the form above.</span>
+          </div>
+          <div class="box-help" style="margin-bottom:10px">
+            <b>Why these examples matter.</b> A "flavor" is a named, scoped view of your ontology — each one defines which OWL classes an agent is allowed to see and which sensitivity tier it can read. The class expression then narrows that flavor further at query time. The combination is what makes hybrid retrieval <i>safe</i>: a billing agent can't accidentally retrieve clinical observations even if the embedding looks similar.
+            <ul>
+              <li><b>Class expression</b> — pipe-separated OWL classes (OR). Sub-classes are included automatically. Empty = whole flavor.</li>
+              <li><b>Question</b> — the natural-language query that gets embedded and ranked.</li>
+              <li><b>Why this works</b> — each example is paired with a one-line rationale so you understand <i>what</i> the OWL filter is actually buying you over a raw vector search.</li>
+            </ul>
+          </div>
+          <div id="vec-examples" class="vec-examples"></div>
+        </div>
       </div>
 
       <div class="card" id="vec-results-card" style="display:none">
         <h3>Results</h3>
+        <div class="box-help">
+          The hits returned by your last query, ranked by hybrid score.
+          <ul>
+            <li><b>What's shown:</b> ranked list of records — IRI, OWL class, sensitivity tier, vector similarity, PROV-O confidence, recency, and combined hybrid score.</li>
+            <li><b>Why it matters:</b> the hybrid score is what an agent actually consumes. Pure vector similarity ignores trust/recency; pure SPARQL ignores semantic similarity. Hybrid balances all three.</li>
+            <li><b>How to read:</b> a top hit with low similarity but high confidence is usually a <i>trusted</i> match. A top hit with high similarity but low confidence may be a hallucination risk — review before passing to a downstream agent. Records above a flavor's sensitivity tier are filtered out before ranking.</li>
+          </ul>
+        </div>
         <div id="vec-results"></div>
       </div>
 
       <div class="card">
         <h3>Retrieval benchmark</h3>
+        <div class="box-help">
+          Head-to-head comparison of the three retrieval strategies on a fixed question set.
+          <ul>
+            <li><b>What's shown:</b> precision@k, MRR, and latency p50/p95 for UNFILTERED_VECTOR (raw kNN), ONTOLOGY_BOUNDED (with the OWL filter), and PURE_SPARQL (no embeddings).</li>
+            <li><b>Why it matters:</b> proves the OWL filter is actually pulling its weight on your data — typical wins are higher precision and similar latency for ONTOLOGY_BOUNDED vs UNFILTERED_VECTOR.</li>
+            <li><b>How to read:</b> green wins beat the baseline; red losses indicate the class filter is too tight or the index is stale. <b>Run</b> launches a fresh suite (1–3 minutes); <b>Load latest</b> shows the previous run.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn btn-primary" onclick="vecBenchmarkRun()">▶ Run benchmark suite</button>
           <button class="btn btn-ghost" onclick="vecBenchmarkLoad()">Load latest run</button>
@@ -521,6 +1080,46 @@ const TEMPLATE_ICONS = {
   logistics_supply_chain:'🚚', government:'🏛️', insurance:'🛡️', pharmaceuticals:'💊', custom:'⚙️'
 };
 
+// ── Theme switcher ───────────────────────────────────────────────────────
+//
+// Three themes: light (default), dark, mono. Choice persists in
+// localStorage; first visit seeds from the user's system preference
+// (prefers-color-scheme). The graph view re-reads CSS vars on each
+// draw, so node/edge colours follow the active theme automatically.
+const THEMES = ['light', 'dark', 'mono'];
+
+function setTheme(name) {
+  if (!THEMES.includes(name)) name = 'light';
+  document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.themeName === name);
+  });
+  try { localStorage.setItem('wizard-theme', name); } catch(_) {}
+  // If the relationship graph is currently visible, redraw so node
+  // colours pick up the new accent / surface tokens.
+  const gp = document.getElementById('rel-tab-graph');
+  if (gp && gp.classList.contains('active') && typeof renderRelGraph === 'function') {
+    renderRelGraph(true);
+  }
+}
+
+function _initTheme() {
+  let stored = null;
+  try { stored = localStorage.getItem('wizard-theme'); } catch(_) {}
+  if (stored && THEMES.includes(stored)) { setTheme(stored); return; }
+  const prefersDark = window.matchMedia &&
+                      window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(prefersDark ? 'dark' : 'light');
+}
+_initTheme();   // run before first paint to avoid a flash of wrong theme
+
+// Resolve a CSS custom property at runtime — used by vis-network so the
+// graph follows the active theme without hard-coding hex values in JS.
+function _cssVar(name, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 async function init() {
   await loadSession();
@@ -553,10 +1152,20 @@ function goStep(name) {
   document.getElementById('step-'+name).classList.add('active');
   document.querySelector(`[data-step="${name}"]`).classList.add('active');
   currentStep = name;
-  if (name === 'generate') renderSummary();
+  if (name === 'generate') {
+    renderSummary();
+    _renderPreflight();      // refresh checklist + run-button gating on entry
+  }
+  // Reset main scroll so the user lands at the top of the new step
+  // (especially important for Generate, where the Pre-flight card needs
+  // to be visible before the run CTA).
+  const main = document.querySelector('.main');
+  if (main) main.scrollTop = 0;
 }
 
 document.querySelectorAll('.step-nav li').forEach(li => {
+  // Section dividers carry no data-step and shouldn't navigate.
+  if (!li.dataset.step) return;
   li.addEventListener('click', () => goStep(li.dataset.step));
 });
 
@@ -579,11 +1188,22 @@ async function loadTemplate(name) {
   try {
     const r = await fetch('/api/template/'+name);
     if (r.ok) {
+      // Replace the in-memory session wholesale so no fields from the
+      // previously-selected template leak into the new one.
       session = await r.json();
       render();
       showToast('Template loaded: '+name.replace(/_/g,' '));
+    } else {
+      let msg = 'Failed to load template "'+name+'" ('+r.status+')';
+      try {
+        const err = await r.json();
+        if (err && err.error) msg = err.error;
+      } catch(_) {}
+      showToast(msg);
     }
-  } catch(e) {}
+  } catch(e) {
+    showToast('Network error loading template: '+name);
+  }
 }
 
 // ── Domain ────────────────────────────────────────────────────────────────
@@ -722,18 +1342,181 @@ function renderRelationships() {
   document.getElementById('rel-count').textContent = `(${session.relationships.length})`;
   if (!session.relationships.length) {
     list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No relationships yet.</div>';
-    return;
+  } else {
+    list.innerHTML = session.relationships.map((r,i) => {
+      const display = (typeof r === 'string') ? r
+        : (r && r.from_entity ? `${r.from_entity} ${r.label||'→'} ${r.to_entity}` : JSON.stringify(r));
+      return `
+        <div class="rel-item">
+          <span class="rel-arrow">→</span>
+          <span style="flex:1;font-size:13px">${display}</span>
+          <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRel(${i})">✕</button>
+        </div>`;
+    }).join('');
   }
-  list.innerHTML = session.relationships.map((r,i) => `
-    <div class="rel-item">
-      <span class="rel-arrow">→</span>
-      <span style="flex:1;font-size:13px">${r}</span>
-      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRel(${i})">✕</button>
-    </div>
-  `).join('');
+  // If the Graph tab is currently visible, re-draw it so it stays in sync.
+  if (document.getElementById('rel-tab-graph').classList.contains('active')) {
+    renderRelGraph(false);
+  }
 }
 
 document.getElementById('new-rel').addEventListener('keydown', e => { if (e.key==='Enter') addRelationship(); });
+
+// ── Relationships: List ↔ Graph tab switching ────────────────────────────
+function switchRelTab(name) {
+  document.querySelectorAll('#step-relationships .tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+  document.querySelectorAll('#step-relationships .tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'rel-tab-' + name);
+  });
+  if (name === 'graph') renderRelGraph(true);
+}
+
+// ── Relationships: graph view (vis-network) ──────────────────────────────
+//
+// Build a force-directed graph where every entity / event is a node and
+// every relationship is a directed edge. Relationships in the session may
+// be either:
+//   • strings  — "A Customer places one or more Orders." (free-form)
+//   • objects  — {from_entity, label, to_entity}        (loaded templates)
+// For strings we infer endpoints by matching the longest known entity
+// name as the source, the next as the target, and the text in between
+// as the verb-phrase label. Anything we can't parse becomes a free-floating
+// node so it's visible rather than silently dropped.
+
+let _relNetwork = null;
+
+function _getKnownLabels() {
+  const labels = [];
+  for (const e of (session.entities || []))  labels.push(e.label || e.name);
+  for (const e of (session.events   || []))  labels.push(e.label || e.name);
+  return labels.filter(Boolean);
+}
+
+function _parseRelString(s, knownLabels) {
+  // Return {from, verb, to} by finding the first and last known label inside s.
+  // Sort labels longest-first so "Network Element" wins over "Network".
+  const sorted = [...knownLabels].sort((a,b) => b.length - a.length);
+  let firstHit = null, lastHit = null;
+  for (const lbl of sorted) {
+    const idx = s.indexOf(lbl);
+    if (idx === -1) continue;
+    if (!firstHit || idx < firstHit.idx) firstHit = {lbl, idx, end: idx + lbl.length};
+    const last = s.lastIndexOf(lbl);
+    const lastEnd = last + lbl.length;
+    if (last !== -1 && (!lastHit || lastEnd > lastHit.end)) lastHit = {lbl, idx: last, end: lastEnd};
+  }
+  if (!firstHit || !lastHit || firstHit.lbl === lastHit.lbl || firstHit.idx >= lastHit.idx) {
+    // Couldn't separate from/to — bail with a single-node "free-floating" rel.
+    return null;
+  }
+  const verb = s.slice(firstHit.end, lastHit.idx)
+    .replace(/[.,;]/g, '').replace(/\s+/g, ' ').trim() || 'related to';
+  return { from: firstHit.lbl, verb, to: lastHit.lbl };
+}
+
+function _buildRelGraphData() {
+  const isEvent = {};
+  const nodes = [];
+  const seen = new Set();
+  const addNode = (label, kind) => {
+    if (seen.has(label)) return;
+    seen.add(label);
+    const evt = (kind === 'event');
+    isEvent[label] = evt;
+    nodes.push({
+      id: label,
+      label: label,
+      shape: 'box',
+      // Pull node colours from the active theme's CSS vars so the graph
+      // stays in sync with Light / Dark / Mono without per-theme branches.
+      color: (() => {
+        const c1 = _cssVar(evt ? '--accent-2' : '--accent', evt ? '#a855f7' : '#4f46e5');
+        const c2 = _cssVar(evt ? '--accent-2' : '--accent-hover', c1);
+        return { background: c1, border: c1, highlight: { background: c2, border: c2 } };
+      })(),
+      font: { color: _cssVar('--on-accent', '#ffffff'), size: 14,
+              face: 'Inter, system-ui, sans-serif', vadjust: 0 },
+      borderWidth: 0,
+      shadow: { enabled: true, color: 'rgba(15,23,42,0.10)', size: 6, x: 0, y: 1 },
+      margin: 12,
+    });
+  };
+  for (const e of (session.entities || [])) addNode(e.label || e.name, 'entity');
+  for (const e of (session.events   || [])) addNode(e.label || e.name, 'event');
+
+  const known = _getKnownLabels();
+  const edges = [];
+  let edgeId = 0;
+  for (const r of (session.relationships || [])) {
+    let from, to, verb;
+    if (typeof r === 'object' && r && r.from_entity && r.to_entity) {
+      from = r.from_entity; to = r.to_entity; verb = r.label || 'related to';
+    } else if (typeof r === 'string') {
+      const parsed = _parseRelString(r, known);
+      if (!parsed) continue;
+      from = parsed.from; to = parsed.to; verb = parsed.verb;
+    } else {
+      continue;
+    }
+    addNode(from, 'entity');   // safety — orphan endpoints become nodes
+    addNode(to,   'entity');
+    edges.push({
+      id: 'e' + (edgeId++),
+      from, to,
+      label: verb,
+      arrows: 'to',
+      color: { color: _cssVar('--muted-2', '#9aa3b6'),
+               highlight: _cssVar('--accent', '#4f46e5'),
+               hover:     _cssVar('--accent', '#4f46e5') },
+      font: { color: _cssVar('--text', '#0f172a'), size: 11, strokeWidth: 0,
+              background: _cssVar('--surface', '#ffffff'), align: 'middle',
+              face: 'Inter, system-ui, sans-serif' },
+      smooth: { type: 'curvedCW', roundness: 0.15 },
+    });
+  }
+  return { nodes, edges };
+}
+
+function renderRelGraph(refit) {
+  const empty = document.getElementById('rel-graph-empty');
+  const container = document.getElementById('rel-graph');
+  if (typeof vis === 'undefined' || !vis.Network) {
+    container.innerHTML = '<div class="rel-graph-empty">Graph library couldn\'t load (offline?). Use the List tab.</div>';
+    return;
+  }
+  const data = _buildRelGraphData();
+  if (!data.nodes.length || !data.edges.length) {
+    empty.style.display = 'block';
+    container.style.display = 'none';
+    if (_relNetwork) { _relNetwork.destroy(); _relNetwork = null; }
+    return;
+  }
+  empty.style.display = 'none';
+  container.style.display = '';
+  const options = {
+    physics: {
+      enabled: true,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: { gravitationalConstant: -50, springLength: 140, springConstant: 0.08 },
+      stabilization: { iterations: 200, fit: true },
+    },
+    interaction: { hover: true, tooltipDelay: 200, zoomView: true, dragView: true },
+    nodes: { borderWidth: 1, shadow: false, shapeProperties: { borderRadius: 6 } },
+    edges: { width: 1.5, selectionWidth: 2, hoverWidth: 0.5 },
+    layout: { improvedLayout: true },
+  };
+  if (_relNetwork) _relNetwork.destroy();
+  _relNetwork = new vis.Network(container,
+    { nodes: new vis.DataSet(data.nodes), edges: new vis.DataSet(data.edges) },
+    options);
+  if (refit) _relNetwork.once('stabilizationIterationsDone', () => _relNetwork.fit());
+}
+
+function fitRelGraph() {
+  if (_relNetwork) _relNetwork.fit({ animation: { duration: 350 } });
+}
 
 // ── CQs ───────────────────────────────────────────────────────────────────
 function addCQ() {
@@ -784,6 +1567,14 @@ function toggleAllPhases(cb) {
 }
 
 async function runPipeline() {
+  // Final guard — pre-flight check might be stale if the user mutated
+  // the session in another tab. Re-evaluate before sending.
+  const failing = _preflightChecks().filter(c => c.req && !c.ok);
+  if (failing.length) {
+    showToast('Resolve required prerequisites first: ' +
+              failing.map(c => c.label.split(' (')[0]).join(', '));
+    return;
+  }
   const phases = Array.from(document.querySelectorAll('.ph-cb:checked')).map(c=>c.value);
   const log = document.getElementById('pipeline-log');
   const badge = document.getElementById('pipeline-badge');
@@ -791,6 +1582,7 @@ async function runPipeline() {
   badge.style.display = 'inline-flex';
   badge.className = 'badge running';
   badge.textContent = '⏳ Running';
+  window._pipelineRunning = true;
   document.getElementById('btn-run-pipeline').disabled = true;
 
   try {
@@ -804,7 +1596,8 @@ async function runPipeline() {
     log.innerHTML = `<span class="log-err">Failed to start: ${e}</span>`;
     badge.className = 'badge';
     badge.textContent = '✗ Error';
-    document.getElementById('btn-run-pipeline').disabled = false;
+    window._pipelineRunning = false;
+    _renderPreflight();
   }
 }
 
@@ -826,7 +1619,8 @@ async function pollPipelineStatus() {
     } else {
       badge.className = 'badge done';
       badge.textContent = '✓ Done';
-      document.getElementById('btn-run-pipeline').disabled = false;
+      window._pipelineRunning = false;
+      _renderPreflight();   // re-evaluate prereq state + re-enable the button
       loadArtifacts();
     }
   } catch(e) {
@@ -892,6 +1686,131 @@ function render() {
   renderEvents();
   renderRelationships();
   renderCQs();
+  _paintDomainPills();
+  vecRenderExamples();
+  _renderPreflight();
+}
+
+// ── Pre-flight check (Generate step) ────────────────────────────────────
+//
+// Drives both the in-step checklist and the gating of the run button.
+// Two tiers:
+//   required    — without these the pipeline produces no useful output;
+//                 the run button stays disabled until they pass.
+//   recommended — the pipeline runs without them but the result is
+//                 weaker (e.g. governance scorecard low because no CQs);
+//                 surfaced as ⚠ but doesn't block.
+//
+// Also gates the sidebar's "Go to Generate" button: if the user hasn't
+// even named the domain, jumping to step 6 is premature — keep them on
+// step 1 until they do.
+
+function _preflightChecks() {
+  const ents = (session.entities || []).filter(e => !e.is_event);
+  const evts = (session.events   || []).length
+            +  (session.entities || []).filter(e => e.is_event).length;
+  const cqs  = (session.competency_questions || []).length;
+  const dn   = (session.domain && session.domain.name)        || '';
+  const iri  = (session.domain && session.domain.base_iri)    || '';
+  return [
+    { req: true,  ok: !!dn,           label: 'Domain name set',
+      hint: 'Give your ontology a name on Step 1 — required for the IRI namespace.' },
+    { req: true,  ok: ents.length>=1, label: `Entities defined (${ents.length})`,
+      hint: 'Add at least one entity on Step 2 — without entities the OWL graph is empty.' },
+    { req: false, ok: !!iri,          label: 'Base IRI set',
+      hint: 'A stable base IRI keeps your ontology referenceable from external systems. Step 1.' },
+    { req: false, ok: cqs>=1,         label: `Competency questions (${cqs})`,
+      hint: 'CQs drive the SPARQL test suite and the governance scorecard. Add a few on Step 5.' },
+    { req: false, ok: true,           label: `Events defined (${evts})`,
+      hint: 'Events are optional. They become subclasses of a base Event class with PROV-O timestamps.' },
+  ];
+}
+
+function _renderPreflight() {
+  const list = document.getElementById('preflight-list');
+  if (!list) return;
+  const checks = _preflightChecks();
+  const requiredFailing = checks.filter(c => c.req && !c.ok);
+  const recommendedFailing = checks.filter(c => !c.req && !c.ok);
+
+  list.innerHTML = checks.map(c => {
+    const icon = c.ok ? '✓' : (c.req ? '✗' : '⚠');
+    const colour = c.ok ? 'var(--success)' : (c.req ? 'var(--danger)' : 'var(--warn)');
+    const bgVar = c.ok ? '--success-soft' : (c.req ? '--danger-soft' : '--warn-soft');
+    return `<li style="display:flex;gap:10px;align-items:flex-start;font-size:13px">
+      <span style="display:inline-flex;align-items:center;justify-content:center;
+                   width:22px;height:22px;border-radius:50%;flex-shrink:0;
+                   background:var(${bgVar});color:${colour};font-weight:700;font-size:12px">${icon}</span>
+      <span style="flex:1">
+        <div><b style="color:var(--text);font-weight:500">${escapeHtml(c.label)}</b>
+          ${c.req ? '<span class="badge" style="margin-left:6px">required</span>'
+                  : '<span class="badge" style="margin-left:6px">recommended</span>'}</div>
+        ${c.ok ? '' : `<div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(c.hint)}</div>`}
+      </span>
+    </li>`;
+  }).join('');
+
+  // Gate the in-step run button.
+  const runBtn = document.getElementById('btn-run-pipeline');
+  if (runBtn && !window._pipelineRunning) {
+    runBtn.disabled = requiredFailing.length > 0;
+    runBtn.title = requiredFailing.length
+      ? 'Resolve required prerequisites first: ' +
+        requiredFailing.map(c => c.label.split(' (')[0]).join(', ')
+      : 'Run the toolkit pipeline now';
+  }
+
+  // One-line summary next to the button.
+  const sum = document.getElementById('preflight-summary');
+  if (sum) {
+    if (requiredFailing.length) {
+      sum.textContent = `${requiredFailing.length} required item${requiredFailing.length===1?'':'s'} blocking — fix above to enable.`;
+      sum.style.color = 'var(--danger)';
+    } else if (recommendedFailing.length) {
+      sum.textContent = `Ready. ${recommendedFailing.length} recommended item${recommendedFailing.length===1?'':'s'} skipped — pipeline will still run, governance score may be lower.`;
+      sum.style.color = 'var(--warn)';
+    } else {
+      sum.textContent = 'All checks pass — ready to generate.';
+      sum.style.color = 'var(--success)';
+    }
+  }
+
+  // Gate the sidebar "Go to Generate" button: needs at least a domain name
+  // so the user has *something* to navigate over.
+  const sb = document.getElementById('btn-goto-generate');
+  if (sb) {
+    const hasName = !!(session.domain && session.domain.name);
+    sb.disabled = !hasName;
+    sb.title = hasName
+      ? 'Go to step 6 (Generate)'
+      : 'Set a domain name on Step 1 first.';
+  }
+}
+
+// ── Domain badge in step titles ──────────────────────────────────────────
+//
+// Once a domain is selected, append a small pill to every step heading
+// so users always know which project they are in. The Domain step
+// itself skips the pill (the user is editing the name there).
+function _paintDomainPills() {
+  document.querySelectorAll('.step-title .domain-pill').forEach(el => el.remove());
+  const name = (session.domain && session.domain.name) || '';
+  if (!name) return;
+  document.querySelectorAll('.step-panel').forEach(panel => {
+    if (panel.id === 'step-domain') return;             // editing the domain — pill is noise
+    const t = panel.querySelector('.step-title');
+    if (!t) return;
+    const pill = document.createElement('span');
+    pill.className = 'domain-pill';
+    pill.textContent = name;
+    t.appendChild(pill);
+  });
+  // Also tag the examples header in the Vector Retrieval step.
+  const exDom = document.getElementById('vec-ex-domain');
+  if (exDom) {
+    exDom.style.display = '';
+    exDom.textContent = name;
+  }
 }
 
 // ── Workstream 2 — Evolution Review tab ──────────────────────────────────
@@ -967,9 +1886,9 @@ async function evolveShow(pid) {
       `<div><b>${p.title||''}</b></div>`
     + `<div style="color:var(--muted);font-size:12px">${p.detection_strategy} · ${p.proposal_type} · composite=${p.confidence_score??'—'}</div>`
     + `<h4 style="margin-top:12px">Proposed axiom (Turtle)</h4>`
-    + `<pre style="background:#0f1117;padding:12px;border-radius:8px;overflow-x:auto">${escapeHtml(p.candidate_turtle||'')}</pre>`
+    + `<pre style="background:var(--bg);padding:12px;border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:12px">${escapeHtml(p.candidate_turtle||'')}</pre>`
     + `<h4>Evidence SPARQL</h4>`
-    + `<pre style="background:#0f1117;padding:12px;border-radius:8px;overflow-x:auto">${escapeHtml(p.evidence_sparql||'')}</pre>`
+    + `<pre style="background:var(--bg);padding:12px;border-radius:8px;overflow-x:auto;font-family:var(--mono);font-size:12px">${escapeHtml(p.evidence_sparql||'')}</pre>`
     + `<h4>Dimensional breakdown</h4>${dimHtml}`
     + `<div style="display:flex;gap:8px;margin-top:12px">`
     +   `<input id="ev-note-${pid}" placeholder="Reviewer note" style="flex:1" />`
@@ -1022,17 +1941,48 @@ function complyStatusColour(status){
   return '#d29922';
 }
 
+// ── Domain-aware filtering ────────────────────────────────────────────────
+//
+// A regulation `r` "applies to" the current domain if either:
+//   - r.applies_to includes the current industry slug, or
+//   - r.applies_to includes "all" (cross-cutting framework like EU AI Act).
+// The Show-all checkbox bypasses the filter for multi-jurisdiction reviews.
+
+function _currentIndustry(){
+  return ((session.domain && session.domain.industry) || '').toString().toLowerCase();
+}
+
+function _showAllRegs(){
+  const cb = document.getElementById('cmp-show-all');
+  return !!(cb && cb.checked);
+}
+
+function _isRegApplicable(reg){
+  if (_showAllRegs()) return true;
+  const ind = _currentIndustry();
+  if (!ind) return true;                                 // no domain set yet — show everything
+  const list = (reg.applies_to || ['all']).map(s => String(s).toLowerCase());
+  return list.includes('all') || list.includes(ind);
+}
+
 async function complyLoadRegulations(){
   const r = await fetch('/api/comply/regulations');
   const j = await r.json();
+  const all = j.regulations || [];
+  const visible = all.filter(_isRegApplicable);
   const sel = document.getElementById('cmp-regulation');
   sel.innerHTML = '';
-  (j.regulations || []).forEach(reg => {
+  visible.forEach(reg => {
     const opt = document.createElement('option');
     opt.value = reg.regulation_id;
     opt.textContent = (reg.short_name || reg.name) + '  ['+reg.regulation_id+']';
     sel.appendChild(opt);
   });
+  if (!visible.length) {
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = '— no regulations match this domain —';
+    sel.appendChild(opt);
+  }
 }
 
 async function complyRefresh(){
@@ -1040,10 +1990,33 @@ async function complyRefresh(){
   await complyLoadRegulations();
   const r = await fetch('/api/comply/coverage');
   const j = await r.json();
-  const regs = j.regulations || [];
-  let html = '<table style="width:100%; border-collapse:collapse"><thead><tr>'
+  const all = j.regulations || [];
+  const regs = all.filter(_isRegApplicable);
+  const hidden = all.length - regs.length;
+
+  // Domain badge
+  const badge = document.getElementById('cmp-domain-badge');
+  const ind   = _currentIndustry();
+  if (ind) {
+    badge.style.display = '';
+    badge.textContent = 'domain: ' + ind.replace(/_/g,' ');
+  } else {
+    badge.style.display = 'none';
+  }
+
+  let html = '';
+  if (ind && !_showAllRegs() && hidden > 0) {
+    html += `<div class="box-help" style="margin:0 0 12px 0; border-left-color:var(--accent-2)">`
+         +  `Filtered to <b>${escapeHtml(ind.replace(/_/g,' '))}</b>. `
+         +  `${hidden} regulation${hidden===1?'':'s'} hidden as not applicable to this domain. `
+         +  `Tick <b>Show all regulations</b> above to reveal them.`
+         +  `</div>`;
+  }
+
+  html += '<table style="width:100%; border-collapse:collapse"><thead><tr>'
     + '<th style="text-align:left; padding:6px">Regulation</th>'
     + '<th style="text-align:left; padding:6px">ID</th>'
+    + '<th style="text-align:left; padding:6px">Applies to</th>'
     + '<th style="text-align:right; padding:6px">Coverage</th>'
     + '<th style="text-align:right; padding:6px">Satisfied</th>'
     + '<th style="text-align:center; padding:6px">Traffic light</th>'
@@ -1052,9 +2025,11 @@ async function complyRefresh(){
     const light = r.coverage >= 80 ? '#3fb950'
                : r.coverage >= 50 ? '#d29922'
                : '#f85149';
+    const at = (r.applies_to || ['all']).join(', ');
     html += `<tr style="border-top:1px solid var(--border)">`
       + `<td style="padding:6px">${escapeHtml(r.name || '')}</td>`
       + `<td style="padding:6px"><code>${escapeHtml(r.regulation_id)}</code></td>`
+      + `<td style="padding:6px; font-size:12px; color:var(--muted)">${escapeHtml(at)}</td>`
       + `<td style="padding:6px; text-align:right">${r.coverage}%</td>`
       + `<td style="padding:6px; text-align:right">${r.satisfied}/${r.applicable}</td>`
       + `<td style="padding:6px; text-align:center">`
@@ -1062,10 +2037,17 @@ async function complyRefresh(){
       + `</td></tr>`;
   });
   html += '</tbody></table>';
-  if (regs.length === 0) html = '<em>No regulations loaded.</em>';
+  if (regs.length === 0) {
+    html = ind && !_showAllRegs()
+      ? `<em>No regulations apply to <b>${escapeHtml(ind)}</b>. Tick <b>Show all regulations</b> to review the rest.</em>`
+      : '<em>No regulations loaded.</em>';
+  }
   document.getElementById('cmp-coverage-list').innerHTML = html;
+
+  const visAt80 = regs.filter(r => r.coverage >= 80).length;
   document.getElementById('cmp-status').textContent =
-    `${j.regulations_at_80 || 0}/${j.total_regulations || 0} regulations at ≥80% coverage`;
+    `${visAt80}/${regs.length} visible regulation${regs.length===1?'':'s'} at ≥80% coverage`
+    + (hidden && !_showAllRegs() ? `  ·  ${hidden} hidden (not applicable to this domain)` : '');
   complyLoadBundles();
 }
 
@@ -1273,6 +2255,148 @@ async function vecQuery(){
   document.getElementById('vec-results').innerHTML =
     _vecRenderStrategy('Ontology-bounded vector retrieval', j);
   document.getElementById('vec-results-card').style.display = 'block';
+}
+
+// ── Hybrid retrieval: per-domain example queries ─────────────────────────
+//
+// Bank of canonical hybrid-retrieval queries, scoped per industry. Each
+// example pairs a class-expression filter with a natural-language
+// question and a one-line "why this query is interesting" rationale —
+// the goal is for a non-expert to see the OWL filter actually doing
+// work, not just be a literal placeholder.
+//
+// Falls back to GENERIC examples when no industry is selected.
+const VEC_EXAMPLES = {
+  telecom: [
+    { flavor: 'network-ops', cls: 'NetworkElement | Alarm',
+      q: 'Which network elements have unacknowledged critical alarms?',
+      why: 'Two classes joined — the OWL filter keeps the search inside infrastructure entities and skips billing or customer records that may share vocabulary like "active" or "critical".' },
+    { flavor: 'fault-management', cls: 'Service | Customer',
+      q: 'Which customers are affected by ongoing service degradations?',
+      why: 'Cross-class traversal. PROV-O confidence on the Service status outweighs raw similarity, so the top hit is the most trusted active issue, not the most lexically similar past one.' },
+    { flavor: 'compliance', cls: 'Alarm',
+      q: 'Which Critical-severity alarms remain open after 4 hours?',
+      why: 'Single-class scope plus a temporal phrase. The flavor blocks Restricted-tier internal incident notes from leaking even if they\'re lexically perfect matches.' },
+  ],
+  healthcare: [
+    { flavor: 'clinical-ops', cls: 'Patient | CarePlan',
+      q: 'Which patients have an active care plan?',
+      why: 'Two-class filter ensures the retriever can\'t mistakenly surface a Provider record just because the embedding is near-by. The Confidential sensitivity tier on Patient is enforced before ranking.' },
+    { flavor: 'clinical-ops', cls: 'Encounter | Observation',
+      q: 'Which clinical observations were recorded with high confidence in the last 90 days?',
+      why: 'PROV-O confidence is part of the hybrid score, so low-confidence observations rank below high-confidence ones even when their embedding is more similar.' },
+    { flavor: 'compliance', cls: 'Medication | Provider',
+      q: 'Which providers prescribed medications outside the approved formulary?',
+      why: 'Joins two classes for an audit-grade lookup. The compliance flavor sees only provider/medication facts — patient PII is filtered out at the flavor boundary.' },
+  ],
+  finance: [
+    { flavor: 'risk-ops', cls: 'Transaction | RiskAssessment',
+      q: 'Which transactions trigger high-risk alerts?',
+      why: 'Pairs transaction records with their risk scores. Recency weight in the hybrid score promotes today\'s alerts above last month\'s, even if last month\'s embedding is closer.' },
+    { flavor: 'compliance', cls: 'Account | Counterparty',
+      q: 'Which counterparties are linked to flagged accounts?',
+      why: 'Cross-class join exposes the network of suspect counterparties. Restricted-tier client identifiers are blocked at the flavor boundary, so the dashboard returns aggregates only.' },
+    { flavor: 'risk-ops', cls: 'Product',
+      q: 'Which products held by retail accounts breach the new exposure limits?',
+      why: 'Single-class scope plus a regulatory predicate. The OWL filter rules out institutional products that share product-master language but live in a different sub-class.' },
+  ],
+  manufacturing: [
+    { flavor: 'plant-ops', cls: 'Asset | WorkOrder',
+      q: 'Which assets are currently under maintenance?',
+      why: 'Combines asset and work-order context. Recency dominates because an "under-maintenance" record from last quarter is irrelevant.' },
+    { flavor: 'quality', cls: 'Product | QualityInspection',
+      q: 'Which products failed quality inspection this week?',
+      why: 'Two-class scope with a clear time window. The OWL filter rules out shipments and supplier records that share quality language but are not directly inspected.' },
+    { flavor: 'supply-chain', cls: 'Supplier | Shipment',
+      q: 'Which suppliers delivered non-conforming materials in the last quarter?',
+      why: 'Cross-class join. PROV-O traceability lets the agent cite the originating inspection record for every supplier hit.' },
+  ],
+  retail: [
+    { flavor: 'fulfilment', cls: 'Order | Customer',
+      q: 'Which orders are awaiting fulfilment?',
+      why: 'Two-class filter avoids matching cancelled or refunded orders even when the embedding is similar. Recency weight surfaces today\'s backlog.' },
+    { flavor: 'merchandising', cls: 'Product | Inventory',
+      q: 'Which products are below the reorder threshold in which stores?',
+      why: 'Joins product master with per-store stock levels. The OWL filter excludes catalog-only products that have no stock record.' },
+    { flavor: 'marketing', cls: 'Promotion | Customer',
+      q: 'Which customers redeemed promotions in the last 30 days?',
+      why: 'Cross-class lookup with a time predicate. The marketing flavor sees Internal-tier loyalty data but is blocked from Confidential payment details.' },
+  ],
+  energy_utilities: [
+    { flavor: 'grid-ops', cls: 'PowerAsset | Outage',
+      q: 'Which substations have unresolved outages affecting more than 1000 customers?',
+      why: 'Two-class scope plus a customer-impact predicate. Drift-monitor signals on PowerAsset boost the rank of equipment with recent telemetry anomalies.' },
+  ],
+  logistics_supply_chain: [
+    { flavor: 'fleet-ops', cls: 'Vehicle | Route',
+      q: 'Which vehicles missed their scheduled stop on a route today?',
+      why: 'Combines fleet asset with planned itinerary. Recency wins over textual similarity, surfacing real-time exceptions ahead of historical ones.' },
+  ],
+  government: [
+    { flavor: 'public-records', cls: 'Citizen | ServiceRequest',
+      q: 'Which open service requests are past their statutory response time?',
+      why: 'Single-class temporal filter on top of a citizen-scoped flavor. PII handling is enforced by the flavor\'s sensitivity tier — no name leaks into the embedding.' },
+  ],
+  insurance: [
+    { flavor: 'claims-ops', cls: 'Claim | Policy',
+      q: 'Which claims are flagged for fraud review and tied to active policies?',
+      why: 'Two-class join for an investigative workflow. Confidence weighting demotes low-evidence flags so reviewers see the strongest cases first.' },
+  ],
+  pharmaceuticals: [
+    { flavor: 'pharmacovigilance', cls: 'AdverseEvent | Drug',
+      q: 'Which drugs have new serious adverse events in the last 7 days?',
+      why: 'Cross-class join with a strict recency window — the regulatory definition of "new" is time-bounded, so the recency weight does the heavy lifting.' },
+  ],
+  GENERIC: [
+    { flavor: '', cls: '',
+      q: 'Which records of class X were created in the last 7 days?',
+      why: 'A simple recency-bounded query. Replace X with one of your entity classes (e.g. Order, Patient, NetworkElement) — the OWL filter restricts the search and recency weight ranks the results.' },
+    { flavor: '', cls: 'EntityA | EntityB',
+      q: 'Which EntityA instances are linked to high-priority EntityB instances?',
+      why: 'Two-class join showing the typical hybrid pattern: class filter narrows the candidate pool, vector similarity ranks within it, PROV-O confidence and recency fine-tune the order.' },
+  ],
+};
+
+function vecRenderExamples() {
+  const grid = document.getElementById('vec-examples');
+  if (!grid) return;
+  const ind = (session.domain && session.domain.industry || '').toLowerCase();
+  const examples = VEC_EXAMPLES[ind] || VEC_EXAMPLES.GENERIC;
+  if (!examples.length) {
+    grid.innerHTML = '<em style="color:var(--muted);font-size:13px">No examples for this domain yet.</em>';
+    return;
+  }
+  grid.innerHTML = examples.map((ex, i) => `
+    <div class="vec-example" onclick="vecApplyExample(${i})" data-i="${i}" title="Click to fill the form above">
+      <div class="vec-example-q">${escapeHtml(ex.q)}</div>
+      <div class="vec-example-cls">flavor: ${escapeHtml(ex.flavor || '(any)')}  ·  class: ${escapeHtml(ex.cls || '(empty — whole flavor)')}</div>
+      <div class="vec-example-why">${escapeHtml(ex.why)}</div>
+    </div>
+  `).join('');
+  grid.dataset.industry = ind || 'GENERIC';
+  grid.dataset.examples = JSON.stringify(examples);
+}
+
+function vecApplyExample(i) {
+  const grid = document.getElementById('vec-examples');
+  const examples = JSON.parse(grid.dataset.examples || '[]');
+  const ex = examples[i]; if (!ex) return;
+  if (ex.flavor) {
+    const sel = document.getElementById('vec-flavor');
+    let matched = false;
+    for (const opt of sel.options) {
+      if (opt.value === ex.flavor) { opt.selected = true; matched = true; break; }
+    }
+    // If the flavor doesn't exist in the dropdown, just leave the user's
+    // current selection — the example is still useful as a query template.
+    if (!matched && sel.options.length) {
+      // no-op; show a toast so the user knows.
+      try { showToast('Flavor "'+ex.flavor+'" not registered yet — using current selection.'); } catch(_) {}
+    }
+  }
+  document.getElementById('vec-class-expr').value = ex.cls || '';
+  document.getElementById('vec-question').value   = ex.q   || '';
+  document.getElementById('vec-question').focus();
 }
 
 async function vecCompare(){

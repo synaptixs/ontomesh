@@ -212,8 +212,9 @@ def coverage_score(
     out = out_path or os.path.join(REPO_ROOT, "output")
     db  = db_path  or os.path.join(REPO_ROOT, "db", "enterprise.db")
     per_reg: List[Dict[str, Any]] = []
-    all_ids = [r["regulation_id"] for r in
-               registry.list_regulations(regulations_dir=regulations_dir)]
+    summaries = registry.list_regulations(regulations_dir=regulations_dir)
+    summary_by_id = {s["regulation_id"]: s for s in summaries}
+    all_ids = [s["regulation_id"] for s in summaries]
     full_cov = 0
     for reg_id in all_ids:
         try:
@@ -239,6 +240,10 @@ def coverage_score(
             "coverage":        pct,
             "applicable":      len(applicable),
             "satisfied":       len(satisfied),
+            # Surface industry tagging so the wizard can scope the
+            # dashboard to the user's domain without a second API call.
+            "applies_to":      summary_by_id.get(reg_id, {}).get("applies_to", ["all"]),
+            "scope":           summary_by_id.get(reg_id, {}).get("scope"),
         })
 
     total = len(per_reg) or 1
