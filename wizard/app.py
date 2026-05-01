@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import os
+import re
 import sys
 import json
 import subprocess
@@ -174,6 +175,103 @@ def _builtin_to_session(name: str, t: dict) -> dict:
     }
 
 
+def _parse_relationship_sentence(text: str, labels: list) -> dict | None:
+    """Best-effort split of a free-form English relationship sentence into
+    {from_entity, label, to_entity} using the loaded entity labels.
+
+    Supports two label-spelling conventions in the same sentence by
+    matching both the label as written ("Power Asset") and its
+    space-stripped form ("PowerAsset") — the YAML templates routinely
+    mix these. Returns None when the sentence can't be split confidently.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return None
+    s = text.strip().rstrip(".")
+    # Build aliases for every label: as-written, space-stripped, hyphen→space.
+    # Also add the LAST WORD of any multi-word label as a suffix-alias when
+    # it's unique across the label set — YAML authors routinely write the
+    # short form ("Policy" instead of "Insurance Policy") in sentences.
+    aliases = {}
+    suffix_counts = {}
+    for lbl in labels:
+        if not lbl:
+            continue
+        for alias in {lbl, lbl.replace(" ", ""), lbl.replace("-", " ")}:
+            aliases[alias] = lbl
+        parts = [p for p in lbl.split() if p]
+        if len(parts) > 1:
+            suffix_counts[parts[-1]] = suffix_counts.get(parts[-1], 0) + 1
+    for lbl in labels:
+        parts = [p for p in (lbl or "").split() if p]
+        if len(parts) > 1 and suffix_counts.get(parts[-1], 0) == 1:
+            aliases.setdefault(parts[-1], lbl)
+
+    # Find first and last alias hits in the sentence. Earliest start vs.
+    # latest end win — and we now allow first == last (self-references).
+    def _scan(haystack):
+        first = last = None
+        for alias, target in aliases.items():
+            i = haystack.find(alias)
+            if i == -1:
+                continue
+            if first is None or i < first[1]:
+                first = (target, i, i + len(alias))
+            j = haystack.rfind(alias)
+            jend = j + len(alias)
+            if last is None or jend > last[2]:
+                last = (target, j, jend)
+        return first, last
+    first, last = _scan(s)
+    # Retry case-insensitively if either side is missing (not on disagreement).
+    if not first or not last:
+        first, last = _scan(s.lower())
+        if not first or not last:
+            return None
+    # Self-references are legitimate (parent→child trees) — accept them.
+    if first[1] >= last[1]:
+        # Single occurrence of one alias only; treat as a self-reference if
+        # the entity itself was found, otherwise un-parseable.
+        if first[0] == last[0]:
+            verb = (s.split(first[0], 1)[1].strip().lstrip(",;:")
+                    if first[0] in s else "related to")
+            verb = re.sub(r"^(?:is|are|may\s+be|can\s+be)\s+", "", verb).rstrip(",;:.").strip()
+            verb = re.split(r"\s+(?:to|with)?\s*another\s+", verb)[0].strip() or "related to"
+            return {"from_entity": first[0], "label": verb or "related to", "to_entity": first[0]}
+        return None
+    verb = s[first[2]:last[1]].strip().lstrip(",;:").rstrip(",;:").strip() or "related to"
+    # Strip leading articles ("is", "are", "may be") that read awkwardly as
+    # an OWL property label — e.g. "is submitted by" → "submitted by".
+    verb = re.sub(r"^(?:is|are|may\s+be|can\s+be)\s+", "", verb)
+    return {"from_entity": first[0], "label": verb, "to_entity": last[0]}
+
+
+def _structure_yaml_relationships(raw: list, entities_yaml: list) -> list:
+    """Normalise YAML 'relationships' (often free-form strings) into the
+    structured {from_entity, label, to_entity} dicts the graph view and
+    downstream tooling expect. Falls back to the original entry when a
+    sentence can't be parsed — keeps human content visible."""
+    labels = [(e.get("label") or e.get("name", "")).strip() for e in (entities_yaml or [])]
+    out = []
+    for r in (raw or []):
+        if isinstance(r, dict) and r.get("from_entity") and r.get("to_entity"):
+            out.append({"from_entity": r["from_entity"],
+                        "label":       r.get("label", "related to"),
+                        "to_entity":   r["to_entity"]})
+            continue
+        if isinstance(r, (list, tuple)) and len(r) == 3:
+            out.append({"from_entity": r[0], "label": r[1], "to_entity": r[2]})
+            continue
+        if isinstance(r, str):
+            parsed = _parse_relationship_sentence(r, labels)
+            if parsed:
+                out.append(parsed)
+            else:
+                # Keep the sentence so the user still sees it on the List
+                # tab; graph view will skip un-parseable entries.
+                out.append({"from_entity": "", "label": r, "to_entity": ""})
+    return out
+
+
 def _yaml_to_session(name: str, tmpl: dict) -> dict:
     """Translate a templates/*.yaml file into the wizard's session shape."""
     return {
@@ -205,7 +303,10 @@ def _yaml_to_session(name: str, tmpl: dict) -> dict:
              "description": ev.get("description", "")}
             for ev in tmpl.get("events", [])
         ],
-        "relationships": tmpl.get("relationships", []),
+        "relationships": _structure_yaml_relationships(
+            tmpl.get("relationships", []),
+            tmpl.get("entities", []),
+        ),
         "competency_questions": [
             {"id": cq.get("id", ""), "question": cq.get("question", ""),
              "priority": cq.get("priority", "Medium")}
@@ -258,6 +359,89 @@ def load_template(name: str):
             return jsonify(session)
 
     return jsonify({"error": f"Template '{name}' not found"}), 404
+
+
+# ── /api/import — file-import (issue #16) ──────────────────────────────────
+#
+# Two ways to call:
+#   multipart/form-data: file=<bytes> [+ format=auto|json|sql]
+#   application/json:    {content: "<raw text>", format: "auto", filename?, dialect?}
+#
+# Returns the parse + validate result without persisting. The browser
+# wizard's review modal then lets the user Accept (→ /api/import/commit)
+# or Reject. Persistence is deferred so a malformed import can never
+# stomp the in-progress session.
+@app.route("/api/import", methods=["POST"])
+def import_file():
+    try:
+        from . import importer as _imp
+    except ImportError:
+        # Allow flat-import fallback if /wizard isn't a package context.
+        sys.path.insert(0, HERE)
+        import importer as _imp                  # type: ignore[no-redef]
+
+    raw: bytes = b""
+    fmt = "auto"; dialect = "auto"; filename = None
+    if request.files and "file" in request.files:
+        f = request.files["file"]
+        raw = f.read()
+        filename = f.filename
+        fmt = (request.form.get("format") or "auto").lower()
+        dialect = (request.form.get("dialect") or "auto").lower()
+    else:
+        body = request.get_json(silent=True) or {}
+        text = body.get("content")
+        if isinstance(text, str):
+            raw = text.encode("utf-8")
+        elif isinstance(body, dict) and body:
+            # Treat the entire posted JSON object as the file content.
+            raw = json.dumps(body).encode("utf-8")
+        fmt = (body.get("format") or "auto").lower()
+        dialect = (body.get("dialect") or "auto").lower()
+        filename = body.get("filename")
+
+    if not raw:
+        return jsonify({"error": "No file or content supplied (POST a multipart 'file' or a JSON body with 'content')."}), 400
+
+    existing = _load_session()
+    result = _imp.parse_and_validate(
+        raw, fmt=fmt, dialect=dialect,
+        existing_session=existing, filename=filename,
+    )
+    return jsonify(result.to_dict()), (200 if result.ok or result.session else 200)
+
+
+@app.route("/api/import/commit", methods=["POST"])
+def import_commit():
+    """Persist a previously-parsed import as the current wizard session.
+
+    Body: the `session` object returned by /api/import. The route does a
+    final-guard re-validate; if errors surface again it refuses to write.
+    """
+    try:
+        from . import importer as _imp
+    except ImportError:
+        sys.path.insert(0, HERE)
+        import importer as _imp                  # type: ignore[no-redef]
+
+    body = request.get_json(force=True) or {}
+    session = body.get("session")
+    if not isinstance(session, dict):
+        return jsonify({"error": "Body must be {session: {...}}"}), 400
+
+    # Final guard — same validators that ran at parse time.
+    raw = json.dumps(session).encode("utf-8")
+    result = _imp.parse_and_validate(raw, fmt="json", existing_session=_load_session())
+    if not result.ok:
+        return jsonify({
+            "error": "Validation failed at commit time",
+            "errors": [i.to_dict() for i in result.errors],
+        }), 400
+
+    _save_session(result.session)
+    return jsonify({"ok": True, "session": result.session,
+                    "warnings": [i.to_dict() for i in result.warnings],
+                    "stats": result.stats})
 
 
 @app.route("/api/generate", methods=["POST"])

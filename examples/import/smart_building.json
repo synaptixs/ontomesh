@@ -1,0 +1,109 @@
+{
+  "_": "Example file for the wizard's Import-from-file feature.",
+  "_about": [
+    "This is the 'wizard-session' JSON shape — the same format the wizard",
+    "POSTs back to /api/session, what /api/template/<name> returns, and what",
+    "you save by clicking 'Save session as JSON' inside the wizard.",
+    "",
+    "Drop this file on the wizard's Step 1 'Import from file' card. The",
+    "review modal will open with:",
+    "  • Errors:      0   (nothing missing)",
+    "  • Warnings:    0   (every entity has a description, base IRI is set)",
+    "  • Suggestions: 0   (no PII columns; sensitivity tiers already set)",
+    "",
+    "Click 'Accept & replace session' to hydrate the wizard with a",
+    "ready-to-generate Smart Building Operations domain — 6 entities,",
+    "2 events, 6 relationships, 5 competency questions.",
+    "",
+    "Underscore-prefixed keys (_, _about) are silently ignored by the",
+    "validator — keep them or strip them, your choice."
+  ],
+
+  "domain": {
+    "name":        "Smart Building Operations",
+    "description": "Real-time sensing, HVAC control, occupancy tracking, and maintenance ticketing across a portfolio of commercial smart buildings.",
+    "base_iri":    "https://ontology.example.com/smart_building/",
+    "industry":    "smart_building"
+  },
+
+  "entities": [
+    {
+      "name":        "building",
+      "label":       "Building",
+      "description": "A physical building in the portfolio with an address, gross floor area, and certification level.",
+      "sensitivity": "Internal",
+      "is_event":    false,
+      "properties":  []
+    },
+    {
+      "name":        "floor",
+      "label":       "Floor",
+      "description": "A floor within a Building, identified by floor number and tenant zoning.",
+      "sensitivity": "Internal",
+      "is_event":    false,
+      "properties":  []
+    },
+    {
+      "name":        "room",
+      "label":       "Room",
+      "description": "A leasable or service space on a Floor (office, meeting room, plant room, etc.).",
+      "sensitivity": "Internal",
+      "is_event":    false,
+      "properties":  []
+    },
+    {
+      "name":        "sensor",
+      "label":       "Sensor",
+      "description": "A physical sensor (temperature, CO2, occupancy, door state, light level) installed in a Room.",
+      "sensitivity": "Internal",
+      "is_event":    false,
+      "properties":  []
+    },
+    {
+      "name":        "hvac_unit",
+      "label":       "HVAC Unit",
+      "description": "A heating/ventilation/air-conditioning unit serving one or more Floors.",
+      "sensitivity": "Internal",
+      "is_event":    false,
+      "properties":  []
+    },
+    {
+      "name":        "tenant",
+      "label":       "Tenant",
+      "description": "An organisation leasing one or more Rooms in a Building. Marked Confidential because lease terms and contact information are commercially sensitive.",
+      "sensitivity": "Confidential",
+      "is_event":    false,
+      "properties":  []
+    }
+  ],
+
+  "events": [
+    {
+      "name":        "temperature_reading",
+      "label":       "Temperature Reading",
+      "description": "An observation event — a temperature sample produced by a Sensor at a point in time."
+    },
+    {
+      "name":        "maintenance_ticket",
+      "label":       "Maintenance Ticket",
+      "description": "A work item raised against an HVAC Unit, Sensor, or Room with a severity and assigned engineer."
+    }
+  ],
+
+  "relationships": [
+    { "from_entity": "Floor",               "label": "located in",     "to_entity": "Building"  },
+    { "from_entity": "Room",                "label": "located on",     "to_entity": "Floor"     },
+    { "from_entity": "Sensor",              "label": "installed in",   "to_entity": "Room"      },
+    { "from_entity": "HVAC Unit",           "label": "serves",         "to_entity": "Floor"     },
+    { "from_entity": "Tenant",              "label": "occupies",       "to_entity": "Room"      },
+    { "from_entity": "Maintenance Ticket",  "label": "raised against", "to_entity": "HVAC Unit" }
+  ],
+
+  "competency_questions": [
+    { "id": "CQ-01", "question": "Which rooms are currently above their temperature setpoint?",          "priority": "High"   },
+    { "id": "CQ-02", "question": "Which HVAC units have open critical maintenance tickets?",             "priority": "High"   },
+    { "id": "CQ-03", "question": "Which sensors have not produced a reading in the last 30 minutes?",    "priority": "High"   },
+    { "id": "CQ-04", "question": "Which tenants occupy rooms with abnormal occupancy patterns this week?","priority": "Medium" },
+    { "id": "CQ-05", "question": "What is the average occupancy of each floor by hour of day?",          "priority": "Medium" }
+  ]
+}

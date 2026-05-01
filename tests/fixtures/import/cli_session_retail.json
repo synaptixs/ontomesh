@@ -1,0 +1,26 @@
+{
+  "domain_name": "Retail Operations",
+  "domain_slug": "retail_operations",
+  "domain_description": "Product catalog, inventory, order management, customer relationships.",
+  "author": "Test Fixture",
+  "base_iri": "https://ontology.example.com/retail_operations/",
+  "sensitivity_default": "Internal",
+  "entities": [
+    { "name": "customer", "label": "Customer",
+      "description": "A person placing orders.",
+      "sensitivity": "Confidential", "is_event": false, "table_name": "customer" },
+    { "name": "order", "label": "Order",
+      "description": "A customer purchase.",
+      "sensitivity": "Internal", "is_event": false, "table_name": "order" },
+    { "name": "purchase_event", "label": "Purchase Event",
+      "description": "Order placed by customer.",
+      "sensitivity": "Internal", "is_event": true, "table_name": "purchase_event" }
+  ],
+  "relationships": [
+    { "from_entity": "Order", "label": "placed by", "to_entity": "Customer" }
+  ],
+  "cqs": [
+    "Which customers placed orders this week?",
+    "Which orders are awaiting fulfilment?"
+  ]
+}

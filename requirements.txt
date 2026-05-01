@@ -7,7 +7,7 @@
 #   pip install -r requirements-db.txt          # non-SQLite database drivers
 #   pip install -r requirements-runtime.txt     # LLM adapters (Anthropic / OpenAI / Vertex / OCI)
 #   pip install -r requirements-drift.txt       # drift_monitor (infodrift) integration
-#   pip install -r requirements-advanced.txt    # spaCy, Flask wizard, Neptune
+#   pip install -r requirements-advanced.txt    # spaCy, Flask wizard, Neptune, sqlglot (#16)
 #
 # pip-install via wheel is also available — see install.md and pyproject.toml.
 
