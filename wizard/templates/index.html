@@ -54,6 +54,31 @@
     .card { background: var(--surface); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
 
+    /* ── Tabs (e.g. Relationships List/Graph) ──────────────────────────── */
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border);
+            margin: 0 0 14px 0; padding: 0; }
+    .tab-btn { background: transparent; border: none; color: var(--muted);
+               padding: 8px 14px; font-size: 13px; font-weight: 600;
+               cursor: pointer; border-bottom: 2px solid transparent;
+               transition: color .15s, border-color .15s; }
+    .tab-btn:hover  { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-panel      { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Relationship graph ────────────────────────────────────────────── */
+    .rel-graph-wrap { background: var(--bg); border: 1px solid var(--border);
+                      border-radius: var(--radius); padding: 0; overflow: hidden; }
+    .rel-graph-toolbar { display: flex; gap: 8px; align-items: center;
+                         padding: 8px 12px; border-bottom: 1px solid var(--border);
+                         font-size: 12px; color: var(--muted); }
+    .rel-graph-toolbar .legend-dot { width: 10px; height: 10px; border-radius: 50%;
+                                     display: inline-block; margin-right: 4px;
+                                     vertical-align: -1px; }
+    .rel-graph-empty { padding: 40px 20px; text-align: center; color: var(--muted);
+                       font-size: 13px; }
+    #rel-graph { height: 480px; width: 100%; background: var(--bg); }
+
     /* ── Per-box help text ─────────────────────────────────────────────── */
     /* A small helper block below each card heading explaining what's in
        the box, why it matters, and how to read or use it. Always visible
@@ -166,6 +191,11 @@
              animation: fadeIn .3s; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
   </style>
+  <!-- vis-network: force-directed graph rendering for the Relationships > Graph tab.
+       MIT-licensed, ~150 KB minified. Loaded from unpkg. If offline / CDN-blocked,
+       the Graph tab falls back to a friendly "couldn't load" message. -->
+  <link  rel="stylesheet" href="https://unpkg.com/vis-network@9.1.9/styles/vis-network.css" />
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -305,16 +335,49 @@
         <div class="box-help">
           How your entities connect — written as plain English sentences.
           <ul>
-            <li><b>What's shown:</b> one row per relationship, with the count in the heading badge. The text input below adds new ones.</li>
-            <li><b>Why it matters:</b> each sentence becomes an <code>owl:ObjectProperty</code> with proper <code>rdfs:domain</code> and <code>rdfs:range</code>, so SPARQL queries can traverse from a Customer to their Orders without you writing any RDF.</li>
-            <li><b>How to read:</b> always start with the source entity, then a verb phrase, then the target entity — "A Customer places one or more Orders." Cardinality words ("one", "many", "at most") get parsed into SHACL constraints automatically.</li>
+            <li><b>What's shown:</b> a <b>List</b> tab for editing and a <b>Graph</b> tab for a force-directed view of your domain.</li>
+            <li><b>Why it matters:</b> each sentence becomes an <code>owl:ObjectProperty</code> with proper <code>rdfs:domain</code> and <code>rdfs:range</code>. The graph view exposes structural problems (orphan entities, missing back-edges, accidental cycles) at a glance — issues you'd miss scanning a flat list.</li>
+            <li><b>How to read:</b> always source entity → verb phrase → target entity, e.g. "A Customer places one or more Orders." Cardinality words become SHACL constraints automatically. Drag nodes to explore; the layout settles after a second.</li>
           </ul>
         </div>
-        <div id="rel-list"></div>
-        <div style="margin-top:12px; display:flex; gap:8px">
-          <input id="new-rel" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
-                 placeholder="A Customer places one or more Orders." />
-          <button class="btn btn-primary" onclick="addRelationship()">Add</button>
+
+        <ul class="tabs" role="tablist">
+          <li><button type="button" class="tab-btn active" data-tab="list" role="tab" onclick="switchRelTab('list')">List</button></li>
+          <li><button type="button" class="tab-btn" data-tab="graph" role="tab" onclick="switchRelTab('graph')">Graph</button></li>
+        </ul>
+
+        <div id="rel-tab-list" class="tab-panel active" role="tabpanel">
+          <div id="rel-list"></div>
+          <div style="margin-top:12px; display:flex; gap:8px">
+            <input id="new-rel" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
+                   placeholder="A Customer places one or more Orders." />
+            <button class="btn btn-primary" onclick="addRelationship()">Add</button>
+          </div>
+        </div>
+
+        <div id="rel-tab-graph" class="tab-panel" role="tabpanel">
+          <div class="rel-graph-wrap">
+            <div class="rel-graph-toolbar">
+              <span><span class="legend-dot" style="background:var(--accent)"></span>Entity</span>
+              <span><span class="legend-dot" style="background:var(--accent2)"></span>Event</span>
+              <span style="margin-left:auto">
+                <button class="btn btn-ghost" style="padding:3px 8px;font-size:11px" onclick="renderRelGraph(true)">⟳ Re-layout</button>
+                <button class="btn btn-ghost" style="padding:3px 8px;font-size:11px" onclick="fitRelGraph()">Fit</button>
+              </span>
+            </div>
+            <div id="rel-graph"></div>
+            <div id="rel-graph-empty" class="rel-graph-empty" style="display:none">
+              No relationships to draw yet — add a few on the List tab.
+            </div>
+          </div>
+          <div class="box-help" style="margin-top:14px;margin-bottom:0">
+            <b>Reading the graph.</b>
+            <ul>
+              <li><b>Nodes</b> = your entities and events. Blue = persistent things, purple = events. Orphan nodes (no edges) usually mean you've defined an entity but never connected it.</li>
+              <li><b>Arrows</b> point from <i>source</i> entity to <i>target</i> entity, labelled with the verb phrase. Bidirectional concepts need two relationships, one each way.</li>
+              <li><b>Drag</b> a node to rearrange. <b>Scroll</b> to zoom. <b>⟳ Re-layout</b> kicks the physics simulation; <b>Fit</b> centres everything in view.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -931,18 +994,171 @@ function renderRelationships() {
   document.getElementById('rel-count').textContent = `(${session.relationships.length})`;
   if (!session.relationships.length) {
     list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No relationships yet.</div>';
-    return;
+  } else {
+    list.innerHTML = session.relationships.map((r,i) => {
+      const display = (typeof r === 'string') ? r
+        : (r && r.from_entity ? `${r.from_entity} ${r.label||'→'} ${r.to_entity}` : JSON.stringify(r));
+      return `
+        <div class="rel-item">
+          <span class="rel-arrow">→</span>
+          <span style="flex:1;font-size:13px">${display}</span>
+          <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRel(${i})">✕</button>
+        </div>`;
+    }).join('');
   }
-  list.innerHTML = session.relationships.map((r,i) => `
-    <div class="rel-item">
-      <span class="rel-arrow">→</span>
-      <span style="flex:1;font-size:13px">${r}</span>
-      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRel(${i})">✕</button>
-    </div>
-  `).join('');
+  // If the Graph tab is currently visible, re-draw it so it stays in sync.
+  if (document.getElementById('rel-tab-graph').classList.contains('active')) {
+    renderRelGraph(false);
+  }
 }
 
 document.getElementById('new-rel').addEventListener('keydown', e => { if (e.key==='Enter') addRelationship(); });
+
+// ── Relationships: List ↔ Graph tab switching ────────────────────────────
+function switchRelTab(name) {
+  document.querySelectorAll('#step-relationships .tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+  document.querySelectorAll('#step-relationships .tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'rel-tab-' + name);
+  });
+  if (name === 'graph') renderRelGraph(true);
+}
+
+// ── Relationships: graph view (vis-network) ──────────────────────────────
+//
+// Build a force-directed graph where every entity / event is a node and
+// every relationship is a directed edge. Relationships in the session may
+// be either:
+//   • strings  — "A Customer places one or more Orders." (free-form)
+//   • objects  — {from_entity, label, to_entity}        (loaded templates)
+// For strings we infer endpoints by matching the longest known entity
+// name as the source, the next as the target, and the text in between
+// as the verb-phrase label. Anything we can't parse becomes a free-floating
+// node so it's visible rather than silently dropped.
+
+let _relNetwork = null;
+
+function _getKnownLabels() {
+  const labels = [];
+  for (const e of (session.entities || []))  labels.push(e.label || e.name);
+  for (const e of (session.events   || []))  labels.push(e.label || e.name);
+  return labels.filter(Boolean);
+}
+
+function _parseRelString(s, knownLabels) {
+  // Return {from, verb, to} by finding the first and last known label inside s.
+  // Sort labels longest-first so "Network Element" wins over "Network".
+  const sorted = [...knownLabels].sort((a,b) => b.length - a.length);
+  let firstHit = null, lastHit = null;
+  for (const lbl of sorted) {
+    const idx = s.indexOf(lbl);
+    if (idx === -1) continue;
+    if (!firstHit || idx < firstHit.idx) firstHit = {lbl, idx, end: idx + lbl.length};
+    const last = s.lastIndexOf(lbl);
+    const lastEnd = last + lbl.length;
+    if (last !== -1 && (!lastHit || lastEnd > lastHit.end)) lastHit = {lbl, idx: last, end: lastEnd};
+  }
+  if (!firstHit || !lastHit || firstHit.lbl === lastHit.lbl || firstHit.idx >= lastHit.idx) {
+    // Couldn't separate from/to — bail with a single-node "free-floating" rel.
+    return null;
+  }
+  const verb = s.slice(firstHit.end, lastHit.idx)
+    .replace(/[.,;]/g, '').replace(/\s+/g, ' ').trim() || 'related to';
+  return { from: firstHit.lbl, verb, to: lastHit.lbl };
+}
+
+function _buildRelGraphData() {
+  const isEvent = {};
+  const nodes = [];
+  const seen = new Set();
+  const addNode = (label, kind) => {
+    if (seen.has(label)) return;
+    seen.add(label);
+    const evt = (kind === 'event');
+    isEvent[label] = evt;
+    nodes.push({
+      id: label,
+      label: label,
+      shape: 'box',
+      color: evt
+        ? { background: '#7c5bf7', border: '#7c5bf7', highlight: { background: '#9d83fa', border: '#9d83fa' } }
+        : { background: '#5b8af7', border: '#5b8af7', highlight: { background: '#82a8fa', border: '#82a8fa' } },
+      font: { color: '#ffffff', size: 14, face: 'Inter, system-ui, sans-serif' },
+      margin: 10,
+    });
+  };
+  for (const e of (session.entities || [])) addNode(e.label || e.name, 'entity');
+  for (const e of (session.events   || [])) addNode(e.label || e.name, 'event');
+
+  const known = _getKnownLabels();
+  const edges = [];
+  let edgeId = 0;
+  for (const r of (session.relationships || [])) {
+    let from, to, verb;
+    if (typeof r === 'object' && r && r.from_entity && r.to_entity) {
+      from = r.from_entity; to = r.to_entity; verb = r.label || 'related to';
+    } else if (typeof r === 'string') {
+      const parsed = _parseRelString(r, known);
+      if (!parsed) continue;
+      from = parsed.from; to = parsed.to; verb = parsed.verb;
+    } else {
+      continue;
+    }
+    addNode(from, 'entity');   // safety — orphan endpoints become nodes
+    addNode(to,   'entity');
+    edges.push({
+      id: 'e' + (edgeId++),
+      from, to,
+      label: verb,
+      arrows: 'to',
+      color: { color: '#5b8af7', highlight: '#7c5bf7' },
+      font: { color: '#cbd5e1', size: 11, strokeWidth: 0,
+              background: 'rgba(15,17,23,0.85)', align: 'middle' },
+      smooth: { type: 'curvedCW', roundness: 0.15 },
+    });
+  }
+  return { nodes, edges };
+}
+
+function renderRelGraph(refit) {
+  const empty = document.getElementById('rel-graph-empty');
+  const container = document.getElementById('rel-graph');
+  if (typeof vis === 'undefined' || !vis.Network) {
+    container.innerHTML = '<div class="rel-graph-empty">Graph library couldn\'t load (offline?). Use the List tab.</div>';
+    return;
+  }
+  const data = _buildRelGraphData();
+  if (!data.nodes.length || !data.edges.length) {
+    empty.style.display = 'block';
+    container.style.display = 'none';
+    if (_relNetwork) { _relNetwork.destroy(); _relNetwork = null; }
+    return;
+  }
+  empty.style.display = 'none';
+  container.style.display = '';
+  const options = {
+    physics: {
+      enabled: true,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: { gravitationalConstant: -50, springLength: 140, springConstant: 0.08 },
+      stabilization: { iterations: 200, fit: true },
+    },
+    interaction: { hover: true, tooltipDelay: 200, zoomView: true, dragView: true },
+    nodes: { borderWidth: 1, shadow: false, shapeProperties: { borderRadius: 6 } },
+    edges: { width: 1.5, selectionWidth: 2, hoverWidth: 0.5 },
+    layout: { improvedLayout: true },
+  };
+  if (_relNetwork) _relNetwork.destroy();
+  _relNetwork = new vis.Network(container,
+    { nodes: new vis.DataSet(data.nodes), edges: new vis.DataSet(data.edges) },
+    options);
+  if (refit) _relNetwork.once('stabilizationIterationsDone', () => _relNetwork.fit());
+}
+
+function fitRelGraph() {
+  if (_relNetwork) _relNetwork.fit({ animation: { duration: 350 } });
+}
 
 // ── CQs ───────────────────────────────────────────────────────────────────
 function addCQ() {
