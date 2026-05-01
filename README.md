@@ -77,7 +77,7 @@ Companion documents (architects, leadership, governance):
 - [docs/framework-whitepaper.md](docs/framework-whitepaper.md) — full framework specification v1.1
 - [docs/executive-summary.md](docs/executive-summary.md) — non-technical overview
 - [docs/technical-blueprint.md](docs/technical-blueprint.md) — phase-by-phase implementation guide
-- [test-plan.md](test-plan.md) · [test-plan-5g.md](test-plan-5g.md) — first-contact test plans
+- [tests/test-plan.md](tests/test-plan.md) · [tests/test-plan-5g.md](tests/test-plan-5g.md) — first-contact test plans
 - [ontology_governance_checklist.csv](ontology_governance_checklist.csv) — 34-criterion checklist
 
 ---

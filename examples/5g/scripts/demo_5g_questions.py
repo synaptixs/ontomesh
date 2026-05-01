@@ -1,7 +1,7 @@
 """Question bank for the 5G-NF first-contact demo.
 
 Each question is anchored to a real-world 5G semantic issue documented in a
-3GPP / GSMA / O-RAN specification. See test-plan-5g.md §1 for the R-table that
+3GPP / GSMA / O-RAN specification. See tests/test-plan-5g.md §1 for the R-table that
 maps each question to its authoritative reference.
 """
 
