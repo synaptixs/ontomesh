@@ -283,6 +283,113 @@ def test_sql_invalid_returns_parse_error():
     assert any(e.code in ("SQL_PARSE", "NO_TABLES") for e in r.errors)
 
 
+# ── Step 4: comment extraction ────────────────────────────────────────────
+
+def test_postgres_comment_on_column_overrides_inline():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    users = next(e for e in r.session["entities"] if e["label"] == "Users")
+    by_name = {p["name"]: p for p in users["properties"]}
+    # COMMENT ON COLUMN users.email wins over no inline comment.
+    assert "Primary contact address" in by_name["email"].get("description", "")
+
+
+def test_postgres_comment_on_table_attaches_to_entity():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    tenants = next(e for e in r.session["entities"] if e["label"] == "Tenants")
+    assert "customer organisation" in tenants["description"].lower()
+
+
+def test_postgres_inline_dash_dash_comment_attaches_to_column():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    tenants = next(e for e in r.session["entities"] if e["label"] == "Tenants")
+    by_name = {p["name"]: p for p in tenants["properties"]}
+    # `id INTEGER PRIMARY KEY,    -- Surrogate identifier.`
+    assert "Surrogate identifier" in by_name["id"].get("description", "")
+
+
+def test_postgres_block_comment_above_column():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    tenants = next(e for e in r.session["entities"] if e["label"] == "Tenants")
+    by_name = {p["name"]: p for p in tenants["properties"]}
+    # The /* ... */ block sits on the line above is_isolated.
+    assert "Single-tenant" in by_name["is_isolated"].get("description", "")
+
+
+def test_mysql_inline_comment_keyword_attaches():
+    r = imp.parse_and_validate(_read("mysql_with_inline_comments.sql"))
+    products = next(e for e in r.session["entities"] if e["label"] == "Products")
+    by_name = {p["name"]: p for p in products["properties"]}
+    assert "Stock-keeping unit" in by_name["sku"].get("description", "")
+    assert "Customer-facing"   in by_name["title"].get("description", "")
+    assert "minor currency"    in by_name["price_cents"].get("description", "")
+
+
+def test_sql_column_description_coverage_in_stats():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    pct = r.stats.get("sql_column_description_coverage_pct")
+    assert pct is not None and pct > 0
+
+
+# ── Step 4: soft-FK suggestions ───────────────────────────────────────────
+
+def test_soft_fk_suggested_for_user_id_with_no_declared_fk():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    softs = [s for s in r.suggestions if s.code == "SUGGEST_SOFT_FK"]
+    # orders.user_id has no FOREIGN KEY but matches the users table → suggest.
+    assert any("orders" in s.location and "user_id" in s.location for s in softs), softs
+    assert any("Users" in s.fix_hint for s in softs)
+
+
+def test_declared_fk_suppresses_soft_fk_for_same_column():
+    # users.tenant_id has a real REFERENCES tenants(id) — no soft-FK suggestion.
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    softs = [s for s in r.suggestions if s.code == "SUGGEST_SOFT_FK"]
+    assert not any("users" in s.location and "tenant_id" in s.location for s in softs)
+
+
+def test_soft_fk_count_in_stats():
+    r = imp.parse_and_validate(_read("postgres_with_comments.sql"))
+    assert r.stats.get("soft_fk_count", 0) >= 1
+
+
+def test_singular_of_plural_table_match():
+    # mysql_with_inline_comments.sql has `inventory.warehouse_id` with no FK
+    # and no `warehouses` table → no suggestion (we don't invent targets).
+    # `inventory.product_id` has a declared FK → no suggestion either.
+    r = imp.parse_and_validate(_read("mysql_with_inline_comments.sql"))
+    softs = [s for s in r.suggestions if s.code == "SUGGEST_SOFT_FK"]
+    # Sanity: no false positives in this fixture.
+    assert not any("warehouse_id" in s.location for s in softs)
+    assert not any("product_id"   in s.location for s in softs)
+
+
+def test_pluralisation_helpers_round_trip():
+    # English heuristics, not linguistics — we just need them to be
+    # consistent enough that customer/customers and category/categories match.
+    assert imp._singularise("customers") == "customer"
+    assert imp._singularise("categories") == "category"
+    assert imp._singularise("addresses")  == "address"
+    assert "customers"  in imp._pluralise("customer")
+    assert "categories" in imp._pluralise("category")
+
+
+# ── Step 4: COMMENT ON TABLE survives across statements ───────────────────
+
+def test_comment_on_table_works_when_placed_at_end():
+    # The fixture puts COMMENT ON TABLE *after* every CREATE TABLE — ensure
+    # the regex pass picks it up regardless of position.
+    sql = b"""
+CREATE TABLE x (id INT);
+CREATE TABLE y (id INT);
+COMMENT ON TABLE x IS 'first table';
+COMMENT ON TABLE y IS 'second table';
+"""
+    r = imp.parse_and_validate(sql, filename="x.sql")
+    descs = {e["label"]: e["description"] for e in r.session["entities"]}
+    assert descs.get("X") == "first table"
+    assert descs.get("Y") == "second table"
+
+
 # ── HTTP routes (Flask test client) ──────────────────────────────────────
 
 @pytest.fixture
