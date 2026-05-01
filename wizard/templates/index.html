@@ -467,7 +467,12 @@
         </button>
       </div>
       <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
-      <button class="btn-run" id="btn-run-pipeline" onclick="runPipeline()">▶ Run Pipeline</button>
+      <!-- Sidebar nav button — does NOT run the pipeline. It only takes
+           you to step 6 (Generate), where the actual run button lives
+           with its prerequisite checklist. Disabled until at least the
+           domain name is set; tooltip explains why. -->
+      <button class="btn-run" id="btn-goto-generate" onclick="goStep('generate')"
+              title="Go to step 6 (Generate)">Go to Generate →</button>
     </div>
   </aside>
 
@@ -662,6 +667,27 @@
     <div class="step-panel" id="step-generate">
       <div class="step-title">Generate Ontology</div>
       <div class="step-subtitle">Review your session and run the toolkit pipeline to generate OWL, SHACL, JSON-LD, SKOS, and the governance report.</div>
+
+      <!-- Pre-flight + run CTA. Surfaces prereqs first so the user knows
+           why the button is disabled (or what's missing for a quality run). -->
+      <div class="card" id="preflight-card">
+        <h3>Pre-flight check &amp; run</h3>
+        <div class="box-help">
+          The pipeline reads your wizard session, generates the full ontology bundle (OWL, SHACL, JSON-LD, SKOS), runs the SPARQL competency-question tests, and writes the HTML governance report. Typical run on a small domain: 3–10 seconds.
+          <ul>
+            <li><b>Required:</b> a domain name and at least one entity. Without these the pipeline runs but produces an empty graph.</li>
+            <li><b>Recommended:</b> a base IRI and at least one competency question. CQs drive the governance scorecard, so a run without them won't score above the minimum gate.</li>
+            <li><b>Reversible:</b> nothing in your input is changed. Outputs land under <code>output/</code> (or your wizard project directory) and can be regenerated freely.</li>
+          </ul>
+        </div>
+        <ul id="preflight-list" style="list-style:none; padding:0; margin:0 0 14px 0; display:flex; flex-direction:column; gap:6px"></ul>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+          <button class="btn btn-primary" id="btn-run-pipeline" onclick="runPipeline()" disabled>
+            ▶ Run Pipeline
+          </button>
+          <span id="preflight-summary" style="font-size:12px; color:var(--muted)"></span>
+        </div>
+      </div>
 
       <div class="card">
         <h3>Session Summary</h3>
@@ -1126,7 +1152,15 @@ function goStep(name) {
   document.getElementById('step-'+name).classList.add('active');
   document.querySelector(`[data-step="${name}"]`).classList.add('active');
   currentStep = name;
-  if (name === 'generate') renderSummary();
+  if (name === 'generate') {
+    renderSummary();
+    _renderPreflight();      // refresh checklist + run-button gating on entry
+  }
+  // Reset main scroll so the user lands at the top of the new step
+  // (especially important for Generate, where the Pre-flight card needs
+  // to be visible before the run CTA).
+  const main = document.querySelector('.main');
+  if (main) main.scrollTop = 0;
 }
 
 document.querySelectorAll('.step-nav li').forEach(li => {
@@ -1533,6 +1567,14 @@ function toggleAllPhases(cb) {
 }
 
 async function runPipeline() {
+  // Final guard — pre-flight check might be stale if the user mutated
+  // the session in another tab. Re-evaluate before sending.
+  const failing = _preflightChecks().filter(c => c.req && !c.ok);
+  if (failing.length) {
+    showToast('Resolve required prerequisites first: ' +
+              failing.map(c => c.label.split(' (')[0]).join(', '));
+    return;
+  }
   const phases = Array.from(document.querySelectorAll('.ph-cb:checked')).map(c=>c.value);
   const log = document.getElementById('pipeline-log');
   const badge = document.getElementById('pipeline-badge');
@@ -1540,6 +1582,7 @@ async function runPipeline() {
   badge.style.display = 'inline-flex';
   badge.className = 'badge running';
   badge.textContent = '⏳ Running';
+  window._pipelineRunning = true;
   document.getElementById('btn-run-pipeline').disabled = true;
 
   try {
@@ -1553,7 +1596,8 @@ async function runPipeline() {
     log.innerHTML = `<span class="log-err">Failed to start: ${e}</span>`;
     badge.className = 'badge';
     badge.textContent = '✗ Error';
-    document.getElementById('btn-run-pipeline').disabled = false;
+    window._pipelineRunning = false;
+    _renderPreflight();
   }
 }
 
@@ -1575,7 +1619,8 @@ async function pollPipelineStatus() {
     } else {
       badge.className = 'badge done';
       badge.textContent = '✓ Done';
-      document.getElementById('btn-run-pipeline').disabled = false;
+      window._pipelineRunning = false;
+      _renderPreflight();   // re-evaluate prereq state + re-enable the button
       loadArtifacts();
     }
   } catch(e) {
@@ -1643,6 +1688,103 @@ function render() {
   renderCQs();
   _paintDomainPills();
   vecRenderExamples();
+  _renderPreflight();
+}
+
+// ── Pre-flight check (Generate step) ────────────────────────────────────
+//
+// Drives both the in-step checklist and the gating of the run button.
+// Two tiers:
+//   required    — without these the pipeline produces no useful output;
+//                 the run button stays disabled until they pass.
+//   recommended — the pipeline runs without them but the result is
+//                 weaker (e.g. governance scorecard low because no CQs);
+//                 surfaced as ⚠ but doesn't block.
+//
+// Also gates the sidebar's "Go to Generate" button: if the user hasn't
+// even named the domain, jumping to step 6 is premature — keep them on
+// step 1 until they do.
+
+function _preflightChecks() {
+  const ents = (session.entities || []).filter(e => !e.is_event);
+  const evts = (session.events   || []).length
+            +  (session.entities || []).filter(e => e.is_event).length;
+  const cqs  = (session.competency_questions || []).length;
+  const dn   = (session.domain && session.domain.name)        || '';
+  const iri  = (session.domain && session.domain.base_iri)    || '';
+  return [
+    { req: true,  ok: !!dn,           label: 'Domain name set',
+      hint: 'Give your ontology a name on Step 1 — required for the IRI namespace.' },
+    { req: true,  ok: ents.length>=1, label: `Entities defined (${ents.length})`,
+      hint: 'Add at least one entity on Step 2 — without entities the OWL graph is empty.' },
+    { req: false, ok: !!iri,          label: 'Base IRI set',
+      hint: 'A stable base IRI keeps your ontology referenceable from external systems. Step 1.' },
+    { req: false, ok: cqs>=1,         label: `Competency questions (${cqs})`,
+      hint: 'CQs drive the SPARQL test suite and the governance scorecard. Add a few on Step 5.' },
+    { req: false, ok: true,           label: `Events defined (${evts})`,
+      hint: 'Events are optional. They become subclasses of a base Event class with PROV-O timestamps.' },
+  ];
+}
+
+function _renderPreflight() {
+  const list = document.getElementById('preflight-list');
+  if (!list) return;
+  const checks = _preflightChecks();
+  const requiredFailing = checks.filter(c => c.req && !c.ok);
+  const recommendedFailing = checks.filter(c => !c.req && !c.ok);
+
+  list.innerHTML = checks.map(c => {
+    const icon = c.ok ? '✓' : (c.req ? '✗' : '⚠');
+    const colour = c.ok ? 'var(--success)' : (c.req ? 'var(--danger)' : 'var(--warn)');
+    const bgVar = c.ok ? '--success-soft' : (c.req ? '--danger-soft' : '--warn-soft');
+    return `<li style="display:flex;gap:10px;align-items:flex-start;font-size:13px">
+      <span style="display:inline-flex;align-items:center;justify-content:center;
+                   width:22px;height:22px;border-radius:50%;flex-shrink:0;
+                   background:var(${bgVar});color:${colour};font-weight:700;font-size:12px">${icon}</span>
+      <span style="flex:1">
+        <div><b style="color:var(--text);font-weight:500">${escapeHtml(c.label)}</b>
+          ${c.req ? '<span class="badge" style="margin-left:6px">required</span>'
+                  : '<span class="badge" style="margin-left:6px">recommended</span>'}</div>
+        ${c.ok ? '' : `<div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(c.hint)}</div>`}
+      </span>
+    </li>`;
+  }).join('');
+
+  // Gate the in-step run button.
+  const runBtn = document.getElementById('btn-run-pipeline');
+  if (runBtn && !window._pipelineRunning) {
+    runBtn.disabled = requiredFailing.length > 0;
+    runBtn.title = requiredFailing.length
+      ? 'Resolve required prerequisites first: ' +
+        requiredFailing.map(c => c.label.split(' (')[0]).join(', ')
+      : 'Run the toolkit pipeline now';
+  }
+
+  // One-line summary next to the button.
+  const sum = document.getElementById('preflight-summary');
+  if (sum) {
+    if (requiredFailing.length) {
+      sum.textContent = `${requiredFailing.length} required item${requiredFailing.length===1?'':'s'} blocking — fix above to enable.`;
+      sum.style.color = 'var(--danger)';
+    } else if (recommendedFailing.length) {
+      sum.textContent = `Ready. ${recommendedFailing.length} recommended item${recommendedFailing.length===1?'':'s'} skipped — pipeline will still run, governance score may be lower.`;
+      sum.style.color = 'var(--warn)';
+    } else {
+      sum.textContent = 'All checks pass — ready to generate.';
+      sum.style.color = 'var(--success)';
+    }
+  }
+
+  // Gate the sidebar "Go to Generate" button: needs at least a domain name
+  // so the user has *something* to navigate over.
+  const sb = document.getElementById('btn-goto-generate');
+  if (sb) {
+    const hasName = !!(session.domain && session.domain.name);
+    sb.disabled = !hasName;
+    sb.title = hasName
+      ? 'Go to step 6 (Generate)'
+      : 'Set a domain name on Step 1 first.';
+  }
 }
 
 // ── Domain badge in step titles ──────────────────────────────────────────
