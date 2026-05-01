@@ -68,7 +68,6 @@ Three runnable demos under [`examples/`](examples/) — each ~5 seconds, no API 
 | **[docs/integrate.md](docs/integrate.md)** | First contact. 5-minute SQLite path, 30-minute existing-DB path, what to ignore |
 | **[install.md](install.md)** | Database driver issues, every connection-string format, pip wheel install, full CLI reference |
 | **[features.md](features.md)** | What every phase, artifact, and runtime component does — the capability map and reference |
-| **[gates.md](gates.md)** | Governance scorecard (34 criteria), exit gates, 43-test SPARQL CQ matrix |
 | **[docs/sdk.md](docs/sdk.md)** | Python SDK — `RuntimeClient`, `Grounder`, `InputGate`, `OutputGate`, all adapters |
 | [examples/README.md](examples/README.md) | Index of runnable demos |
 

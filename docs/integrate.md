@@ -1,6 +1,6 @@
 # Integration guide — get value in 5 minutes, not 5 days
 
-The shortest path from *clone the repo* to *running ontology against your data*. If you read nothing else in this repository, read this. Deeper reference lives in [install.md](../install.md), [features.md](../features.md), and [gates.md](../gates.md).
+The shortest path from *clone the repo* to *running ontology against your data*. If you read nothing else in this repository, read this. Deeper reference lives in [install.md](../install.md) and the docs in this directory.
 
 ## Contents
 
@@ -120,18 +120,18 @@ These are **opt-in**. Skip them on day 1 — the pipeline runs fine without any 
 
 | When you want to… | Install | Read |
 |---|---|---|
-| Wire LLM calls through the SHACL gates and OWL grounding | `pip install -r requirements-runtime.txt` | [features.md §8 Runtime](../features.md#8-runtime--connecting-the-toolkit-to-ai-and-llms) · [docs/sdk.md](sdk.md) |
+| Wire LLM calls through the SHACL gates and OWL grounding | `pip install -r requirements-runtime.txt` | [docs/runtime.md](runtime.md) · [docs/sdk.md](sdk.md) |
 | Monitor production data drift against the ontology | `pip install -r requirements-drift.txt` | [examples/infodrift/README.md](../examples/infodrift/README.md) |
-| Use the browser-based wizard | `pip install -r requirements-advanced.txt` | [install.md §2](../install.md#2-onboarding--start-a-new-project) |
-| Publish to Fuseki / Stardog / Neptune / GraphDB | `pip install -r requirements-advanced.txt` (Neptune only) | [features.md §9](../features.md#9-phase-3--scale--community) |
-| Federate with another organisation's ontology | core only | [features.md §12](../features.md#12-generation-2--cross-enterprise-federated-ontology-network) |
-| Generate compliance evidence bundles | core only | [features.md §13](../features.md#13-generation-2--regulatory-ai-compliance-evidence-engine) |
+| Use the browser-based wizard | `pip install -r requirements-advanced.txt` | [install.md §2](../install.md#2-start-a-new-project-wizard) |
+| Publish to Fuseki / Stardog / Neptune / GraphDB | `pip install -r requirements-advanced.txt` (Neptune only) | [docs/advanced.md](advanced.md) |
+| Federate with another organisation's ontology | core only | [docs/advanced.md](advanced.md) |
+| Generate compliance evidence bundles | core only | [docs/advanced.md](advanced.md) |
 
 ---
 
 ## You probably don't need (yet)
 
-These are advanced features. Useful when you have a specific need — distracting otherwise. Each lives behind a `--phase` flag and is documented inside [features.md](../features.md).
+These are advanced features. Useful when you have a specific need — distracting otherwise. Each lives behind a `--phase` flag and is documented inside [docs/advanced.md](advanced.md).
 
 - `--phase reasoner` — OWL 2 consistency checking via ROBOT (needs Java + a 100 MB jar)
 - `--phase modular` — splits the ontology into importable modules with cycle detection
@@ -153,7 +153,9 @@ Run `python3 toolkit.py --help` to see every flag, but ignore most of them on fi
 |---|---|
 | **This file** | First contact, integration recipe, "what's the minimum?" |
 | [install.md](../install.md) | You hit a database driver issue or want every connection-string format |
-| [features.md](../features.md) | You want to know what a specific phase, artifact, or runtime component does |
-| [gates.md](../gates.md) | You're owning ontology governance and need the scorecard / exit-gate matrix |
+| [features.md](../features.md) | You want to see the full capability map and decide where to read next |
+| [docs/artifacts.md](artifacts.md) | You want to know what a specific generated file is for |
+| [docs/runtime.md](runtime.md) | You're wiring LLM calls through the toolkit's gates |
+| [docs/advanced.md](advanced.md) | You're enabling drift monitoring, federation, compliance, vector retrieval, etc. |
 | [docs/sdk.md](sdk.md) | You're writing application code that calls `RuntimeClient`, `Grounder`, etc. |
 | [examples/](../examples/) | You want to see a runnable end-to-end demo |
