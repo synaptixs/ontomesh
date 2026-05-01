@@ -188,6 +188,89 @@ def load_template(name: str):
     return jsonify({"error": f"Template '{name}' not found"}), 404
 
 
+# ── /api/import — file-import (issue #16) ──────────────────────────────────
+#
+# Two ways to call:
+#   multipart/form-data: file=<bytes> [+ format=auto|json|sql]
+#   application/json:    {content: "<raw text>", format: "auto", filename?, dialect?}
+#
+# Returns the parse + validate result without persisting. The browser
+# wizard's review modal then lets the user Accept (→ /api/import/commit)
+# or Reject. Persistence is deferred so a malformed import can never
+# stomp the in-progress session.
+@app.route("/api/import", methods=["POST"])
+def import_file():
+    try:
+        from . import importer as _imp
+    except ImportError:
+        # Allow flat-import fallback if /wizard isn't a package context.
+        sys.path.insert(0, HERE)
+        import importer as _imp                  # type: ignore[no-redef]
+
+    raw: bytes = b""
+    fmt = "auto"; dialect = "auto"; filename = None
+    if request.files and "file" in request.files:
+        f = request.files["file"]
+        raw = f.read()
+        filename = f.filename
+        fmt = (request.form.get("format") or "auto").lower()
+        dialect = (request.form.get("dialect") or "auto").lower()
+    else:
+        body = request.get_json(silent=True) or {}
+        text = body.get("content")
+        if isinstance(text, str):
+            raw = text.encode("utf-8")
+        elif isinstance(body, dict) and body:
+            # Treat the entire posted JSON object as the file content.
+            raw = json.dumps(body).encode("utf-8")
+        fmt = (body.get("format") or "auto").lower()
+        dialect = (body.get("dialect") or "auto").lower()
+        filename = body.get("filename")
+
+    if not raw:
+        return jsonify({"error": "No file or content supplied (POST a multipart 'file' or a JSON body with 'content')."}), 400
+
+    existing = _load_session()
+    result = _imp.parse_and_validate(
+        raw, fmt=fmt, dialect=dialect,
+        existing_session=existing, filename=filename,
+    )
+    return jsonify(result.to_dict()), (200 if result.ok or result.session else 200)
+
+
+@app.route("/api/import/commit", methods=["POST"])
+def import_commit():
+    """Persist a previously-parsed import as the current wizard session.
+
+    Body: the `session` object returned by /api/import. The route does a
+    final-guard re-validate; if errors surface again it refuses to write.
+    """
+    try:
+        from . import importer as _imp
+    except ImportError:
+        sys.path.insert(0, HERE)
+        import importer as _imp                  # type: ignore[no-redef]
+
+    body = request.get_json(force=True) or {}
+    session = body.get("session")
+    if not isinstance(session, dict):
+        return jsonify({"error": "Body must be {session: {...}}"}), 400
+
+    # Final guard — same validators that ran at parse time.
+    raw = json.dumps(session).encode("utf-8")
+    result = _imp.parse_and_validate(raw, fmt="json", existing_session=_load_session())
+    if not result.ok:
+        return jsonify({
+            "error": "Validation failed at commit time",
+            "errors": [i.to_dict() for i in result.errors],
+        }), 400
+
+    _save_session(result.session)
+    return jsonify({"ok": True, "session": result.session,
+                    "warnings": [i.to_dict() for i in result.warnings],
+                    "stats": result.stats})
+
+
 @app.route("/api/generate", methods=["POST"])
 def generate():
     global _pipeline_running, _pipeline_log

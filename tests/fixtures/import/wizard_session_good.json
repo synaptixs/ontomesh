@@ -1,0 +1,36 @@
+{
+  "domain": {
+    "name": "Smart Building Operations",
+    "description": "Real-time sensing, HVAC control, occupancy tracking, access management, and maintenance ticketing across a portfolio of commercial smart buildings.",
+    "base_iri": "https://ontology.example.com/smart_building/",
+    "industry": "smart_building"
+  },
+  "entities": [
+    {
+      "name": "building", "label": "Building",
+      "description": "A physical building in the portfolio.",
+      "sensitivity": "Internal", "is_event": false, "properties": []
+    },
+    {
+      "name": "floor", "label": "Floor",
+      "description": "A floor within a building.",
+      "sensitivity": "Internal", "is_event": false, "properties": []
+    },
+    {
+      "name": "tenant", "label": "Tenant",
+      "description": "An organisation leasing rooms in a building.",
+      "sensitivity": "Confidential", "is_event": false, "properties": []
+    }
+  ],
+  "events": [
+    { "name": "access_event", "label": "Access Event",
+      "description": "An entry/exit event raised when an Access Card is presented." }
+  ],
+  "relationships": [
+    { "from_entity": "Floor",  "label": "located in", "to_entity": "Building" },
+    { "from_entity": "Tenant", "label": "occupies",   "to_entity": "Floor"    }
+  ],
+  "competency_questions": [
+    { "id": "CQ-01", "question": "Which floors does each tenant occupy?", "priority": "High" }
+  ]
+}
