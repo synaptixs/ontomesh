@@ -22,47 +22,85 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 
+# Core (always installed) — minimum to run phases 1–5, tmf, test, report.
+# ~50 MB on disk, no compilation. Everything else is opt-in via extras.
 dependencies = [
-    # RDF / OWL / SHACL
     "rdflib>=7.0.0",
     "pyshacl>=0.26.0",
     "sparqlwrapper>=2.0.0",
-    # LLM adapters
-    "anthropic>=0.34.0",
-    "openai>=1.40.0",
-    "google-cloud-aiplatform>=1.60.0",
-    "requests>=2.32.3",
-    # Drift monitoring (P1–P5 integration)
-    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
-    "drain3>=0.9",
-    # NLP
-    "spacy>=3.7.4",
-    # Wizard
-    "flask>=3.0.3",
-    "flask-cors>=4.0.1",
-    # Reporting / templating
     "pyyaml>=6.0.2",
     "jinja2>=3.1.4",
 ]
 
 [project.optional-dependencies]
+# ── Database drivers (per-driver) ────────────────────────────────────────
 postgres = ["psycopg2-binary>=2.9.9"]
 mysql    = ["mysql-connector-python>=8.3.0"]
 mssql    = ["pyodbc>=5.1.0"]
 oracle   = ["oracledb>=2.3.0"]
 db2      = ["ibm_db>=3.2.3", "ibm_db_dbi>=3.2.3"]
-oci      = ["oci>=2.126.0"]
-neptune  = ["boto3>=1.35.0"]
-test     = ["pytest>=8.2.2"]
-all = [
+db = [
     "psycopg2-binary>=2.9.9",
     "mysql-connector-python>=8.3.0",
     "pyodbc>=5.1.0",
     "oracledb>=2.3.0",
     "ibm_db>=3.2.3",
     "ibm_db_dbi>=3.2.3",
+]
+
+# ── Runtime LLM adapters ─────────────────────────────────────────────────
+runtime = [
+    "anthropic>=0.34.0",
+    "openai>=1.40.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "requests>=2.32.3",
     "oci>=2.126.0",
+]
+# Per-vendor subset for users who only want one adapter
+anthropic = ["anthropic>=0.34.0"]
+openai    = ["openai>=1.40.0"]
+vertex    = ["google-cloud-aiplatform>=1.60.0"]
+ollama    = ["requests>=2.32.3"]
+oci       = ["oci>=2.126.0"]
+
+# ── Drift monitoring (runtime/drift/) ────────────────────────────────────
+drift = [
+    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drain3>=0.9",
+]
+
+# ── Advanced / opt-in ────────────────────────────────────────────────────
+wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1"]
+discover = ["spacy>=3.7.4"]
+neptune  = ["boto3>=1.35.0"]
+
+# ── Testing ──────────────────────────────────────────────────────────────
+test     = ["pytest>=8.2.2"]
+
+# ── Convenience aggregate ────────────────────────────────────────────────
+all = [
+    # db
+    "psycopg2-binary>=2.9.9",
+    "mysql-connector-python>=8.3.0",
+    "pyodbc>=5.1.0",
+    "oracledb>=2.3.0",
+    "ibm_db>=3.2.3",
+    "ibm_db_dbi>=3.2.3",
+    # runtime
+    "anthropic>=0.34.0",
+    "openai>=1.40.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "requests>=2.32.3",
+    "oci>=2.126.0",
+    # drift
+    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drain3>=0.9",
+    # advanced
+    "flask>=3.0.3",
+    "flask-cors>=4.0.1",
+    "spacy>=3.7.4",
     "boto3>=1.35.0",
+    # test
     "pytest>=8.2.2",
 ]
 
