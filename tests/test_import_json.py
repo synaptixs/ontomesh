@@ -213,11 +213,74 @@ def test_diff_against_existing_session():
     assert r.diff["removed"]["entities"] == 0
 
 
-# ── SQL stub ──────────────────────────────────────────────────────────────
+# ── SQL parser (sqlglot) ──────────────────────────────────────────────────
 
-def test_sql_path_returns_not_implemented_error():
-    r = imp.parse_and_validate(b"CREATE TABLE foo (id INT);", filename="x.sql")
-    assert any(e.code == "SQL_NOT_IMPLEMENTED" for e in r.errors)
+sqlglot = pytest.importorskip("sqlglot")
+
+
+def test_sql_postgres_parses_three_tables():
+    r = imp.parse_and_validate(_read("postgres_orders.sql"), filename="postgres_orders.sql")
+    assert r.format == "sql", r.errors
+    assert r.stats["table_count"] == 3
+    assert r.stats["sql_dialect"] == "postgres"   # detected from BIGSERIAL
+    s = r.session
+    # Customers + Orders are entities; order_event_log routes to events.
+    entity_labels = {e["label"] for e in s["entities"]}
+    event_labels  = {e["label"] for e in s["events"]}
+    assert "Customers" in entity_labels
+    assert "Orders"    in entity_labels
+    assert "Order Event Log" in event_labels
+
+
+def test_sql_postgres_fk_becomes_relationship():
+    r = imp.parse_and_validate(_read("postgres_orders.sql"))
+    # orders.customer_id REFERENCES customers(id) → "Orders → references → Customers"
+    rels = r.session["relationships"]
+    assert any(rel["from_entity"] == "Orders" and rel["to_entity"] == "Customers"
+               for rel in rels), rels
+    # table-level FK (order_event_log → orders)
+    assert any(rel["from_entity"] == "Order Event Log" and rel["to_entity"] == "Orders"
+               for rel in rels)
+
+
+def test_sql_postgres_xsd_type_mapping():
+    r = imp.parse_and_validate(_read("postgres_orders.sql"))
+    customers = next(e for e in r.session["entities"] if e["label"] == "Customers")
+    by_name = {p["name"]: p for p in customers["properties"]}
+    # Plain types map to their XSD equivalents (carried via type field — UI shows "VARCHAR"
+    # but the XSD is recorded for OWL/SHACL generation downstream).
+    assert by_name["email"]["type"].upper().startswith("VARCHAR")
+    assert by_name["created_at"]["type"].upper().startswith("TIMESTAMP")
+
+
+def test_sql_mysql_dialect_detected_and_parsed():
+    r = imp.parse_and_validate(_read("mysql_payments.sql"), filename="mysql_payments.sql")
+    assert r.format == "sql"
+    assert r.stats["sql_dialect"] == "mysql"
+    labels = {e["label"] for e in r.session["entities"]}
+    assert "Accounts" in labels and "Transactions" in labels
+    # FK → relationship even when declared at table level
+    rels = r.session["relationships"]
+    assert any(rel["from_entity"] == "Transactions" and rel["to_entity"] == "Accounts" for rel in rels)
+
+
+def test_sql_sensitivity_suggestion_from_pii_columns():
+    r = imp.parse_and_validate(_read("postgres_orders.sql"))
+    # customers.email → property-level Confidential suggestion
+    sug = [s for s in r.suggestions if s.code == "SUGGEST_PROPERTY_SENSITIVITY"]
+    assert any("email" in s.message for s in sug)
+
+
+def test_sql_no_create_table_returns_clean_error():
+    r = imp.parse_and_validate(b"-- just a comment\nDROP TABLE foo;", filename="empty.sql")
+    assert r.format == "sql"
+    assert any(e.code == "NO_TABLES" for e in r.errors)
+
+
+def test_sql_invalid_returns_parse_error():
+    r = imp.parse_and_validate(b"CREATE TABLE   not    valid syntax\n;", filename="x.sql")
+    # Either NO_TABLES (sqlglot tolerated it but produced nothing) or SQL_PARSE.
+    assert any(e.code in ("SQL_PARSE", "NO_TABLES") for e in r.errors)
 
 
 # ── HTTP routes (Flask test client) ──────────────────────────────────────

@@ -74,16 +74,85 @@ PII_HINTS_RESTRICTED = (
     "card_cvv", "cvv2", "pin",
 )
 
-#: Naming patterns that suggest an entity is event-shaped even when the
-#: source didn't tag it as such.
+#: Naming patterns that suggest an entity is event-shaped. Conservative
+#: by design — false positives would silently move common-domain entities
+#: (Transaction, Ticket, …) into the Events bucket. We only fire on:
+#:   - clear suffix forms (`_log`, `_audit`, `_history`, …) — strong signal;
+#:   - words that are nouns-of-occurrence in any domain (`event`, `incident`,
+#:     `alarm`, `alert`) — fire even bare.
 EVENT_NAME_HINTS = (
-    "_event", "_log", "_history", "_audit", "_journal",
-    "event", "alert", "incident", "transaction", "ticket", "alarm",
+    "_event", "_events",
+    "_log", "_logs",
+    "_history",
+    "_audit", "_audits",
+    "_journal",
+    "event", "incident", "alarm", "alert",
 )
 
 #: IRI-unsafe characters in entity / relationship identifiers. Names are
 #: required to be safely embeddable in the generated OWL IRI.
 IRI_UNSAFE = re.compile(r"[\s<>\"'`{}|\\^\[\]]")
+
+
+# ── SQL → XSD data-type map ───────────────────────────────────────────────
+# Keys are upper-case sqlglot DataType.Type names. The mapping is
+# deliberately coarse — the goal is "good enough that the toolkit can
+# pick a sensible OWL/XSD restriction"; downstream code can refine.
+
+SQL_TO_XSD: Dict[str, str] = {
+    # numeric
+    "TINYINT":   "xsd:integer",  "SMALLINT": "xsd:integer",
+    "INT":       "xsd:integer",  "INTEGER":  "xsd:integer",
+    "BIGINT":    "xsd:integer",  "MEDIUMINT": "xsd:integer",
+    "DECIMAL":   "xsd:decimal",  "NUMERIC":  "xsd:decimal",
+    "FLOAT":     "xsd:float",    "DOUBLE":   "xsd:double",
+    "REAL":      "xsd:double",
+    "MONEY":     "xsd:decimal",  "SMALLMONEY": "xsd:decimal",
+    # text
+    "CHAR":      "xsd:string",   "NCHAR":    "xsd:string",
+    "VARCHAR":   "xsd:string",   "NVARCHAR": "xsd:string",
+    "TEXT":      "xsd:string",   "NTEXT":    "xsd:string",
+    "CLOB":      "xsd:string",   "LONGTEXT": "xsd:string",
+    "MEDIUMTEXT":"xsd:string",   "TINYTEXT": "xsd:string",
+    "VARCHAR2":  "xsd:string",                          # Oracle
+    "ENUM":      "xsd:string",
+    "UUID":      "xsd:string",
+    # temporal
+    "DATE":      "xsd:date",
+    "TIME":      "xsd:time",
+    "TIMESTAMP": "xsd:dateTime",
+    "DATETIME":  "xsd:dateTime", "DATETIME2": "xsd:dateTime",
+    "DATETIMEOFFSET": "xsd:dateTime",
+    "TIMESTAMPTZ":    "xsd:dateTime",
+    "INTERVAL":  "xsd:duration",
+    # boolean
+    "BOOLEAN":   "xsd:boolean",
+    "BOOL":      "xsd:boolean",
+    "BIT":       "xsd:boolean",
+    # binary / json / spatial
+    "BINARY":    "xsd:base64Binary", "VARBINARY": "xsd:base64Binary",
+    "BLOB":      "xsd:base64Binary", "BYTEA":    "xsd:base64Binary",
+    "JSON":      "rdf:JSON",         "JSONB":    "rdf:JSON",
+    "GEOMETRY":  "geo:wktLiteral",   "GEOGRAPHY": "geo:wktLiteral",
+}
+
+
+# ── Dialect sniff ─────────────────────────────────────────────────────────
+
+def _detect_sql_dialect(raw_text: str) -> str:
+    """Return a sqlglot-recognised dialect name from content cues, or "" for default."""
+    head = raw_text[:8192].upper()
+    if "JSONB" in head or "SERIAL " in head or "BIGSERIAL" in head:
+        return "postgres"
+    if "AUTO_INCREMENT" in head or "ENGINE=" in head or "TINYINT(" in head:
+        return "mysql"
+    if "NVARCHAR" in head or "IDENTITY(" in head or "[dbo]" in head.lower():
+        return "tsql"            # SQL Server
+    if "VARCHAR2" in head or "NUMBER(" in head or "NOCYCLE" in head:
+        return "oracle"
+    if "PRAGMA " in head or "AUTOINCREMENT" in head:
+        return "sqlite"
+    return ""                    # let sqlglot use its default
 
 
 # ── Dataclasses ───────────────────────────────────────────────────────────
@@ -565,6 +634,185 @@ def _diff(new: Dict[str, Any], existing: Optional[Dict[str, Any]]) -> Dict[str, 
     }
 
 
+# ── SQL parser (issue #16 step 3 — sqlglot AST → schema-shape dict) ─────
+
+def _xsd_for(sql_type: str) -> str:
+    base = sql_type.upper().split("(", 1)[0].strip()
+    return SQL_TO_XSD.get(base, "xsd:string")
+
+
+def _table_name_to_label(name: str) -> str:
+    # Strip schema-qualifier (e.g. "public.orders" → "orders").
+    bare = (name or "").split(".")[-1]
+    # Strip surrounding quotes / brackets ('"orders"', '[orders]').
+    bare = re.sub(r"^[\"'\[`]|[\"'\]`]$", "", bare)
+    return _label_from_snake(bare)
+
+
+def _parse_sql(
+    raw: bytes,
+    *,
+    dialect: str = "auto",
+    existing_session: Optional[Dict[str, Any]] = None,
+    filename: Optional[str] = None,
+) -> ImportResult:
+    """Parse a CREATE TABLE script into a schema-shape session via sqlglot."""
+    result = ImportResult(format="sql")
+    try:
+        text = raw.decode("utf-8-sig")
+    except UnicodeDecodeError as e:
+        result.errors.append(Issue(
+            code="ENCODING", severity="error",
+            message=f"File is not valid UTF-8: {e}",
+            fix_hint="Re-save the file as UTF-8.",
+        ))
+        return result
+
+    try:
+        import sqlglot
+        from sqlglot import exp
+    except ImportError:
+        result.errors.append(Issue(
+            code="SQLGLOT_MISSING", severity="error",
+            message="SQL import requires the `sqlglot` package.",
+            fix_hint="Install with: pip install sqlglot   (or: pip install -r requirements-advanced.txt)",
+        ))
+        return result
+
+    resolved_dialect = dialect.lower() if dialect and dialect != "auto" else _detect_sql_dialect(text)
+    try:
+        trees = sqlglot.parse(text, dialect=resolved_dialect or None)
+    except Exception as e:                           # broad — sqlglot raises ParseError, TokenError, etc.
+        result.errors.append(Issue(
+            code="SQL_PARSE", severity="error",
+            message=f"Could not parse SQL: {e.__class__.__name__}: {e}",
+            fix_hint=("Check syntax; if the file is dialect-specific, try passing "
+                      "dialect=postgres|mysql|tsql|oracle|sqlite explicitly."),
+        ))
+        return result
+
+    tables: List[Dict[str, Any]] = []
+    for stmt in (trees or []):
+        if not isinstance(stmt, exp.Create):
+            continue
+        kind = (stmt.args.get("kind") or "").upper()
+        if kind != "TABLE":
+            continue
+
+        tnode = stmt.find(exp.Table)
+        if tnode is None:
+            continue
+        tname_full = tnode.sql()                     # may include schema
+        tname_bare = tnode.name                      # just the table identifier
+        if not tname_bare:
+            continue
+
+        cols: List[Dict[str, Any]] = []
+        pk_cols: List[str] = []
+        fks: List[Dict[str, str]] = []
+
+        schema = stmt.find(exp.Schema)
+        if schema:
+            for el in schema.expressions:
+                # ── column ────────────────────────────────────────────
+                if isinstance(el, exp.ColumnDef):
+                    cname = el.name
+                    kind_ = el.args.get("kind")
+                    type_sql = kind_.sql() if kind_ else ""
+                    not_null = False
+                    is_pk_col = False
+                    constraints = el.args.get("constraints") or []
+                    for cs in constraints:
+                        kn = cs.kind.__class__.__name__ if cs.kind else ""
+                        if kn == "NotNullColumnConstraint":
+                            not_null = True
+                        elif kn == "PrimaryKeyColumnConstraint":
+                            is_pk_col = True
+                            pk_cols.append(cname)
+                        elif kn == "Reference":
+                            # Inline `REFERENCES other(col)` clause.
+                            ref_table = cs.kind.find(exp.Table)
+                            ref_col = None
+                            ids = cs.kind.find_all(exp.Identifier)
+                            ids = list(ids)
+                            # last identifier inside Reference is usually the column name
+                            if ref_table and ids:
+                                ref_col = ids[-1].name
+                            if ref_table:
+                                fks.append({
+                                    "column":             cname,
+                                    "references_table":   ref_table.name,
+                                    "references_column":  ref_col or "id",
+                                })
+                    cols.append({
+                        "name":        cname,
+                        "type":        type_sql or "TEXT",
+                        "xsd_type":    _xsd_for(type_sql),
+                        "required":    not_null or is_pk_col,
+                        "primary_key": is_pk_col,
+                        "description": "",
+                    })
+                # ── table-level PRIMARY KEY (a, b) ───────────────────
+                elif isinstance(el, exp.PrimaryKey):
+                    for x in el.expressions:
+                        nm = x.name if hasattr(x, "name") else x.sql()
+                        if nm: pk_cols.append(nm)
+                # ── table-level FOREIGN KEY (col) REFERENCES t (col) ─
+                elif isinstance(el, exp.ForeignKey):
+                    src_cols = [x.name for x in el.expressions if hasattr(x, "name")]
+                    ref = el.args.get("reference")
+                    ref_table = None; ref_cols: List[str] = []
+                    if ref is not None:
+                        rtab = ref.find(exp.Table)
+                        if rtab is not None:
+                            ref_table = rtab.name
+                        ref_cols = [x.name for x in ref.find_all(exp.Identifier)
+                                    if hasattr(x, "name") and x.name and x.name != ref_table]
+                    if ref_table and src_cols:
+                        for i, sc in enumerate(src_cols):
+                            fks.append({
+                                "column":            sc,
+                                "references_table":  ref_table,
+                                "references_column": ref_cols[i] if i < len(ref_cols) else "id",
+                            })
+
+        tables.append({
+            "name":         tname_bare,
+            "label":        _table_name_to_label(tname_bare),
+            "description":  "",
+            "columns":      cols,
+            "primary_key":  pk_cols or None,
+            "foreign_keys": fks,
+            "schema_qualified_name": tname_full,
+        })
+
+    if not tables:
+        result.errors.append(Issue(
+            code="NO_TABLES", severity="error",
+            message="No CREATE TABLE statements were found in the SQL file.",
+            fix_hint="The importer reads CREATE TABLE only — drop indexes, views, and stored procs are skipped.",
+        ))
+        return result
+
+    schema_doc = {
+        "domain":   _label_from_snake(filename.rsplit(".", 1)[0]) if filename else "Imported Schema",
+        "description": f"Imported from {filename or 'SQL DDL'} ({resolved_dialect or 'default'} dialect).",
+        "tables":   tables,
+    }
+    session = _norm_schema(schema_doc)
+    result.session = session
+
+    errors, warnings, suggestions = _validate_session(session)
+    result.errors.extend(errors)
+    result.warnings.extend(warnings)
+    result.suggestions.extend(suggestions)
+    result.stats = _stats(session)
+    result.stats["sql_dialect"] = resolved_dialect or "(default)"
+    result.stats["table_count"] = len(tables)
+    result.diff = _diff(session, existing_session)
+    return result
+
+
 # ── Public API ────────────────────────────────────────────────────────────
 
 def parse_and_validate(
@@ -584,13 +832,8 @@ def parse_and_validate(
     result = ImportResult()
 
     if fmt_resolved == "sql":
-        result.format = "sql"
-        result.errors.append(Issue(
-            code="SQL_NOT_IMPLEMENTED", severity="error",
-            message="SQL import isn't implemented in this build (issue #16 step 3).",
-            fix_hint="Use a JSON file (wizard session, CLI session, or {tables: [...]}) for now.",
-        ))
-        return result
+        return _parse_sql(raw, dialect=dialect, existing_session=existing_session,
+                          filename=filename)
 
     # JSON path
     try:
