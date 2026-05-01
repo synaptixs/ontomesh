@@ -17,10 +17,10 @@ RuntimeClient    — high-level SDK tying the full pipeline together
 
 Version
 -------
-__version__ = "1.0.0"
+__version__ = "3.0.0"
 """
 
-__version__ = "1.0.0"
+__version__ = "3.0.0"
 
 import os as _os
 import sys as _sys
