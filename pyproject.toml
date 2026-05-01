@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ontology-toolkit"
+version = "1.0.0"
+description = "Ontology Engineering Toolkit — DB → OWL → SHACL pipeline with runtime gates, drift monitoring, federation, and compliance."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [
+    { name = "nrohilla-fibonacci" },
+]
+keywords = ["ontology", "owl", "shacl", "rdf", "drift", "llm", "knowledge-graph"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+dependencies = [
+    # RDF / OWL / SHACL
+    "rdflib>=7.0.0",
+    "pyshacl>=0.26.0",
+    "sparqlwrapper>=2.0.0",
+    # LLM adapters
+    "anthropic>=0.34.0",
+    "openai>=1.40.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "requests>=2.32.3",
+    # Drift monitoring (P1–P5 integration)
+    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drain3>=0.9",
+    # NLP
+    "spacy>=3.7.4",
+    # Wizard
+    "flask>=3.0.3",
+    "flask-cors>=4.0.1",
+    # Reporting / templating
+    "pyyaml>=6.0.2",
+    "jinja2>=3.1.4",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg2-binary>=2.9.9"]
+mysql    = ["mysql-connector-python>=8.3.0"]
+mssql    = ["pyodbc>=5.1.0"]
+oracle   = ["oracledb>=2.3.0"]
+db2      = ["ibm_db>=3.2.3", "ibm_db_dbi>=3.2.3"]
+oci      = ["oci>=2.126.0"]
+neptune  = ["boto3>=1.35.0"]
+test     = ["pytest>=8.2.2"]
+all = [
+    "psycopg2-binary>=2.9.9",
+    "mysql-connector-python>=8.3.0",
+    "pyodbc>=5.1.0",
+    "oracledb>=2.3.0",
+    "ibm_db>=3.2.3",
+    "ibm_db_dbi>=3.2.3",
+    "oci>=2.126.0",
+    "boto3>=1.35.0",
+    "pytest>=8.2.2",
+]
+
+[project.scripts]
+ontology-toolkit = "toolkit:main"
+ontology-onboard = "onboard:main"
+
+[project.urls]
+Homepage = "https://github.com/nrohilla-fibonacci/ontology"
+Repository = "https://github.com/nrohilla-fibonacci/ontology"
+
+[tool.setuptools]
+py-modules = ["toolkit", "onboard"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "runtime*",
+    "compliance*",
+    "federation*",
+    "src*",
+    "wizard*",
+]
+exclude = [
+    "tests*",
+    "output*",
+    "db*",
+    "scripts*",
+    "docker*",
+    "__pycache__*",
+]
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.json",
+    "*.yaml",
+    "*.yml",
+    "*.ttl",
+    "*.shacl",
+    "*.html",
+    "*.j2",
+    "templates/*",
+    "static/*",
+]

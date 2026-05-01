@@ -1,0 +1,27 @@
+include README.md
+include requirements.txt
+include install.md
+include gates.md
+include features.md
+include demo.md
+include ontology_infodrift_integration.md
+
+recursive-include templates *
+recursive-include config *.json *.yaml *.yml
+recursive-include compliance/regulations *
+recursive-include compliance/bundles *
+recursive-include federation/specs *
+recursive-include federation/manifests *
+recursive-include runtime/flavors *
+recursive-include wizard/templates *
+recursive-include wizard/static *
+
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+prune output
+prune db
+prune .git
+prune .github
+prune .pytest_cache
