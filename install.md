@@ -1,41 +1,64 @@
 # Install & Onboarding
 
-How to install drivers, start a new project, and point the toolkit at an existing database.
+How to install the toolkit, point it at a database, and get a working ontology. If you're new, also read [docs/integrate.md](docs/integrate.md) — same content, even shorter.
 
 ## Contents
 
-1. [Prerequisites](#1-prerequisites)
-2. [Onboarding — start a new project](#2-onboarding--start-a-new-project)
-3. [Connecting to an existing database](#3-connecting-to-an-existing-database)
-4. [Full pipeline walkthrough](#4-full-pipeline-walkthrough)
-5. [CLI reference](#5-cli-reference)
-6. [Database backends](#6-database-backends)
+1. [Install](#1-install)
+2. [Start a new project (wizard)](#2-start-a-new-project-wizard)
+3. [Connect to an existing database](#3-connect-to-an-existing-database)
+4. [Database backends](#4-database-backends)
+5. [Going further](#5-going-further)
 
 ---
 
-## 1. Prerequisites
+## 1. Install
 
-**Core pipeline:** Python 3.8 or later. No packages required — stdlib only.
-
-**Database drivers** — install only what you need:
+**Python:** 3.10 or later.
 
 ```bash
-pip install psycopg2-binary          # PostgreSQL
-pip install mysql-connector-python   # MySQL / MariaDB
-pip install pyodbc                   # SQL Server (also needs ODBC Driver 17 or 18)
-pip install oracledb                 # Oracle / Oracle ADB (thin mode — no Instant Client)
-pip install ibm_db ibm_db_dbi        # IBM DB2 (also needs DB2 ODBC/CLI driver from IBM)
+git clone https://github.com/nrohilla-fibonacci/ontology.git
+cd ontology
+pip install -r requirements-core.txt
 ```
 
-SQLite is built into Python — no driver needed.
+That's it. ~50 MB, no compile, no API keys. The toolkit now runs against any SQLite database. For PostgreSQL / MySQL / Oracle / SQL Server / DB2, also install the matching driver — see §4 below.
+
+### Optional add-ons (install only when you need them)
+
+| You want to… | Add |
+|---|---|
+| Connect a non-SQLite database | `pip install -r requirements-db.txt` (or just one driver — see §4) |
+| Wire LLM calls through the toolkit's runtime gates | `pip install -r requirements-runtime.txt` |
+| Monitor production data drift | `pip install -r requirements-drift.txt` |
+| Use the browser wizard, log entity discovery, or AWS Neptune | `pip install -r requirements-advanced.txt` |
+| Everything (CI / kitchen-sink) | `pip install -r requirements.txt` |
+
+### Install via pip wheel
+
+The toolkit also ships as a pip-installable package built from `pyproject.toml`. Two console scripts (`ontology-toolkit`, `ontology-onboard`) are exposed on install.
+
+```bash
+pip install dist/ontology_toolkit-3.0.0-py3-none-any.whl
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[db,runtime]"
+pip install "dist/ontology_toolkit-3.0.0-py3-none-any.whl[all]"
+```
+
+Available extras: `postgres`, `mysql`, `mssql`, `oracle`, `db2`, `db`, `anthropic`, `openai`, `vertex`, `ollama`, `oci`, `runtime`, `drift`, `wizard`, `discover`, `neptune`, `test`, `all`.
+
+Rebuild from source:
+
+```bash
+python -m build      # produces dist/*.whl and dist/*.tar.gz
+```
+
+> The `drift-monitor` dependency is a git+VCS reference to [infodrift](https://github.com/nrohilla-fibonacci/infodrift), so the wheel is intended for private/internal distribution rather than PyPI.
 
 ---
 
-## 2. Onboarding — start a new project
+## 2. Start a new project (wizard)
 
-If you are starting from scratch — no existing schema, no database — use the onboarding wizard. It guides you through domain definition in plain language and generates everything the pipeline needs.
-
-### Interactive wizard (recommended for new projects)
+If you don't have a database yet, use the wizard. Plain language, no OWL knowledge required.
 
 ```bash
 python3 onboard.py
@@ -44,17 +67,17 @@ python3 onboard.py
 The wizard walks through six steps:
 
 1. **Domain identity** — name, description, author, base IRI for the ontology
-2. **Entities** — the main things in your domain (Asset, Customer, Patient, Order...)
-3. **Events** — things that happen (Incident, Inspection, Discharge, Trade...)
-4. **Relationships** — how entities connect, written as plain sentences
-5. **Competency questions** — the questions the ontology must be able to answer. Auto-suggests starters if you have fewer than 4
-6. **Review and run** — summary of everything before generating
+2. **Entities** — the things in your domain (Asset, Customer, Patient, Order, …)
+3. **Events** — things that happen (Incident, Inspection, Discharge, Trade, …)
+4. **Relationships** — how entities connect, in plain sentences
+5. **Competency questions** — what the ontology must answer
+6. **Review and run** — summary before generation
 
-No ontology knowledge is required. Answer in plain language.
+When done, the toolkit produces the ontology, validation shapes, JSON-LD context, mapping workbook, and an HTML report — all under `projects/{your_domain}/output/`.
 
-### Industry starter templates
+### Industry starters
 
-Skip blank-slate setup by loading a pre-built domain template:
+Skip the blank slate by loading a pre-built domain:
 
 ```bash
 python3 onboard.py --industry telecom        # Network operations, 5G NFs, alarms, KPIs
@@ -64,50 +87,94 @@ python3 onboard.py --industry manufacturing  # Assets, work orders, quality, sup
 python3 onboard.py --industry retail         # Products, orders, inventory, promotions
 ```
 
-Each template pre-populates entities, events, relationships, and 5-8 competency questions. You review and adjust before anything is generated.
+Each pre-populates entities, events, relationships, and 5–8 competency questions. You review and adjust before anything is generated.
 
-### Saving and resuming
+### Save and resume
 
-The wizard saves your session at every step. If interrupted, resume where you left off:
+The wizard auto-saves at every step:
 
 ```bash
 python3 onboard.py --from projects/my_domain/session.json
 ```
 
-### What the wizard generates
+### Dry run
 
-Everything lands in `projects/{domain_slug}/`:
-
-```
-projects/my_domain/
-├── db/
-│   ├── schema.sql        ← Working relational schema with PROV-O provenance columns
-│   └── seed.sql          ← ontology_metadata rows pre-populated from your answers
-├── docs/
-│   ├── scope-charter.md  ← Phase 1 scope charter with stakeholder sign-off table
-│   └── cq-catalog.md     ← Competency question catalog with SPARQL status tracking
-├── output/               ← All generated ontology artifacts (populated by pipeline)
-└── session.json          ← Saved wizard session (resumable)
-```
-
-After artifact generation the full pipeline runs automatically, producing the ontology, SHACL shapes, JSON-LD context, mapping workbook, and HTML report.
-
-### Dry run — generate files without running the pipeline
+Generate files without running the pipeline:
 
 ```bash
 python3 onboard.py --industry healthcare --dry-run
 ```
 
----
+### `onboard.py` flags
 
-## 3. Connecting to an existing database
+```
+--industry STR  Pre-load a starter template
+--from FILE     Resume a saved session
+--dry-run       Generate files without running the pipeline
+--llm           Use Claude to auto-suggest entities/events/relationships/CQs
+                from your domain description (needs ANTHROPIC_API_KEY)
+```
 
-If you already have a database with an existing schema, skip the wizard and point the toolkit directly at it.
+### Browser wizard
 
-### Connection string formats
+Same six steps, but in a drag-and-drop web UI instead of the terminal. Useful if you'd rather click than type, or if a non-technical stakeholder is doing the onboarding.
+
+**Install the wizard's deps (Flask):**
 
 ```bash
-# SQLite — file path (backward-compatible)
+pip install -r requirements-advanced.txt        # Flask + Flask-CORS + spaCy + boto3
+# or just the wizard, nothing else:
+pip install flask flask-cors
+```
+
+**Start the wizard:**
+
+```bash
+python3 wizard/app.py                           # dev server on http://localhost:5000
+python3 wizard/app.py --host 0.0.0.0 --port 5000   # listen on all interfaces
+```
+
+Open `http://localhost:5000` in a browser. The wizard walks through Domain → Entities → Events → Relationships → CQs → Generate. The "Generate" step runs the toolkit pipeline and links to the resulting `output/reports/toolkit_report.html`.
+
+**Load an industry template** in the UI (Templates tab) or via the CLI before launching:
+
+```bash
+python3 onboard.py --industry telecom --dry-run    # writes projects/telecom_network_operations/session.json
+python3 wizard/app.py                              # opens the same session for editing
+```
+
+**Stop the wizard:** `Ctrl+C` in the terminal. Sessions are saved to `projects/{your_domain}/session.json` and can be resumed from either the CLI (`onboard.py --from …`) or by reopening the wizard.
+
+---
+
+## 3. Connect to an existing database
+
+If you already have a database, skip the wizard and point the toolkit at it directly.
+
+### Run it
+
+```bash
+python3 toolkit.py --db "postgresql://user:password@host/mydb" --out output/
+open output/reports/toolkit_report.html
+```
+
+That's the whole loop. The toolkit reads your schema, generates the ontology and supporting artifacts, and writes everything under `--out`.
+
+### One-time setup: two annotation tables
+
+The toolkit needs a small annotation control plane in your database — two tables, *no changes to your existing tables*. Copy the DDL from `db/schema.sql`:
+
+```sql
+CREATE TABLE ontology_metadata (...);   -- semantic annotation control plane
+CREATE TABLE semantic_loss_log (...);   -- where the toolkit writes findings
+```
+
+Then add a few rows to `ontology_metadata` describing your most important tables and columns (semantic class, business term, sensitivity tier). The minimum viable set is in [docs/integrate.md](docs/integrate.md). Re-run the toolkit and refine over time.
+
+### Connection strings
+
+```bash
+# SQLite (default)
 python3 toolkit.py --db db/enterprise.db
 python3 toolkit.py --db sqlite:///db/enterprise.db
 
@@ -122,31 +189,19 @@ python3 toolkit.py --db "mysql://user:password@host:3306/mydb"
 python3 toolkit.py --db "mssql://user:password@host/mydb"
 python3 toolkit.py --db "mssql://user:password@host/mydb?driver=ODBC+Driver+17+for+SQL+Server"
 
-# Oracle (standard — thin mode, no Instant Client required)
+# Oracle (thin mode — no Instant Client)
 python3 toolkit.py --db "oracle://user:password@host:1521/service_name"
 python3 toolkit.py --db "oracle://user:password@host:1521/ORCLPDB1?schema=MYSCHEMA"
 
-# Oracle Autonomous Database (ADB) — wallet-based mTLS
+# Oracle Autonomous Database (wallet-based mTLS)
 python3 toolkit.py --db "oracle://ADMIN:password@/myatp_high?wallet=/path/to/wallet&wallet_password=walletpass"
 
 # IBM DB2
 python3 toolkit.py --db "db2://db2inst1:password@host:50000/MYDB"
-python3 toolkit.py --db "db2://user:password@host:50000/MYDB?schema=PROD"
 python3 toolkit.py --db "db2://user:password@host:50000/MYDB?security=SSL&sslcertificate=/certs/db2.arm"
 ```
 
-### What the toolkit needs in your database
-
-Two system tables must exist. If they are not there, create them from `db/schema.sql`:
-
-```sql
-CREATE TABLE ontology_metadata ( ... );  -- semantic annotation control plane
-CREATE TABLE semantic_loss_log ( ... );  -- Phase 4 findings log
-```
-
-All other tables are introspected automatically. The toolkit does not modify any existing tables.
-
-### Oracle ADB setup
+### Oracle ADB
 
 1. Download the wallet zip from OCI Console → your ADB instance → DB Connection → Download Wallet
 2. Unzip to a local directory (e.g. `/opt/adb-wallet/`)
@@ -165,149 +220,30 @@ DB2 requires IBM's DB2 ODBC/CLI driver installed on the host OS. Download from [
 
 ---
 
-## 4. Full pipeline walkthrough
-
-### New project — complete flow
-
-```bash
-# Step 1: Run the onboarding wizard
-python3 onboard.py --industry telecom
-
-# The wizard asks questions, then automatically runs all phases
-
-# Step 2: Open the report
-open projects/telecom_network_operations/output/reports/toolkit_report.html
-
-# Step 3: Review the generated ontology
-cat projects/telecom_network_operations/output/ontology/enterprise.ttl
-
-# Step 4: Refine and re-run
-python3 onboard.py --from projects/telecom_network_operations/session.json
-```
-
-### Existing database — complete flow
-
-```bash
-# Step 1: Add ontology_metadata annotations (see features.md §3 Semantic metadata control table)
-
-# Step 2: Run the full pipeline
-python3 toolkit.py --db "postgresql://user:pass@host/mydb" --out output/
-
-# Step 3: Open the report
-open output/reports/toolkit_report.html
-```
-
-### Running individual phases
-
-```bash
-python3 toolkit.py --phase 1        # Introspect schema and print inventory
-python3 toolkit.py --phase 2        # OWL 2 ontology generation only
-python3 toolkit.py --phase 3        # SHACL shape generation only
-python3 toolkit.py --phase 4        # Mapping workbook + semantic loss only
-python3 toolkit.py --phase 5        # JSON-LD, SKOS, MCP tools only
-python3 toolkit.py --phase tmf      # TM Forum SID alignment + TMF CQ tests
-python3 toolkit.py --phase test     # CQ tests + governance scorecard
-python3 toolkit.py --phase report   # HTML report only (from existing CSVs)
-python3 toolkit.py --phase log       # Structured log ingestion (requires --log-path)
-python3 toolkit.py --phase security  # Named-graph RBAC config generation
-python3 toolkit.py --phase conflict  # Multi-agent conflict resolution (Phase 2B)
-python3 toolkit.py --phase alignment # Ontology alignment + federation config (Phase 2B)
-```
-
-### Log ingestion
-
-```bash
-# Ingest a JSON-lines log file
-python3 toolkit.py --phase log --log-path /var/log/app.log --log-format jsonl
-
-# Auto-detect format from a glob
-python3 toolkit.py --phase log --log-path "/var/log/*.log"
-
-# Dry-run — parse and report without writing to DB
-python3 toolkit.py --phase log --log-path /var/log/app.log --dry-run
-
-# Syslog RFC5424
-python3 toolkit.py --phase log --log-path /var/log/syslog --log-format syslog
-
-# Named-group regex (custom format)
-python3 toolkit.py --phase log --log-path /var/log/app.log --log-format regex \
-    --log-regex "(?P<timestamp>\S+) (?P<severity>\w+) (?P<message>.+)"
-```
-
-### Named-graph RBAC
-
-```bash
-# Generate all three store configs (Stardog, Fuseki, Neptune)
-python3 toolkit.py --phase security --store all
-
-# Single store target
-python3 toolkit.py --phase security --store stardog
-python3 toolkit.py --phase security --store fuseki
-python3 toolkit.py --phase security --store neptune
-```
-
----
-
-## 5. CLI reference
-
-### toolkit.py
-
-```
-python3 toolkit.py [options]
-
-  --db PATH           Database connection string or SQLite file path
-                      Default: db/enterprise.db
-
-  --out PATH          Output directory for generated artifacts
-                      Default: output/
-
-  --phase PHASE       Run a specific phase:
-                      all | 1 | 2 | 3 | 4 | 5 | tmf | test | report |
-                      reasoner | sparql | log | security | conflict | alignment
-                      Default: all
-
-  --industry STR      Label for the industry context (used in report header)
-
-  --log-path PATH     Log file path or glob pattern (for --phase log)
-  --log-format FMT    Log format: auto | jsonl | syslog | cef | otlp | regex
-                      Default: auto
-  --log-regex PATTERN Named-group regex (for --log-format regex)
-  --dry-run           Parse logs without writing to DB (for --phase log)
-
-  --store TARGET      Graph store for --phase security:
-                      all | stardog | fuseki | neptune
-                      Default: all
-```
-
-### onboard.py
-
-```
-python3 onboard.py [options]
-
-  --industry STR  Pre-load a starter template: telecom | healthcare | finance | manufacturing | retail
-
-  --from FILE     Load a saved session JSON and skip the interview
-
-  --dry-run       Generate files without running the pipeline
-
-  --llm           Use Claude Sonnet to auto-suggest entities, events, relationships,
-                  and CQs from your domain description.
-                  Requires ANTHROPIC_API_KEY environment variable.
-```
-
----
-
-## 6. Database backends
+## 4. Database backends
 
 Schema introspection is normalised across all backends — downstream generators see identical models regardless of which database is connected.
 
-| Backend | Introspection source | Port | Scheme |
+| Backend | Driver to install | Port | Scheme |
 |---|---|---|---|
-| SQLite | PRAGMA table_info, PRAGMA foreign_key_list | file | sqlite:/// |
-| PostgreSQL | INFORMATION_SCHEMA | 5432 | postgresql:// |
-| MySQL / MariaDB | INFORMATION_SCHEMA | 3306 | mysql:// |
-| SQL Server | INFORMATION_SCHEMA | 1433 | mssql:// |
-| Oracle / ADB | ALL_TAB_COLUMNS, ALL_CONSTRAINTS | 1521 | oracle:// |
-| IBM DB2 | SYSCAT.COLUMNS, SYSCAT.TABCONST | 50000 | db2:// |
+| SQLite | (built into Python) | file | `sqlite:///` |
+| PostgreSQL | `psycopg2-binary` | 5432 | `postgresql://` |
+| MySQL / MariaDB | `mysql-connector-python` | 3306 | `mysql://` |
+| SQL Server | `pyodbc` (+ ODBC Driver 17/18) | 1433 | `mssql://` |
+| Oracle / ADB | `oracledb` | 1521 | `oracle://` |
+| IBM DB2 | `ibm_db` `ibm_db_dbi` (+ DB2 CLI driver) | 50000 | `db2://` |
 
-When connecting to a non-SQLite database: create `ontology_metadata` and `semantic_loss_log` manually (DDL in `db/schema.sql`), then run phases 2-5 individually. The toolkit does not modify any existing tables.
+The toolkit does not modify any existing tables.
+
+---
+
+## 5. Going further
+
+Once the basic loop works, look at:
+
+- [docs/integrate.md](docs/integrate.md) — minimum-viable annotation set, what artifact to read first, what to ignore
+- [features.md](features.md) — what every output file is for, every advanced flag, the runtime layer, drift monitoring, federation, compliance, vector retrieval
+- [docs/sdk.md](docs/sdk.md) — Python SDK if you're embedding the toolkit in your own application
+- [examples/](examples/) — runnable demos (retail, 5G, drift monitoring)
+
+Run `python3 toolkit.py --help` for the full CLI; advanced flags are documented in features.md.

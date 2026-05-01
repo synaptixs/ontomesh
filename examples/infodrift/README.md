@@ -2,8 +2,6 @@
 
 This example shows how to integrate **[`drift_monitor`](https://github.com/nrohilla-fibonacci/infodrift) (the package formerly known as *infodrift*)** with the ontology-toolkit, where the toolkit's OWL ontology is the *source of truth* for production drift monitoring — not a separate hand-written config.
 
-For the full architecture, see [ontology_infodrift_integration.md](../../ontology_infodrift_integration.md).
-
 ## Why this matters (the real-world case)
 
 Most ML drift tooling treats "what to monitor" as a separate config concern: a YAML listing entities, baselines, thresholds. That config drifts away from your real data model the moment the schema changes.

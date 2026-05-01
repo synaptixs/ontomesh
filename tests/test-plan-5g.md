@@ -41,7 +41,7 @@ If any of these references moves or expires (3GPP specs do get re-numbered acros
 **Out of scope**
 
 - Live NF integration (no NETCONF/YANG pull, no SBI calls) — the seed data is hand-authored to mirror spec examples.
-- Cross-enterprise federation, vector retrieval (covered by Gen-2 workstreams; see [gates.md](gates.md)).
+- Cross-enterprise federation, vector retrieval (covered by Gen-2 workstreams; see [docs/advanced.md](../docs/advanced.md)).
 - LTE / 4G. Schema is NR/5GC only, though R5 is tested with one deliberately mis-typed counter.
 
 ---

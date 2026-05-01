@@ -1,0 +1,12 @@
+# Database drivers — install only the one(s) you actually use.
+# SQLite needs nothing (built into Python's stdlib).
+#
+# Install all: pip install -r requirements-db.txt
+# Install one: pip install psycopg2-binary  (etc.)
+
+psycopg2-binary>=2.9.9          # PostgreSQL
+mysql-connector-python>=8.3.0   # MySQL / MariaDB
+pyodbc>=5.1.0                   # SQL Server (also needs ODBC Driver 17/18 on host)
+oracledb>=2.3.0                 # Oracle / Oracle ADB (thin mode — no Instant Client)
+ibm_db>=3.2.3                   # IBM DB2 (also needs DB2 ODBC/CLI driver from IBM)
+ibm_db_dbi>=3.2.3               # IBM DB2 DBI interface

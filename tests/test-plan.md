@@ -21,7 +21,7 @@
 
 **Out of scope**
 
-- Cross-enterprise federation, vector retrieval, memory consolidation (those have their own CQ tests — see [gates.md](gates.md)).
+- Cross-enterprise federation, vector retrieval, memory consolidation (those have their own CQ tests — see [docs/advanced.md](../docs/advanced.md)).
 - Performance benchmarking beyond wall-clock per call.
 - Production deployment.
 

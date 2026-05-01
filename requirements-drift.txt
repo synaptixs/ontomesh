@@ -1,0 +1,16 @@
+# Production drift monitoring (runtime/drift/) — wraps the drift_monitor
+# package (formerly known as infodrift) with the toolkit's OWL +
+# SHACL + JSON-LD layer.
+#
+# drift_monitor pulls in numpy / pandas / scipy / scikit-learn
+# transitively, so this tier is sizeable (~250 MB).
+#
+# Install: pip install -r requirements-drift.txt
+#
+# NOTE: the drift-monitor distribution is hosted on a private git repo
+# (see https://github.com/nrohilla-fibonacci/infodrift). The wheel
+# produced by `python -m build` is therefore intended for private /
+# internal distribution — not PyPI.
+
+drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop
+drain3>=0.9                     # Optional — required only by LogTemplateMonitor

@@ -1,0 +1,19 @@
+# Advanced / opt-in features.
+# Install individually unless you actually need all of them.
+#
+# Install: pip install -r requirements-advanced.txt
+
+# ── Browser wizard (wizard/) ────────────────────────────────────────────
+flask>=3.0.3                    # Local web wizard
+flask-cors>=4.0.1               # CORS for local dev wizard
+sqlglot>=25.0                   # SQL DDL parser for /api/import (issue #16).
+                                # Optional — JSON import works without it; the
+                                # SQL path surfaces a clear "pip install sqlglot"
+                                # message if missing rather than 500ing.
+
+# ── Log entity discovery — toolkit.py --phase discover ──────────────────
+# After install, also run:  python -m spacy download en_core_web_sm
+spacy>=3.7.4
+
+# ── Amazon Neptune publish target — toolkit.py --phase publish ──────────
+boto3>=1.35.0

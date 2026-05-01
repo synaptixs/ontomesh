@@ -1,12 +1,15 @@
 {
   "regulation_id": "basel-iv-sr-11-7",
-  "name": "Basel IV — SR 11-7 Supervisory Guidance on Model Risk Management",
+  "name": "Basel IV \u2014 SR 11-7 Supervisory Guidance on Model Risk Management",
   "short_name": "Basel IV SR 11-7",
   "jurisdiction": "United States (Federal Reserve, OCC)",
   "effective_date": "2011-04-04",
   "last_verified_date": "2026-04-01",
   "regulatory_source_url": "https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm",
   "scope": "Banking organisations using models for risk management, capital adequacy, and decisioning",
+  "applies_to": [
+    "finance"
+  ],
   "summary": "Requires a sound model risk management framework covering model development, implementation, use, validation, governance, policies, and controls. Algorithmic decisions must be explainable and evidence trails must be preserved for independent review.",
   "requirements": [
     {

@@ -49,6 +49,14 @@ sys.path.insert(0, ROOT)
 SESSION_FILE = os.path.join(ROOT, ".wizard_session.json")
 TEMPLATES_DIR = os.path.join(ROOT, "templates")
 
+# Built-in starter templates live in onboard.py's INDUSTRY_TEMPLATES dict
+# (telecom, healthcare, finance, manufacturing, retail). Import them so the
+# browser wizard and the CLI wizard share the same source of truth.
+try:
+    from onboard import INDUSTRY_TEMPLATES as _ONBOARD_TEMPLATES  # type: ignore
+except Exception:
+    _ONBOARD_TEMPLATES = {}
+
 try:
     from flask import Flask, request, jsonify, send_file, send_from_directory
     from flask_cors import CORS
@@ -124,67 +132,131 @@ def save_session():
     return jsonify({"ok": True, "updated_at": existing["updated_at"]})
 
 
+def _to_snake(s: str) -> str:
+    return "_".join(s.lower().replace("-", " ").replace("/", " ").split())
+
+
+def _builtin_to_session(name: str, t: dict) -> dict:
+    """Translate an onboard.py INDUSTRY_TEMPLATES entry into the wizard's
+    session shape. The CLI dict stores entities/events as plain strings
+    and relationships as 3-tuples; the wizard expects structured records.
+    """
+    entities = [
+        {"name": _to_snake(label), "label": label, "description": "",
+         "sensitivity": "Internal", "is_event": False, "properties": []}
+        for label in t.get("entities", [])
+    ]
+    events = [
+        {"name": _to_snake(label), "label": label, "description": ""}
+        for label in t.get("events", [])
+    ]
+    relationships = [
+        {"from_entity": frm, "label": lbl, "to_entity": to}
+        for (frm, lbl, to) in t.get("relationships", [])
+    ]
+    cqs = [
+        {"id": f"CQ-{i+1:02d}", "question": q, "priority": "Medium"}
+        for i, q in enumerate(t.get("cqs", []))
+    ]
+    return {
+        "domain": {
+            "name": t.get("domain_name", name.title()),
+            "description": t.get("domain_description", ""),
+            "base_iri": f"https://ontology.example.com/{name}/",
+            "industry": name,
+        },
+        "entities": entities,
+        "events": events,
+        "relationships": relationships,
+        "competency_questions": cqs,
+        "created_at": _now(),
+        "updated_at": _now(),
+    }
+
+
+def _yaml_to_session(name: str, tmpl: dict) -> dict:
+    """Translate a templates/*.yaml file into the wizard's session shape."""
+    return {
+        "domain": {
+            "name": tmpl.get("label", name),
+            "description": tmpl.get("description", "").strip(),
+            "base_iri": tmpl.get("base_iri", f"https://ontology.example.com/{name}/"),
+            "industry": name,
+        },
+        "entities": [
+            {
+                "name": e["name"],
+                "label": e.get("label", e["name"]),
+                "description": e.get("description", ""),
+                "sensitivity": e.get("sensitivity", "Internal"),
+                "is_event": e.get("is_event", False),
+                "properties": [
+                    {"name": pn,
+                     "type": (pv.get("type", "string") if isinstance(pv, dict) else "string"),
+                     "required": (pv.get("required", False) if isinstance(pv, dict) else False)}
+                    for item in (e.get("properties") or [])
+                    for pn, pv in (item.items() if isinstance(item, dict) else [])
+                ],
+            }
+            for e in tmpl.get("entities", [])
+        ],
+        "events": [
+            {"name": ev["name"], "label": ev.get("label", ev["name"]),
+             "description": ev.get("description", "")}
+            for ev in tmpl.get("events", [])
+        ],
+        "relationships": tmpl.get("relationships", []),
+        "competency_questions": [
+            {"id": cq.get("id", ""), "question": cq.get("question", ""),
+             "priority": cq.get("priority", "Medium")}
+            for cq in tmpl.get("competency_questions", [])
+        ],
+        "created_at": _now(),
+        "updated_at": _now(),
+    }
+
+
 @app.route("/api/templates", methods=["GET"])
 def list_templates():
-    names = []
+    yaml_names: list[str] = []
     if os.path.isdir(TEMPLATES_DIR):
         for fname in sorted(os.listdir(TEMPLATES_DIR)):
             if fname.endswith((".yaml", ".yml")):
-                names.append(fname.rsplit(".", 1)[0])
-    builtin = ["telecom", "healthcare", "finance"]
-    return jsonify({"templates": builtin + names})
+                yaml_names.append(fname.rsplit(".", 1)[0])
+    builtin = list(_ONBOARD_TEMPLATES.keys())   # telecom, healthcare, finance, manufacturing, retail
+    # Preserve order, drop duplicates if a YAML happens to share a name with a builtin.
+    seen: set[str] = set()
+    out: list[str] = []
+    for n in builtin + yaml_names:
+        if n not in seen:
+            out.append(n)
+            seen.add(n)
+    return jsonify({"templates": out})
 
 
 @app.route("/api/template/<name>", methods=["GET"])
 def load_template(name: str):
+    # 1. Built-in starter templates from onboard.py
+    if name in _ONBOARD_TEMPLATES:
+        session = _builtin_to_session(name, _ONBOARD_TEMPLATES[name])
+        _save_session(session)
+        return jsonify(session)
+
+    # 2. YAML templates under templates/
     try:
         import yaml
-        for ext in (".yaml", ".yml"):
-            path = os.path.join(TEMPLATES_DIR, name + ext)
-            if os.path.exists(path):
-                with open(path) as f:
-                    tmpl = yaml.safe_load(f)
-                session = {
-                    "domain": {
-                        "name": tmpl.get("label", name),
-                        "description": tmpl.get("description", "").strip(),
-                        "base_iri": tmpl.get("base_iri", f"https://ontology.example.com/{name}/"),
-                        "industry": name,
-                    },
-                    "entities": [
-                        {
-                            "name": e["name"],
-                            "label": e.get("label", e["name"]),
-                            "description": e.get("description", ""),
-                            "sensitivity": e.get("sensitivity", "Internal"),
-                            "is_event": e.get("is_event", False),
-                            "properties": [
-                                {"name": pn, "type": (pv.get("type", "string") if isinstance(pv, dict) else "string"),
-                                 "required": (pv.get("required", False) if isinstance(pv, dict) else False)}
-                                for item in (e.get("properties") or [])
-                                for pn, pv in (item.items() if isinstance(item, dict) else [])
-                            ]
-                        }
-                        for e in tmpl.get("entities", [])
-                    ],
-                    "events": [
-                        {"name": ev["name"], "label": ev.get("label", ev["name"]),
-                         "description": ev.get("description", "")}
-                        for ev in tmpl.get("events", [])
-                    ],
-                    "relationships": tmpl.get("relationships", []),
-                    "competency_questions": [
-                        {"id": cq.get("id", ""), "question": cq.get("question", ""),
-                         "priority": cq.get("priority", "Medium")}
-                        for cq in tmpl.get("competency_questions", [])
-                    ],
-                    "created_at": _now(),
-                    "updated_at": _now(),
-                }
-                _save_session(session)
-                return jsonify(session)
     except ImportError:
         return jsonify({"error": "PyYAML not installed — run: pip install pyyaml"}), 500
+
+    for ext in (".yaml", ".yml"):
+        path = os.path.join(TEMPLATES_DIR, name + ext)
+        if os.path.exists(path):
+            with open(path) as f:
+                tmpl = yaml.safe_load(f) or {}
+            session = _yaml_to_session(name, tmpl)
+            _save_session(session)
+            return jsonify(session)
+
     return jsonify({"error": f"Template '{name}' not found"}), 404
 
 

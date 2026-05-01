@@ -1,17 +1,20 @@
 {
   "regulation_id": "hipaa-164-312",
-  "name": "HIPAA Security Rule — §164.312 Technical Safeguards (AI Addendum)",
-  "short_name": "HIPAA §164.312",
+  "name": "HIPAA Security Rule \u2014 \u00a7164.312 Technical Safeguards (AI Addendum)",
+  "short_name": "HIPAA \u00a7164.312",
   "jurisdiction": "United States (HHS OCR)",
   "effective_date": "2003-04-21",
   "last_verified_date": "2026-04-01",
   "regulatory_source_url": "https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-C/part-164/subpart-C/section-164.312",
   "scope": "Covered entities and business associates handling electronic protected health information (ePHI), with AI-system addenda under active rulemaking",
+  "applies_to": [
+    "healthcare"
+  ],
   "summary": "Requires access control, audit controls, integrity, person-or-entity authentication, and transmission security for ePHI. AI addenda extend audit-control requirements to capture every AI-generated observation, decision, and PROV-O chain involving ePHI.",
   "requirements": [
     {
       "req_id": "HIPAA-312-A-1",
-      "title": "Access control — sensitivity tiering",
+      "title": "Access control \u2014 sensitivity tiering",
       "description": "Every ontology class that may reference ePHI must carry a sensitivity tier annotation so downstream access controls can enforce the minimum-necessary rule.",
       "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
       "evidence_selector": "Sensitivity annotation completeness",
@@ -19,7 +22,7 @@
     },
     {
       "req_id": "HIPAA-312-B-1",
-      "title": "Audit controls — PROV-O observation attribution",
+      "title": "Audit controls \u2014 PROV-O observation attribution",
       "description": "Every observation involving ePHI must carry an agent attribution so the audit log can reconstruct who touched the data.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-004",
@@ -27,7 +30,7 @@
     },
     {
       "req_id": "HIPAA-312-B-2",
-      "title": "Audit controls — observed-at timestamp",
+      "title": "Audit controls \u2014 observed-at timestamp",
       "description": "Every observation must carry an observed_at timestamp recorded at capture time, not at retrieval time.",
       "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
       "evidence_selector": "Source attribution",
@@ -35,7 +38,7 @@
     },
     {
       "req_id": "HIPAA-312-C-1",
-      "title": "Integrity — SHACL validation gate",
+      "title": "Integrity \u2014 SHACL validation gate",
       "description": "All inbound and outbound payloads crossing the agent boundary must be validated against a SHACL shape.",
       "artefact_type": "SHACL_SHAPE",
       "evidence_selector": "ObservationAcceptanceGate",
@@ -43,7 +46,7 @@
     },
     {
       "req_id": "HIPAA-312-D-1",
-      "title": "Entity authentication — named agent",
+      "title": "Entity authentication \u2014 named agent",
       "description": "Every observation must be attributable to a named agent IRI, not an anonymous source.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-004",
@@ -51,7 +54,7 @@
     },
     {
       "req_id": "HIPAA-312-E-1",
-      "title": "Transmission security — RESTRICTED tier at the federation boundary",
+      "title": "Transmission security \u2014 RESTRICTED tier at the federation boundary",
       "description": "RESTRICTED-tier observations must never cross the federation boundary to a partner endpoint.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-CMP-05",
@@ -59,7 +62,7 @@
     },
     {
       "req_id": "HIPAA-312-AI-1",
-      "title": "AI addendum — decision chain for the AI output under audit",
+      "title": "AI addendum \u2014 decision chain for the AI output under audit",
       "description": "For a specific AI-generated observation, the PROV-O chain back to source data must be reconstructible.",
       "artefact_type": "PROV_O_CHAIN",
       "evidence_selector": "decision_iri",

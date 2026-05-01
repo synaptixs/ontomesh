@@ -1,0 +1,13 @@
+# Runtime layer — LLM adapters used by RuntimeClient.
+# Only required if you wire LLM calls through the toolkit's runtime/ layer
+# (input/output gates, prompt assembly, OWL grounding). The pipeline
+# itself does not need any of these.
+#
+# Install all: pip install -r requirements-runtime.txt
+# Install one: pip install anthropic   (etc.)
+
+anthropic>=0.34.0               # Anthropic Messages API (Claude)
+openai>=1.40.0                  # OpenAI Chat Completions (GPT-4o, etc.)
+google-cloud-aiplatform>=1.60.0 # Google Vertex AI (Gemini)
+requests>=2.32.3                # Ollama adapter + graph store HTTP calls
+oci>=2.126.0                    # Oracle Cloud Infrastructure Generative AI
