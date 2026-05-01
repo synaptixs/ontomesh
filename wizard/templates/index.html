@@ -53,6 +53,19 @@
     /* ── Cards & Inputs ─────────────────────────────────────────────────── */
     .card { background: var(--surface); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+
+    /* ── Per-box help text ─────────────────────────────────────────────── */
+    /* A small helper block below each card heading explaining what's in
+       the box, why it matters, and how to read or use it. Always visible
+       — the wizard's audience is non-technical, so progressive disclosure
+       behind a click would just hide what they need to see. */
+    .box-help { background: rgba(91,138,247,.06); border-left: 3px solid var(--accent);
+                border-radius: 4px; padding: 10px 14px; margin: 0 0 14px 0;
+                font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+    .box-help b { color: var(--text); font-weight: 600; }
+    .box-help ul { margin: 6px 0 0 0; padding-left: 18px; }
+    .box-help li { margin-bottom: 2px; }
+    .box-help li b { color: var(--text); }
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 12px; font-weight: 600;
                    text-transform: uppercase; letter-spacing: .5px;
@@ -189,6 +202,14 @@
 
       <div class="card">
         <h3>Load a starter template</h3>
+        <div class="box-help">
+          Pre-built domains that fill in entities, events, relationships, and competency questions for you.
+          <ul>
+            <li><b>What's shown:</b> 10 industry templates — five built-in (telecom, healthcare, finance, manufacturing, retail) and five YAML-defined (energy, logistics, government, insurance, pharmaceuticals).</li>
+            <li><b>Why it matters:</b> a starter saves 30+ minutes of typing and gives you a known-good shape to edit. You can change anything afterwards.</li>
+            <li><b>How to use:</b> click any tile to load it. The whole session is replaced — fields below, entities, events, relationships, and CQs all update at once.</li>
+          </ul>
+        </div>
         <div class="template-grid" id="template-grid">
           <!-- Populated by JS -->
         </div>
@@ -196,6 +217,15 @@
 
       <div class="card">
         <h3>Domain details</h3>
+        <div class="box-help">
+          The identity of your ontology — used in every generated IRI, SHACL shape, and report.
+          <ul>
+            <li><b>Domain Name:</b> human-readable name shown in the report header (e.g. "Smart Building Operations").</li>
+            <li><b>Description:</b> one or two sentences. Goes into the auto-generated scope charter and is read by the LLM if you use <code>--llm</code> suggestions.</li>
+            <li><b>Base IRI:</b> the namespace every OWL class lives under. Pick once and stick with it — changing it later breaks downstream graph stores.</li>
+            <li><b>Industry:</b> selects sensible defaults for sensitivity tiers and standards alignment (e.g. TM Forum SID for telecom).</li>
+          </ul>
+        </div>
         <div class="field"><label>Domain Name</label>
           <input id="d-name" placeholder="e.g. Enterprise Network Operations" /></div>
         <div class="field"><label>Description</label>
@@ -228,6 +258,14 @@
           <h3 style="margin:0">Entities <span id="entity-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="openEntityModal()">+ Add Entity</button>
         </div>
+        <div class="box-help">
+          The persistent <b>nouns</b> of your domain — the things your data is <i>about</i>.
+          <ul>
+            <li><b>What's shown:</b> one chip per entity, with its sensitivity tier and a delete button. The badge in the heading is the live count.</li>
+            <li><b>Why it matters:</b> every entity becomes an <code>owl:Class</code> in the generated ontology, a <code>sh:NodeShape</code> in the SHACL file, and a <code>@type</code> in the JSON-LD context.</li>
+            <li><b>How to read:</b> aim for 5–10 entities. If you have more than 15, you're probably modelling implementation details rather than domain concepts. Click a chip to edit; drag to reorder.</li>
+          </ul>
+        </div>
         <div class="item-list" id="entity-list"></div>
       </div>
     </div>
@@ -242,6 +280,14 @@
           <h3 style="margin:0">Events <span id="event-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="openEventModal()">+ Add Event</button>
         </div>
+        <div class="box-help">
+          The <b>verbs</b> — things that happen at a point in time.
+          <ul>
+            <li><b>What's shown:</b> one chip per event, the live count in the heading badge.</li>
+            <li><b>Why it matters:</b> events become <code>owl:Class</code> subclasses of a base <code>Event</code> class with <code>prov:atTime</code> and <code>prov:wasAttributedTo</code> properties — drift detection, audit logs, and PROV-O lineage all hang off them.</li>
+            <li><b>How to read:</b> entities answer "what exists?", events answer "what happened?". A good rule: if you'd record it in a log line or audit trail, it's an event. 3–8 event types is typical.</li>
+          </ul>
+        </div>
         <div class="item-list" id="event-list"></div>
       </div>
     </div>
@@ -255,6 +301,14 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
           <h3 style="margin:0">Relationships <span id="rel-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="addRelationship()">+ Add</button>
+        </div>
+        <div class="box-help">
+          How your entities connect — written as plain English sentences.
+          <ul>
+            <li><b>What's shown:</b> one row per relationship, with the count in the heading badge. The text input below adds new ones.</li>
+            <li><b>Why it matters:</b> each sentence becomes an <code>owl:ObjectProperty</code> with proper <code>rdfs:domain</code> and <code>rdfs:range</code>, so SPARQL queries can traverse from a Customer to their Orders without you writing any RDF.</li>
+            <li><b>How to read:</b> always start with the source entity, then a verb phrase, then the target entity — "A Customer places one or more Orders." Cardinality words ("one", "many", "at most") get parsed into SHACL constraints automatically.</li>
+          </ul>
         </div>
         <div id="rel-list"></div>
         <div style="margin-top:12px; display:flex; gap:8px">
@@ -275,6 +329,14 @@
           <h3 style="margin:0">Questions <span id="cq-count" class="badge">(0)</span></h3>
           <button class="btn btn-primary" onclick="addCQ()">+ Add</button>
         </div>
+        <div class="box-help">
+          The questions your ontology must be able to answer.
+          <ul>
+            <li><b>What's shown:</b> one row per CQ, count in the heading badge. New ones go in the input below.</li>
+            <li><b>Why it matters:</b> each CQ becomes a SPARQL test in the generated test suite. Their pass rate is one of the 34 inputs to the governance scorecard, and a failed CQ on CI blocks merge.</li>
+            <li><b>How to read:</b> a good CQ is specific and answerable from the data — "Which assets have been in outage for more than 4 hours?" beats "Are assets healthy?". Aim for 5–8 to start; you can always add more later.</li>
+          </ul>
+        </div>
         <div id="cq-list"></div>
         <div style="margin-top:12px; display:flex; gap:8px">
           <input id="new-cq" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
@@ -291,11 +353,32 @@
 
       <div class="card">
         <h3>Session Summary</h3>
+        <div class="box-help">
+          A read-only roll-up of everything you've defined so far.
+          <ul>
+            <li><b>What's shown:</b> domain identity + counts of entities, events, relationships, and CQs.</li>
+            <li><b>Why it matters:</b> last sanity check before generation. If a count looks wrong, jump back to that step before clicking run.</li>
+            <li><b>How to read:</b> rough sizing — under 5 entities is probably too thin; over 20 is probably too detailed. Same shape rule for CQs.</li>
+          </ul>
+        </div>
         <div id="session-summary"></div>
       </div>
 
       <div class="card">
         <h3>Pipeline phases</h3>
+        <div class="box-help">
+          Which steps of the toolkit pipeline to run. Default = all of them.
+          <ul>
+            <li><b>1 — Foundation:</b> introspects your schema and writes the annotated class/property inventory.</li>
+            <li><b>2 — OWL Modeling:</b> generates <code>enterprise.ttl</code> + <code>events.ttl</code> + <code>provenance.ttl</code>.</li>
+            <li><b>3 — SHACL:</b> generates validation shapes (<code>enterprise-shapes.ttl</code>, <code>agent-gate.ttl</code>).</li>
+            <li><b>4 — Mapping:</b> writes the mapping workbook + semantic loss report so you can see which DB columns didn't map cleanly.</li>
+            <li><b>5 — JSON-LD:</b> emits the JSON-LD context, sample payloads, SKOS vocab, and MCP tool definitions.</li>
+            <li><b>Test:</b> runs the SPARQL CQ suite and computes the 34-criterion governance scorecard.</li>
+            <li><b>Report:</b> renders the visual HTML run summary.</li>
+          </ul>
+          Uncheck individual phases only if you're iterating on a specific output and want a faster loop.
+        </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px">
           <label><input type="checkbox" id="ph-all" checked onchange="toggleAllPhases(this)"> All phases</label>
         </div>
@@ -315,11 +398,28 @@
           <h3 style="margin:0">Pipeline Output</h3>
           <span id="pipeline-badge" class="badge" style="display:none"></span>
         </div>
+        <div class="box-help">
+          Live tail of the toolkit pipeline as it runs.
+          <ul>
+            <li><b>What's shown:</b> the last ~50 lines of stdout/stderr from <code>toolkit.py</code>, refreshed every second while running.</li>
+            <li><b>Why it matters:</b> this is where you see <code>✓ PASS</code> / <code>✗ FAIL</code> on each phase, the SPARQL CQ results, and the final governance score.</li>
+            <li><b>How to read:</b> green ticks = phase succeeded. Red <code>FAIL</code> / <code>ERROR</code> = look at the line above for the cause (commonly a missing entity or a malformed relationship). The badge top-right turns green on success.</li>
+          </ul>
+        </div>
         <div id="pipeline-log">Waiting to run pipeline...</div>
       </div>
 
       <div class="card" id="artifact-list-card" style="display:none">
         <h3>Generated Artifacts</h3>
+        <div class="box-help">
+          The files <code>toolkit.py</code> just wrote, with one-click open.
+          <ul>
+            <li><b>Open the HTML report first</b> — it's the visual summary of everything that ran (governance score, CQ pass rate, semantic loss findings).</li>
+            <li><b>Then <code>enterprise.ttl</code></b> — the OWL ontology you can hand to any RDF tool, reasoner, or graph store.</li>
+            <li><b>Then <code>enterprise-context.json</code></b> — the JSON-LD context that downstream agent payloads bind to.</li>
+            <li>Everything else (SHACL shapes, SKOS vocab, mapping CSVs, MCP tools) is real value but not required to evaluate the pipeline's output.</li>
+          </ul>
+        </div>
         <div id="artifact-list"></div>
       </div>
     </div>
@@ -331,6 +431,14 @@
 
       <div class="card">
         <h3>Detection run</h3>
+        <div class="box-help">
+          Trigger the anomaly monitor to scan production observations and surface candidate ontology changes.
+          <ul>
+            <li><b>Minimum evidence:</b> how many independent observations a candidate needs before it becomes a proposal. Higher = fewer, better-supported proposals; lower = more noise.</li>
+            <li><b>Strategy:</b> which detector to run. <i>SHACL violation accumulation</i> spots constraints that fire repeatedly; <i>cardinality breach</i> flags real-world data exceeding declared <code>min/maxCount</code>; <i>class co-occurrence</i> finds entities that always appear together; <i>NLP candidate promotion</i> promotes terms from log corpora.</li>
+            <li><b>How to use:</b> run with the default settings first, refresh the proposal list, then tighten <code>min evidence</code> if you're drowning in low-signal candidates.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
           <label>Minimum evidence: <input type="number" id="ev-min-evidence" value="3" min="1" style="width:70px" /></label>
           <label>Strategy:
@@ -362,11 +470,27 @@
             </label>
           </div>
         </div>
+        <div class="box-help">
+          Every candidate change the monitor surfaced, scored against five dimensions and bucketed by urgency.
+          <ul>
+            <li><b>What's shown:</b> proposal ID, type (new class / new property / cardinality change), composite score (0–1), urgency band, evidence count, and a "View detail" link per row.</li>
+            <li><b>Band filter:</b> <b>Review now</b> (≥0.80) — high-confidence, look at this week. <b>Weekly batch</b> (0.50–0.80) — defer to a bulk review. <b>Candidate</b> (&lt;0.50) — let the monitor accumulate more evidence first.</li>
+            <li><b>How to read:</b> sort by score descending. The score weighs evidence volume, schema fit, query impact, novelty, and downstream blast radius — five inputs visible in the detail card below.</li>
+          </ul>
+        </div>
         <div id="ev-list" style="overflow-x:auto">Run the monitor or click refresh to load proposals.</div>
       </div>
 
       <div class="card" id="ev-detail-card" style="display:none">
         <h3>Proposal detail</h3>
+        <div class="box-help">
+          The full evidence and decision form for the proposal you clicked.
+          <ul>
+            <li><b>What's shown:</b> the five score components, the actual production observations that triggered detection, the proposed OWL/SHACL diff, and the approval form.</li>
+            <li><b>Why it matters:</b> approving here triggers the reasoner + SPARQL CQ gate. Only proposals that pass both auto-bump the ontology version and write a PROV-O lineage record.</li>
+            <li><b>How to use:</b> read the evidence first — does the data really support this change? Then enter a reviewer note and (optionally) a target version. <b>Approve</b> applies, <b>Reject</b> archives, <b>Defer</b> bumps it to the next weekly batch.</li>
+          </ul>
+        </div>
         <div id="ev-detail"></div>
       </div>
     </div>
@@ -378,6 +502,14 @@
 
       <div class="card">
         <h3>Regulation coverage</h3>
+        <div class="box-help">
+          Per-regulation traffic-light view of how well your ontology + observations cover each regulatory requirement.
+          <ul>
+            <li><b>What's shown:</b> one row per loaded regulation (EU AI Act, Basel IV SR 11-7, HIPAA §164.312, Ofcom Network Transparency, plus any custom YAML you added). Columns: requirement count, evidence count, coverage %, traffic light.</li>
+            <li><b>Traffic lights:</b> 🟢 ≥90% covered · 🟡 50–90% partial · 🔴 &lt;50% — this requirement won't pass an audit yet.</li>
+            <li><b>How to use:</b> click <b>Refresh</b> after every pipeline run to get current numbers. Click <b>Gap analysis</b> for the per-requirement breakdown of what's missing.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn" onclick="complyRefresh()">⟳ Refresh dashboard</button>
           <button class="btn btn-ghost" onclick="complyGap()">Run gap analysis</button>
@@ -388,6 +520,14 @@
 
       <div class="card">
         <h3>Assemble new evidence bundle</h3>
+        <div class="box-help">
+          Build a signed, machine-verifiable ZIP containing every artifact relevant to the chosen regulation.
+          <ul>
+            <li><b>Regulation:</b> the framework you're building evidence for. Each loaded regulation lists its requirements, controls, and the toolkit artifacts that satisfy them.</li>
+            <li><b>Decision IRI (optional):</b> point at a specific <code>ObservationRecord</code> to scope the bundle to one decision (e.g. one credit-risk score, one care-plan recommendation). Leave blank for a full coverage bundle.</li>
+            <li><b>How to read:</b> the bundle includes the OWL ontology, SHACL shapes, evidence records, an Ed25519 signature, and a SHA-256 manifest. Auditors verify with one command — see "Exported bundles" below.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">
           <label>Regulation:
             <select id="cmp-regulation" style="min-width:260px"></select>
@@ -401,16 +541,40 @@
 
       <div class="card" id="cmp-detail-card" style="display:none">
         <h3>Evidence detail</h3>
+        <div class="box-help">
+          Per-requirement drill-down for the assembly you just ran.
+          <ul>
+            <li><b>What's shown:</b> each requirement of the regulation paired with the artifacts (OWL classes, SHACL shapes, observation records) the assembler matched to it.</li>
+            <li><b>Why it matters:</b> this is the audit narrative — "requirement X is satisfied by evidence Y, Z, W". Empty rows = unmet requirements (visible in <b>Gap analysis</b> below).</li>
+            <li><b>How to read:</b> green ✓ = requirement covered. Click any artifact to see its full record. The signature footer at the bottom is what auditors verify offline.</li>
+          </ul>
+        </div>
         <div id="cmp-detail"></div>
       </div>
 
       <div class="card">
         <h3>Exported bundles</h3>
+        <div class="box-help">
+          History of every signed bundle you've generated.
+          <ul>
+            <li><b>What's shown:</b> bundle ID, regulation, assembly timestamp, file size, signature status, and a download link.</li>
+            <li><b>Why it matters:</b> bundles are immutable evidence — auditors verify them with the public key in <code>compliance/keys/</code> without needing access to your live system.</li>
+            <li><b>Verify offline:</b> <code>python3 -m compliance.bundle verify path/to/bundle.zip</code> — checks SHA-256 manifest + Ed25519 signature.</li>
+          </ul>
+        </div>
         <div id="cmp-bundles" style="overflow-x:auto">Run an assembly to generate a bundle.</div>
       </div>
 
       <div class="card" id="cmp-gap-card" style="display:none">
         <h3>Gap analysis</h3>
+        <div class="box-help">
+          The "what's missing" view across every loaded regulation.
+          <ul>
+            <li><b>What's shown:</b> requirements with no matching evidence, grouped by regulation, with the closest near-miss artifact (if any).</li>
+            <li><b>Why it matters:</b> this is your remediation backlog — fix these and the traffic light goes green.</li>
+            <li><b>How to read:</b> top of the list = highest-severity uncovered requirements. The "Suggested artifact" column tells you which OWL class or SHACL shape would close the gap if added.</li>
+          </ul>
+        </div>
         <div id="cmp-gap"></div>
       </div>
     </div>
@@ -422,6 +586,14 @@
 
       <div class="card">
         <h3>Embedding indexes</h3>
+        <div class="box-help">
+          The vector indexes the toolkit has built per flavor. One row per index.
+          <ul>
+            <li><b>What's shown:</b> flavor name, vector store backend (memory / Qdrant / Chroma / Weaviate / pgvector), embedding dimension, record count, and last-built timestamp.</li>
+            <li><b>Why it matters:</b> a query can only return results from an existing index. If you don't see one for your flavor, run <code>python3 toolkit.py --phase embed --flavor &lt;name&gt;</code> first.</li>
+            <li><b>How to read:</b> high record counts on indexes you don't query are a cost signal — consider scoping flavors more tightly.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn" onclick="vecRefreshIndexes()">⟳ Refresh indexes</button>
           <span id="vec-idx-status" style="font-size:12px;color:var(--muted)"></span>
@@ -431,6 +603,16 @@
 
       <div class="card">
         <h3>Hybrid retrieval — ontology-bounded query</h3>
+        <div class="box-help">
+          Run a single query against the index, with the OWL class hierarchy as a hard pre-filter.
+          <ul>
+            <li><b>Flavor:</b> which agent's view to query against (matches a file under <code>runtime/flavors/</code>).</li>
+            <li><b>Class expression:</b> the OWL class filter — only embeddings tagged with this class (or a subclass) are eligible. Multi-class with <code>|</code> (OR), e.g. <code>tmf:NetworkFunction | tmf:Alarm</code>.</li>
+            <li><b>k:</b> top-k vector neighbours to return after filtering.</li>
+            <li><b>Question:</b> the natural-language query that gets embedded and compared.</li>
+            <li><b>How to read:</b> click <b>Run</b> for one strategy, or <b>Compare all strategies</b> to see UNFILTERED_VECTOR vs ONTOLOGY_BOUNDED vs PURE_SPARQL on the same question side-by-side.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">
           <label>Flavor:
             <select id="vec-flavor" style="min-width:200px"></select>
@@ -455,11 +637,27 @@
 
       <div class="card" id="vec-results-card" style="display:none">
         <h3>Results</h3>
+        <div class="box-help">
+          The hits returned by your last query, ranked by hybrid score.
+          <ul>
+            <li><b>What's shown:</b> ranked list of records — IRI, OWL class, sensitivity tier, vector similarity, PROV-O confidence, recency, and combined hybrid score.</li>
+            <li><b>Why it matters:</b> the hybrid score is what an agent actually consumes. Pure vector similarity ignores trust/recency; pure SPARQL ignores semantic similarity. Hybrid balances all three.</li>
+            <li><b>How to read:</b> a top hit with low similarity but high confidence is usually a <i>trusted</i> match. A top hit with high similarity but low confidence may be a hallucination risk — review before passing to a downstream agent. Records above a flavor's sensitivity tier are filtered out before ranking.</li>
+          </ul>
+        </div>
         <div id="vec-results"></div>
       </div>
 
       <div class="card">
         <h3>Retrieval benchmark</h3>
+        <div class="box-help">
+          Head-to-head comparison of the three retrieval strategies on a fixed question set.
+          <ul>
+            <li><b>What's shown:</b> precision@k, MRR, and latency p50/p95 for UNFILTERED_VECTOR (raw kNN), ONTOLOGY_BOUNDED (with the OWL filter), and PURE_SPARQL (no embeddings).</li>
+            <li><b>Why it matters:</b> proves the OWL filter is actually pulling its weight on your data — typical wins are higher precision and similar latency for ONTOLOGY_BOUNDED vs UNFILTERED_VECTOR.</li>
+            <li><b>How to read:</b> green wins beat the baseline; red losses indicate the class filter is too tight or the index is stale. <b>Run</b> launches a fresh suite (1–3 minutes); <b>Load latest</b> shows the previous run.</li>
+          </ul>
+        </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
           <button class="btn btn-primary" onclick="vecBenchmarkRun()">▶ Run benchmark suite</button>
           <button class="btn btn-ghost" onclick="vecBenchmarkLoad()">Load latest run</button>
