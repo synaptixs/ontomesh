@@ -74,10 +74,13 @@ Prerequisites, driver installs, and connection strings for every backend: see [i
 
 Two self-contained demos compare an LLM answering the same questions with and without the toolkit-generated ontology. Each runs end-to-end in ~4 seconds against SQLite, produces an engineering-facing full matrix (8 questions × 2 vendors × 2 modes) and an executive one-page view, and falls back to ground-truth-derived illustrative answers when no API keys are set.
 
+All runnable demos live under [`examples/`](examples/) — see [examples/README.md](examples/README.md) for the index.
+
 | Domain | Test plan | Schema | Runner | What it exposes |
 |---|---|---|---|---|
-| Retail | [test-plan.md](test-plan.md) · [demo.md](demo.md) | [db/demo.sql](db/demo.sql) | `./demo.sh` | `status` overload across 3 tables, PROV-O MEASURED vs INFERRED events, FK→object-property traversal, SHACL output gating |
-| 5G Core NFs | [test-plan-5g.md](test-plan-5g.md) | [db/demo_5g.sql](db/demo_5g.sql) | `./demo_5g.sh` | `active` overload across 5 tables (3GPP TS 29.510), composite S-NSSAI (TS 23.003), heartbeat-inferred deregistration (TS 29.510 §5.2.2), NR/LTE PM counter collision (TS 28.552 vs 32.425), SUPI redaction |
+| Retail | [test-plan.md](test-plan.md) · [examples/retail/README.md](examples/retail/README.md) | [db/demo.sql](db/demo.sql) | `./examples/retail/demo.sh` | `status` overload across 3 tables, PROV-O MEASURED vs INFERRED events, FK→object-property traversal, SHACL output gating |
+| 5G Core NFs | [test-plan-5g.md](test-plan-5g.md) | [db/demo_5g.sql](db/demo_5g.sql) | `./examples/5g/demo_5g.sh` | `active` overload across 5 tables (3GPP TS 29.510), composite S-NSSAI (TS 23.003), heartbeat-inferred deregistration (TS 29.510 §5.2.2), NR/LTE PM counter collision (TS 28.552 vs 32.425), SUPI redaction |
+| Drift monitoring | [examples/infodrift/README.md](examples/infodrift/README.md) · [ontology_infodrift_integration.md](ontology_infodrift_integration.md) | reuses `db/demo.sql` | `./examples/infodrift/demo_infodrift.sh` | OWL-driven entity registration in `drift_monitor`, SHACL gating of production frames, JSON-LD/PROV-O drift records, OWL-graph escalation |
 
 Both use the same toolkit pipeline, SHACL gates, and `RuntimeClient` — only the schema, runtime flavor, and question bank differ. Run with `--live` and `ANTHROPIC_API_KEY` + `OPENAI_API_KEY` to swap the illustrative answers for real LLM output through the full governance pipeline.
 
@@ -165,7 +168,8 @@ The adapter defaults to the Cohere request shape. To target a Meta/generic model
 | [install.md](install.md) | All teams | Install, onboarding, CLI, database connection |
 | [features.md](features.md) | Engineers | Artifacts, metadata control, runtime, Gen 2 workstreams |
 | [gates.md](gates.md) | All teams | Governance scorecard, exit gates, CQ-test matrix |
-| [test-plan.md](test-plan.md) · [demo.md](demo.md) | Demo viewers | Retail first-contact test plan — ontology-vs-baseline LLM comparison |
+| [test-plan.md](test-plan.md) · [examples/retail/README.md](examples/retail/README.md) | Demo viewers | Retail first-contact test plan — ontology-vs-baseline LLM comparison |
+| [examples/README.md](examples/README.md) · [examples/infodrift/README.md](examples/infodrift/README.md) | Engineers | Runnable demo index + drift_monitor (infodrift) integration walkthrough |
 | [test-plan-5g.md](test-plan-5g.md) | Demo viewers · telco | 5G-NF first-contact test plan — 3GPP / GSMA / O-RAN-anchored semantic issues |
 | [docs/framework-whitepaper.md](docs/framework-whitepaper.md) | Architects | Full framework specification v1.1 |
 | [docs/executive-summary.md](docs/executive-summary.md) | Leadership | Non-technical overview — what, why, and first steps |
