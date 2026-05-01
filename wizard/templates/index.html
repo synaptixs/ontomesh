@@ -179,6 +179,24 @@
     .step-panel.active { display: block; }
     .step-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
     .step-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    /* Domain badge appended to each step title once a domain is selected,
+       so the user always knows which project they're working on. */
+    .domain-pill { display: inline-block; margin-left: 10px; padding: 2px 10px;
+                   font-size: 0.65em; font-weight: 600; vertical-align: middle;
+                   background: linear-gradient(135deg, var(--accent), var(--accent2));
+                   color: #fff; border-radius: 999px; letter-spacing: .3px; }
+    /* Vector-retrieval example chips — clickable, prefill the query form. */
+    .vec-examples { display: grid; gap: 10px; margin-top: 10px; }
+    .vec-example  { background: var(--bg); border: 1px solid var(--border);
+                    border-radius: 8px; padding: 10px 12px; cursor: pointer;
+                    transition: border-color .15s, transform .1s; }
+    .vec-example:hover  { border-color: var(--accent); }
+    .vec-example:active { transform: translateY(1px); }
+    .vec-example-q { font-size: 13px; color: var(--text); font-weight: 500; }
+    .vec-example-cls { font-family: var(--mono, monospace); font-size: 11px;
+                       color: var(--accent); margin-top: 2px; }
+    .vec-example-why { font-size: 11.5px; color: var(--muted); margin-top: 4px;
+                       line-height: 1.4; }
 
     /* ── Misc ─────────────────────────────────────────────────────────────── */
     .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
@@ -700,6 +718,24 @@
         <div style="margin-top:10px; display:flex; gap:8px">
           <button class="btn btn-primary" onclick="vecQuery()">▶ Run ontology-bounded query</button>
           <button class="btn btn-ghost" onclick="vecCompare()">Compare all strategies</button>
+        </div>
+
+        <div style="margin-top:18px">
+          <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:6px">
+            <h4 style="margin:0; font-size:13px; color:var(--accent); font-weight:600">
+              Examples for your domain <span id="vec-ex-domain" class="domain-pill" style="display:none"></span>
+            </h4>
+            <span style="font-size:11.5px; color:var(--muted)">— click any example to prefill the form above.</span>
+          </div>
+          <div class="box-help" style="margin-bottom:10px">
+            <b>Why these examples matter.</b> A "flavor" is a named, scoped view of your ontology — each one defines which OWL classes an agent is allowed to see and which sensitivity tier it can read. The class expression then narrows that flavor further at query time. The combination is what makes hybrid retrieval <i>safe</i>: a billing agent can't accidentally retrieve clinical observations even if the embedding looks similar.
+            <ul>
+              <li><b>Class expression</b> — pipe-separated OWL classes (OR). Sub-classes are included automatically. Empty = whole flavor.</li>
+              <li><b>Question</b> — the natural-language query that gets embedded and ranked.</li>
+              <li><b>Why this works</b> — each example is paired with a one-line rationale so you understand <i>what</i> the OWL filter is actually buying you over a raw vector search.</li>
+            </ul>
+          </div>
+          <div id="vec-examples" class="vec-examples"></div>
         </div>
       </div>
 
@@ -1322,6 +1358,34 @@ function render() {
   renderEvents();
   renderRelationships();
   renderCQs();
+  _paintDomainPills();
+  vecRenderExamples();
+}
+
+// ── Domain badge in step titles ──────────────────────────────────────────
+//
+// Once a domain is selected, append a small pill to every step heading
+// so users always know which project they are in. The Domain step
+// itself skips the pill (the user is editing the name there).
+function _paintDomainPills() {
+  document.querySelectorAll('.step-title .domain-pill').forEach(el => el.remove());
+  const name = (session.domain && session.domain.name) || '';
+  if (!name) return;
+  document.querySelectorAll('.step-panel').forEach(panel => {
+    if (panel.id === 'step-domain') return;             // editing the domain — pill is noise
+    const t = panel.querySelector('.step-title');
+    if (!t) return;
+    const pill = document.createElement('span');
+    pill.className = 'domain-pill';
+    pill.textContent = name;
+    t.appendChild(pill);
+  });
+  // Also tag the examples header in the Vector Retrieval step.
+  const exDom = document.getElementById('vec-ex-domain');
+  if (exDom) {
+    exDom.style.display = '';
+    exDom.textContent = name;
+  }
 }
 
 // ── Workstream 2 — Evolution Review tab ──────────────────────────────────
@@ -1766,6 +1830,148 @@ async function vecQuery(){
   document.getElementById('vec-results').innerHTML =
     _vecRenderStrategy('Ontology-bounded vector retrieval', j);
   document.getElementById('vec-results-card').style.display = 'block';
+}
+
+// ── Hybrid retrieval: per-domain example queries ─────────────────────────
+//
+// Bank of canonical hybrid-retrieval queries, scoped per industry. Each
+// example pairs a class-expression filter with a natural-language
+// question and a one-line "why this query is interesting" rationale —
+// the goal is for a non-expert to see the OWL filter actually doing
+// work, not just be a literal placeholder.
+//
+// Falls back to GENERIC examples when no industry is selected.
+const VEC_EXAMPLES = {
+  telecom: [
+    { flavor: 'network-ops', cls: 'NetworkElement | Alarm',
+      q: 'Which network elements have unacknowledged critical alarms?',
+      why: 'Two classes joined — the OWL filter keeps the search inside infrastructure entities and skips billing or customer records that may share vocabulary like "active" or "critical".' },
+    { flavor: 'fault-management', cls: 'Service | Customer',
+      q: 'Which customers are affected by ongoing service degradations?',
+      why: 'Cross-class traversal. PROV-O confidence on the Service status outweighs raw similarity, so the top hit is the most trusted active issue, not the most lexically similar past one.' },
+    { flavor: 'compliance', cls: 'Alarm',
+      q: 'Which Critical-severity alarms remain open after 4 hours?',
+      why: 'Single-class scope plus a temporal phrase. The flavor blocks Restricted-tier internal incident notes from leaking even if they\'re lexically perfect matches.' },
+  ],
+  healthcare: [
+    { flavor: 'clinical-ops', cls: 'Patient | CarePlan',
+      q: 'Which patients have an active care plan?',
+      why: 'Two-class filter ensures the retriever can\'t mistakenly surface a Provider record just because the embedding is near-by. The Confidential sensitivity tier on Patient is enforced before ranking.' },
+    { flavor: 'clinical-ops', cls: 'Encounter | Observation',
+      q: 'Which clinical observations were recorded with high confidence in the last 90 days?',
+      why: 'PROV-O confidence is part of the hybrid score, so low-confidence observations rank below high-confidence ones even when their embedding is more similar.' },
+    { flavor: 'compliance', cls: 'Medication | Provider',
+      q: 'Which providers prescribed medications outside the approved formulary?',
+      why: 'Joins two classes for an audit-grade lookup. The compliance flavor sees only provider/medication facts — patient PII is filtered out at the flavor boundary.' },
+  ],
+  finance: [
+    { flavor: 'risk-ops', cls: 'Transaction | RiskAssessment',
+      q: 'Which transactions trigger high-risk alerts?',
+      why: 'Pairs transaction records with their risk scores. Recency weight in the hybrid score promotes today\'s alerts above last month\'s, even if last month\'s embedding is closer.' },
+    { flavor: 'compliance', cls: 'Account | Counterparty',
+      q: 'Which counterparties are linked to flagged accounts?',
+      why: 'Cross-class join exposes the network of suspect counterparties. Restricted-tier client identifiers are blocked at the flavor boundary, so the dashboard returns aggregates only.' },
+    { flavor: 'risk-ops', cls: 'Product',
+      q: 'Which products held by retail accounts breach the new exposure limits?',
+      why: 'Single-class scope plus a regulatory predicate. The OWL filter rules out institutional products that share product-master language but live in a different sub-class.' },
+  ],
+  manufacturing: [
+    { flavor: 'plant-ops', cls: 'Asset | WorkOrder',
+      q: 'Which assets are currently under maintenance?',
+      why: 'Combines asset and work-order context. Recency dominates because an "under-maintenance" record from last quarter is irrelevant.' },
+    { flavor: 'quality', cls: 'Product | QualityInspection',
+      q: 'Which products failed quality inspection this week?',
+      why: 'Two-class scope with a clear time window. The OWL filter rules out shipments and supplier records that share quality language but are not directly inspected.' },
+    { flavor: 'supply-chain', cls: 'Supplier | Shipment',
+      q: 'Which suppliers delivered non-conforming materials in the last quarter?',
+      why: 'Cross-class join. PROV-O traceability lets the agent cite the originating inspection record for every supplier hit.' },
+  ],
+  retail: [
+    { flavor: 'fulfilment', cls: 'Order | Customer',
+      q: 'Which orders are awaiting fulfilment?',
+      why: 'Two-class filter avoids matching cancelled or refunded orders even when the embedding is similar. Recency weight surfaces today\'s backlog.' },
+    { flavor: 'merchandising', cls: 'Product | Inventory',
+      q: 'Which products are below the reorder threshold in which stores?',
+      why: 'Joins product master with per-store stock levels. The OWL filter excludes catalog-only products that have no stock record.' },
+    { flavor: 'marketing', cls: 'Promotion | Customer',
+      q: 'Which customers redeemed promotions in the last 30 days?',
+      why: 'Cross-class lookup with a time predicate. The marketing flavor sees Internal-tier loyalty data but is blocked from Confidential payment details.' },
+  ],
+  energy_utilities: [
+    { flavor: 'grid-ops', cls: 'PowerAsset | Outage',
+      q: 'Which substations have unresolved outages affecting more than 1000 customers?',
+      why: 'Two-class scope plus a customer-impact predicate. Drift-monitor signals on PowerAsset boost the rank of equipment with recent telemetry anomalies.' },
+  ],
+  logistics_supply_chain: [
+    { flavor: 'fleet-ops', cls: 'Vehicle | Route',
+      q: 'Which vehicles missed their scheduled stop on a route today?',
+      why: 'Combines fleet asset with planned itinerary. Recency wins over textual similarity, surfacing real-time exceptions ahead of historical ones.' },
+  ],
+  government: [
+    { flavor: 'public-records', cls: 'Citizen | ServiceRequest',
+      q: 'Which open service requests are past their statutory response time?',
+      why: 'Single-class temporal filter on top of a citizen-scoped flavor. PII handling is enforced by the flavor\'s sensitivity tier — no name leaks into the embedding.' },
+  ],
+  insurance: [
+    { flavor: 'claims-ops', cls: 'Claim | Policy',
+      q: 'Which claims are flagged for fraud review and tied to active policies?',
+      why: 'Two-class join for an investigative workflow. Confidence weighting demotes low-evidence flags so reviewers see the strongest cases first.' },
+  ],
+  pharmaceuticals: [
+    { flavor: 'pharmacovigilance', cls: 'AdverseEvent | Drug',
+      q: 'Which drugs have new serious adverse events in the last 7 days?',
+      why: 'Cross-class join with a strict recency window — the regulatory definition of "new" is time-bounded, so the recency weight does the heavy lifting.' },
+  ],
+  GENERIC: [
+    { flavor: '', cls: '',
+      q: 'Which records of class X were created in the last 7 days?',
+      why: 'A simple recency-bounded query. Replace X with one of your entity classes (e.g. Order, Patient, NetworkElement) — the OWL filter restricts the search and recency weight ranks the results.' },
+    { flavor: '', cls: 'EntityA | EntityB',
+      q: 'Which EntityA instances are linked to high-priority EntityB instances?',
+      why: 'Two-class join showing the typical hybrid pattern: class filter narrows the candidate pool, vector similarity ranks within it, PROV-O confidence and recency fine-tune the order.' },
+  ],
+};
+
+function vecRenderExamples() {
+  const grid = document.getElementById('vec-examples');
+  if (!grid) return;
+  const ind = (session.domain && session.domain.industry || '').toLowerCase();
+  const examples = VEC_EXAMPLES[ind] || VEC_EXAMPLES.GENERIC;
+  if (!examples.length) {
+    grid.innerHTML = '<em style="color:var(--muted);font-size:13px">No examples for this domain yet.</em>';
+    return;
+  }
+  grid.innerHTML = examples.map((ex, i) => `
+    <div class="vec-example" onclick="vecApplyExample(${i})" data-i="${i}" title="Click to fill the form above">
+      <div class="vec-example-q">${escapeHtml(ex.q)}</div>
+      <div class="vec-example-cls">flavor: ${escapeHtml(ex.flavor || '(any)')}  ·  class: ${escapeHtml(ex.cls || '(empty — whole flavor)')}</div>
+      <div class="vec-example-why">${escapeHtml(ex.why)}</div>
+    </div>
+  `).join('');
+  grid.dataset.industry = ind || 'GENERIC';
+  grid.dataset.examples = JSON.stringify(examples);
+}
+
+function vecApplyExample(i) {
+  const grid = document.getElementById('vec-examples');
+  const examples = JSON.parse(grid.dataset.examples || '[]');
+  const ex = examples[i]; if (!ex) return;
+  if (ex.flavor) {
+    const sel = document.getElementById('vec-flavor');
+    let matched = false;
+    for (const opt of sel.options) {
+      if (opt.value === ex.flavor) { opt.selected = true; matched = true; break; }
+    }
+    // If the flavor doesn't exist in the dropdown, just leave the user's
+    // current selection — the example is still useful as a query template.
+    if (!matched && sel.options.length) {
+      // no-op; show a toast so the user knows.
+      try { showToast('Flavor "'+ex.flavor+'" not registered yet — using current selection.'); } catch(_) {}
+    }
+  }
+  document.getElementById('vec-class-expr').value = ex.cls || '';
+  document.getElementById('vec-question').value   = ex.q   || '';
+  document.getElementById('vec-question').focus();
 }
 
 async function vecCompare(){
