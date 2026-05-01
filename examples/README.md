@@ -5,6 +5,7 @@ Runnable demos of the ontology-toolkit. Each subfolder is self-contained — clo
 | Demo | Domain | What it shows | Entrypoint |
 |------|--------|---------------|------------|
 | [wizard/](wizard/) | Smart Building Operations | Onboarding wizard end-to-end — plain-language domain → schema → ontology → SHACL → JSON-LD → report, in one command | `./examples/wizard/demo_wizard.sh` |
+| [import/](import/) | Three sample inputs | Wizard's Import-from-file feature (#16). Drop a `.json` session, a data-catalog `{tables: [...]}` schema, or a Postgres DDL file → review modal walks you through validation, suggestions, and Accept | `python3 wizard/app.py` (then drop a file on Step 1) |
 | [retail/](retail/) | Retail / orders | Ontology-vs-baseline LLM comparison (8 questions × 2 vendors) — does the ontology actually help? | `./examples/retail/demo.sh` |
 | [5g/](5g/) | 5G Core NFs (3GPP) | Same comparison harness over telecom data — `active` overload, S-NSSAI composition, heartbeat-inferred deregistration, NR/LTE PM counter collision | `./examples/5g/demo_5g.sh` |
 | [infodrift/](infodrift/) | Drift monitoring | OWL-driven drift detection: how the toolkit's ontology drives `drift_monitor` (infodrift) entity registration, SHACL gating, JSON-LD enrichment, and OWL propagation | `./examples/infodrift/demo_infodrift.sh` |
