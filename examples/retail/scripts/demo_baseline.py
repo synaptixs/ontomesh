@@ -18,8 +18,9 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = SCRIPT_DIR.parents[2]
+sys.path.insert(0, str(SCRIPT_DIR))
 from demo_questions import QUESTIONS  # noqa: E402
 
 CACHE_DIR = ROOT / "output" / "demo" / "cache"

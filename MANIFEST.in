@@ -3,8 +3,9 @@ include requirements.txt
 include install.md
 include gates.md
 include features.md
-include demo.md
 include ontology_infodrift_integration.md
+
+recursive-include examples *.md *.sh *.py *.json
 
 recursive-include templates *
 recursive-include config *.json *.yaml *.yml

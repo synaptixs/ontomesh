@@ -42,9 +42,9 @@ The runner chains five steps:
 
 1. Build `db/demo.db` from `db/demo.sql` + `db/demo_seed.sql` (retail schema, 8 domain tables, ~60 rows, 17 `ontology_metadata` annotations)
 2. Run `toolkit.py --db db/demo.db --out output/demo/` (generates OWL + SHACL + JSON-LD + SKOS + 43 CQ tests, ~3 seconds)
-3. Run `scripts/demo_baseline.py` — 8 questions × 2 vendors × raw SQL rows + plain prompt
-4. Run `scripts/demo_grounded.py` — 8 questions × 2 vendors × `RuntimeClient.ask(flavor='retail')`
-5. Run `scripts/demo_report.py` — reads the cache, writes `comparison.html`, `executive.html`, `comparison.csv`
+3. Run `examples/retail/scripts/demo_baseline.py` — 8 questions × 2 vendors × raw SQL rows + plain prompt
+4. Run `examples/retail/scripts/demo_grounded.py` — 8 questions × 2 vendors × `RuntimeClient.ask(flavor='retail')`
+5. Run `examples/retail/scripts/demo_report.py` — reads the cache, writes `comparison.html`, `executive.html`, `comparison.csv`
 
 Step 2 takes ~3 seconds. Steps 3+4 combined run in under 30 seconds in live mode (16 total API calls per vendor × 2 = 32 calls).
 
@@ -97,7 +97,7 @@ output/demo/
 
 ---
 
-## The 8-question bank (`scripts/demo_questions.py`)
+## The 8-question bank (`examples/retail/scripts/demo_questions.py`)
 
 Each question is paired with a `why` annotation so you can explain the deliberate construction:
 
@@ -114,7 +114,7 @@ Each question is paired with a `why` annotation so you can explain the deliberat
 
 ---
 
-## The runtime path (`scripts/demo_grounded.py`)
+## The runtime path (`examples/retail/scripts/demo_grounded.py`)
 
 Calls `RuntimeClient.ask(question=..., flavor="retail")`. The pipeline inside that one call:
 
@@ -189,8 +189,8 @@ Source badges: `live` = real LLM output from cache; `illustrative` = scripted fa
 
 ## Extending the demo
 
-- **Add a question** — append to `QUESTIONS` in `scripts/demo_questions.py` and a matching entry in `illustrative.json`. Re-run.
-- **Add a vendor** — extend `VENDORS` in `scripts/demo_report.py` and add a matching call branch in `demo_baseline.py` / `demo_grounded.py`. Any adapter in `runtime/adapters/` works.
+- **Add a question** — append to `QUESTIONS` in `examples/retail/scripts/demo_questions.py` and a matching entry in `illustrative.json`. Re-run.
+- **Add a vendor** — extend `VENDORS` in `examples/retail/scripts/demo_report.py` and add a matching call branch in `demo_baseline.py` / `demo_grounded.py`. Any adapter in `runtime/adapters/` works.
 - **Swap the domain** — replace `db/demo.sql` + `db/demo_seed.sql` and edit `runtime/flavors/retail.json`'s `owl_classes`, `db_tables`, and `context_terms`. The rest of the pipeline is schema-agnostic.
 - **Tighten SHACL** — add NodeShapes to `output/demo/shapes/enterprise-shapes.ttl`. The grounded path's `OutputGate` will enforce them.
 
@@ -204,12 +204,12 @@ Source badges: `live` = real LLM output from cache; `illustrative` = scripted fa
 | [db/demo.sql](db/demo.sql) | Retail schema (self-contained, includes system tables) |
 | [db/demo_seed.sql](db/demo_seed.sql) | 60 rows + 17 `ontology_metadata` rows |
 | [runtime/flavors/retail.json](runtime/flavors/retail.json) | Flavor declaration — OWL classes, db_tables, context terms, system_prompt_hint |
-| [scripts/demo_questions.py](scripts/demo_questions.py) | The 8-question bank |
-| [scripts/demo_baseline.py](scripts/demo_baseline.py) | Raw-rows LLM runner (no ontology) |
-| [scripts/demo_grounded.py](scripts/demo_grounded.py) | `RuntimeClient` runner |
-| [scripts/demo_report.py](scripts/demo_report.py) | Builds `comparison.html` + `executive.html` + `comparison.csv` |
+| [examples/retail/scripts/demo_questions.py](examples/retail/scripts/demo_questions.py) | The 8-question bank |
+| [examples/retail/scripts/demo_baseline.py](examples/retail/scripts/demo_baseline.py) | Raw-rows LLM runner (no ontology) |
+| [examples/retail/scripts/demo_grounded.py](examples/retail/scripts/demo_grounded.py) | `RuntimeClient` runner |
+| [examples/retail/scripts/demo_report.py](examples/retail/scripts/demo_report.py) | Builds `comparison.html` + `executive.html` + `comparison.csv` |
 | [test-plan.md](test-plan.md) / [test-plan.html](test-plan.html) | Original test plan |
-| [scripts/demo_illustrative.json](scripts/demo_illustrative.json) | Scripted answer fallback (ground-truth-derived; survives `--fresh`) |
+| [examples/retail/scripts/demo_illustrative.json](examples/retail/scripts/demo_illustrative.json) | Scripted answer fallback (ground-truth-derived; survives `--fresh`) |
 
 ---
 
