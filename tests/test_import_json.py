@@ -375,6 +375,46 @@ def test_pluralisation_helpers_round_trip():
 
 # ── Step 4: COMMENT ON TABLE survives across statements ───────────────────
 
+def test_yaml_relationship_parser_handles_real_template_sentences():
+    """Regression for the bug where energy_utilities and four other YAML
+    templates loaded with un-parseable relationships, leaving the
+    Graph tab empty. Every shipped template must round-trip to
+    structured {from_entity, label, to_entity} dicts."""
+    from wizard import app as wapp
+    c = wapp.app.test_client()
+    names = c.get('/api/templates').get_json()['templates']
+    assert names, "no templates registered"
+    for n in names:
+        j = c.get('/api/template/' + n).get_json()
+        rels = j.get('relationships') or []
+        bad = [r for r in rels
+               if isinstance(r, dict)
+               and (not r.get('from_entity') or not r.get('to_entity'))]
+        assert not bad, (
+            f"template '{n}' has {len(bad)}/{len(rels)} un-parseable relationship(s): "
+            + "; ".join(b.get('label', '') for b in bad))
+
+
+def test_yaml_relationship_parser_unit():
+    """Direct exercise of the helper for the trickiest patterns:
+    space-stripped label, suffix alias, self-reference."""
+    from wizard.app import _parse_relationship_sentence as P
+    # space-stripped form ('GovernmentAgency' for 'Government Agency')
+    r = P("A Citizen submits a ServiceApplication to a GovernmentAgency.",
+          ["Citizen", "Service Application", "Government Agency"])
+    assert r and r["from_entity"] == "Citizen" and r["to_entity"] == "Government Agency"
+    # suffix alias ('Policy' → 'Insurance Policy')
+    r = P("A Claim is lodged against exactly one Policy.",
+          ["Insurance Policy", "Insurance Claim"])
+    assert r and r["from_entity"] == "Insurance Claim" and r["to_entity"] == "Insurance Policy"
+    # self-reference (parent → child tree shape)
+    r = P("An Agency may be subordinate to another Agency.", ["Government Agency"])
+    assert r and r["from_entity"] == r["to_entity"] == "Government Agency"
+    # un-parseable: only one entity, no self-ref hint
+    r = P("Generic prose without entity names.", ["Foo", "Bar"])
+    assert r is None
+
+
 def test_comment_on_table_works_when_placed_at_end():
     # The fixture puts COMMENT ON TABLE *after* every CREATE TABLE — ensure
     # the regex pass picks it up regardless of position.
