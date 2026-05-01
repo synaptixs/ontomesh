@@ -1,0 +1,77 @@
+{
+  "_about": [
+    "Example file for the wizard's Import-from-file feature.",
+    "",
+    "This is the 'json-schema' shape — a thin {tables: [...]} description",
+    "that data catalogs (dbt, Atlan, OpenMetadata) and OpenAPI tools",
+    "typically produce. The importer auto-detects the shape from the",
+    "top-level `tables` key and turns each table into a wizard entity",
+    "(or event by name heuristic), each column into a property, each",
+    "declared FK into a relationship.",
+    "",
+    "Drop this file on the wizard's Step 1 'Import from file' card.",
+    "The review modal will show a curated mix of issues to demonstrate",
+    "the validation tiers:",
+    "",
+    "  Errors:      0",
+    "  Warnings:    MISSING_BASE_IRI · NO_CQS",
+    "  Suggestions: SUGGEST_PROPERTY_SENSITIVITY × 3",
+    "               (customer.email + customer.ssn → Confidential,",
+    "                customer.password → Restricted)",
+    "               SUGGEST_DESCRIPTION × 1",
+    "               (column with no description gets a heuristic wording)",
+    "",
+    "The transaction_log table is auto-routed to events at parse time",
+    "because of the `_log` suffix — no SUGGEST_EVENT row appears.",
+    "(Soft-FK suggestions only fire on the SQL import path; for JSON",
+    "schemas, FKs must be declared explicitly.)",
+    "",
+    "Try Accept-all-pending in the Suggestions tab to apply every",
+    "auto-fix at once, then check the Preview tab to see the resulting",
+    "session JSON before clicking 'Accept & replace session'."
+  ],
+
+  "domain":      "Payments Processing",
+  "description": "Card and bank-transfer payment processing. Imported from a sample data-catalog schema.",
+  "industry":    "finance",
+
+  "tables": [
+    {
+      "name":        "customer",
+      "description": "Person or business that owns one or more accounts on the platform.",
+      "columns": [
+        { "name": "id",          "type": "INTEGER", "description": "Surrogate primary key.", "required": true },
+        { "name": "email",       "type": "VARCHAR", "description": "Login + primary contact." },
+        { "name": "ssn",         "type": "VARCHAR", "description": "Social security number, used for KYC checks." },
+        { "name": "password",    "type": "VARCHAR", "description": "Hashed login password." },
+        { "name": "created_at",  "type": "TIMESTAMP" }
+      ],
+      "primary_key": ["id"]
+    },
+    {
+      "name":        "account",
+      "description": "Settlement account a customer can move money in and out of.",
+      "columns": [
+        { "name": "id",          "type": "INTEGER", "description": "Surrogate primary key.", "required": true },
+        { "name": "customer_id", "type": "INTEGER", "description": "Owning customer." },
+        { "name": "currency",    "type": "VARCHAR", "description": "ISO-4217 currency code." },
+        { "name": "balance",     "type": "NUMERIC", "description": "Cleared balance in minor units." }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        { "column": "customer_id", "references_table": "customer", "references_column": "id" }
+      ]
+    },
+    {
+      "name":        "transaction_log",
+      "description": "Every settled or attempted money movement.",
+      "columns": [
+        { "name": "id",          "type": "INTEGER" },
+        { "name": "account_id",  "type": "INTEGER", "description": "Account the transaction was posted against." },
+        { "name": "amount",      "type": "NUMERIC" },
+        { "name": "occurred_at", "type": "TIMESTAMP" }
+      ],
+      "primary_key": ["id"]
+    }
+  ]
+}

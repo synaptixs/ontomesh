@@ -70,7 +70,7 @@ drift = [
 ]
 
 # ── Advanced / opt-in ────────────────────────────────────────────────────
-wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1"]
+wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1", "sqlglot>=25.0", "jsonschema>=4.20"]
 discover = ["spacy>=3.7.4"]
 neptune  = ["boto3>=1.35.0"]
 
@@ -98,6 +98,8 @@ all = [
     # advanced
     "flask>=3.0.3",
     "flask-cors>=4.0.1",
+    "sqlglot>=25.0",
+    "jsonschema>=4.20",
     "spacy>=3.7.4",
     "boto3>=1.35.0",
     # test

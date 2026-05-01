@@ -500,6 +500,30 @@
       </div>
 
       <div class="card">
+        <h3>Import from file</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
+          Drop a <code>.json</code> session file (wizard or onboard.py format) or a
+          <code>.json</code> schema. SQL DDL import lands in a follow-up step (#16).
+        </p>
+        <label id="import-drop"
+               style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                      padding:24px;border:2px dashed var(--border);border-radius:8px;
+                      cursor:pointer;background:rgba(91,138,247,.04);
+                      transition:border-color .15s,background .15s">
+          <span style="font-size:24px;opacity:.55">⤓</span>
+          <span style="font-size:13px;color:var(--muted)">
+            Drag &amp; drop, or <span style="color:var(--accent);font-weight:600">click to browse</span>
+          </span>
+          <span id="import-filename" style="font-size:11px;color:var(--muted-2)"></span>
+          <input type="file" id="import-file" accept=".json,.sql" style="display:none"
+                 onchange="onImportPicked(event)" />
+        </label>
+        <div id="import-error" style="display:none;color:var(--danger);font-size:12px;
+                                       margin-top:8px;padding:8px 12px;
+                                       background:rgba(247,107,107,.08);border-radius:4px"></div>
+      </div>
+
+      <div class="card">
         <h3>Domain details</h3>
         <div class="box-help">
           The identity of your ontology — used in every generated IRI, SHACL shape, and report.
@@ -1069,6 +1093,87 @@
   </div>
 </div>
 
+<!-- ── Import Review Modal ─────────────────────────────────────────────── -->
+<!--
+  Hosts the parse/validate/diff result returned by POST /api/import.
+  User picks a tab (Summary · Errors · Warnings · Suggestions · Preview),
+  optionally toggles individual suggestions, then clicks Accept to commit
+  via POST /api/import/commit (which final-guard re-validates).
+-->
+<div id="import-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:780px;width:92%">
+    <div class="modal-header">
+      <h2 style="margin:0">Import review</h2>
+      <span id="im-format-pill" class="badge" style="margin-left:auto;margin-right:12px"></span>
+      <button class="btn btn-ghost" onclick="closeImportModal()">✕</button>
+    </div>
+
+    <!-- Tab strip -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px">
+      <button class="im-tab-btn active" data-im-tab="summary"     onclick="imSwitchTab('summary')">Summary</button>
+      <button class="im-tab-btn"        data-im-tab="errors"      onclick="imSwitchTab('errors')">Errors <span id="im-c-errors" class="badge" style="margin-left:4px"></span></button>
+      <button class="im-tab-btn"        data-im-tab="warnings"    onclick="imSwitchTab('warnings')">Warnings <span id="im-c-warnings" class="badge" style="margin-left:4px"></span></button>
+      <button class="im-tab-btn"        data-im-tab="suggestions" onclick="imSwitchTab('suggestions')">Suggestions <span id="im-c-suggestions" class="badge" style="margin-left:4px"></span></button>
+      <button class="im-tab-btn"        data-im-tab="preview"     onclick="imSwitchTab('preview')">Preview</button>
+    </div>
+
+    <div id="im-tab-summary"     class="im-tab-panel" style="min-height:280px"></div>
+    <div id="im-tab-errors"      class="im-tab-panel" style="display:none;min-height:280px"></div>
+    <div id="im-tab-warnings"    class="im-tab-panel" style="display:none;min-height:280px"></div>
+    <div id="im-tab-suggestions" class="im-tab-panel" style="display:none;min-height:280px"></div>
+    <div id="im-tab-preview"     class="im-tab-panel" style="display:none;min-height:280px"></div>
+
+    <div class="modal-footer" style="border-top:1px solid var(--border);padding-top:14px">
+      <span id="im-status" style="font-size:12px;color:var(--muted);margin-right:auto"></span>
+      <button class="btn btn-ghost"   onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" id="im-accept" onclick="imAccept()">Accept &amp; replace session</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Import modal — tab strip + issue rows */
+  .im-tab-btn { background:transparent;border:none;color:var(--muted);
+                padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;
+                border-bottom:2px solid transparent;font-family:inherit;
+                transition:color .15s,border-color .15s }
+  .im-tab-btn:hover  { color:var(--text) }
+  .im-tab-btn.active { color:var(--accent);border-bottom-color:var(--accent) }
+  .im-tab-panel .badge { font-size:10.5px }
+  .im-issue { border:1px solid var(--border);border-radius:6px;
+              padding:10px 12px;margin-bottom:8px;font-size:12.5px;
+              background:rgba(255,255,255,.02) }
+  .im-issue .im-code { font-family:monospace;font-size:10.5px;color:var(--muted-2);
+                       background:rgba(255,255,255,.04);padding:1px 6px;
+                       border-radius:4px;margin-right:6px }
+  .im-issue .im-loc  { color:var(--muted-2);font-size:11px;float:right;
+                       font-family:monospace }
+  .im-issue .im-hint { color:var(--muted);margin-top:4px;font-size:12px }
+  .im-issue.error    { border-left:3px solid var(--danger) }
+  .im-issue.warning  { border-left:3px solid var(--warn) }
+  .im-issue.suggest  { border-left:3px solid var(--accent) }
+  .im-issue.accepted { border-left-color:var(--success);
+                       background:rgba(76,175,80,.06);opacity:.85 }
+  .im-issue.rejected { border-left-color:var(--muted-2);opacity:.5 }
+  .im-issue.rejected .im-msg, .im-issue.rejected .im-hint { text-decoration:line-through }
+  .im-sug-actions { display:flex;gap:6px;margin-top:8px }
+  .im-sug-actions .btn { padding:3px 10px;font-size:11px;font-weight:500 }
+  .im-sug-status { font-size:11px;font-weight:600;margin-left:8px }
+  .im-sug-status.accepted { color:var(--success) }
+  .im-sug-status.rejected { color:var(--muted-2) }
+  .im-bulk-bar  { display:flex;justify-content:space-between;align-items:center;
+                  margin-bottom:10px;font-size:12px;color:var(--muted) }
+  .im-stat-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px }
+  .im-stat { background:var(--surface-2,rgba(255,255,255,.03));
+             border:1px solid var(--border);border-radius:6px;padding:10px 14px }
+  .im-stat .lbl { font-size:11px;color:var(--muted);text-transform:uppercase;
+                  letter-spacing:.04em;font-weight:600 }
+  .im-stat .val { font-size:20px;font-weight:600;color:var(--text);margin-top:2px }
+  #im-tab-preview pre { background:var(--bg);border:1px solid var(--border);
+                        border-radius:6px;padding:12px;font-size:11.5px;
+                        max-height:340px;overflow:auto;line-height:1.4 }
+</style>
+
 <script>
 // ── State ─────────────────────────────────────────────────────────────────
 let session = {
@@ -1124,6 +1229,7 @@ function _cssVar(name, fallback) {
 async function init() {
   await loadSession();
   loadTemplateList();
+  _imSetupDropZone();
   render();
 }
 
@@ -1203,6 +1309,396 @@ async function loadTemplate(name) {
     }
   } catch(e) {
     showToast('Network error loading template: '+name);
+  }
+}
+
+// ── Import (issue #16, step 2) ────────────────────────────────────────────
+//
+// Drop-zone + review-modal flow. Backend does the heavy lifting in
+// /api/import; the frontend just renders the structured result and
+// posts /api/import/commit when the user accepts.
+
+let _importResult = null;          // last parse result (kept for Accept)
+
+function _imSetupDropZone() {
+  const dz = document.getElementById('import-drop');
+  const input = document.getElementById('import-file');
+  if (!dz || !input) return;
+  ['dragenter','dragover'].forEach(ev =>
+    dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)';
+                                   dz.style.background = 'rgba(91,138,247,.10)'; }));
+  ['dragleave','drop'].forEach(ev =>
+    dz.addEventListener(ev, e => { e.preventDefault(); dz.style.borderColor = '';
+                                   dz.style.background = ''; }));
+  dz.addEventListener('drop', e => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) _imUploadFile(f);
+  });
+}
+
+function onImportPicked(ev) {
+  const f = ev.target.files && ev.target.files[0];
+  if (f) _imUploadFile(f);
+  ev.target.value = '';   // allow picking the same file twice
+}
+
+async function _imUploadFile(file) {
+  const errBox = document.getElementById('import-error');
+  errBox.style.display = 'none';
+  document.getElementById('import-filename').textContent = file.name + '  (' + Math.round(file.size/1024) + ' KB)';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('format', 'auto');
+  let res;
+  try {
+    const r = await fetch('/api/import', { method: 'POST', body: fd });
+    res = await r.json();
+  } catch(e) {
+    errBox.textContent = 'Network error: ' + (e && e.message || e);
+    errBox.style.display = '';
+    return;
+  }
+  if (res && res.error && !res.session) {
+    errBox.textContent = res.error;
+    errBox.style.display = '';
+    return;
+  }
+  _importResult = res;
+  _imRenderModal(res);
+  document.getElementById('import-modal').style.display = 'flex';
+  imSwitchTab(res.errors && res.errors.length ? 'errors' : 'summary');
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+}
+
+function imSwitchTab(name) {
+  document.querySelectorAll('#import-modal .im-tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.imTab === name));
+  ['summary','errors','warnings','suggestions','preview'].forEach(t =>
+    document.getElementById('im-tab-' + t).style.display = (t === name) ? '' : 'none');
+}
+
+function _imBadge(n, severity) {
+  if (!n) return '';
+  const colour = severity === 'error'  ? 'var(--danger)'
+              : severity === 'warning' ? 'var(--warn)'
+              : 'var(--accent)';
+  return `<span class="badge" style="color:${colour};border-color:${colour}">${n}</span>`;
+}
+
+function _imIssueRow(it, severity, idx) {
+  const cls = severity === 'error' ? 'error' : severity === 'warning' ? 'warning' : 'suggest';
+  return `<div class="im-issue ${cls}" id="im-issue-${severity}-${idx ?? 0}">
+    ${it.location ? `<span class="im-loc">${escapeHtml(it.location)}</span>` : ''}
+    <span class="im-code">${escapeHtml(it.code)}</span>
+    <b class="im-msg" style="color:var(--text)">${escapeHtml(it.message)}</b>
+    ${it.fix_hint ? `<div class="im-hint">${escapeHtml(it.fix_hint)}</div>` : ''}
+  </div>`;
+}
+
+// ── Suggestion accept/reject (issue #16 step 5 UI) ──────────────────────
+//
+// Each suggestion the backend returns carries an `apply` payload that
+// describes the mutation the frontend should perform on the in-memory
+// session if the user clicks Accept. Two flavours:
+//
+//   { path: [...], value: ... }       simple setter — walk + assign
+//   { op: "<name>", ... }             named operation — see _imApplyOp
+//
+// Per-row state lives on the suggestion entry itself
+// (it._state = 'pending' | 'accepted' | 'rejected') so re-renders survive
+// tab switching. Bulk Accept All re-applies every still-pending suggestion.
+
+function _imSuggestionRow(it, idx) {
+  const state = it._state || 'pending';
+  const cls = 'suggest' + (state === 'accepted' ? ' accepted' : state === 'rejected' ? ' rejected' : '');
+  const actions = state === 'pending'
+    ? `<div class="im-sug-actions">
+         <button class="btn btn-primary" onclick="imAcceptSuggestion(${idx})">Accept</button>
+         <button class="btn btn-ghost"   onclick="imRejectSuggestion(${idx})">Reject</button>
+       </div>`
+    : `<span class="im-sug-status ${state}">${state === 'accepted' ? '✓ accepted' : '✗ rejected'}</span>
+       <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px;margin-left:6px"
+               onclick="imResetSuggestion(${idx})">Undo</button>`;
+  return `<div class="im-issue ${cls}" id="im-sug-${idx}">
+    ${it.location ? `<span class="im-loc">${escapeHtml(it.location)}</span>` : ''}
+    <span class="im-code">${escapeHtml(it.code)}</span>
+    <b class="im-msg" style="color:var(--text)">${escapeHtml(it.message)}</b>
+    ${it.fix_hint ? `<div class="im-hint">${escapeHtml(it.fix_hint)}</div>` : ''}
+    ${actions}
+  </div>`;
+}
+
+function _imWalkPathSet(obj, path, value) {
+  let cur = obj;
+  for (let i = 0; i < path.length - 1; i++) {
+    const k = path[i];
+    if (cur == null) return false;
+    cur = cur[k];
+  }
+  if (cur == null) return false;
+  cur[path[path.length - 1]] = value;
+  return true;
+}
+
+function _imApplyOp(session, apply) {
+  // Returns true on success, false if the op silently no-op'd.
+  if (!apply) return false;
+  if (apply.path) return _imWalkPathSet(session, apply.path, apply.value);
+  switch (apply.op) {
+    case "move_to_events": {
+      const i = apply.entity_index;
+      if (typeof i !== "number" || !session.entities || i >= session.entities.length) return false;
+      const ent = session.entities[i];
+      session.entities.splice(i, 1);
+      session.events = session.events || [];
+      // Avoid duplicate event with the same label.
+      if (!session.events.some(e => (e.label||e.name) === (ent.label||ent.name))) {
+        session.events.push({
+          name:        apply.name || ent.name,
+          label:       apply.label || ent.label,
+          description: apply.description || ent.description || "",
+        });
+      }
+      // Path-indexed suggestions referencing later entities now point at the
+      // wrong row — invalidate any still-pending ones from this batch.
+      _importResult.suggestions.forEach(s => {
+        if (s !== apply.__issue && s._state === 'pending'
+            && s.apply && Array.isArray(s.apply.path)
+            && s.apply.path[0] === 'entities'
+            && typeof s.apply.path[1] === 'number'
+            && s.apply.path[1] > i) {
+          s.apply.path[1] -= 1;
+        }
+      });
+      return true;
+    }
+    case "add_relationship": {
+      session.relationships = session.relationships || [];
+      const exists = session.relationships.some(r =>
+        r && r.from_entity === apply.from_entity
+          && r.to_entity === apply.to_entity
+          && (r.label || "") === (apply.label || ""));
+      if (!exists) {
+        session.relationships.push({
+          from_entity: apply.from_entity,
+          label:       apply.label || "references",
+          to_entity:   apply.to_entity,
+        });
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+function _imRefreshSummaryStats() {
+  // Recount counts in the Summary tab from the current session — Accept All
+  // can shift entities → events and add relationships, so the stat cards
+  // need to refresh without a full server round-trip.
+  const s = _importResult.session || {};
+  const recount = {
+    entities: (s.entities || []).length,
+    events: (s.events || []).length,
+    relationships: (s.relationships || []).length,
+    competency_questions: (s.competency_questions || []).length,
+  };
+  Object.entries(recount).forEach(([k, v]) => {
+    document.querySelectorAll('#im-tab-summary .im-stat .lbl').forEach(lbl => {
+      const map = {entities:'Entities', events:'Events', relationships:'Relationships', competency_questions:'CQs'};
+      if (lbl.textContent === map[k]) {
+        const val = lbl.parentElement.querySelector('.val');
+        if (val) val.textContent = v;
+      }
+    });
+  });
+}
+
+function _imRenderSuggestions() {
+  const sN = (_importResult.suggestions || []).length;
+  const wrap = document.getElementById('im-tab-suggestions');
+  if (!sN) {
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No suggestions.</div>';
+    return;
+  }
+  const pending = _importResult.suggestions.filter(s => (s._state || 'pending') === 'pending').length;
+  const accepted = _importResult.suggestions.filter(s => s._state === 'accepted').length;
+  const rejected = _importResult.suggestions.filter(s => s._state === 'rejected').length;
+  const bulk = `<div class="im-bulk-bar">
+    <span><b style="color:var(--text)">${pending}</b> pending · ${accepted} accepted · ${rejected} rejected</span>
+    <span>
+      <button class="btn btn-primary" style="padding:4px 12px;font-size:12px"
+              onclick="imAcceptAllSuggestions()" ${pending ? '' : 'disabled'}>Accept all pending</button>
+      <button class="btn btn-ghost" style="padding:4px 12px;font-size:12px;margin-left:6px"
+              onclick="imRejectAllSuggestions()" ${pending ? '' : 'disabled'}>Reject all pending</button>
+    </span>
+  </div>`;
+  wrap.innerHTML = bulk
+    + _importResult.suggestions.map((it, i) => _imSuggestionRow(it, i)).join('')
+    + '<div style="color:var(--muted-2);font-size:11.5px;margin-top:8px;font-style:italic">'
+    + 'Accepted suggestions are applied to the in-memory session before commit. '
+    + 'You can still edit them on Steps 2–5 afterwards.</div>';
+}
+
+function imAcceptSuggestion(idx) {
+  const it = _importResult.suggestions[idx];
+  if (!it || it._state) return;
+  it.apply && (it.apply.__issue = it);   // tag for index re-bumping in move_to_events
+  const ok = _imApplyOp(_importResult.session, it.apply);
+  it._state = ok ? 'accepted' : 'rejected';
+  _imRenderSuggestions();
+  _imRefreshSummaryStats();
+  // Preview tab is showing the mutated session — refresh if it's open.
+  document.getElementById('im-tab-preview').innerHTML =
+    '<pre>' + escapeHtml(JSON.stringify(_importResult.session, null, 2)) + '</pre>';
+}
+
+function imRejectSuggestion(idx) {
+  const it = _importResult.suggestions[idx];
+  if (!it || it._state) return;
+  it._state = 'rejected';
+  _imRenderSuggestions();
+}
+
+function imResetSuggestion(idx) {
+  // Best-effort undo — for path-set suggestions we can't trivially restore
+  // the previous value, so we mark it pending and let the user re-Accept
+  // (which is idempotent for setters) or just leave it as-is.
+  const it = _importResult.suggestions[idx];
+  if (!it) return;
+  it._state = null;
+  _imRenderSuggestions();
+}
+
+function imAcceptAllSuggestions() {
+  // Apply in two passes: setters first, then ops. This avoids a
+  // move_to_events re-bumping a setter's index *after* the setter would
+  // have run — easier to reason about than interleaved order.
+  const pending = _importResult.suggestions
+    .map((it, i) => ({ it, i }))
+    .filter(x => (x.it._state || 'pending') === 'pending');
+  const setters = pending.filter(x => x.it.apply && x.it.apply.path);
+  const ops     = pending.filter(x => x.it.apply && x.it.apply.op);
+  setters.forEach(x => imAcceptSuggestion(x.i));
+  ops.forEach(x =>     imAcceptSuggestion(x.i));
+}
+
+function imRejectAllSuggestions() {
+  _importResult.suggestions.forEach((it, i) => {
+    if ((it._state || 'pending') === 'pending') it._state = 'rejected';
+  });
+  _imRenderSuggestions();
+}
+
+function _imRenderModal(res) {
+  // Format pill
+  const pill = document.getElementById('im-format-pill');
+  pill.textContent = res.format || '';
+  pill.style.color = res.ok ? 'var(--accent)' : 'var(--danger)';
+  pill.style.borderColor = res.ok ? 'var(--accent)' : 'var(--danger)';
+
+  // Tab counts
+  const eN = (res.errors||[]).length, wN = (res.warnings||[]).length, sN = (res.suggestions||[]).length;
+  document.getElementById('im-c-errors').textContent      = eN || '';
+  document.getElementById('im-c-warnings').textContent    = wN || '';
+  document.getElementById('im-c-suggestions').textContent = sN || '';
+
+  // Status footer
+  const status = document.getElementById('im-status');
+  if (eN) {
+    status.textContent = eN + ' error' + (eN===1?'':'s') + ' must be fixed in the file before this import can be accepted.';
+    status.style.color = 'var(--danger)';
+  } else if (wN) {
+    status.textContent = wN + ' warning' + (wN===1?'':'s') + ' — import is allowed; quality may be lower than ideal.';
+    status.style.color = 'var(--warn)';
+  } else {
+    status.textContent = 'No issues — ready to accept.';
+    status.style.color = 'var(--success, var(--accent))';
+  }
+
+  // Accept button gating
+  document.getElementById('im-accept').disabled = !!eN;
+
+  // ── Summary tab ─────────────────────────────────────────────────────
+  const st = res.stats || {}, df = res.diff || {};
+  document.getElementById('im-tab-summary').innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+      <b style="color:var(--text)">${escapeHtml(res.session?.domain?.name || '(no domain name)')}</b>
+      <span style="color:var(--muted);font-size:12px">${escapeHtml(res.session?.domain?.industry || '')}</span>
+    </div>
+    <div style="color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:6px">
+      ${escapeHtml(res.session?.domain?.description || '')}
+    </div>
+    <div class="im-stat-grid">
+      <div class="im-stat"><div class="lbl">Entities</div><div class="val">${st.entities ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">Events</div><div class="val">${st.events ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">Relationships</div><div class="val">${st.relationships ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">CQs</div><div class="val">${st.competency_questions ?? 0}</div></div>
+      <div class="im-stat"><div class="lbl">Description coverage</div><div class="val">${st.entity_description_coverage_pct ?? 0}%</div></div>
+      <div class="im-stat"><div class="lbl">Property count</div><div class="val">${st.property_count ?? 0}</div></div>
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--muted)">
+      <b style="color:var(--text)">Diff vs current session</b> &nbsp;
+      added: ${df.added?.entities ?? 0}E / ${df.added?.events ?? 0}V ·
+      replaced: ${df.replaced?.entities ?? 0}E / ${df.replaced?.events ?? 0}V ·
+      removed: ${df.removed?.entities ?? 0}E / ${df.removed?.events ?? 0}V
+      ${df.domain_change ? '· <b style="color:var(--warn)">domain name changes</b>' : ''}
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--muted-2);line-height:1.5">
+      <b style="color:var(--text)">What happens on Accept:</b>
+      this imported session replaces your current session in memory and on disk
+      (the file you uploaded is parsed only — never persisted). You can still
+      edit everything afterwards on Steps 2–5 before clicking Generate.
+    </div>
+  `;
+
+  // ── Errors / Warnings / Suggestions ────────────────────────────────
+  document.getElementById('im-tab-errors').innerHTML = eN
+    ? (res.errors.map(it => _imIssueRow(it, 'error')).join(''))
+    : '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No errors — file parses cleanly.</div>';
+
+  document.getElementById('im-tab-warnings').innerHTML = wN
+    ? (res.warnings.map(it => _imIssueRow(it, 'warning')).join(''))
+    : '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No warnings — quality looks good.</div>';
+
+  // Suggestions tab is interactive — uses _imRenderSuggestions which
+  // tracks per-row state on the suggestion entries themselves.
+  res.suggestions.forEach(s => { if (s._state === undefined) s._state = null; });
+  _imRenderSuggestions();
+
+  // ── Preview tab ────────────────────────────────────────────────────
+  document.getElementById('im-tab-preview').innerHTML =
+    '<pre>' + escapeHtml(JSON.stringify(res.session, null, 2)) + '</pre>';
+}
+
+async function imAccept() {
+  if (!_importResult) return;
+  const btn = document.getElementById('im-accept');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch('/api/import/commit', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ session: _importResult.session }),
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      const msg = (j.errors && j.errors[0] && j.errors[0].message) || j.error || 'Commit failed';
+      showToast(msg);
+      btn.textContent = 'Accept & replace session'; btn.disabled = false;
+      return;
+    }
+    session = j.session;
+    closeImportModal();
+    render();
+    showToast('Imported '
+      + (session.entities?.length || 0) + ' entities · '
+      + (session.events?.length   || 0) + ' events · '
+      + (session.relationships?.length || 0) + ' relationships');
+    goStep('entities');
+  } finally {
+    btn.textContent = 'Accept & replace session';
   }
 }
 
@@ -1395,24 +1891,51 @@ function _getKnownLabels() {
 }
 
 function _parseRelString(s, knownLabels) {
-  // Return {from, verb, to} by finding the first and last known label inside s.
-  // Sort labels longest-first so "Network Element" wins over "Network".
-  const sorted = [...knownLabels].sort((a,b) => b.length - a.length);
-  let firstHit = null, lastHit = null;
-  for (const lbl of sorted) {
-    const idx = s.indexOf(lbl);
-    if (idx === -1) continue;
-    if (!firstHit || idx < firstHit.idx) firstHit = {lbl, idx, end: idx + lbl.length};
-    const last = s.lastIndexOf(lbl);
-    const lastEnd = last + lbl.length;
-    if (last !== -1 && (!lastHit || lastEnd > lastHit.end)) lastHit = {lbl, idx: last, end: lastEnd};
+  // Return {from, verb, to} by finding the first and last alias hit in s.
+  // Aliases include: the label as written, space-stripped form, hyphen→space,
+  // and the unique trailing word of multi-word labels (so "Insurance Policy"
+  // also matches the bare "Policy"). Self-references (first === last) are
+  // treated as legitimate tree-shaped relationships, not rejected.
+  const aliasMap = {};   // alias → canonical label
+  const suffixCount = {};
+  for (const lbl of knownLabels) {
+    if (!lbl) continue;
+    [lbl, lbl.replace(/\s+/g,''), lbl.replace(/-/g,' ')].forEach(a => aliasMap[a] = lbl);
+    const parts = lbl.split(/\s+/).filter(Boolean);
+    if (parts.length > 1) suffixCount[parts[parts.length-1]] = (suffixCount[parts[parts.length-1]]||0) + 1;
   }
-  if (!firstHit || !lastHit || firstHit.lbl === lastHit.lbl || firstHit.idx >= lastHit.idx) {
-    // Couldn't separate from/to — bail with a single-node "free-floating" rel.
-    return null;
+  for (const lbl of knownLabels) {
+    const parts = (lbl||'').split(/\s+/).filter(Boolean);
+    if (parts.length > 1 && suffixCount[parts[parts.length-1]] === 1) {
+      const tail = parts[parts.length-1];
+      if (aliasMap[tail] === undefined) aliasMap[tail] = lbl;
+    }
+  }
+  // Sort longest-first so multi-word aliases win over their suffixes.
+  const aliases = Object.keys(aliasMap).sort((a,b) => b.length - a.length);
+
+  let firstHit = null, lastHit = null;
+  for (const a of aliases) {
+    const idx = s.indexOf(a);
+    if (idx === -1) continue;
+    const end = idx + a.length;
+    if (!firstHit || idx < firstHit.idx) firstHit = {lbl: aliasMap[a], idx, end};
+    const last = s.lastIndexOf(a);
+    const lastEnd = last + a.length;
+    if (last !== -1 && (!lastHit || lastEnd > lastHit.end)) lastHit = {lbl: aliasMap[a], idx: last, end: lastEnd};
+  }
+  if (!firstHit || !lastHit) return null;
+
+  // Self-reference: same canonical label appears once or twice — keep it.
+  if (firstHit.lbl === lastHit.lbl) {
+    const verb = (s.slice(firstHit.end).replace(/[.,;]/g,'').replace(/\s+another\s+/i,' ').trim()
+                  || 'related to')
+                 .replace(/^(?:is|are|may\s+be|can\s+be)\s+/i,'').trim() || 'related to';
+    return { from: firstHit.lbl, verb, to: firstHit.lbl };
   }
   const verb = s.slice(firstHit.end, lastHit.idx)
-    .replace(/[.,;]/g, '').replace(/\s+/g, ' ').trim() || 'related to';
+    .replace(/[.,;]/g, '').replace(/\s+/g, ' ').trim().replace(/^(?:is|are|may\s+be|can\s+be)\s+/i,'')
+    || 'related to';
   return { from: firstHit.lbl, verb, to: lastHit.lbl };
 }
 

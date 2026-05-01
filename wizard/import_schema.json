@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ontology.example.com/wizard/import_schema.json",
+  "title": "Wizard Import Schema",
+  "description": "Structural validation for /api/import JSON inputs. Three shapes are accepted (oneOf below); semantic checks (duplicate names, IRI safety, missing relationships, etc.) are layered on top in wizard/importer.py::_validate_session.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/wizardSession" },
+    { "$ref": "#/$defs/cliSession" },
+    { "$ref": "#/$defs/schemaInput" }
+  ],
+  "$defs": {
+    "sensitivity": {
+      "type": "string",
+      "enum": ["Public", "Internal", "Confidential", "Restricted"]
+    },
+    "ident": {
+      "description": "An identifier safe to embed in an IRI fragment.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_\\-\\.]*$"
+    },
+
+    "wizardSession": {
+      "title": "Wizard session JSON",
+      "description": "What the browser wizard POSTs back to /api/session and what /api/template/<name> returns.",
+      "type": "object",
+      "required": ["domain"],
+      "properties": {
+        "domain": {
+          "type": "object",
+          "properties": {
+            "name":        { "type": "string" },
+            "description": { "type": "string" },
+            "base_iri":    { "type": "string" },
+            "industry":    { "type": "string" }
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name":        { "type": "string" },
+              "label":       { "type": "string" },
+              "description": { "type": "string" },
+              "sensitivity": { "$ref": "#/$defs/sensitivity" },
+              "is_event":    { "type": "boolean" },
+              "table_name":  { "type": "string" },
+              "properties":  {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name":        { "type": "string" },
+                    "type":        { "type": ["string","null"] },
+                    "description": { "type": "string" },
+                    "sensitivity": { "anyOf": [
+                                      { "$ref": "#/$defs/sensitivity" },
+                                      { "type": "null" }
+                                    ] },
+                    "required":    { "type": "boolean" },
+                    "primary_key": { "type": "boolean" },
+                    "xsd_type":    { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name":        { "type": "string" },
+              "label":       { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "object",
+                "properties": {
+                  "from_entity": { "type": "string" },
+                  "label":       { "type": "string" },
+                  "to_entity":   { "type": "string" }
+                }
+              }
+            ]
+          }
+        },
+        "competency_questions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "object",
+                "properties": {
+                  "id":       { "type": "string" },
+                  "question": { "type": "string" },
+                  "priority": { "type": "string", "enum": ["Low","Medium","High"] }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    "cliSession": {
+      "title": "CLI session JSON (onboard.py)",
+      "description": "What onboard.py writes to projects/<slug>/session.json — flat entities + is_event flag, plain-string CQs.",
+      "type": "object",
+      "required": ["domain_name"],
+      "properties": {
+        "domain_name":         { "type": "string" },
+        "domain_slug":         { "type": "string" },
+        "domain_description":  { "type": "string" },
+        "author":              { "type": "string" },
+        "base_iri":            { "type": "string" },
+        "sensitivity_default": { "$ref": "#/$defs/sensitivity" },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name":        { "type": "string" },
+              "label":       { "type": "string" },
+              "description": { "type": "string" },
+              "sensitivity": { "$ref": "#/$defs/sensitivity" },
+              "is_event":    { "type": "boolean" },
+              "table_name":  { "type": "string" }
+            }
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from_entity": { "type": "string" },
+              "label":       { "type": "string" },
+              "to_entity":   { "type": "string" }
+            }
+          }
+        },
+        "cqs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "schemaInput": {
+      "title": "Data-catalog schema JSON",
+      "description": "A {tables: [...]} description — what dbt, Atlan, OpenMetadata, OpenAPI converters typically emit.",
+      "type": "object",
+      "required": ["tables"],
+      "properties": {
+        "domain":      { "type": "string" },
+        "name":        { "type": "string" },
+        "description": { "type": "string" },
+        "base_iri":    { "type": "string" },
+        "industry":    { "type": "string" },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name":        { "type": "string" },
+              "label":       { "type": "string" },
+              "description": { "type": "string" },
+              "sensitivity": { "$ref": "#/$defs/sensitivity" },
+              "columns": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name":        { "type": "string" },
+                    "type":        { "type": ["string","null"] },
+                    "description": { "type": "string" },
+                    "required":    { "type": "boolean" },
+                    "not_null":    { "type": "boolean" },
+                    "sensitivity": { "anyOf": [
+                                       { "$ref": "#/$defs/sensitivity" },
+                                       { "type": "null" }
+                                     ] }
+                  }
+                }
+              },
+              "primary_key": {
+                "anyOf": [
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "null" }
+                ]
+              },
+              "foreign_keys": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "column":            { "type": "string" },
+                    "label":             { "type": "string" },
+                    "references_table":  { "type": "string" },
+                    "references_column": { "type": "string" },
+                    "ref_table":         { "type": "string" },
+                    "references":        { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
