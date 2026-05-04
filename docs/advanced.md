@@ -97,7 +97,7 @@ python3 toolkit.py --phase templates --template pharmaceuticals
 python3 toolkit.py --phase templates --template all   # all 5 at once
 ```
 
-Or load directly from the browser wizard's template picker.
+Or load directly from Ontology Studio's template picker.
 
 | Template | Standard Alignment | Entities | CQs |
 |---|---|---|---|
@@ -160,9 +160,9 @@ python3 toolkit.py --phase tmf630
 - DB tables: `tmf_task`, `tmf_import_job`, `tmf_export_job`
 - 3 new TMF CQ tests (CQ-TMF-14/15/16)
 
-### 9.8 Browser Wizard
+### 9.8 Ontology Studio
 
-Web-based equivalent of `onboard.py` with a drag-and-drop entity/relationship builder.
+Web-based equivalent of `onboard.py` with a drag-and-drop entity/relationship builder, an Ontology Library for save/load, and post-generation tools (Evolution Review, Compliance Dashboard, Vector Retrieval).
 
 ```bash
 python3 toolkit.py --phase wizard
@@ -666,9 +666,9 @@ python3 toolkit.py --phase comply --gap-analysis
 
 Also produces the aggregate `coverage_score()` that feeds the new **Regulatory Evidence Coverage** scorecard criterion (% of loaded regulations at ≥80% coverage).
 
-### 13.5 Compliance Dashboard (wizard)
+### 13.5 Compliance Dashboard (Ontology Studio)
 
-New **Compliance Dashboard** tab in the browser wizard:
+New **Compliance Dashboard** tab in Ontology Studio:
 
 - Per-regulation coverage with green/amber/red traffic lights (`≥80%` / `≥50%` / below)
 - One-click evidence assembly (regulation picker + optional decision IRI)
