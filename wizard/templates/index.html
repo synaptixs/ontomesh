@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ontology Toolkit — Browser Wizard</title>
+  <title>Ontology Toolkit — Ontology Studio</title>
   <!-- Inter and JetBrains Mono — modern sans + mono pair. Falls back to
        system font stack if the CDN is blocked. preconnect first to keep
        cold-load latency tight. -->
@@ -379,6 +379,36 @@
                   letter-spacing: -0.02em; }
     .step-subtitle { color: var(--muted); font-size: 13.5px; margin-bottom: 26px;
                      line-height: 1.55; max-width: 760px; }
+    /* Uniform Back / Skip / Continue strip at the bottom of each build step. */
+    .step-nav-footer { display: flex; justify-content: space-between; align-items: center;
+                       gap: 10px; margin-top: 22px; padding-top: 16px;
+                       border-top: 1px solid var(--border); }
+    .step-nav-footer .nav-hint { color: var(--muted); font-size: 12px; }
+    .step-nav-footer .nav-right { display: flex; gap: 8px; }
+
+    /* Peer-tool pills shown at the top of post-generation tools (7/8/9). */
+    .peer-strip { display: flex; gap: 6px; margin: -6px 0 16px 0; flex-wrap: wrap; }
+    .peer-pill { background: transparent; border: 1px solid var(--border);
+                 color: var(--muted); padding: 6px 12px; border-radius: 999px;
+                 font-size: 12px; cursor: pointer; transition: all .15s ease; }
+    .peer-pill:hover { color: var(--text); border-color: var(--accent); }
+    .peer-pill.active { background: var(--accent-soft); color: var(--accent);
+                        border-color: var(--accent); cursor: default; }
+
+    /* Pre-flight readiness banner. Two visual states: ready (green) and
+       waiting (amber). Sits between the step subtitle and the peer strip. */
+    .preflight-banner { display: flex; align-items: center; gap: 10px;
+                        padding: 10px 14px; border-radius: 8px;
+                        font-size: 12.5px; margin: 0 0 14px 0; line-height: 1.4; }
+    .preflight-banner.ready   { background: rgba(34,197,94,0.10);
+                                color: #15803d;  border: 1px solid rgba(34,197,94,0.25); }
+    .preflight-banner.waiting { background: rgba(234,179,8,0.10);
+                                color: #a16207;  border: 1px solid rgba(234,179,8,0.30); }
+    .preflight-banner .pf-icon { font-weight: 700; font-size: 14px; }
+    .preflight-banner .pf-text { flex: 1; }
+    .preflight-banner button { background: transparent; border: 1px solid currentColor;
+                               color: inherit; padding: 4px 10px; border-radius: 6px;
+                               font-size: 11.5px; cursor: pointer; }
 
     /* Domain pill — solid accent tint, no gradient. */
     .domain-pill { display: inline-block; margin-left: 12px; padding: 3px 10px;
@@ -440,9 +470,11 @@
   <aside class="sidebar">
     <div class="sidebar-logo">
       <strong>Ontology Toolkit</strong>
-      <span>Browser Wizard · v2.0</span>
+      <span>Ontology Studio · v3.0</span>
     </div>
     <ul class="step-nav" id="step-nav">
+      <li data-step="library"><span class="step-num">📚</span> Library</li>
+      <li class="step-divider" aria-hidden="true">Build</li>
       <li class="active" data-step="domain"><span class="step-num">1</span> Domain Identity</li>
       <li data-step="entities"><span class="step-num">2</span> Entities</li>
       <li data-step="events"><span class="step-num">3</span> Events</li>
@@ -453,6 +485,8 @@
       <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
       <li data-step="comply"><span class="step-num">8</span> Compliance Dashboard</li>
       <li data-step="retrieve"><span class="step-num">9</span> Vector Retrieval</li>
+      <li class="step-divider" aria-hidden="true">Configuration</li>
+      <li data-step="settings"><span class="step-num">⚙</span> Settings</li>
     </ul>
     <div class="sidebar-footer">
       <div class="theme-picker" role="radiogroup" aria-label="Theme">
@@ -466,13 +500,7 @@
           <span class="theme-icon">◐</span><span>Mono</span>
         </button>
       </div>
-      <div id="save-status" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center"></div>
-      <!-- Sidebar nav button — does NOT run the pipeline. It only takes
-           you to step 6 (Generate), where the actual run button lives
-           with its prerequisite checklist. Disabled until at least the
-           domain name is set; tooltip explains why. -->
-      <button class="btn-run" id="btn-goto-generate" onclick="goStep('generate')"
-              title="Go to step 6 (Generate)">Go to Generate →</button>
+      <div id="save-status" style="font-size:11px;color:var(--muted);text-align:center"></div>
     </div>
   </aside>
 
@@ -528,7 +556,13 @@
             <option value="pharmaceuticals">Pharmaceuticals</option>
             <option value="custom">Custom</option>
           </select></div>
-        <button class="btn btn-primary" onclick="saveDomain()">Save &amp; Continue →</button>
+        <div class="step-nav-footer">
+          <span class="nav-hint">Step 1 of 6 · You can skip ahead and come back any time.</span>
+          <div class="nav-right">
+            <button class="btn btn-ghost"   onclick="goStep('entities')">Skip →</button>
+            <button class="btn btn-primary" onclick="saveDomain()">Save &amp; Continue →</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -552,6 +586,14 @@
         </div>
         <div class="item-list" id="entity-list"></div>
       </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('domain')">← Back</button>
+        <span class="nav-hint">Step 2 of 6 · Entities are optional but recommended.</span>
+        <div class="nav-right">
+          <button class="btn btn-ghost"   onclick="goStep('events')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('events')">Continue →</button>
+        </div>
+      </div>
     </div>
 
     <!-- Step 3: Events -->
@@ -573,6 +615,14 @@
           </ul>
         </div>
         <div class="item-list" id="event-list"></div>
+      </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('entities')">← Back</button>
+        <span class="nav-hint">Step 3 of 6 · Skip if your domain has no time-stamped events.</span>
+        <div class="nav-right">
+          <button class="btn btn-ghost"   onclick="goStep('relationships')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('relationships')">Continue →</button>
+        </div>
       </div>
     </div>
 
@@ -634,6 +684,14 @@
           </div>
         </div>
       </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('events')">← Back</button>
+        <span class="nav-hint">Step 4 of 6 · Even one or two relationships make the graph more useful.</span>
+        <div class="nav-right">
+          <button class="btn btn-ghost"   onclick="goStep('cqs')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('cqs')">Continue →</button>
+        </div>
+      </div>
     </div>
 
     <!-- Step 5: CQs -->
@@ -659,6 +717,14 @@
           <input id="new-cq" style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 12px; font-size:14px; outline:none;"
                  placeholder="Which assets have been in outage for more than 4 hours?" />
           <button class="btn btn-primary" onclick="addCQ()">Add</button>
+        </div>
+      </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
+        <span class="nav-hint">Step 5 of 6 · CQs drive the governance scorecard. Optional but recommended.</span>
+        <div class="nav-right">
+          <button class="btn btn-ghost"   onclick="goStep('generate')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('generate')">Continue →</button>
         </div>
       </div>
     </div>
@@ -759,6 +825,49 @@
           </ul>
         </div>
         <div id="artifact-list"></div>
+        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="openSaveOntologyModal()">💾 Save to Library</button>
+          <span style="font-size:12px;color:var(--muted)">Save the current session + generated artifacts under a unique name.</span>
+        </div>
+      </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
+        <span class="nav-hint">Step 6 of 6 · Last step. Run the pipeline above, then save to the Library.</span>
+        <div class="nav-right">
+          <button class="btn btn-ghost" onclick="goStep('library')">View Library →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Library: list saved ontologies, load/view/delete -->
+    <div class="step-panel" id="step-library">
+      <div class="step-title">Ontology Library</div>
+      <div class="step-subtitle">All ontologies you've saved — load any one back into the wizard, or open it in the read-only viewer.</div>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Saved Ontologies</h3>
+          <button class="btn btn-ghost" onclick="refreshLibrary()">↻ Refresh</button>
+        </div>
+        <div id="library-list" style="font-size:13px">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Settings: domain visibility + other prefs -->
+    <div class="step-panel" id="step-settings">
+      <div class="step-title">Settings</div>
+      <div class="step-subtitle">Customise which domain templates appear on the landing page.</div>
+      <div class="card">
+        <h3>Domain visibility</h3>
+        <div class="box-help">
+          Uncheck a domain to hide it from the landing-page template grid.
+          Hidden domains can still be loaded directly via the API; this only
+          affects what the wizard suggests up front.
+        </div>
+        <div id="settings-domains" style="display:flex; flex-direction:column; gap:6px; font-size:13px">Loading…</div>
+        <div style="margin-top:14px">
+          <button class="btn btn-primary" onclick="saveDomainVisibility()">Save</button>
+          <span id="settings-status" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+        </div>
       </div>
     </div>
 
@@ -766,6 +875,13 @@
     <div class="step-panel" id="step-evolve">
       <div class="step-title">Ontology Evolution Review</div>
       <div class="step-subtitle">Workstream 2 — Review ontology-evolution proposals surfaced from production observations. Approve, reject, or defer each candidate. Approved proposals flow through the reasoner + SPARQL CQ gate before auto-bumping the ontology version.</div>
+
+      <div class="preflight-banner" id="preflight-evolve" style="display:none"></div>
+      <div class="peer-strip" data-peer-group="postgen">
+        <button class="peer-pill" data-peer="evolve"   onclick="goStep('evolve')">Evolution Review</button>
+        <button class="peer-pill" data-peer="comply"   onclick="goStep('comply')">Compliance Dashboard</button>
+        <button class="peer-pill" data-peer="retrieve" onclick="goStep('retrieve')">Vector Retrieval</button>
+      </div>
 
       <div class="card">
         <h3>Detection run</h3>
@@ -780,7 +896,7 @@
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
           <label>Minimum evidence: <input type="number" id="ev-min-evidence" value="3" min="1" style="width:70px" /></label>
           <label>Strategy:
-            <select id="ev-strategy">
+            <select id="ev-strategy" onchange="renderEvStrategyHelp()">
               <option value="">All strategies</option>
               <option value="SHACL_VIOLATION_ACCUMULATION">SHACL violation accumulation</option>
               <option value="CARDINALITY_BREACH">Cardinality breach</option>
@@ -792,6 +908,7 @@
           <button class="btn btn-ghost" onclick="evolveReload()">⟳ Refresh list</button>
           <span id="ev-status" style="font-size:12px;color:var(--muted)"></span>
         </div>
+        <div id="ev-strategy-help" style="margin-top:12px;padding:10px 12px;background:var(--surface-2);border-radius:6px;font-size:12.5px;line-height:1.5;color:var(--muted-2);border-left:3px solid var(--accent)"></div>
       </div>
 
       <div class="card">
@@ -837,6 +954,13 @@
     <div class="step-panel" id="step-comply">
       <div class="step-title">Regulatory Compliance Dashboard</div>
       <div class="step-subtitle">Workstream 4 — Assemble signed, machine-verifiable evidence bundles for named regulatory frameworks. Monitor per-regulation coverage, traffic-light status per requirement, and gap analysis.</div>
+
+      <div class="preflight-banner" id="preflight-comply" style="display:none"></div>
+      <div class="peer-strip" data-peer-group="postgen">
+        <button class="peer-pill" data-peer="evolve"   onclick="goStep('evolve')">Evolution Review</button>
+        <button class="peer-pill" data-peer="comply"   onclick="goStep('comply')">Compliance Dashboard</button>
+        <button class="peer-pill" data-peer="retrieve" onclick="goStep('retrieve')">Vector Retrieval</button>
+      </div>
 
       <div class="card">
         <h3>Regulation coverage</h3>
@@ -926,6 +1050,13 @@
     <div class="step-panel" id="step-retrieve">
       <div class="step-title">Ontology-Bounded Vector Retrieval</div>
       <div class="step-subtitle">Workstream 5 — The OWL class hierarchy becomes a hard semantic filter on vector similarity search. Inspect embedding indexes, query with class-scoped semantics, and compare retrieval strategies.</div>
+
+      <div class="preflight-banner" id="preflight-retrieve" style="display:none"></div>
+      <div class="peer-strip" data-peer-group="postgen">
+        <button class="peer-pill" data-peer="evolve"   onclick="goStep('evolve')">Evolution Review</button>
+        <button class="peer-pill" data-peer="comply"   onclick="goStep('comply')">Compliance Dashboard</button>
+        <button class="peer-pill" data-peer="retrieve" onclick="goStep('retrieve')">Vector Retrieval</button>
+      </div>
 
       <div class="card">
         <h3>Embedding indexes</h3>
@@ -1052,6 +1183,76 @@
   </div>
 </div>
 
+<!-- ── Regulation JSON Viewer Modal ────────────────────────────────────── -->
+<div id="regulation-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:900px;width:95%">
+    <div class="modal-header">
+      <h2 id="regulation-modal-title">Regulation</h2>
+      <button class="btn btn-ghost" onclick="closeModal('regulation-modal')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+      Read-only view of the regulation file under <code>compliance/regulations/</code>.
+      Drop new files in that directory to register additional frameworks.
+    </div>
+    <pre id="regulation-modal-pre" style="max-height:60vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px;line-height:1.45"></pre>
+    <div class="modal-footer">
+      <button class="btn btn-ghost"   onclick="closeModal('regulation-modal')">Close</button>
+      <button class="btn btn-primary" id="regulation-modal-source" onclick="openRegulationSource()">Open regulator's source ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Save Ontology Modal ─────────────────────────────────────────────── -->
+<div id="save-ontology-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Save Ontology to Library</h2>
+      <button class="btn btn-ghost" onclick="closeModal('save-ontology-modal')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+      The current session and generated artifacts (TTL, SHACL, SKOS) will be
+      stored under a unique name built from the three fields below.
+    </div>
+    <div class="field"><label>Domain</label><input id="so-domain" placeholder="e.g. Telecom" /></div>
+    <div class="field"><label>Product / Project</label><input id="so-product" placeholder="e.g. OSS Assurance" /></div>
+    <div class="field"><label>Label</label><input id="so-label" placeholder="e.g. Fault Mgmt v1" /></div>
+    <div class="field" style="font-size:12px;color:var(--muted)">
+      Saved as: <code id="so-slug-preview">—</code>
+    </div>
+    <div id="so-error" style="font-size:12px;color:var(--danger,#c33);min-height:1em"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('save-ontology-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitSaveOntology(false)">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Ontology Viewer Modal ───────────────────────────────────────────── -->
+<div id="viewer-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:900px;width:95%">
+    <div class="modal-header">
+      <h2 id="viewer-title">Ontology Viewer</h2>
+      <button class="btn btn-ghost" onclick="closeModal('viewer-modal')">✕</button>
+    </div>
+    <ul class="tabs" role="tablist">
+      <li><button type="button" class="tab-btn active" data-vtab="overview" onclick="switchViewerTab('overview')">Overview</button></li>
+      <li><button type="button" class="tab-btn" data-vtab="ttl"    onclick="switchViewerTab('ttl')">TTL</button></li>
+      <li><button type="button" class="tab-btn" data-vtab="shacl"  onclick="switchViewerTab('shacl')">SHACL</button></li>
+      <li><button type="button" class="tab-btn" data-vtab="skos"   onclick="switchViewerTab('skos')">SKOS</button></li>
+      <li><button type="button" class="tab-btn" data-vtab="jsonld" onclick="switchViewerTab('jsonld')">JSON-LD</button></li>
+    </ul>
+    <div id="viewer-overview" class="tab-panel active" style="font-size:13px"></div>
+    <div id="viewer-ttl"    class="tab-panel"><pre id="viewer-ttl-pre"    style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
+    <div id="viewer-shacl"  class="tab-panel"><pre id="viewer-shacl-pre"  style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
+    <div id="viewer-skos"   class="tab-panel"><pre id="viewer-skos-pre"   style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
+    <div id="viewer-jsonld" class="tab-panel"><pre id="viewer-jsonld-pre" style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost"   onclick="closeModal('viewer-modal')">Close</button>
+      <button class="btn btn-primary" id="viewer-load-btn" onclick="loadFromViewer()">Load into Wizard</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Event Modal ───────────────────────────────────────────────────────── -->
 <div id="event-modal" class="modal-backdrop" style="display:none">
   <div class="modal">
@@ -1156,6 +1357,13 @@ function goStep(name) {
     renderSummary();
     _renderPreflight();      // refresh checklist + run-button gating on entry
   }
+  if (name === 'library')  refreshLibrary();
+  if (name === 'settings') refreshSettings();
+  if (['evolve','comply','retrieve'].includes(name)) {
+    _highlightPeerPill(name);
+    _runPreflight(name);
+  }
+  if (name === 'evolve') renderEvStrategyHelp();
   // Reset main scroll so the user lands at the top of the new step
   // (especially important for Generate, where the Pre-flight card needs
   // to be visible before the run CTA).
@@ -1775,16 +1983,6 @@ function _renderPreflight() {
     }
   }
 
-  // Gate the sidebar "Go to Generate" button: needs at least a domain name
-  // so the user has *something* to navigate over.
-  const sb = document.getElementById('btn-goto-generate');
-  if (sb) {
-    const hasName = !!(session.domain && session.domain.name);
-    sb.disabled = !hasName;
-    sb.title = hasName
-      ? 'Go to step 6 (Generate)'
-      : 'Set a domain name on Step 1 first.';
-  }
 }
 
 // ── Domain badge in step titles ──────────────────────────────────────────
@@ -2020,6 +2218,7 @@ async function complyRefresh(){
     + '<th style="text-align:right; padding:6px">Coverage</th>'
     + '<th style="text-align:right; padding:6px">Satisfied</th>'
     + '<th style="text-align:center; padding:6px">Traffic light</th>'
+    + '<th style="text-align:right; padding:6px">Source</th>'
     + '</tr></thead><tbody>';
   regs.forEach(r => {
     const light = r.coverage >= 80 ? '#3fb950'
@@ -2034,7 +2233,12 @@ async function complyRefresh(){
       + `<td style="padding:6px; text-align:right">${r.satisfied}/${r.applicable}</td>`
       + `<td style="padding:6px; text-align:center">`
       + `<span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:${light}"></span>`
-      + `</td></tr>`;
+      + `</td>`
+      + `<td style="padding:6px; text-align:right">`
+      + `<a href="#" onclick="event.preventDefault(); viewRegulationJson('${escapeHtml(r.regulation_id)}')" `
+      + `   title="Show the raw regulation JSON" style="font-size:12px; color:var(--accent); text-decoration:none">📄 View JSON</a>`
+      + `</td>`
+      + `</tr>`;
   });
   html += '</tbody></table>';
   if (regs.length === 0) {
@@ -2455,6 +2659,363 @@ async function vecBenchmarkLoad(){
   const r = await fetch('/api/retrieve/benchmark');
   const j = await r.json();
   document.getElementById('vec-benchmark').innerHTML = _vecRenderBenchmark(j.strategies || []);
+}
+
+// ── Library / Save / Viewer / Settings ───────────────────────────────────
+
+function _slugifyPart(s) {
+  return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,64);
+}
+
+function _updateSlugPreview() {
+  const d = _slugifyPart(document.getElementById('so-domain').value);
+  const p = _slugifyPart(document.getElementById('so-product').value);
+  const l = _slugifyPart(document.getElementById('so-label').value);
+  const ok = d && p && l;
+  document.getElementById('so-slug-preview').textContent = ok ? `${d}__${p}__${l}` : '—';
+}
+
+function openSaveOntologyModal() {
+  document.getElementById('so-domain').value  = (session.domain && (session.domain.industry || session.domain.name)) || '';
+  document.getElementById('so-product').value = '';
+  document.getElementById('so-label').value   = '';
+  document.getElementById('so-error').textContent = '';
+  _updateSlugPreview();
+  document.getElementById('save-ontology-modal').style.display = 'flex';
+  ['so-domain','so-product','so-label'].forEach(id => {
+    document.getElementById(id).oninput = _updateSlugPreview;
+  });
+}
+
+async function submitSaveOntology(forceOverwrite) {
+  const body = {
+    domain:  document.getElementById('so-domain').value.trim(),
+    product: document.getElementById('so-product').value.trim(),
+    label:   document.getElementById('so-label').value.trim(),
+    session: session,
+    overwrite: !!forceOverwrite,
+  };
+  if (!(body.domain && body.product && body.label)) {
+    document.getElementById('so-error').textContent = 'All three fields are required.';
+    return;
+  }
+  const r = await fetch('/api/ontologies', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body),
+  });
+  if (r.status === 409) {
+    if (confirm('An ontology with this name already exists. Overwrite?')) {
+      return submitSaveOntology(true);
+    }
+    return;
+  }
+  const j = await r.json();
+  if (!r.ok) {
+    document.getElementById('so-error').textContent = j.error || 'Save failed.';
+    return;
+  }
+  closeModal('save-ontology-modal');
+  showToast('Saved: ' + j.slug);
+}
+
+async function refreshLibrary() {
+  const el = document.getElementById('library-list');
+  if (!el) return;
+  el.innerHTML = 'Loading…';
+  try {
+    const r = await fetch('/api/ontologies');
+    const j = await r.json();
+    const rows = j.ontologies || [];
+    if (!rows.length) {
+      el.innerHTML = '<div style="color:var(--muted);padding:8px 0">No saved ontologies yet. Generate one and click <b>Save to Library</b> on Step 6.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="text-align:left;color:var(--muted-2);font-size:12px;border-bottom:1px solid var(--border)">
+            <th style="padding:6px 8px">Domain</th>
+            <th style="padding:6px 8px">Product / Project</th>
+            <th style="padding:6px 8px">Label</th>
+            <th style="padding:6px 8px">Updated</th>
+            <th style="padding:6px 8px;text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px">${r.domain}</td>
+              <td style="padding:8px">${r.product}</td>
+              <td style="padding:8px">${r.label}</td>
+              <td style="padding:8px;color:var(--muted);font-size:11px">${new Date(r.updated_at).toLocaleString()}</td>
+              <td style="padding:8px;text-align:right;white-space:nowrap">
+                <button class="btn btn-ghost"   style="padding:4px 8px;font-size:11px" onclick="viewOntology('${r.slug}')">View</button>
+                <button class="btn btn-ghost"   style="padding:4px 8px;font-size:11px" onclick="loadOntology('${r.slug}')">Load</button>
+                <button class="btn btn-ghost"   style="padding:4px 8px;font-size:11px" onclick="reharvestOntology('${r.slug}')" title="Re-read current output/ files into this row">Re-harvest</button>
+                <button class="btn btn-ghost"   style="padding:4px 8px;font-size:11px;color:var(--danger,#c33)" onclick="deleteOntology('${r.slug}')">Delete</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--danger,#c33)">Failed to load library: '+e+'</div>';
+  }
+}
+
+let _viewerSlug = null;
+
+async function viewOntology(slug) {
+  const r = await fetch('/api/ontologies/'+encodeURIComponent(slug));
+  if (!r.ok) { showToast('Not found: '+slug); return; }
+  const row = await r.json();
+  _viewerSlug = slug;
+  document.getElementById('viewer-title').textContent = `${row.domain} · ${row.product} · ${row.label}`;
+  const s = row.session || {};
+  const counts = [
+    ['Entities', (s.entities||[]).length],
+    ['Events', (s.events||[]).length],
+    ['Relationships', (s.relationships||[]).length],
+    ['Competency Questions', (s.competency_questions||[]).length],
+  ];
+  document.getElementById('viewer-overview').innerHTML = `
+    <div style="margin-bottom:10px">
+      <b>Base IRI:</b> <code>${(s.domain||{}).base_iri||'—'}</code><br>
+      <b>Industry:</b> ${(s.domain||{}).industry||'—'}<br>
+      <b>Description:</b> ${(s.domain||{}).description||'—'}
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      ${counts.map(([k,v]) => `<tr><td style="padding:4px 8px;color:var(--muted-2)">${k}</td><td style="padding:4px 8px"><b>${v}</b></td></tr>`).join('')}
+    </table>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">
+      Created ${new Date(row.created_at).toLocaleString()} · Updated ${new Date(row.updated_at).toLocaleString()}
+    </div>`;
+  const g = row.generated || {};
+  document.getElementById('viewer-ttl-pre').textContent    = g.ttl    || '(no TTL captured at save time)';
+  document.getElementById('viewer-shacl-pre').textContent  = g.shacl  || '(no SHACL captured at save time)';
+  document.getElementById('viewer-skos-pre').textContent   = g.skos   || '(no SKOS captured at save time)';
+  let jsonldText = '(no JSON-LD context captured at save time)';
+  if (g.jsonld) {
+    try { jsonldText = JSON.stringify(JSON.parse(g.jsonld), null, 2); }
+    catch(_) { jsonldText = g.jsonld; }
+  }
+  document.getElementById('viewer-jsonld-pre').textContent = jsonldText;
+  switchViewerTab('overview');
+  document.getElementById('viewer-modal').style.display = 'flex';
+}
+
+function switchViewerTab(name) {
+  document.querySelectorAll('#viewer-modal .tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.vtab === name));
+  ['overview','ttl','shacl','skos','jsonld'].forEach(k => {
+    document.getElementById('viewer-'+k).classList.toggle('active', k === name);
+  });
+}
+
+async function loadFromViewer() {
+  if (_viewerSlug) await loadOntology(_viewerSlug);
+  closeModal('viewer-modal');
+}
+
+async function loadOntology(slug) {
+  const r = await fetch('/api/ontologies/'+encodeURIComponent(slug)+'/load', {method:'POST'});
+  if (!r.ok) { showToast('Load failed'); return; }
+  session = await r.json();
+  render();
+  showToast('Loaded: '+slug);
+  goStep('domain');
+}
+
+async function reharvestOntology(slug) {
+  const r = await fetch('/api/ontologies/'+encodeURIComponent(slug)+'/reharvest', {method:'POST'});
+  if (!r.ok) { showToast('Re-harvest failed'); return; }
+  const j = await r.json();
+  showToast('Re-harvested: ' + (j.harvested || []).join(', '));
+  refreshLibrary();
+}
+
+async function deleteOntology(slug) {
+  if (!confirm('Delete saved ontology "'+slug+'"? This cannot be undone.')) return;
+  const r = await fetch('/api/ontologies/'+encodeURIComponent(slug), {method:'DELETE'});
+  if (r.ok) { showToast('Deleted'); refreshLibrary(); }
+  else showToast('Delete failed');
+}
+
+// ── Settings (domain visibility) ─────────────────────────────────────────
+
+async function refreshSettings() {
+  const el = document.getElementById('settings-domains');
+  if (!el) return;
+  el.innerHTML = 'Loading…';
+  const [tmplRes, prefRes] = await Promise.all([
+    fetch('/api/templates'), fetch('/api/preferences')
+  ]);
+  const tmpl = await tmplRes.json();
+  const prefs = await prefRes.json();
+  const all = tmpl.all || tmpl.templates || [];
+  const hidden = new Set(prefs['landing.hidden_domains'] || []);
+  el.innerHTML = all.map(name => `
+    <label style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" data-domain="${name}" ${hidden.has(name) ? '' : 'checked'}>
+      <span>${name.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
+      <span style="color:var(--muted);font-size:11px">(${name})</span>
+    </label>`).join('');
+}
+
+async function saveDomainVisibility() {
+  const boxes = document.querySelectorAll('#settings-domains input[type=checkbox]');
+  const hidden = Array.from(boxes).filter(b => !b.checked).map(b => b.dataset.domain);
+  const r = await fetch('/api/preferences', {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ 'landing.hidden_domains': hidden }),
+  });
+  if (r.ok) {
+    document.getElementById('settings-status').textContent = '✓ Saved';
+    setTimeout(() => document.getElementById('settings-status').textContent = '', 2000);
+    loadTemplateList();   // landing grid reflects the change immediately
+  } else {
+    document.getElementById('settings-status').textContent = 'Save failed';
+  }
+}
+
+// ── Post-generation tool strip + preflight ──────────────────────────────
+
+function _highlightPeerPill(active) {
+  document.querySelectorAll('.peer-strip .peer-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.peer === active);
+  });
+}
+
+const _PREFLIGHT = {
+  evolve: {
+    bannerId: 'preflight-evolve',
+    async check() {
+      try {
+        const r = await fetch('/api/evolve/proposals?limit=1');
+        if (!r.ok) throw new Error('endpoint error');
+        const j = await r.json();
+        const n = (j.proposals || []).length;
+        return {
+          ready: true,
+          message: n > 0
+            ? `Ready · proposals available (showing ${n}+ pending). Use the band filter below to triage.`
+            : `Ready · no proposals yet. Click <b>▶ Run monitor + scorer</b> below to surface candidates from production observations.`,
+        };
+      } catch (e) {
+        return { ready: false, message: 'Evolution database unavailable. Run the toolkit pipeline (Step 6) so the schema is created and proposals can be written.' };
+      }
+    },
+  },
+  comply: {
+    bannerId: 'preflight-comply',
+    async check() {
+      try {
+        const r = await fetch('/api/comply/coverage');
+        if (!r.ok) throw new Error('endpoint error');
+        const j = await r.json();
+        const regs = j.regulations || j.coverage || [];
+        return {
+          ready: regs.length > 0,
+          message: regs.length > 0
+            ? `Ready · ${regs.length} regulation${regs.length === 1 ? '' : 's'} loaded for your domain. Click <b>⟳ Refresh dashboard</b> to recompute coverage.`
+            : 'No regulations matched your domain yet. Set the industry on Step 1, then run the pipeline (Step 6) so coverage data is generated.',
+        };
+      } catch (e) {
+        return { ready: false, message: 'Compliance data unavailable. Run the toolkit pipeline (Step 6) first to populate coverage.' };
+      }
+    },
+  },
+  retrieve: {
+    bannerId: 'preflight-retrieve',
+    async check() {
+      try {
+        const r = await fetch('/api/retrieve/indexes');
+        if (!r.ok) throw new Error('endpoint error');
+        const j = await r.json();
+        const n = (j.indexes || []).length;
+        return {
+          ready: n > 0,
+          message: n > 0
+            ? `Ready · ${n} embedding index${n === 1 ? '' : 'es'} available. Pick a flavor below to query.`
+            : 'No embedding indexes yet. Build one with <code>python3 toolkit.py --phase embed --flavor &lt;name&gt;</code>, or click <b>▶ Index flavor</b> below if shown.',
+        };
+      } catch (e) {
+        return { ready: false, message: 'Retrieval service unavailable. Run the toolkit pipeline (Step 6) and ensure embedding dependencies are installed.' };
+      }
+    },
+  },
+};
+
+async function _runPreflight(name) {
+  const cfg = _PREFLIGHT[name];
+  if (!cfg) return;
+  const banner = document.getElementById(cfg.bannerId);
+  if (!banner) return;
+  banner.style.display = 'flex';
+  banner.className = 'preflight-banner waiting';
+  banner.innerHTML = '<span class="pf-icon">…</span><span class="pf-text">Checking readiness…</span>';
+  const result = await cfg.check();
+  banner.className = 'preflight-banner ' + (result.ready ? 'ready' : 'waiting');
+  const icon = result.ready ? '✓' : '⚠';
+  banner.innerHTML =
+    `<span class="pf-icon">${icon}</span>` +
+    `<span class="pf-text">${result.message}</span>` +
+    (result.ready ? '' : `<button onclick="goStep('generate')">Open Step 6 →</button>`);
+}
+
+// ── Evolution strategy explanations ─────────────────────────────────────
+
+const _EV_STRATEGY_HELP = {
+  '': '<b>All strategies</b> — runs every detector in one pass. Good default; tighten to a single strategy when you want to tune <i>min evidence</i> for that detector specifically.',
+  SHACL_VIOLATION_ACCUMULATION:
+    '<b>SHACL violation accumulation</b> — tracks SHACL constraint failures over time. When the same constraint fires repeatedly across many production observations, the constraint is likely too strict (or the data needs a new sub-class). <i>Best for:</i> refining <code>min/maxCount</code>, value ranges, or pattern constraints that look right in theory but fail in practice.',
+  CARDINALITY_BREACH:
+    '<b>Cardinality breach</b> — flags real-world records whose instance counts exceed the ontology\'s declared <code>min/maxCount</code>. Example: <code>Order</code> declared <code>maxCount 1</code> for <code>customer</code>, but a record with two customers appears. <i>Best for:</i> catching schema drift in normalised-but-evolving data and joint-account / multi-party edge cases.',
+  CLASS_COOCCURRENCE:
+    '<b>Class co-occurrence</b> — identifies pairs of classes that always (or almost always) appear together in observations. Suggests a missing parent class, mixin, or relationship that the original modeller didn\'t spot. <i>Best for:</i> discovering implicit hierarchies (e.g. every <code>FaultTicket</code> co-occurs with a <code>NetworkElement</code> → maybe a <code>RelatedAsset</code> property is missing).',
+  NLP_CANDIDATE_PROMOTION:
+    '<b>NLP candidate promotion</b> — mines free-text logs, ticket descriptions, or doc comments for recurring noun phrases that look like first-class entities but aren\'t in the ontology yet. <i>Best for:</i> catching domain vocabulary that emerges in operations after deployment (e.g. operators consistently log "RU congestion" but the ontology has no <code>RadioUnit</code> class).',
+};
+
+// ── Regulation raw-JSON viewer ──────────────────────────────────────────
+
+let _currentRegulation = null;
+
+async function viewRegulationJson(regulationId) {
+  const r = await fetch('/api/comply/regulations/'+encodeURIComponent(regulationId));
+  if (!r.ok) {
+    showToast('Could not load regulation: '+regulationId);
+    return;
+  }
+  const reg = await r.json();
+  _currentRegulation = reg;
+  document.getElementById('regulation-modal-title').textContent =
+    (reg.name || regulationId) + '  ·  ' + (reg.short_name || regulationId);
+  document.getElementById('regulation-modal-pre').textContent =
+    JSON.stringify(reg, null, 2);
+  const srcBtn = document.getElementById('regulation-modal-source');
+  if (reg.regulatory_source_url) {
+    srcBtn.style.display = '';
+    srcBtn.textContent = 'Open regulator’s source ↗';
+  } else {
+    srcBtn.style.display = 'none';
+  }
+  document.getElementById('regulation-modal').style.display = 'flex';
+}
+
+function openRegulationSource() {
+  if (_currentRegulation && _currentRegulation.regulatory_source_url) {
+    window.open(_currentRegulation.regulatory_source_url, '_blank', 'noopener');
+  }
+}
+
+function renderEvStrategyHelp() {
+  const sel = document.getElementById('ev-strategy');
+  const box = document.getElementById('ev-strategy-help');
+  if (!sel || !box) return;
+  box.innerHTML = _EV_STRATEGY_HELP[sel.value] || _EV_STRATEGY_HELP[''];
 }
 
 init();

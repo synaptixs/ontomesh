@@ -1167,12 +1167,12 @@ def main():
         emb_dash.write_summary(out_path=out_path, db_path=db_path)
 
     def phase_wizard(db_path: str, out_path: str):
-        step(0, "Phase 3 — Browser Wizard (Flask)")
+        step(0, "Phase 3 — Ontology Studio (Flask)")
         wizard_path = os.path.join(HERE, "wizard", "app.py")
         if not os.path.exists(wizard_path):
-            print(f"  ⚠  Wizard not found at {wizard_path}")
+            print(f"  ⚠  Ontology Studio not found at {wizard_path}")
             return
-        print(f"  Starting browser wizard at http://127.0.0.1:5000")
+        print(f"  Starting Ontology Studio at http://127.0.0.1:5000")
         print(f"  Press Ctrl+C to stop.")
         os.execv(sys.executable, [sys.executable, wizard_path, "--debug"])
 
