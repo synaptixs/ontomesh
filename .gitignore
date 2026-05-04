@@ -22,7 +22,10 @@ ENV/
 db/enterprise.db
 db/demo.db
 db/demo_5g.db
+db/ontologies.db
 db/*.db-shm
+.wizard_session.json
+.claude/launch.json
 db/*.db-wal
 
 # ── Generated output artefacts ────────────────────────────────────────────────

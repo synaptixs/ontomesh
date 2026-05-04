@@ -49,10 +49,15 @@ sys.path.insert(0, ROOT)
 
 SESSION_FILE = os.path.join(ROOT, ".wizard_session.json")
 TEMPLATES_DIR = os.path.join(ROOT, "templates")
+ONTOLOGIES_DB = os.path.join(ROOT, "db", "ontologies.db")
+OUTPUT_DIR = os.path.join(ROOT, "output")
+
+from wizard import ontologies_store as _store
+_store.init_db(ONTOLOGIES_DB)
 
 # Built-in starter templates live in onboard.py's INDUSTRY_TEMPLATES dict
 # (telecom, healthcare, finance, manufacturing, retail). Import them so the
-# browser wizard and the CLI wizard share the same source of truth.
+# Ontology Studio and the CLI wizard share the same source of truth.
 try:
     from onboard import INDUSTRY_TEMPLATES as _ONBOARD_TEMPLATES  # type: ignore
 except Exception:
@@ -332,7 +337,11 @@ def list_templates():
         if n not in seen:
             out.append(n)
             seen.add(n)
-    return jsonify({"templates": out})
+    # Apply user's landing-page visibility filter.
+    prefs = _store.get_preferences(ONTOLOGIES_DB)
+    hidden = set(prefs.get("landing.hidden_domains") or [])
+    visible = [n for n in out if n not in hidden]
+    return jsonify({"templates": visible, "hidden": sorted(hidden), "all": out})
 
 
 @app.route("/api/template/<name>", methods=["GET"])
@@ -490,6 +499,95 @@ def pipeline_status():
     })
 
 
+# ── Saved Ontologies (Library + Viewer) ───────────────────────────────────
+
+@app.route("/api/ontologies", methods=["GET"])
+def list_saved_ontologies():
+    return jsonify({"ontologies": _store.list_ontologies(ONTOLOGIES_DB)})
+
+
+@app.route("/api/ontologies", methods=["POST"])
+def save_saved_ontology():
+    body = request.get_json(force=True) or {}
+    domain  = (body.get("domain")  or "").strip()
+    product = (body.get("product") or "").strip()
+    label   = (body.get("label")   or "").strip()
+    if not (domain and product and label):
+        return jsonify({"error": "domain, product, and label are required"}), 400
+
+    session_payload = body.get("session")
+    if session_payload is None:
+        session_payload = _load_session()
+
+    generated = body.get("generated")
+    if generated is None:
+        generated = _store.harvest_generated(OUTPUT_DIR)
+
+    overwrite = bool(body.get("overwrite", False))
+    try:
+        result = _store.save_ontology(
+            ONTOLOGIES_DB,
+            domain=domain, product=product, label=label,
+            session=session_payload, generated=generated,
+            overwrite=overwrite,
+        )
+    except FileExistsError as exc:
+        return jsonify({"error": "exists", "slug": str(exc)}), 409
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify(result)
+
+
+@app.route("/api/ontologies/<slug>", methods=["GET"])
+def get_saved_ontology(slug: str):
+    row = _store.get_ontology(ONTOLOGIES_DB, slug)
+    if not row:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(row)
+
+
+@app.route("/api/ontologies/<slug>", methods=["DELETE"])
+def delete_saved_ontology(slug: str):
+    ok = _store.delete_ontology(ONTOLOGIES_DB, slug)
+    if not ok:
+        return jsonify({"error": "not found"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/ontologies/<slug>/reharvest", methods=["POST"])
+def reharvest_saved_ontology(slug: str):
+    """Re-read output/ and refresh the saved generated artifacts for slug."""
+    result = _store.reharvest_ontology(ONTOLOGIES_DB, slug, OUTPUT_DIR)
+    if result is None:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(result)
+
+
+@app.route("/api/ontologies/<slug>/load", methods=["POST"])
+def load_saved_ontology(slug: str):
+    """Copy a saved ontology's session into the active wizard session."""
+    row = _store.get_ontology(ONTOLOGIES_DB, slug)
+    if not row:
+        return jsonify({"error": "not found"}), 404
+    _save_session(row["session"])
+    return jsonify(row["session"])
+
+
+# ── Preferences (domain visibility, etc.) ─────────────────────────────────
+
+@app.route("/api/preferences", methods=["GET"])
+def get_preferences():
+    return jsonify(_store.get_preferences(ONTOLOGIES_DB))
+
+
+@app.route("/api/preferences", methods=["PUT"])
+def put_preferences():
+    body = request.get_json(force=True) or {}
+    if not isinstance(body, dict):
+        return jsonify({"error": "body must be an object"}), 400
+    return jsonify(_store.set_preferences(ONTOLOGIES_DB, body))
+
+
 @app.route("/api/output", methods=["GET"])
 def list_output():
     out_dir = os.path.join(ROOT, "output")
@@ -589,6 +687,17 @@ def comply_list_regulations():
     except ImportError as exc:
         return jsonify({"error": f"compliance module unavailable: {exc}"}), 500
     return jsonify({"regulations": reg_mod.list_regulations()})
+
+
+@app.route("/api/comply/regulations/<regulation_id>", methods=["GET"])
+def comply_get_regulation(regulation_id: str):
+    """Return the full raw regulation JSON for the viewer link."""
+    sys.path.insert(0, ROOT)
+    from compliance import registry as reg_mod
+    try:
+        return jsonify(reg_mod.load_regulation(regulation_id))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 404
 
 
 @app.route("/api/comply/coverage", methods=["GET"])
@@ -725,14 +834,14 @@ def serve_output(subdir: str, filename: str):
 # ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Ontology Toolkit Browser Wizard")
+    parser = argparse.ArgumentParser(description="Ontology Toolkit — Ontology Studio (v3.0)")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=5000)
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    print(f"\n  Ontology Toolkit Browser Wizard")
-    print(f"  ─────────────────────────────────")
+    print(f"\n  Ontology Toolkit — Ontology Studio (v3.0)")
+    print(f"  ────────────────────────────────────────────")
     print(f"  URL: http://{args.host}:{args.port}")
     print(f"  Session file: {SESSION_FILE}")
     print()
