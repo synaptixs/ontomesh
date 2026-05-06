@@ -480,6 +480,7 @@
       <li data-step="events"><span class="step-num">3</span> Events</li>
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
+      <li data-step="rules"><span class="step-num">5.5</span> Rules &amp; Reasoning</li>
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
       <li class="step-divider" aria-hidden="true">After generation</li>
       <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
@@ -747,7 +748,49 @@
         <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
         <span class="nav-hint">Step 5 of 6 · CQs drive the governance scorecard. Optional but recommended.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('generate')">Skip →</button>
+          <button class="btn btn-ghost"   onclick="goStep('rules')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('rules')">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5.5: Rules & Reasoning -->
+    <div class="step-panel" id="step-rules">
+      <div class="step-title">Rules &amp; Reasoning</div>
+      <div class="step-subtitle">Author SHACL, SPARQL CONSTRUCT, and OWL-axiom rules. Saved rules are validated, persisted to <code>session.rules</code>, and consumed by <code>--phase reason</code> at materialisation time.</div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Rules <span id="rule-count" class="badge">(0)</span></h3>
+          <div style="display:flex; gap:8px">
+            <select id="rule-library-select" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px;">
+              <option value="">Load starter library…</option>
+            </select>
+            <button class="btn btn-ghost" onclick="loadRuleLibrary()">Load</button>
+            <button class="btn btn-primary" onclick="addRule()">+ Add rule</button>
+          </div>
+        </div>
+        <div class="box-help">
+          Rules let the reasoner derive triples your data doesn't state directly.
+          <ul>
+            <li><b>SHACL</b> — <code>sh:rule</code> blocks. "When this shape matches, assert these triples." Use for data-driven assertions.</li>
+            <li><b>SPARQL</b> — <code>CONSTRUCT { ?x :p ?y } WHERE { ... }</code>. Use for pattern-based inference (transitive impact, joins).</li>
+            <li><b>OWL</b> — Turtle fragments declaring property characteristics (transitive, equivalent, etc.). Use for taxonomy-level axioms.</li>
+            <li><b>Validation</b> — every rule is parsed and smoke-executed against an empty graph before save. Broken rules cannot be saved.</li>
+          </ul>
+        </div>
+        <div id="rule-list"></div>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
+          <button class="btn btn-ghost"   onclick="validateAllRules()">Validate all</button>
+          <button class="btn btn-primary" onclick="saveRules()">Save rules</button>
+        </div>
+        <div id="rule-status" style="margin-top:8px; font-size:13px; color:var(--muted);"></div>
+      </div>
+
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
+        <span class="nav-hint">Step 5.5 of 6 · Optional. Rules feed the materialisation phase.</span>
+        <div class="nav-right">
           <button class="btn btn-primary" onclick="goStep('generate')">Continue →</button>
         </div>
       </div>
@@ -2292,6 +2335,154 @@ function renderCQs() {
 
 document.getElementById('new-cq').addEventListener('keydown', e => { if (e.key==='Enter') addCQ(); });
 
+// ── Rules & Reasoning (Step 5.5) ──────────────────────────────────────────
+function _ensureRules() {
+  if (!Array.isArray(session.rules)) session.rules = [];
+  return session.rules;
+}
+
+function addRule(seed) {
+  const rules = _ensureRules();
+  const r = seed || {
+    id: '',
+    kind: 'sparql',
+    label: 'New rule',
+    body: 'PREFIX : <https://ontology.example.com/enterprise/>\nCONSTRUCT { ?s ?p ?o }\nWHERE     { ?s ?p ?o }',
+    enabled: true,
+  };
+  rules.push(r);
+  renderRules();
+}
+
+function removeRule(i) {
+  _ensureRules().splice(i, 1);
+  renderRules();
+}
+
+function renderRules() {
+  const rules = _ensureRules();
+  const list = document.getElementById('rule-list');
+  document.getElementById('rule-count').textContent = `(${rules.length})`;
+  if (!rules.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No rules yet. Click <b>+ Add rule</b> or load a starter library above.</div>';
+    return;
+  }
+  list.innerHTML = rules.map((r, i) => `
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+        <input value="${(r.id||'').replace(/"/g,'&quot;')}" placeholder="rule-id" data-i="${i}" data-f="id"
+               style="flex:0 0 220px; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px; font-family:monospace; font-size:12px;"/>
+        <select data-i="${i}" data-f="kind" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px;">
+          <option value="sparql" ${r.kind==='sparql'?'selected':''}>SPARQL</option>
+          <option value="shacl"  ${r.kind==='shacl'?'selected':''}>SHACL</option>
+          <option value="owl"    ${r.kind==='owl'?'selected':''}>OWL axiom</option>
+        </select>
+        <input value="${(r.label||'').replace(/"/g,'&quot;')}" placeholder="Human-readable label" data-i="${i}" data-f="label"
+               style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px;"/>
+        <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--muted)">
+          <input type="checkbox" data-i="${i}" data-f="enabled" ${r.enabled!==false?'checked':''}/> on
+        </label>
+        <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="validateOneRule(${i})">Validate</button>
+        <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRule(${i})">✕</button>
+      </div>
+      <textarea data-i="${i}" data-f="body" rows="6"
+        style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 10px; font-family:monospace; font-size:12px; resize:vertical;">${(r.body||'').replace(/</g,'&lt;')}</textarea>
+      <div id="rule-msg-${i}" style="margin-top:6px; font-size:12px; min-height:14px;"></div>
+    </div>
+  `).join('');
+
+  // Wire change handlers — keep edits in sync with `session.rules`.
+  list.querySelectorAll('input[data-i], select[data-i], textarea[data-i]').forEach(el => {
+    el.addEventListener('input', () => {
+      const i = +el.dataset.i, f = el.dataset.f;
+      const v = el.type === 'checkbox' ? el.checked : el.value;
+      _ensureRules()[i][f] = v;
+    });
+  });
+}
+
+async function validateOneRule(i) {
+  const r = _ensureRules()[i];
+  const msg = document.getElementById(`rule-msg-${i}`);
+  msg.textContent = 'validating…';
+  msg.style.color = 'var(--muted)';
+  try {
+    const res = await fetch('/api/rules/validate', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(r),
+    });
+    const out = await res.json();
+    if (out.ok) {
+      msg.textContent = '✓ valid' + (out.warnings && out.warnings.length ? ' — ' + out.warnings.join('; ') : '');
+      msg.style.color = '#5ec27a';
+    } else {
+      msg.textContent = '✗ ' + (out.errors || ['validation failed']).join('; ');
+      msg.style.color = '#e08383';
+    }
+  } catch (e) { msg.textContent = '✗ ' + e; msg.style.color = '#e08383'; }
+}
+
+async function validateAllRules() {
+  const status = document.getElementById('rule-status');
+  status.textContent = 'validating…';
+  const res = await fetch('/api/rules/validate', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({rules: _ensureRules()}),
+  });
+  const out = await res.json();
+  let bad = 0;
+  Object.entries(out.results || {}).forEach(([rid, r]) => { if (!r.ok) bad++; });
+  status.textContent = bad ? `${bad} rule(s) failed validation. See per-rule messages.` : `All ${Object.keys(out.results||{}).length} rules valid.`;
+  status.style.color = bad ? '#e08383' : '#5ec27a';
+}
+
+async function saveRules() {
+  const status = document.getElementById('rule-status');
+  status.textContent = 'saving…';
+  status.style.color = 'var(--muted)';
+  try {
+    const res = await fetch('/api/rules', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({rules: _ensureRules()}),
+    });
+    const out = await res.json();
+    if (!res.ok) {
+      status.textContent = '✗ ' + (out.error || 'save failed');
+      status.style.color = '#e08383';
+      return;
+    }
+    status.textContent = `✓ Saved ${out.count} rule(s).`;
+    status.style.color = '#5ec27a';
+    await saveSession();
+  } catch (e) { status.textContent = '✗ ' + e; status.style.color = '#e08383'; }
+}
+
+async function loadRuleLibrary() {
+  const sel = document.getElementById('rule-library-select');
+  const ind = sel.value;
+  if (!ind) return;
+  const res = await fetch(`/api/rules/library/${encodeURIComponent(ind)}`);
+  const out = await res.json();
+  if (!Array.isArray(out.rules)) return;
+  out.rules.forEach(r => addRule(r));
+  document.getElementById('rule-status').textContent =
+    `Loaded ${out.rules.length} starter rule(s) from "${ind}".`;
+}
+
+async function _populateRuleLibraryDropdown() {
+  try {
+    const res = await fetch('/api/rules/library');
+    const out = await res.json();
+    const sel = document.getElementById('rule-library-select');
+    (out.industries || []).forEach(i => {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = i;
+      sel.appendChild(opt);
+    });
+  } catch (_) { /* offline / dev — leave dropdown blank */ }
+}
+_populateRuleLibraryDropdown();
+
 // ── Generate ──────────────────────────────────────────────────────────────
 function toggleAllPhases(cb) {
   document.querySelectorAll('.ph-cb').forEach(c => c.checked = cb.checked);
@@ -2417,6 +2608,7 @@ function render() {
   renderEvents();
   renderRelationships();
   renderCQs();
+  renderRules();
   _paintDomainPills();
   vecRenderExamples();
   _renderPreflight();
