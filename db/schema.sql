@@ -31,6 +31,17 @@ CREATE TABLE IF NOT EXISTS ontology_metadata (
     skos_pref_label   TEXT,                  -- SKOS preferred label
     skos_alt_labels   TEXT,                  -- comma-separated synonyms
     cq_coverage       TEXT,                  -- comma-separated CQ-IDs this supports
+    -- ── Phase A: richer axiom signals ──────────────────────────
+    -- Object-property characteristics (set on COLUMN rows for FK/object props)
+    is_transitive         INTEGER DEFAULT 0,
+    is_symmetric          INTEGER DEFAULT 0,
+    is_functional         INTEGER DEFAULT 0,
+    is_inverse_functional INTEGER DEFAULT 0,
+    inverse_of            TEXT,              -- counterpart property name (lowerCamel)
+    -- Class-level disjointness grouping (set on TABLE rows)
+    disjoint_group        TEXT,              -- shared name → AllDisjointClasses
+    -- Class-level meaningful key columns (set on TABLE rows)
+    has_key_columns       TEXT,              -- comma-separated column names → owl:hasKey
     created_at        TEXT DEFAULT (datetime('now'))
 );
 

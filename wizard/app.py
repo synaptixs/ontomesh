@@ -99,6 +99,7 @@ def _load_session() -> dict:
         "events": [],
         "relationships": [],
         "competency_questions": [],
+        "rules": [],
         "created_at": _now(),
         "updated_at": _now(),
     }
@@ -488,6 +489,59 @@ def generate():
     t = threading.Thread(target=_run, daemon=True)
     t.start()
     return jsonify({"ok": True, "message": "Pipeline started", "phases": phases})
+
+
+# ── Phase C — Rules step ─────────────────────────────────────────────────
+
+from wizard import rules as _rules_mod  # noqa: E402
+
+_RULES_LIBRARY_DIR = os.path.join(ROOT, "templates", "rules")
+
+
+@app.route("/api/rules", methods=["GET"])
+def get_rules():
+    return jsonify({"rules": _load_session().get("rules", [])})
+
+
+@app.route("/api/rules", methods=["POST"])
+def save_rules():
+    body = request.get_json(force=True) or {}
+    rules = body.get("rules", [])
+    if not isinstance(rules, list):
+        return jsonify({"error": "rules must be a list"}), 400
+    results = _rules_mod.validate_rules(rules)
+    bad = {rid: r.to_dict() for rid, r in results.items() if not r.ok}
+    if bad:
+        return jsonify({"error": "validation_failed", "results": bad}), 400
+    session = _load_session()
+    session["rules"] = [_rules_mod.normalise_rule(r) for r in rules]
+    _save_session(session)
+    return jsonify({"ok": True, "count": len(session["rules"])})
+
+
+@app.route("/api/rules/validate", methods=["POST"])
+def validate_rule():
+    body = request.get_json(force=True) or {}
+    if "rules" in body and isinstance(body["rules"], list):
+        results = _rules_mod.validate_rules(body["rules"])
+        return jsonify({"results": {rid: r.to_dict() for rid, r in results.items()}})
+    result = _rules_mod.validate_rule(body)
+    return jsonify(result.to_dict())
+
+
+@app.route("/api/rules/library", methods=["GET"])
+def list_rule_library():
+    industries = []
+    if os.path.isdir(_RULES_LIBRARY_DIR):
+        for p in sorted(Path(_RULES_LIBRARY_DIR).glob("*.yaml")):
+            industries.append(p.stem)
+    return jsonify({"industries": industries})
+
+
+@app.route("/api/rules/library/<industry>", methods=["GET"])
+def get_rule_library(industry: str):
+    starter = _rules_mod.load_starter_library(_RULES_LIBRARY_DIR, industry)
+    return jsonify({"industry": industry, "rules": starter})
 
 
 @app.route("/api/pipeline/status", methods=["GET"])

@@ -1,0 +1,47 @@
+industry: telecom
+description: |
+  Starter rules for telecom-network impact analysis. The first rule
+  propagates outage impact downward through a NetworkElement parent/child
+  hierarchy; the second flags a site as "impacted" whenever any of its
+  hosted elements is in OUTAGE state.
+rules:
+  - id: rule-impact-via-hierarchy
+    kind: sparql
+    label: "Propagate outage impact down the network hierarchy"
+    body: |
+      PREFIX : <https://ontology.example.com/telecom/>
+      CONSTRUCT { ?child :impactedBy ?event }
+      WHERE {
+        ?event a :OutageEvent ;
+               :affectedAsset ?parent .
+        ?child :childOf+ ?parent .
+      }
+  - id: rule-site-flag-on-outage
+    kind: shacl
+    label: "Flag site as impacted when a hosted element has outage status"
+    body: |
+      @prefix : <https://ontology.example.com/telecom/> .
+      @prefix sh: <http://www.w3.org/ns/shacl#> .
+      :SiteImpactRule
+        a sh:NodeShape ;
+        sh:targetClass :Site ;
+        sh:rule [
+          a sh:TripleRule ;
+          sh:subject sh:this ;
+          sh:predicate :hasIncident ;
+          sh:object true ;
+          sh:condition [
+            sh:property [
+              sh:path :hosts ;
+              sh:qualifiedValueShape [ sh:property [ sh:path :status ;
+                                                    sh:hasValue "OUTAGE" ] ] ;
+              sh:qualifiedMinCount 1
+            ]
+          ]
+        ] .
+  - id: axiom-childof-transitive
+    kind: owl
+    label: "childOf is transitive"
+    body: |
+      @prefix : <https://ontology.example.com/telecom/> .
+      :childOf a owl:ObjectProperty, owl:TransitiveProperty .
