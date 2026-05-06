@@ -20,6 +20,7 @@ Generates the OWL ontology, SHACL shapes, JSON-LD context, mapping workbook, and
 | 1 — Foundation | Annotated class and property inventory |
 | 2 — Modeling | `enterprise.ttl`, `events.ttl`, `provenance.ttl` |
 | 3 — Validation | `enterprise-shapes.ttl`, `agent-gate.ttl` |
+| reason — Materialisation *(new in v3.1)* | `materialised.ttl` + `materialised-lineage.ttl` from OWL-RL ⊕ SHACL `sh:rule` ⊕ SPARQL CONSTRUCT |
 | 4 — Mapping | Mapping workbook, semantic loss report, orphan analysis |
 | 5 — Exchange | Context file, sample payloads, MCP tool definitions, vocabulary |
 | TMF | TM Forum SID OWL hierarchy (24 APIs, 13 CQs) |
@@ -32,6 +33,7 @@ What each output file is for: [docs/artifacts.md](docs/artifacts.md) · How to d
 
 | Group | What it adds | Read |
 |---|---|---|
+| **Rules & Reasoning** *(new in v3.1)* | OWL axioms from wizard inputs, materialised inference (`--phase reason`), per-triple lineage (`prov:wasDerivedFrom`), Studio rule editor with slot-fill / NL drafting / test-fire / premise tree, rule-impact heat map, provider-agnostic LLM Insights | [docs/release-notes.md](docs/release-notes.md) · [docs/reasoning-roadmap.md](docs/reasoning-roadmap.md) |
 | Runtime layer — connect ontology to LLMs | SHACL input/output gates, OWL grounding, prompt assembly, 5 LLM adapters | [docs/runtime.md](docs/runtime.md) |
 | Drift monitoring — production-grade | OWL hierarchy + SHACL shapes drive `drift_monitor` (infodrift) | [examples/infodrift/](examples/infodrift/) · [docs/advanced.md §Drift](docs/advanced.md) |
 | Graph publishing | One-command upload to Fuseki / Stardog / Oxigraph / Neptune / GraphDB | [docs/advanced.md §Graph publishing](docs/advanced.md) |
