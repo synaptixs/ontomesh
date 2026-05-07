@@ -250,7 +250,11 @@ def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
             sibling_groups.append(siblings)
 
     for group in sibling_groups:
-        members = ", ".join(f":{c}" for c in group)
+        # Turtle RDF-list members must be whitespace-separated. A comma
+        # is a "same-subject same-predicate" repeat marker and isn't
+        # valid inside a `( ... )` collection — using one breaks parsers
+        # downstream (rdflib, pyshacl, ROBOT).
+        members = " ".join(f":{c}" for c in group)
         blocks.append(
             "[] a owl:AllDisjointClasses ;\n"
             f"   owl:members ( {members} ) .\n"
@@ -271,7 +275,7 @@ def _disjoint_class_groups(tables: List[TableModel]) -> str:
     for name, members in groups.items():
         if len(members) < 2:
             continue
-        member_iris = ", ".join(f":{m}" for m in members)
+        member_iris = " ".join(f":{m}" for m in members)
         out.append(
             f'# Group: "{name}"\n'
             "[] a owl:AllDisjointClasses ;\n"

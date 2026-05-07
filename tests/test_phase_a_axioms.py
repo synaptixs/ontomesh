@@ -213,3 +213,20 @@ def test_profile_escalates_to_dl(populated_db, tmp_path):
     # SymmetricProperty + inverseOf + InverseFunctionalProperty all present
     assert "OWL 2 DL" in rec
     assert "HermiT" in rec
+
+
+def test_generated_ttl_files_parse_with_rdflib(populated_db, tmp_path):
+    """Regression guard: every emitted Turtle file must parse cleanly.
+
+    The earlier `, `-separated `owl:members` list slipped past the
+    string-search assertions but blew up CI's SPARQL CQ tests when
+    rdflib hit it. This test exercises rdflib directly so any future
+    Turtle-syntax regression fails the unit suite, not CI.
+    """
+    from rdflib import Graph
+    out_dir = tmp_path / "out"
+    _generate(populated_db, out_dir)
+    for name in ("enterprise.ttl", "events.ttl", "provenance.ttl"):
+        path = out_dir / name
+        assert path.is_file(), f"{name} was not written"
+        Graph().parse(path, format="turtle")  # raises on bad syntax
