@@ -1,0 +1,38 @@
+{
+  "_comment": "Phase E — provider catalogue. The Insights layer reads this file to populate the Settings → Providers panel and to pick a default model per provider. Keys live in environment variables (or the OCI config file). The 'residency' hint is shown in the UI before every Insights call so users see whether a request leaves their tenancy.",
+  "providers": {
+    "openai": {
+      "label": "OpenAI",
+      "model": "gpt-4o-mini",
+      "residency": "us-cloud",
+      "env_keys": ["OPENAI_API_KEY"]
+    },
+    "oci": {
+      "label": "OCI Generative AI",
+      "model": "cohere.command-r-plus",
+      "residency": "tenant-region",
+      "env_keys": ["OCI_COMPARTMENT_ID"],
+      "config_paths": ["~/.oci/config"]
+    },
+    "anthropic": {
+      "label": "Anthropic",
+      "model": "claude-3-7-sonnet-latest",
+      "residency": "us-cloud",
+      "env_keys": ["ANTHROPIC_API_KEY"]
+    },
+    "vertex": {
+      "label": "Google Vertex AI",
+      "model": "gemini-1.5-pro",
+      "residency": "gcp-region",
+      "env_keys": ["GOOGLE_APPLICATION_CREDENTIALS"]
+    },
+    "ollama": {
+      "label": "Local (Ollama)",
+      "model": "llama3",
+      "residency": "air-gapped",
+      "env_keys": [],
+      "base_url_default": "http://localhost:11434"
+    }
+  },
+  "default": "openai"
+}

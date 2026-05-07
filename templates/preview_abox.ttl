@@ -1,0 +1,44 @@
+@prefix : <https://ontology.example.com/enterprise/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ── Preview ABox ──────────────────────────────────────────────────────────
+# A handful of instances per common class so test-fire previews always
+# have something for rules to match on. Keep it small — the preview pass
+# loads this on every Test-fire and we want the UI to feel instant.
+
+# Sites and assets
+:site_a       a :Site ; rdfs:label "Site A" ; :status "ACTIVE" .
+:site_b       a :Site ; rdfs:label "Site B" ; :status "OUTAGE" .
+
+:asset_a1     a :Asset ; rdfs:label "Asset A1" ; :status "ACTIVE" ;
+              :hostedAt :site_a ; :childOf :site_a .
+:asset_a2     a :Asset ; rdfs:label "Asset A2" ; :status "ACTIVE" ;
+              :hostedAt :site_a ; :childOf :asset_a1 .
+:asset_b1     a :Asset ; rdfs:label "Asset B1" ; :status "OUTAGE" ;
+              :hostedAt :site_b ; :childOf :site_b .
+
+# Hierarchy edges
+:site_a :hosts :asset_a1, :asset_a2 .
+:site_b :hosts :asset_b1 .
+
+# Events
+:outage_42    a :OutageEvent ; rdfs:label "Outage 42" ;
+              :affectedAsset :site_b ; :startedAt "2026-01-01T00:00:00Z"^^xsd:dateTime .
+:maint_07     a :MaintenanceEvent ; rdfs:label "Maintenance 07" ;
+              :affectedAsset :asset_a1 .
+
+# Customers / orders
+:cust_1       a :Customer ; rdfs:label "Customer 1" ; :tier "GOLD" .
+:cust_2       a :Customer ; rdfs:label "Customer 2" ; :tier "SILVER" .
+:order_100    a :Order ; rdfs:label "Order 100" ; :placedBy :cust_1 ; :amount 250 .
+:order_101    a :Order ; rdfs:label "Order 101" ; :placedBy :cust_2 ; :amount 12000 .
+
+# Trigger instances exercised by the SHACL rule examples
+:trigger_a    a :Trigger ; rdfs:label "Trigger A" .
+:trigger_b    a :Trigger ; rdfs:label "Trigger B" .
+
+# Generic taxonomy edges so transitive rules have material
+:partA :partOf :partB .
+:partB :partOf :partC .

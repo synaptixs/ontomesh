@@ -12,6 +12,7 @@ Usage:
   python toolkit.py --phase 3         # SHACL generation
   python toolkit.py --phase 4         # mapping + semantic loss
   python toolkit.py --phase 5         # JSON-LD + SKOS
+  python toolkit.py --phase reason    # materialisation (OWL-RL + SHACL + SPARQL)
   python toolkit.py --phase test      # CQ tests + governance score
   python toolkit.py --phase report    # HTML report only
 
@@ -177,6 +178,99 @@ def phase2_ontology(db_path: str, out_path: str):
     except Exception:
         pass
     run_and_report(ontology_path, os.path.join(out_path, "ontology"), profile)
+
+
+def phase_reason(db_path: str, out_path: str):
+    """Phase B — materialisation. Runs OWL-RL, SHACL sh:rule, and SPARQL
+    CONSTRUCT engines over `enterprise.ttl` and writes the four derived
+    artefacts (`enterprise-inferred.ttl`, `inferred-shacl.ttl`,
+    `inferred-sparql.ttl`, `materialised.ttl`) plus a report.
+
+    Inputs are auto-discovered from the standard pipeline output layout:
+        ontology/      enterprise.ttl, events.ttl, provenance.ttl
+        shapes/        enterprise.ttl  (SHACL — optional)
+        sparql_rules/  *.rq             (SPARQL CONSTRUCTs — optional)
+    """
+    step("B", "Reasoning — Materialisation (OWL-RL + SHACL + SPARQL)")
+    from materializer import materialize
+
+    ont_dir = os.path.join(out_path, "ontology")
+    ontology = os.path.join(ont_dir, "enterprise.ttl")
+    if not os.path.isfile(ontology):
+        print(f"  ✗ {ontology} not found — run phase 2 first.")
+        return
+
+    # Phase C — export session.rules to disk before materialisation.
+    # The wizard persists rules at <repo>/.wizard_session.json; we look
+    # for them silently and skip if absent.
+    session_path = os.path.join(HERE, ".wizard_session.json")
+    if os.path.isfile(session_path):
+        try:
+            with open(session_path) as f:
+                session = json.load(f)
+            session_rules = session.get("rules") or []
+            if session_rules:
+                sys.path.insert(0, HERE)
+                from wizard.rules import export_rules
+                export = export_rules(session_rules, out_path)
+                counts = export["counts"]
+                print(f"  ↪ Rules exported: {counts['shacl']} SHACL, "
+                      f"{counts['sparql']} SPARQL, {counts['owl']} OWL "
+                      f"({counts['skipped']} skipped)")
+                for rid, msg in export["skipped"]:
+                    print(f"    ✗ {rid}: {msg}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ⚠ Rule export failed: {exc}")
+
+    extras = [
+        os.path.join(ont_dir, "events.ttl"),
+        os.path.join(ont_dir, "provenance.ttl"),
+    ]
+    extras = [p for p in extras if os.path.isfile(p)]
+
+    # Collect every .ttl under output/shapes/ — phase 3 emits
+    # `enterprise-shapes.ttl` / `agent-gate.ttl`; phase C exports
+    # session-authored sh:rule constructs to `rules.ttl`. Merge them
+    # into a single union shapes graph for the materializer.
+    shapes = None
+    shapes_dir = os.path.join(out_path, "shapes")
+    if os.path.isdir(shapes_dir):
+        ttl_files = sorted(p for p in os.listdir(shapes_dir) if p.endswith(".ttl"))
+        if ttl_files:
+            from rdflib import Graph as _G
+            union = _G()
+            for fname in ttl_files:
+                if fname == "_combined.ttl":
+                    continue
+                try:
+                    union.parse(os.path.join(shapes_dir, fname), format="turtle")
+                except Exception:
+                    pass
+            combined = os.path.join(shapes_dir, "_combined.ttl")
+            union.serialize(destination=combined, format="turtle")
+            shapes = combined
+
+    rules_dir = os.path.join(out_path, "sparql_rules")
+    if not os.path.isdir(rules_dir):
+        rules_dir = None
+
+    result = materialize(
+        ontology, ont_dir,
+        shapes_path=shapes,
+        extra_ontology_paths=extras,
+        sparql_rules_dir=rules_dir,
+    )
+
+    print(f"  Asserted:        {result.asserted_count:,} triples")
+    print(f"  Derived (total): {result.total_derived:,} triples")
+    print(f"  Materialised:    {result.materialised_count:,} triples")
+    for e in result.engines:
+        marker = "✓" if e.status == "PASS" else ("~" if e.status == "SKIPPED" else "✗")
+        print(f"  {marker} {e.name:<8} [{e.status}]: {e.message}")
+    if result.sensitivity_warnings:
+        print(f"  ⚠ {len(result.sensitivity_warnings)} sensitivity warning(s) — see report")
+    print(f"  ✓ Materialised graph    → {result.materialised_path}")
+    print(f"  ✓ Materialisation report → {result.report_path}")
 
 
 def phase3_shacl(db_path: str, out_path: str):
@@ -514,7 +608,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
+                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
                                  "embed","retrieve"],
                         help="Run a specific phase only")
@@ -1182,6 +1276,7 @@ def main():
         "3":       [(phase3_shacl,      [args.db, args.out])],
         "4":       [(phase4_mapping,    [args.db, args.out])],
         "5":       [(phase5_exchange,   [args.db, args.out])],
+        "reason":  [(phase_reason,      [args.db, args.out])],
         "tmf":     [(phase_tmf,         [args.db, args.out])],
         "test":    [(phase_test,        [args.db, args.out])],
         "report":  [(phase_report,      [args.out])],
@@ -1209,6 +1304,7 @@ def main():
             (phase1_foundation, [args.db, args.out]),
             (phase2_ontology,   [args.db, args.out]),
             (phase3_shacl,      [args.db, args.out]),
+            (phase_reason,      [args.db, args.out]),
             (phase4_mapping,    [args.db, args.out]),
             (phase5_exchange,   [args.db, args.out]),
             (phase_tmf,         [args.db, args.out]),

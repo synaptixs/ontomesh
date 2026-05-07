@@ -207,6 +207,9 @@ _DEFAULT_ARTIFACTS = {
     "events":     "ontology/events.ttl",
     "provenance": "ontology/provenance.ttl",
     "jsonld":     "jsonld/enterprise-context.json",
+    # Phase D — materialised graph + per-triple lineage.
+    "materialised":         "ontology/materialised.ttl",
+    "materialised_lineage": "ontology/materialised-lineage.ttl",
 }
 
 

@@ -1,8 +1,10 @@
-# Ontology Engineering Toolkit — v3.0
+# Ontology Engineering Toolkit — v3.1
 
-**Domain-agnostic · Phase 3 complete · Scale & Community edition**
+**Domain-agnostic · Rules & Reasoning · LLM Insights**
 
 A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineering Framework v1.1](docs/framework-whitepaper.md). Takes a relational database schema and produces a production-ready OWL 2 ontology, SHACL validation shapes, JSON-LD agent payloads, SKOS vocabulary, and a scored governance report — for any domain, any industry, any major relational database.
+
+> **What's new in v3.1:** first-class rules & reasoning — richer OWL axioms, a `--phase reason` materialisation step, per-triple `prov:wasDerivedFrom` lineage, a Studio rule editor with slot-fill, natural-language drafting, test-fire previews, premise trees, rule-impact heat maps, and provider-agnostic LLM Insights. See [docs/release-notes.md](docs/release-notes.md).
 
 > **First time here?** Read [docs/integrate.md](docs/integrate.md) — the 5-minute integration recipe. This README is just the landing page.
 
