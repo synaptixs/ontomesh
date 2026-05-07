@@ -99,6 +99,7 @@ def _load_session() -> dict:
         "events": [],
         "relationships": [],
         "competency_questions": [],
+        "rules": [],
         "created_at": _now(),
         "updated_at": _now(),
     }
@@ -488,6 +489,336 @@ def generate():
     t = threading.Thread(target=_run, daemon=True)
     t.start()
     return jsonify({"ok": True, "message": "Pipeline started", "phases": phases})
+
+
+# ── Phase C — Rules step ─────────────────────────────────────────────────
+
+from wizard import rules as _rules_mod  # noqa: E402
+
+_RULES_LIBRARY_DIR = os.path.join(ROOT, "templates", "rules")
+
+
+@app.route("/api/rules", methods=["GET"])
+def get_rules():
+    return jsonify({"rules": _load_session().get("rules", [])})
+
+
+@app.route("/api/rules", methods=["POST"])
+def save_rules():
+    body = request.get_json(force=True) or {}
+    rules = body.get("rules", [])
+    if not isinstance(rules, list):
+        return jsonify({"error": "rules must be a list"}), 400
+    results = _rules_mod.validate_rules(rules)
+    bad = {rid: r.to_dict() for rid, r in results.items() if not r.ok}
+    if bad:
+        return jsonify({"error": "validation_failed", "results": bad}), 400
+    session = _load_session()
+    session["rules"] = [_rules_mod.normalise_rule(r) for r in rules]
+    _save_session(session)
+    return jsonify({"ok": True, "count": len(session["rules"])})
+
+
+@app.route("/api/rules/validate", methods=["POST"])
+def validate_rule():
+    body = request.get_json(force=True) or {}
+    if "rules" in body and isinstance(body["rules"], list):
+        results = _rules_mod.validate_rules(body["rules"])
+        return jsonify({"results": {rid: r.to_dict() for rid, r in results.items()}})
+    result = _rules_mod.validate_rule(body)
+    return jsonify(result.to_dict())
+
+
+@app.route("/api/rules/summarise", methods=["POST"])
+def summarise_rule_route():
+    """Generate a one-sentence English summary of a rule. Best-effort:
+    400 only when the input is malformed; provider failures bubble up
+    as 502 so the UI can decide whether to retry or skip silently.
+
+    Body:
+        { "rule": {...}, "provider": "ollama" (optional) }
+
+    On success the summary is also written back to ``session.rules`` so
+    the round-trip persists across reloads.
+    """
+    body = request.get_json(force=True) or {}
+    rule = body.get("rule") or body
+    if not rule.get("body"):
+        return jsonify({"error": "rule body is empty"}), 400
+    from runtime.insights import summarise_rule
+    try:
+        summary = summarise_rule(rule, provider=body.get("provider"),
+                                 model=body.get("model"))
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"error": str(exc)}), 502
+
+    # Persist back into the session so the next reload renders the
+    # English label without a fresh LLM call.
+    if rule.get("id"):
+        session = _load_session()
+        for stored in session.get("rules") or []:
+            if stored.get("id") == rule["id"]:
+                stored["nl_summary"] = summary
+                break
+        _save_session(session)
+
+    return jsonify({"id": rule.get("id"), "nl_summary": summary})
+
+
+@app.route("/api/rules/nl", methods=["POST"])
+def draft_rule_route():
+    """Draft a rule body from a plain-English description. Body:
+
+        { "nl": "When a Site is in OUTAGE, mark it impacted",
+          "kind": "shacl" | "sparql" | "owl",
+          "provider": "ollama" (optional),
+          "model":    "..."   (optional) }
+
+    The response carries the drafted body, IRI grounding stats, and
+    whether the draft passes Phase C validation. Authors review and
+    accept (or reject) the draft on the client.
+    """
+    body = request.get_json(force=True) or {}
+    nl   = (body.get("nl") or "").strip()
+    kind = (body.get("kind") or "shacl").strip().lower()
+    if not nl:
+        return jsonify({"error": "nl is required"}), 400
+
+    # Vocabulary feed — same source the slot-fill builder uses.
+    from vocabulary import get_vocabulary
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    vocab = get_vocabulary(ontology_path).to_dict()
+    if not (vocab.get("classes") or vocab.get("properties")):
+        return jsonify({"error": "No ontology vocabulary available — "
+                                "run --phase 2 first."}), 400
+
+    from runtime.insights import draft_rule
+    try:
+        draft = draft_rule(
+            nl=nl, kind=kind, vocabulary=vocab,
+            provider=body.get("provider"), model=body.get("model"),
+        )
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"error": str(exc)}), 502
+    return jsonify(draft.to_dict())
+
+
+@app.route("/api/rules/preview", methods=["POST"])
+def preview_rule_route():
+    """Test-fire a single rule against a small synthetic ABox and return
+    the derived triples + lineage. The UI uses this to give authors
+    instant feedback on whether their rule actually matches anything.
+
+    Body:
+        { "rule": {...}, "abox_text": "..." (optional) }
+
+    The default ABox is `templates/preview_abox.ttl`.
+    """
+    body = request.get_json(force=True) or {}
+    rule = body.get("rule") or body
+    abox_text = body.get("abox_text")
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    if not os.path.isfile(ontology_path):
+        ontology_path = None  # let preview_rule fall back
+    result = _rules_mod.preview_rule(
+        rule,
+        ontology_path=ontology_path,
+        abox_text=abox_text,
+    )
+    return jsonify(result.to_dict())
+
+
+@app.route("/api/rules/compile", methods=["POST"])
+def compile_rule():
+    """Compile a slot-fill rule to its Turtle body without persisting.
+    Used by the slot-fill UI to render a live "show source" preview.
+    """
+    body = request.get_json(force=True) or {}
+    rule = _rules_mod.normalise_rule(body)
+    return jsonify({
+        "id": rule["id"], "kind": rule["kind"],
+        "body": rule["body"], "meta": rule.get("meta") or {},
+    })
+
+
+@app.route("/api/rules/coverage", methods=["GET"])
+def rules_coverage():
+    """Per-class rule-impact map. Drives the Relationships graph's heat
+    overlay (#7) and any other visual surfaces that need to know which
+    rules touch a class.
+    """
+    from vocabulary import get_vocabulary
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    vocab = get_vocabulary(ontology_path).to_dict()
+    rules = _load_session().get("rules") or []
+    coverage = _rules_mod.compute_coverage(rules, vocab)
+    # Convenience aggregates for the UI.
+    counts = [c["count"] for c in coverage.values()]
+    summary = {
+        "max":   max(counts) if counts else 0,
+        "total": sum(counts),
+        "covered_classes": sum(1 for n in counts if n > 0),
+        "all_classes":     len(counts),
+    }
+    return jsonify({"coverage": coverage, "summary": summary})
+
+
+@app.route("/api/rules/library", methods=["GET"])
+def list_rule_library():
+    industries = []
+    if os.path.isdir(_RULES_LIBRARY_DIR):
+        for p in sorted(Path(_RULES_LIBRARY_DIR).glob("*.yaml")):
+            industries.append(p.stem)
+    return jsonify({"industries": industries})
+
+
+@app.route("/api/rules/library/<industry>", methods=["GET"])
+def get_rule_library(industry: str):
+    starter = _rules_mod.load_starter_library(_RULES_LIBRARY_DIR, industry)
+    return jsonify({"industry": industry, "rules": starter})
+
+
+# ── Phase D — Explain / why-trace ────────────────────────────────────────
+
+
+@app.route("/api/explain", methods=["GET"])
+def explain_triple_route():
+    """Return the lineage records for a single derived triple. Required
+    query params: subject, predicate, object. Each may be either a full
+    IRI or a quoted literal `"value"`.
+    """
+    subject = request.args.get("subject", "").strip()
+    predicate = request.args.get("predicate", "").strip()
+    obj = request.args.get("object", "").strip()
+    if not (subject and predicate and obj):
+        return jsonify({"error": "subject, predicate, object are required"}), 400
+    lineage_path = os.path.join(OUTPUT_DIR, "ontology", "materialised-lineage.ttl")
+    from materializer import explain_triple
+    derivations = explain_triple(lineage_path, subject, predicate, obj)
+    return jsonify({
+        "triple": {"subject": subject, "predicate": predicate, "object": obj},
+        "derivations": derivations,
+        "asserted": len(derivations) == 0,
+    })
+
+
+@app.route("/api/materialised/triples", methods=["GET"])
+def list_materialised_triples():
+    """Return derived triples with their rule attribution. Powers the
+    Viewer's Materialised tab.
+
+    Query params: limit (default 200), engine, rule.
+    """
+    lineage_path = os.path.join(OUTPUT_DIR, "ontology", "materialised-lineage.ttl")
+    if not os.path.isfile(lineage_path):
+        return jsonify({"triples": [], "available": False})
+    try:
+        limit = max(1, min(2000, int(request.args.get("limit", "200"))))
+    except ValueError:
+        limit = 200
+    engine_filter = request.args.get("engine", "").strip().lower()
+    rule_filter = request.args.get("rule", "").strip()
+
+    from rdflib import Graph as _G, URIRef as _U
+    from rdflib.namespace import RDF as _RDF, PROV as _PROV
+    TOOLKIT_RULE = _U("https://ontology.example.com/toolkit/materializer/rule")
+    TOOLKIT_ENGINE = _U("https://ontology.example.com/toolkit/materializer/engine")
+
+    g = _G()
+    try:
+        g.parse(lineage_path, format="turtle")
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"triples": [], "available": True, "error": str(exc)})
+
+    out = []
+    for stmt in g.subjects(_RDF.type, _RDF.Statement):
+        s = next(g.objects(stmt, _RDF.subject), None)
+        p = next(g.objects(stmt, _RDF.predicate), None)
+        o = next(g.objects(stmt, _RDF.object), None)
+        if not (s and p and o):
+            continue
+        deriv = next(g.objects(stmt, _PROV.wasDerivedFrom), None)
+        rule = engine = None
+        if deriv:
+            r = next(g.objects(deriv, TOOLKIT_RULE), None)
+            e = next(g.objects(deriv, TOOLKIT_ENGINE), None)
+            rule = str(r) if r else None
+            engine = str(e) if e else None
+        if engine_filter and (engine or "").lower() != engine_filter:
+            continue
+        if rule_filter and rule_filter not in (rule or ""):
+            continue
+        out.append({
+            "subject": str(s), "predicate": str(p), "object": str(o),
+            "rule": rule, "engine": engine,
+        })
+        if len(out) >= limit:
+            break
+    return jsonify({"triples": out, "available": True})
+
+
+# ── F1 — Ontology vocabulary catalogue ───────────────────────────────────
+
+
+@app.route("/api/ontology/vocabulary", methods=["GET"])
+def ontology_vocabulary():
+    """Return classes + properties parsed from `enterprise.ttl`. Drives
+    the slot-fill rule builder, NL-rule prompts, and rule-impact overlay.
+    Cached by mtime — repeat calls reuse the parse on unchanged files.
+    """
+    from vocabulary import get_vocabulary
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    vocab = get_vocabulary(ontology_path)
+    return jsonify(vocab.to_dict())
+
+
+# ── Phase E — Insights / LLM grounding ───────────────────────────────────
+
+
+@app.route("/api/insights/providers", methods=["GET"])
+def insights_providers():
+    """List declared providers + per-provider configuration status. Used
+    to populate the Settings → Providers panel.
+    """
+    from runtime.insights import provider_status
+    return jsonify({"providers": [p.to_dict() for p in provider_status()]})
+
+
+@app.route("/api/insights/ask", methods=["POST"])
+def insights_ask():
+    """Answer a question grounded in the active ontology. Body:
+        {
+          "question": "...",
+          "provider": "openai" | "ollama" | ... (optional),
+          "model": "gpt-4o" (optional),
+          "include_materialised": false
+        }
+    """
+    body = request.get_json(force=True) or {}
+    question = (body.get("question") or "").strip()
+    if not question:
+        return jsonify({"error": "question is required"}), 400
+
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    materialised_path = os.path.join(OUTPUT_DIR, "ontology", "materialised.ttl")
+    if not os.path.isfile(ontology_path):
+        return jsonify({"error": "no ontology — run --phase 2 first"}), 400
+
+    from runtime.insights import Insights
+    insights = Insights(
+        ontology_path,
+        materialised_path if os.path.isfile(materialised_path) else None,
+    )
+    try:
+        result = insights.ask(
+            question,
+            provider=body.get("provider"),
+            model=body.get("model"),
+            include_materialised=bool(body.get("include_materialised")),
+        )
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"error": str(exc)}), 502
+    return jsonify(result.to_dict())
 
 
 @app.route("/api/pipeline/status", methods=["GET"])

@@ -1,0 +1,50 @@
+industry: finance
+description: |
+  Starter rules for AML / large-value transaction triage. The first rule
+  flags any transaction with an unknown counterparty above a threshold;
+  the second classifies an account holder as "high-risk" when more than
+  three flagged transactions occur in their history.
+rules:
+  - id: rule-large-unknown-counterparty
+    kind: shacl
+    label: "Flag transactions ≥ 10,000 with unknown counterparty"
+    body: |
+      @prefix : <https://ontology.example.com/finance/> .
+      @prefix sh: <http://www.w3.org/ns/shacl#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+      :LargeUnknownCpartyRule
+        a sh:NodeShape ;
+        sh:targetClass :Transaction ;
+        sh:rule [
+          a sh:TripleRule ;
+          sh:subject sh:this ;
+          sh:predicate :reviewStatus ;
+          sh:object :PendingReview ;
+          sh:condition [
+            sh:property [ sh:path :amount ;
+                          sh:minInclusive 10000 ;
+                          sh:datatype xsd:decimal ] ;
+            sh:property [ sh:path :counterpartyKnown ;
+                          sh:hasValue false ]
+          ]
+        ] .
+  - id: rule-high-risk-holder
+    kind: sparql
+    label: "Mark holders with > 3 flagged transactions as high-risk"
+    body: |
+      PREFIX : <https://ontology.example.com/finance/>
+      CONSTRUCT { ?holder :riskTier :High }
+      WHERE {
+        SELECT ?holder (COUNT(?txn) AS ?n)
+        WHERE {
+          ?txn :ofHolder ?holder ;
+               :reviewStatus :PendingReview .
+        } GROUP BY ?holder
+        HAVING (?n > 3)
+      }
+  - id: axiom-controls-transitive
+    kind: owl
+    label: "controls is transitive (corporate ownership chains)"
+    body: |
+      @prefix : <https://ontology.example.com/finance/> .
+      :controls a owl:ObjectProperty, owl:TransitiveProperty .

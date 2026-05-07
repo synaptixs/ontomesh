@@ -1,0 +1,46 @@
+industry: healthcare
+description: |
+  Starter rules for clinical encounter classification. Encounters
+  associated with a terminal diagnosis are flagged for palliative-care
+  workflows; high-acuity vital signs raise an at-risk flag on the patient.
+rules:
+  - id: rule-flag-palliative
+    kind: sparql
+    label: "Flag encounters with a terminal diagnosis as palliative"
+    body: |
+      PREFIX : <https://ontology.example.com/healthcare/>
+      CONSTRUCT { ?enc :clinicalFlag :Palliative }
+      WHERE {
+        ?enc a :Encounter ;
+             :hasDiagnosis ?dx .
+        ?dx :severity "TERMINAL" .
+      }
+  - id: rule-vitals-at-risk
+    kind: shacl
+    label: "Mark patient at-risk when SBP > 180"
+    body: |
+      @prefix : <https://ontology.example.com/healthcare/> .
+      @prefix sh: <http://www.w3.org/ns/shacl#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+      :AtRiskBPRule
+        a sh:NodeShape ;
+        sh:targetClass :VitalsObservation ;
+        sh:rule [
+          a sh:TripleRule ;
+          sh:subject [ sh:path :forPatient ] ;
+          sh:predicate :clinicalFlag ;
+          sh:object :AtRisk ;
+          sh:condition [
+            sh:property [
+              sh:path :systolicMmHg ;
+              sh:minInclusive 181 ;
+              sh:datatype xsd:integer
+            ]
+          ]
+        ] .
+  - id: axiom-locatedin-transitive
+    kind: owl
+    label: "locatedIn is transitive (rooms within wards within hospitals)"
+    body: |
+      @prefix : <https://ontology.example.com/healthcare/> .
+      :locatedIn a owl:ObjectProperty, owl:TransitiveProperty .

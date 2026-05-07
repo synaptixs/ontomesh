@@ -480,6 +480,7 @@
       <li data-step="events"><span class="step-num">3</span> Events</li>
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
+      <li data-step="rules"><span class="step-num">5.5</span> Rules &amp; Reasoning</li>
       <li data-step="generate"><span class="step-num">6</span> Generate</li>
       <li class="step-divider" aria-hidden="true">After generation</li>
       <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
@@ -747,7 +748,50 @@
         <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
         <span class="nav-hint">Step 5 of 6 · CQs drive the governance scorecard. Optional but recommended.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('generate')">Skip →</button>
+          <button class="btn btn-ghost"   onclick="goStep('rules')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('rules')">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5.5: Rules & Reasoning -->
+    <div class="step-panel" id="step-rules">
+      <div class="step-title">Rules &amp; Reasoning</div>
+      <div class="step-subtitle">Author SHACL, SPARQL CONSTRUCT, and OWL-axiom rules. Saved rules are validated, persisted to <code>session.rules</code>, and consumed by <code>--phase reason</code> at materialisation time.</div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h3 style="margin:0">Rules <span id="rule-count" class="badge">(0)</span></h3>
+          <div style="display:flex; gap:8px">
+            <select id="rule-library-select" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px;">
+              <option value="">Load starter library…</option>
+            </select>
+            <button class="btn btn-ghost" onclick="loadRuleLibrary()">Load</button>
+            <button class="btn btn-ghost" onclick="openConvoRule()" title="Describe a rule in English and the wizard drafts + previews + highlights">💬 Build from English</button>
+            <button class="btn btn-primary" onclick="addRule()">+ Add rule</button>
+          </div>
+        </div>
+        <div class="box-help">
+          Rules let the reasoner derive triples your data doesn't state directly.
+          <ul>
+            <li><b>SHACL</b> — <code>sh:rule</code> blocks. "When this shape matches, assert these triples." Use for data-driven assertions.</li>
+            <li><b>SPARQL</b> — <code>CONSTRUCT { ?x :p ?y } WHERE { ... }</code>. Use for pattern-based inference (transitive impact, joins).</li>
+            <li><b>OWL</b> — Turtle fragments declaring property characteristics (transitive, equivalent, etc.). Use for taxonomy-level axioms.</li>
+            <li><b>Validation</b> — every rule is parsed and smoke-executed against an empty graph before save. Broken rules cannot be saved.</li>
+          </ul>
+        </div>
+        <div id="rule-list"></div>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end">
+          <button class="btn btn-ghost"   onclick="validateAllRules()">Validate all</button>
+          <button class="btn btn-primary" onclick="saveRules()">Save rules</button>
+        </div>
+        <div id="rule-status" style="margin-top:8px; font-size:13px; color:var(--muted);"></div>
+      </div>
+
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
+        <span class="nav-hint">Step 5.5 of 6 · Optional. Rules feed the materialisation phase.</span>
+        <div class="nav-right">
           <button class="btn btn-primary" onclick="goStep('generate')">Continue →</button>
         </div>
       </div>
@@ -892,6 +936,45 @@
           <button class="btn btn-primary" onclick="saveDomainVisibility()">Save</button>
           <span id="settings-status" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
         </div>
+      </div>
+
+      <!-- Phase E — Providers panel + Insights ask box -->
+      <div class="card" style="margin-top:14px">
+        <h3>LLM Providers</h3>
+        <div class="box-help">
+          Insights uses one of these providers per call. Keys are read from
+          environment variables (or the provider's config file) — never
+          persisted by the wizard. The <b>residency hint</b> tells you whether
+          a request leaves your tenancy. <b>Materialised triples</b> from
+          Phase B are sent only when the toggle below is on, and only if you
+          confirm after seeing the hint for the active provider.
+        </div>
+        <div id="insights-providers" style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-top:10px">Loading…</div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>Ask Insights</h3>
+        <div class="box-help">
+          Question grounded in the asserted ontology. Toggle <b>Include
+          materialised</b> to also send Phase B inferences (transitive
+          impact, sh:rule outputs, etc.). The response is checked for
+          hallucinated IRIs against the ontology vocabulary.
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+          <select id="insights-provider-select" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:13px">
+            <option value="">(auto: catalogue default)</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)">
+            <input type="checkbox" id="insights-include-materialised"/> Include materialised
+          </label>
+        </div>
+        <textarea id="insights-question" rows="3" placeholder="e.g. Which classes are subject to a transitive impact rule?"
+                  style="width:100%;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;resize:vertical"></textarea>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="askInsights()">Ask</button>
+          <span id="insights-status" style="font-size:12px;color:var(--muted);align-self:center"></span>
+        </div>
+        <div id="insights-answer" style="margin-top:10px"></div>
       </div>
     </div>
 
@@ -1264,15 +1347,145 @@
       <li><button type="button" class="tab-btn" data-vtab="shacl"  onclick="switchViewerTab('shacl')">SHACL</button></li>
       <li><button type="button" class="tab-btn" data-vtab="skos"   onclick="switchViewerTab('skos')">SKOS</button></li>
       <li><button type="button" class="tab-btn" data-vtab="jsonld" onclick="switchViewerTab('jsonld')">JSON-LD</button></li>
+      <li><button type="button" class="tab-btn" data-vtab="materialised" onclick="switchViewerTab('materialised')">Materialised</button></li>
     </ul>
     <div id="viewer-overview" class="tab-panel active" style="font-size:13px"></div>
     <div id="viewer-ttl"    class="tab-panel"><pre id="viewer-ttl-pre"    style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
     <div id="viewer-shacl"  class="tab-panel"><pre id="viewer-shacl-pre"  style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
     <div id="viewer-skos"   class="tab-panel"><pre id="viewer-skos-pre"   style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
     <div id="viewer-jsonld" class="tab-panel"><pre id="viewer-jsonld-pre" style="max-height:55vh;overflow:auto;background:var(--surface-2);padding:10px;border-radius:6px;font-size:12px"></pre></div>
+    <div id="viewer-materialised" class="tab-panel" style="font-size:13px">
+      <div style="margin-bottom:8px;color:var(--muted);font-size:12px">
+        Click a derived triple to see its rule, bindings, and premises (Phase D explain).
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+        <select id="viewer-mat-engine" onchange="loadMaterialisedTriples()"
+                style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px">
+          <option value="">All engines</option>
+          <option value="owl-rl">OWL-RL</option>
+          <option value="shacl">SHACL</option>
+          <option value="sparql">SPARQL</option>
+        </select>
+        <input id="viewer-mat-rule-filter" placeholder="rule filter (substring)"
+               oninput="loadMaterialisedTriples()"
+               style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px"/>
+        <span id="viewer-mat-count" style="color:var(--muted);font-size:11px"></span>
+      </div>
+      <div style="display:flex;gap:10px;height:55vh">
+        <div id="viewer-mat-list"
+             style="flex:1;overflow:auto;background:var(--surface-2);border-radius:6px;padding:6px;font-family:monospace;font-size:11px"></div>
+        <div id="viewer-mat-detail"
+             style="flex:1;overflow:auto;background:var(--surface-2);border-radius:6px;padding:10px;font-size:12px">
+          <div style="color:var(--muted);font-size:12px">Pick a triple on the left to see its derivation.</div>
+        </div>
+      </div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost"   onclick="closeModal('viewer-modal')">Close</button>
       <button class="btn btn-primary" id="viewer-load-btn" onclick="loadFromViewer()">Load into Wizard</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Conversational Rule Construction (suggestion #8) ────────────────── -->
+<div id="convo-rule-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:1100px;width:96%">
+    <div class="modal-header">
+      <h2>Build a rule by talking to your ontology</h2>
+      <button class="btn btn-ghost" onclick="closeModal('convo-rule-modal')">✕</button>
+    </div>
+    <div class="box-help">
+      Describe what should happen in plain English. The wizard drafts a rule body
+      using only IRIs from your ontology (#1), test-fires it on the synthetic ABox
+      (#6), and highlights the classes it touches on a mini graph (#7) — all in
+      one round trip. Accept saves the rule into <code>session.rules</code>;
+      Refine keeps the panel open for tweaks.
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px">
+      <!-- Left: NL + draft + preview -->
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="font-size:12px;color:var(--muted)">Description</label>
+        <textarea id="convo-input" rows="6"
+          placeholder="When a Site has any hosted asset in OUTAGE, mark the Site impacted."
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:12px;color:var(--muted)">Kind</label>
+          <select id="convo-kind" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px">
+            <option value="shacl">SHACL</option>
+            <option value="sparql">SPARQL</option>
+            <option value="owl">OWL axiom</option>
+          </select>
+          <label style="font-size:12px;color:var(--muted);margin-left:8px">Provider</label>
+          <select id="convo-provider" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px">
+            <option value="">(catalogue default)</option>
+          </select>
+          <button class="btn btn-primary" style="margin-left:auto" onclick="convoDraftAndPreview()">Draft &amp; preview</button>
+        </div>
+        <div id="convo-status" style="font-size:12px;color:var(--muted);min-height:14px"></div>
+        <label style="font-size:12px;color:var(--muted);margin-top:6px">Generated body</label>
+        <pre id="convo-body" style="margin:0;padding:10px;background:var(--surface-2);border-radius:6px;font-size:11px;font-family:monospace;white-space:pre-wrap;min-height:140px;max-height:240px;overflow:auto"></pre>
+        <label style="font-size:12px;color:var(--muted);margin-top:6px">Test-fire result</label>
+        <div id="convo-fire" style="min-height:60px;padding:8px;background:var(--surface-2);border-radius:6px;font-size:12px"></div>
+      </div>
+      <!-- Right: mini graph + class summary -->
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="font-size:12px;color:var(--muted)">Classes touched</label>
+        <div id="convo-graph" style="height:300px;background:var(--surface-2);border-radius:6px"></div>
+        <div id="convo-class-list" style="font-size:12px;color:var(--muted);min-height:24px"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:12px">
+      <button class="btn btn-ghost"   onclick="closeModal('convo-rule-modal')">Cancel</button>
+      <button class="btn btn-ghost"   id="convo-refine-btn" onclick="document.getElementById('convo-input').focus()">Refine</button>
+      <button class="btn btn-primary" id="convo-accept-btn" onclick="convoAcceptDraft()" disabled>Accept</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NL Rule Drafter Modal (suggestion #1) ───────────────────────────── -->
+<div id="nl-drafter-modal" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:900px;width:95%">
+    <div class="modal-header">
+      <h2>Draft rule from English</h2>
+      <button class="btn btn-ghost" onclick="closeModal('nl-drafter-modal')">✕</button>
+    </div>
+    <div class="box-help">
+      Describe the rule in plain English. The configured LLM (see Settings → Providers)
+      drafts a body using only the IRIs in your ontology vocabulary. The draft is
+      validated and IRI-checked before you accept it; nothing is auto-saved.
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px">
+      <div>
+        <label style="font-size:12px;color:var(--muted)">Description</label>
+        <textarea id="nl-drafter-input" rows="10"
+          placeholder="When a Site has any hosted asset in OUTAGE, mark the Site impacted."
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;resize:vertical;margin-top:4px"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <label style="font-size:12px;color:var(--muted)">Kind</label>
+          <select id="nl-drafter-kind" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px">
+            <option value="shacl">SHACL</option>
+            <option value="sparql">SPARQL</option>
+            <option value="owl">OWL axiom</option>
+          </select>
+          <label style="font-size:12px;color:var(--muted);margin-left:8px">Provider</label>
+          <select id="nl-drafter-provider" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:12px">
+            <option value="">(catalogue default)</option>
+          </select>
+          <button class="btn btn-primary" style="margin-left:auto" onclick="runNlDrafter()">Draft</button>
+        </div>
+        <div id="nl-drafter-status" style="margin-top:6px;font-size:12px;color:var(--muted);min-height:14px"></div>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted)">Generated body</label>
+        <pre id="nl-drafter-output"
+             style="margin:4px 0 0;padding:10px;background:var(--surface-2);border-radius:6px;font-size:11px;font-family:monospace;white-space:pre-wrap;min-height:240px;color:var(--text)"></pre>
+        <div id="nl-drafter-iri-summary" style="margin-top:6px;font-size:11px;min-height:14px"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:12px">
+      <button class="btn btn-ghost"   onclick="closeModal('nl-drafter-modal')">Cancel</button>
+      <button class="btn btn-ghost"   id="nl-drafter-refine-btn" onclick="document.getElementById('nl-drafter-input').focus()" disabled>Refine</button>
+      <button class="btn btn-primary" id="nl-drafter-accept-btn" onclick="acceptNlDraft()" disabled>Accept</button>
     </div>
   </div>
 </div>
@@ -2210,6 +2423,52 @@ function _buildRelGraphData() {
   return { nodes, edges };
 }
 
+// Suggestion #7 — rule-impact heat overlay.
+// Rendered per-graph-render: fetched lazily and cached so re-layouts
+// don't pile up requests. Reset whenever rules change (saveRules).
+let _coverageCache = null;
+async function _loadCoverage(force) {
+  if (_coverageCache && !force) return _coverageCache;
+  try {
+    const res = await fetch('/api/rules/coverage');
+    if (!res.ok) { _coverageCache = { coverage: {}, summary: { max: 0 } }; return _coverageCache; }
+    _coverageCache = await res.json();
+  } catch (_) {
+    _coverageCache = { coverage: {}, summary: { max: 0 } };
+  }
+  return _coverageCache;
+}
+
+// Build a label → coverage-entry map. The graph keys nodes on the
+// entity *label*, but coverage is keyed on qname; we match either by
+// equal qname (e.g. ":Site" → "Site") or by the human label.
+function _coverageByLabel(coverage) {
+  const out = {};
+  for (const [qname, entry] of Object.entries(coverage || {})) {
+    const local = qname.replace(/^.*:/, ''); // ":Site" → "Site"
+    if (local) out[local] = entry;
+    if (entry.label) out[entry.label] = entry;
+  }
+  return out;
+}
+
+// Mix two CSS-colour values. Uses a tiny helper because we only need
+// HEX-input mixing for the heat ramp. Inputs may be HEX (#rgb / #rrggbb)
+// or fall back to a sensible default if parse fails.
+function _mixHex(a, b, t) {
+  const parse = (s) => {
+    if (!s || s[0] !== '#') return null;
+    let h = s.slice(1);
+    if (h.length === 3) h = h.split('').map(c => c+c).join('');
+    if (h.length !== 6) return null;
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  };
+  const A = parse(a), B = parse(b);
+  if (!A || !B) return a;
+  const m = (i) => Math.round(A[i] + (B[i]-A[i])*t);
+  return `rgb(${m(0)},${m(1)},${m(2)})`;
+}
+
 function renderRelGraph(refit) {
   const empty = document.getElementById('rel-graph-empty');
   const container = document.getElementById('rel-graph');
@@ -2243,6 +2502,130 @@ function renderRelGraph(refit) {
     { nodes: new vis.DataSet(data.nodes), edges: new vis.DataSet(data.edges) },
     options);
   if (refit) _relNetwork.once('stabilizationIterationsDone', () => _relNetwork.fit());
+
+  // Apply heat overlay + click handler asynchronously — coverage may
+  // require a network round trip, so we don't block the initial render.
+  _applyRuleHeat(data);
+}
+
+async function _applyRuleHeat(data) {
+  const cov = await _loadCoverage(false);
+  const max = (cov.summary && cov.summary.max) || 0;
+  if (!max || !_relNetwork) {
+    // No rules touch any class — skip the overlay entirely. The legend
+    // tells the user how to populate it.
+    _renderHeatLegend(cov);
+    return;
+  }
+  const byLabel = _coverageByLabel(cov.coverage);
+  const cool = _cssVar('--surface-2', '#1e293b');
+  const hot  = _cssVar('--accent', '#4f46e5');
+  const updates = data.nodes.map(n => {
+    const entry = byLabel[n.id] || byLabel[n.label];
+    if (!entry || !entry.count) return null;
+    const intensity = Math.min(1, entry.count / Math.max(1, max));
+    const colour = _mixHex(cool, hot, 0.35 + intensity * 0.65);
+    return {
+      id: n.id,
+      color: { background: colour, border: colour, highlight: { background: hot, border: hot } },
+      title: `${entry.qname || n.label} — ${entry.count} rule(s):\n  ${entry.rule_ids.join('\n  ')}`,
+    };
+  }).filter(Boolean);
+  if (updates.length) _relNetwork.body.data.nodes.update(updates);
+
+  // One-shot click handler bound here so it picks up the latest cov.
+  _relNetwork.off('click');
+  _relNetwork.on('click', (params) => {
+    const id = params.nodes && params.nodes[0];
+    if (!id) { _hideRulePopover(); return; }
+    const entry = byLabel[id];
+    if (!entry || !entry.count) { _hideRulePopover(); return; }
+    _showRulePopover(entry, params.pointer.DOM);
+  });
+  _renderHeatLegend(cov);
+}
+
+function _renderHeatLegend(cov) {
+  let host = document.getElementById('rel-heat-legend');
+  if (!host) {
+    const graphTab = document.getElementById('rel-tab-graph');
+    if (!graphTab) return;
+    host = document.createElement('div');
+    host.id = 'rel-heat-legend';
+    host.style.cssText = 'margin-top:8px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px';
+    graphTab.appendChild(host);
+  }
+  const max = (cov.summary && cov.summary.max) || 0;
+  const covered = (cov.summary && cov.summary.covered_classes) || 0;
+  const total = (cov.summary && cov.summary.all_classes) || 0;
+  if (!max) {
+    host.innerHTML = `<span>Rule-impact overlay: no rules touch any class yet. Add rules in <a href="#" onclick="goStep('rules');return false">Step 5.5</a> to see the heat map.</span>`;
+    return;
+  }
+  host.innerHTML = `
+    <span><b>Rule impact:</b> ${covered}/${total} classes covered, max ${max} rule(s) per class.</span>
+    <span style="display:inline-flex;align-items:center;gap:4px">
+      <span>cool</span>
+      <span style="display:inline-block;width:80px;height:8px;border-radius:4px;background:linear-gradient(90deg, var(--surface-2), var(--accent))"></span>
+      <span>hot</span>
+    </span>`;
+}
+
+function _showRulePopover(entry, point) {
+  let host = document.getElementById('rel-rule-popover');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'rel-rule-popover';
+    host.style.cssText = 'position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 4px 12px rgba(0,0,0,0.25);font-size:12px;z-index:50;min-width:240px';
+    document.getElementById('rel-tab-graph').appendChild(host);
+  }
+  const rules = (session.rules || []).filter(r => entry.rule_ids.includes(r.id));
+  const items = rules.length
+    ? rules.map(r => `
+        <div style="padding:4px 0;border-top:1px solid var(--border)">
+          <div><b>${r.id}</b> <span style="color:var(--muted);font-size:10px">${r.kind}</span></div>
+          <div style="color:var(--muted);font-size:11px">${r.label||''}</div>
+        </div>`).join('')
+    : '<div style="color:var(--muted)">(no matching rule details in session)</div>';
+  host.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <b style="font-family:monospace">${entry.qname || entry.label}</b>
+      <button class="btn btn-ghost" style="padding:0 4px" onclick="_hideRulePopover()">✕</button>
+    </div>
+    <div style="color:var(--muted);font-size:11px;margin-top:2px">${entry.count} rule(s) touch this class</div>
+    ${items}
+    <div style="margin-top:8px"><button class="btn btn-primary" style="font-size:11px;padding:4px 10px"
+      onclick="_jumpToRule('${(rules[0]&&rules[0].id)||''}')">Open in Rules editor →</button></div>`;
+  // Position the popover near the click point but inside the graph.
+  const wrap = document.getElementById('rel-tab-graph');
+  const rect = wrap.getBoundingClientRect();
+  const x = Math.min(point.x + 12, rect.width - 260);
+  const y = Math.min(point.y + 12, rect.height - 200);
+  host.style.left = Math.max(0, x) + 'px';
+  host.style.top  = Math.max(0, y) + 'px';
+  host.style.display = 'block';
+}
+
+function _hideRulePopover() {
+  const host = document.getElementById('rel-rule-popover');
+  if (host) host.style.display = 'none';
+}
+
+function _jumpToRule(ruleId) {
+  _hideRulePopover();
+  goStep('rules');
+  // After the step transition lands, scroll the matching rule into view.
+  setTimeout(() => {
+    const rules = _ensureRules();
+    const idx = rules.findIndex(r => r.id === ruleId);
+    if (idx < 0) return;
+    const card = document.querySelectorAll('#rule-list .card')[idx];
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.outline = '2px solid var(--accent)';
+      setTimeout(() => card.style.outline = '', 1600);
+    }
+  }, 100);
 }
 
 function fitRelGraph() {
@@ -2291,6 +2674,857 @@ function renderCQs() {
 }
 
 document.getElementById('new-cq').addEventListener('keydown', e => { if (e.key==='Enter') addCQ(); });
+
+// ── Rules & Reasoning (Step 5.5) ──────────────────────────────────────────
+function _ensureRules() {
+  if (!Array.isArray(session.rules)) session.rules = [];
+  return session.rules;
+}
+
+function addRule(seed) {
+  const rules = _ensureRules();
+  const r = seed || {
+    id: '',
+    kind: 'shacl',
+    label: 'New rule',
+    body: '',
+    meta: { target_class: '', conditions: [], assertion: { path: '', value: '' } },
+    _editor: 'slots',
+    enabled: true,
+  };
+  rules.push(r);
+  renderRules();
+}
+
+function removeRule(i) {
+  _ensureRules().splice(i, 1);
+  renderRules();
+}
+
+// Vocabulary cache for the slot-fill rule builder. Loaded lazily on
+// first render of a SHACL slot-fill row. The endpoint is mtime-cached
+// on the server, so refetching is cheap, but we still avoid duplicate
+// fetches across renders by holding the parsed result here.
+let _vocab = null;
+async function _ensureVocab(force) {
+  if (_vocab && !force) return _vocab;
+  try {
+    const res = await fetch('/api/ontology/vocabulary');
+    _vocab = await res.json();
+  } catch (_) {
+    _vocab = { classes: [], properties: [] };
+  }
+  return _vocab;
+}
+
+const SLOT_OPS = ['=','!=','>=','>','<=','<','regex','in','exists','not_null'];
+const SLOT_OPS_NEED_VALUE = new Set(['=','!=','>=','>','<=','<','regex','in']);
+
+function renderRules() {
+  const rules = _ensureRules();
+  const list = document.getElementById('rule-list');
+  document.getElementById('rule-count').textContent = `(${rules.length})`;
+  if (!rules.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No rules yet. Click <b>+ Add rule</b> or load a starter library above.</div>';
+    return;
+  }
+  list.innerHTML = rules.map((r, i) => _renderRuleCard(r, i)).join('');
+
+  // Wire change handlers for plain inputs. Slot-fill rows manage their
+  // own listeners via _wireSlotFill().
+  list.querySelectorAll('input[data-i], select[data-i], textarea[data-i]').forEach(el => {
+    el.addEventListener('input', () => {
+      const i = +el.dataset.i, f = el.dataset.f;
+      const v = el.type === 'checkbox' ? el.checked : el.value;
+      _ensureRules()[i][f] = v;
+      // When the user changes `kind`, the body editor needs to switch
+      // between slot-fill / source / textarea — re-render the row.
+      if (f === 'kind') renderRules();
+    });
+  });
+
+  // Asynchronously hydrate slot-fill panels — needs the vocabulary.
+  rules.forEach((r, i) => {
+    const editorMode = r._editor || (r.kind === 'shacl' && r.meta ? 'slots' : 'source');
+    if (r.kind === 'shacl' && editorMode === 'slots') _hydrateSlotFill(i);
+  });
+}
+
+function _renderRuleCard(r, i) {
+  const editorMode = r._editor || (r.kind === 'shacl' && r.meta ? 'slots' : 'source');
+  const editingLabel = !!r._labelEditing;
+  // The English summary (if present) is the primary surface so reviewers
+  // can scan rules without reading Turtle. The structured `label` field
+  // sits behind an edit toggle to keep the row compact.
+  const summary = r.nl_summary || '';
+  const summaryRow = summary
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+         <span style="flex:1;font-size:13px;color:var(--text)"><b>${summary.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</b></span>
+         <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;color:var(--muted)" title="Re-summarise via LLM" onclick="summariseRule(${i})">↻ summarise</button>
+       </div>`
+    : `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+         <span style="flex:1;font-size:12px;color:var(--muted);font-style:italic">No English summary yet.</span>
+         <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px" onclick="summariseRule(${i})">Summarise</button>
+       </div>`;
+
+  const labelEditor = editingLabel
+    ? `<input value="${(r.label||'').replace(/"/g,'&quot;')}" placeholder="Human-readable label" data-i="${i}" data-f="label"
+              autofocus onblur="_endLabelEdit(${i})"
+              style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px;"/>`
+    : `<button class="btn btn-ghost" style="flex:1;text-align:left;padding:4px 10px;font-size:12px;color:var(--muted-2)"
+               onclick="_startLabelEdit(${i})" title="Click to edit the structured label">${(r.label||'(no label — click to add)').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</button>`;
+
+  const headerHtml = `
+    ${summaryRow}
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+      <input value="${(r.id||'').replace(/"/g,'&quot;')}" placeholder="rule-id" data-i="${i}" data-f="id"
+             style="flex:0 0 220px; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px; font-family:monospace; font-size:12px;"/>
+      <select data-i="${i}" data-f="kind" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:6px 10px;">
+        <option value="sparql" ${r.kind==='sparql'?'selected':''}>SPARQL</option>
+        <option value="shacl"  ${r.kind==='shacl'?'selected':''}>SHACL</option>
+        <option value="owl"    ${r.kind==='owl'?'selected':''}>OWL axiom</option>
+      </select>
+      ${labelEditor}
+      <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--muted)">
+        <input type="checkbox" data-i="${i}" data-f="enabled" ${r.enabled!==false?'checked':''}/> on
+      </label>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="validateOneRule(${i})">Validate</button>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="testFireRule(${i})">Test fire</button>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="openNlDrafter(${i})">Draft from English</button>
+      <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="removeRule(${i})">✕</button>
+    </div>`;
+
+  // Tabbed editor (Slot-fill | Source) appears for SHACL only — SPARQL
+  // and OWL fall back to the plain textarea since they're free-form.
+  const tabsHtml = (r.kind === 'shacl') ? `
+    <div style="display:flex; gap:6px; margin-bottom:6px; font-size:12px;">
+      <button type="button" class="btn btn-ghost ${editorMode==='slots'?'btn-primary':''}"
+              style="padding:2px 10px; font-size:11px" onclick="setRuleEditor(${i},'slots')">Slot-fill</button>
+      <button type="button" class="btn btn-ghost ${editorMode==='source'?'btn-primary':''}"
+              style="padding:2px 10px; font-size:11px" onclick="setRuleEditor(${i},'source')">Source</button>
+    </div>` : '';
+
+  const sourceTextarea = `
+    <textarea data-i="${i}" data-f="body" rows="6"
+      style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 10px; font-family:monospace; font-size:12px; resize:vertical;">${(r.body||'').replace(/</g,'&lt;')}</textarea>`;
+
+  const slotsContainer = `<div id="slots-${i}" style="font-size:12px"></div>`;
+
+  const editorHtml = (r.kind === 'shacl' && editorMode === 'slots')
+    ? slotsContainer + `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;color:var(--muted)">Show generated source</summary>
+        <pre id="slots-source-${i}" style="margin:6px 0 0;padding:8px;background:var(--bg);border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted)">${(r.body||'').replace(/</g,'&lt;')}</pre>
+      </details>`
+    : sourceTextarea;
+
+  return `
+    <div class="card" style="margin-bottom:10px; padding:12px;">
+      ${headerHtml}
+      ${tabsHtml}
+      ${editorHtml}
+      <div id="rule-msg-${i}" style="margin-top:6px; font-size:12px; min-height:14px;"></div>
+      <div id="rule-fire-${i}" style="margin-top:6px"></div>
+    </div>`;
+}
+
+// Suggestion #2 — NL summary round-trip helpers.
+function _startLabelEdit(i) {
+  _ensureRules()[i]._labelEditing = true;
+  renderRules();
+}
+function _endLabelEdit(i) {
+  const r = _ensureRules()[i];
+  if (!r) return;
+  r._labelEditing = false;
+  renderRules();
+}
+
+async function summariseRule(i) {
+  const r = _ensureRules()[i];
+  if (!r) return;
+  // No body to summarise? Surface that on the row.
+  if (!(r.body||'').trim()) {
+    const cards = document.querySelectorAll('#rule-list .card');
+    if (cards[i]) {
+      const msg = document.getElementById('rule-msg-' + i);
+      if (msg) { msg.textContent = '✗ rule body is empty'; msg.style.color = '#e08383'; }
+    }
+    return;
+  }
+  // Show inline progress on the summary line so the user knows we're
+  // talking to the LLM. Best-effort — failure leaves nl_summary empty.
+  const msg = document.getElementById('rule-msg-' + i);
+  if (msg) { msg.textContent = 'summarising…'; msg.style.color = 'var(--muted)'; }
+  try {
+    const res = await fetch('/api/rules/summarise', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rule: r }),
+    });
+    const out = await res.json();
+    if (!res.ok) {
+      if (msg) { msg.textContent = '✗ ' + (out.error || 'summarise failed'); msg.style.color = '#e08383'; }
+      return;
+    }
+    r.nl_summary = out.nl_summary || '';
+    if (msg) { msg.textContent = '✓ summarised'; msg.style.color = '#5ec27a'; }
+    renderRules();
+  } catch (e) {
+    if (msg) { msg.textContent = '✗ ' + e; msg.style.color = '#e08383'; }
+  }
+}
+
+// Suggestion #8 — Conversational rule construction.
+// Combines NL draft (#1) + test-fire (#6) + class highlight (#7) in
+// a single drawer. Uses an inline vis-network mini-graph that flashes
+// the classes the drafted rule touches.
+let _convoNetwork = null;
+let _convoLastDraft = null;
+
+async function openConvoRule() {
+  document.getElementById('convo-input').value = '';
+  document.getElementById('convo-body').textContent = '';
+  document.getElementById('convo-fire').innerHTML = '<div style="color:var(--muted)">No draft yet — describe a rule and press <b>Draft & preview</b>.</div>';
+  document.getElementById('convo-class-list').innerHTML = '';
+  document.getElementById('convo-status').textContent = '';
+  document.getElementById('convo-accept-btn').disabled = true;
+  _convoLastDraft = null;
+
+  // Provider dropdown — same source as #1.
+  const sel = document.getElementById('convo-provider');
+  while (sel.options.length > 1) sel.remove(1);
+  try {
+    const res = await fetch('/api/insights/providers');
+    const out = await res.json();
+    (out.providers || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name; opt.textContent = `${p.label}${p.configured?'':' (unconfigured)'}`;
+      if (!p.configured) opt.disabled = true;
+      sel.appendChild(opt);
+    });
+  } catch (_) {}
+
+  document.getElementById('convo-rule-modal').style.display = 'flex';
+  document.getElementById('convo-input').focus();
+  // Render the empty graph now so users see the surface they'll get later.
+  _renderConvoGraph([]);
+}
+
+async function convoDraftAndPreview() {
+  const nl = document.getElementById('convo-input').value.trim();
+  const kind = document.getElementById('convo-kind').value;
+  const provider = document.getElementById('convo-provider').value || null;
+  const status = document.getElementById('convo-status');
+  const bodyEl = document.getElementById('convo-body');
+  const fireEl = document.getElementById('convo-fire');
+  const acceptBtn = document.getElementById('convo-accept-btn');
+  const classList = document.getElementById('convo-class-list');
+
+  if (!nl) { status.textContent = 'Type a description first.'; return; }
+  status.textContent = 'drafting…';
+  status.style.color = 'var(--muted)';
+  bodyEl.textContent = '';
+  fireEl.innerHTML = '<div style="color:var(--muted)">drafting…</div>';
+  classList.innerHTML = '';
+  acceptBtn.disabled = true;
+  _convoLastDraft = null;
+
+  // Step 1 — NL → rule (suggestion #1).
+  let draft;
+  try {
+    const res = await fetch('/api/rules/nl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nl, kind, provider }),
+    });
+    draft = await res.json();
+    if (!res.ok) {
+      status.textContent = '✗ ' + (draft.error || 'draft failed');
+      status.style.color = '#e08383';
+      fireEl.innerHTML = '';
+      return;
+    }
+  } catch (e) {
+    status.textContent = '✗ ' + e; status.style.color = '#e08383'; return;
+  }
+  bodyEl.textContent = draft.body || '(empty)';
+  status.textContent = `${draft.duration_ms} ms · ${draft.provider}/${draft.model||'?'} · ${draft.valid?'✓ valid':'✗ invalid'}`;
+  status.style.color = draft.valid ? '#5ec27a' : '#e08383';
+
+  // Step 2 — render touched classes on the mini graph (suggestion #7).
+  const classIris = draft.class_iris || [];
+  if (classIris.length) {
+    classList.innerHTML = '<b>Classes:</b> ' + classIris.map(c =>
+      `<code style="font-size:11px;color:#5ec27a;margin-right:6px">${c}</code>`).join('');
+  } else {
+    classList.innerHTML = '<span style="color:var(--muted)">(no vocabulary classes referenced — the model may need more context)</span>';
+  }
+  _renderConvoGraph(classIris);
+
+  // Step 3 — test fire (suggestion #6). Skip if the draft is invalid.
+  if (!draft.valid) {
+    fireEl.innerHTML = '<div style="color:#e08383">✗ ' + (draft.validation_errors||[]).join('; ') + '</div>';
+    return;
+  }
+  fireEl.innerHTML = '<div style="color:var(--muted)">test-firing…</div>';
+  try {
+    const tmpRule = { id: 'convo-preview', kind: draft.kind, label: 'preview',
+                      body: draft.body, enabled: true };
+    const r2 = await fetch('/api/rules/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rule: tmpRule }),
+    });
+    const out = await r2.json();
+    if (!out.ok) {
+      fireEl.innerHTML = `<div style="color:#e08383">✗ ${(out.errors||['preview failed']).join('; ')}</div>`;
+    } else if (!out.derived_count) {
+      fireEl.innerHTML = `<div style="color:var(--muted-2)"><b>Rule fired but produced no triples</b> — pattern doesn't match the synthetic preview ABox.</div>`;
+    } else {
+      const short = (s) => (s||'').replace(/^.*[\/#]/, '');
+      const rows = out.derived.slice(0, 8).map(([s,p,o]) =>
+        `<div><code>${short(s)}</code> <span style="color:var(--muted)">${short(p)}</span> <code>${short(o)}</code></div>`).join('');
+      const trunc = out.derived_count > 8 ? `<div style="color:var(--muted);font-size:11px">…and ${out.derived_count-8} more</div>` : '';
+      fireEl.innerHTML = `<div style="font-size:12px"><b>✓ Produced ${out.derived_count} triple(s)</b> in ${out.duration_ms} ms</div>${rows}${trunc}`;
+    }
+  } catch (e) {
+    fireEl.innerHTML = '<div style="color:#e08383">✗ ' + e + '</div>';
+  }
+
+  _convoLastDraft = draft;
+  acceptBtn.disabled = !draft.valid;
+}
+
+function _renderConvoGraph(highlightIris) {
+  const container = document.getElementById('convo-graph');
+  if (typeof vis === 'undefined' || !vis.Network) {
+    container.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:12px">Graph library unavailable.</div>';
+    return;
+  }
+  // Reuse the main relationships graph data so the mini graph reads as
+  // "the same map, with these classes lit up."
+  const data = (typeof _buildRelGraphData === 'function') ? _buildRelGraphData() : { nodes: [], edges: [] };
+  if (!data.nodes.length) {
+    container.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:12px">No entities defined yet — the mini graph will appear once Step 2 has classes.</div>';
+    return;
+  }
+  // Highlight match — labels (graph node ids) vs class qnames.
+  const localNames = new Set();
+  for (const iri of (highlightIris || [])) {
+    const local = iri.replace(/^.*:/, '');
+    if (local) localNames.add(local);
+  }
+  // Pull every contrast-relevant colour from the active theme so the
+  // mini graph reads cleanly in Light, Dark, and Mono. The previous
+  // version used `--surface-2` for unlit nodes, which collapses against
+  // the panel background in the light theme.
+  const accent     = _cssVar('--accent',    '#4f46e5');
+  const onAccent   = _cssVar('--on-accent', '#ffffff');
+  const idleBg     = _cssVar('--surface',   '#ffffff');
+  const idleBorder = _cssVar('--border',    '#cbd5e1');
+  const text       = _cssVar('--text',      '#0f172a');
+  const muted2     = _cssVar('--muted-2',   '#94a3b6');
+
+  const nodes = data.nodes.map(n => {
+    const lit = localNames.has(n.id) || localNames.has(n.label);
+    return {
+      ...n,
+      color: lit
+        ? { background: accent,  border: accent,     highlight: { background: accent, border: accent } }
+        : { background: idleBg,  border: idleBorder, highlight: { background: accent, border: accent } },
+      font: { color: lit ? onAccent : text, size: 12,
+              face: 'Inter, system-ui, sans-serif' },
+      borderWidth: lit ? 0 : 1,
+      shadow: lit
+        ? { enabled: true, color: accent, size: 18, x: 0, y: 0 }
+        : false,
+      margin: 10,
+    };
+  });
+  // Edges need their label font tinted too — by default they inherit
+  // a colour that washes out against the panel background.
+  const edges = (data.edges || []).map(e => ({
+    ...e,
+    color: { color: muted2, highlight: accent, hover: accent },
+    font: { color: text, size: 10, strokeWidth: 0,
+            background: idleBg, align: 'middle',
+            face: 'Inter, system-ui, sans-serif' },
+  }));
+  if (_convoNetwork) _convoNetwork.destroy();
+  _convoNetwork = new vis.Network(container,
+    { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) }, {
+    physics: { enabled: true, stabilization: { iterations: 120, fit: true } },
+    interaction: { hover: false, dragView: true, zoomView: true },
+    nodes: { borderWidth: 1, shapeProperties: { borderRadius: 6 } },
+  });
+}
+
+function convoAcceptDraft() {
+  if (!_convoLastDraft) return;
+  // Drop the rule into session and surface it for further editing.
+  _ensureRules();
+  addRule({
+    id: '',
+    kind: _convoLastDraft.kind,
+    label: 'From English',
+    body: _convoLastDraft.body,
+    enabled: true,
+  });
+  // Auto-summarise the new rule (best-effort, non-blocking).
+  setTimeout(() => {
+    const idx = (session.rules || []).length - 1;
+    if (idx >= 0) summariseRule(idx);
+  }, 50);
+  closeModal('convo-rule-modal');
+  _convoLastDraft = null;
+  goStep('rules');
+}
+
+// Suggestion #1 — Draft a rule body from plain English via the configured
+// LLM provider. Opens a modal with NL textarea on the left and the
+// generated body on the right. Accept copies the body into the rule and
+// closes; Cancel/Refine leaves the rule untouched.
+let _nlDrafterTargetIdx = null;
+let _nlDrafterLastDraft = null;
+
+async function openNlDrafter(i) {
+  _nlDrafterTargetIdx = i;
+  _nlDrafterLastDraft = null;
+  const r = _ensureRules()[i];
+  document.getElementById('nl-drafter-input').value = '';
+  document.getElementById('nl-drafter-output').textContent = '';
+  document.getElementById('nl-drafter-iri-summary').innerHTML = '';
+  document.getElementById('nl-drafter-status').textContent = '';
+  document.getElementById('nl-drafter-kind').value = r.kind || 'shacl';
+  document.getElementById('nl-drafter-accept-btn').disabled = true;
+  document.getElementById('nl-drafter-refine-btn').disabled = true;
+
+  // Populate the provider select with whatever's configured. Reuses the
+  // Phase E /api/insights/providers endpoint so the user can see which
+  // adapters are actually usable before pressing Draft.
+  const sel = document.getElementById('nl-drafter-provider');
+  while (sel.options.length > 1) sel.remove(1);
+  try {
+    const res = await fetch('/api/insights/providers');
+    const out = await res.json();
+    (out.providers || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = `${p.label}${p.configured?'':' (unconfigured)'}`;
+      if (!p.configured) opt.disabled = true;
+      sel.appendChild(opt);
+    });
+  } catch (_) { /* dev path — leave dropdown blank */ }
+
+  document.getElementById('nl-drafter-modal').style.display = 'flex';
+  document.getElementById('nl-drafter-input').focus();
+}
+
+async function runNlDrafter() {
+  const nl   = document.getElementById('nl-drafter-input').value.trim();
+  const kind = document.getElementById('nl-drafter-kind').value;
+  const provider = document.getElementById('nl-drafter-provider').value || null;
+  const status = document.getElementById('nl-drafter-status');
+  const out    = document.getElementById('nl-drafter-output');
+  const iris   = document.getElementById('nl-drafter-iri-summary');
+  if (!nl) { status.textContent = 'Type a description first.'; return; }
+
+  status.textContent = 'drafting…';
+  status.style.color = 'var(--muted)';
+  out.textContent = '';
+  iris.innerHTML  = '';
+  document.getElementById('nl-drafter-accept-btn').disabled = true;
+  document.getElementById('nl-drafter-refine-btn').disabled = true;
+
+  try {
+    const res = await fetch('/api/rules/nl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nl, kind, provider }),
+    });
+    const draft = await res.json();
+    if (!res.ok) {
+      status.textContent = '✗ ' + (draft.error || 'draft failed');
+      status.style.color = '#e08383';
+      return;
+    }
+    _nlDrafterLastDraft = draft;
+    out.textContent = draft.body || '(empty response)';
+    status.textContent =
+      `${draft.duration_ms} ms · ${draft.provider}/${draft.model||'?'} · ${draft.valid?'✓ valid':'✗ invalid'}`;
+    status.style.color = draft.valid ? '#5ec27a' : '#e08383';
+
+    const grounded = (draft.grounded_iris||[]).map(i =>
+      `<code style="font-size:10px;color:#5ec27a">${i}</code>`).join(' ');
+    const unknown = (draft.unknown_iris||[]).map(i =>
+      `<code style="font-size:10px;color:#e08383">${i}</code>`).join(' ');
+    const errs = (draft.validation_errors||[]).map(e =>
+      `<div style="color:#e08383">✗ ${e}</div>`).join('');
+    iris.innerHTML = `
+      ${errs}
+      <div style="margin-top:4px"><b style="color:var(--muted)">Grounded:</b> ${grounded || '<span style="color:var(--muted)">(none)</span>'}</div>
+      <div style="margin-top:2px"><b style="color:var(--muted)">Unknown:</b> ${unknown || '<span style="color:var(--muted)">(none)</span>'}</div>`;
+
+    // Allow Accept only if the draft validated. Refine is always
+    // available so users can edit the NL and re-draft without losing
+    // the modal state.
+    document.getElementById('nl-drafter-accept-btn').disabled = !draft.valid;
+    document.getElementById('nl-drafter-refine-btn').disabled = false;
+  } catch (e) {
+    status.textContent = '✗ ' + e;
+    status.style.color = '#e08383';
+  }
+}
+
+function acceptNlDraft() {
+  if (_nlDrafterTargetIdx == null || !_nlDrafterLastDraft) return;
+  const rules = _ensureRules();
+  const r = rules[_nlDrafterTargetIdx];
+  r.kind = _nlDrafterLastDraft.kind;
+  r.body = _nlDrafterLastDraft.body;
+  // The textarea path is the source of truth for an LLM-drafted rule —
+  // drop any stale slot-fill `meta` so normalise_rule doesn't overwrite
+  // the body on save.
+  delete r.meta;
+  r._editor = 'source';
+  closeModal('nl-drafter-modal');
+  renderRules();
+  validateOneRule(_nlDrafterTargetIdx);
+  _nlDrafterTargetIdx = null;
+  _nlDrafterLastDraft = null;
+}
+
+// Suggestion #6 — Test-fire preview. POSTs the rule to /api/rules/preview
+// which writes it into a tempdir and runs the materializer against the
+// shipped synthetic ABox. The resulting derived triples + lineage are
+// rendered inline so authors see whether the rule actually matches.
+async function testFireRule(i) {
+  const r = _ensureRules()[i];
+  const host = document.getElementById('rule-fire-' + i);
+  host.innerHTML = '<div style="color:var(--muted);font-size:12px">test-firing…</div>';
+  try {
+    const res = await fetch('/api/rules/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rule: r }),
+    });
+    const out = await res.json();
+    if (!out.ok) {
+      host.innerHTML = `<div style="color:#e08383;font-size:12px">✗ ${
+        (out.errors||['preview failed']).join('; ')
+      }</div>`;
+      return;
+    }
+    const short = (s) => (s||'').replace(/^.*[\/#]/, '');
+    if (!out.derived_count) {
+      host.innerHTML = `
+        <div style="padding:8px 10px;background:var(--surface-2);border-radius:6px;font-size:12px;color:var(--muted-2)">
+          <b>Rule fired but produced no triples.</b>
+          <div style="margin-top:4px;font-size:11px">
+            Either the rule's pattern doesn't match the synthetic preview ABox,
+            or the WHERE/condition is too strict. Check that the IRIs in your
+            rule match the preview vocabulary
+            (<code>:Site</code>, <code>:Asset</code>, <code>:Order</code>,
+            <code>:OutageEvent</code>, <code>:Trigger</code>, <code>:partOf</code>…).
+          </div>
+        </div>`;
+      return;
+    }
+    const rows = out.derived.slice(0, 25).map(([s, p, o], k) => {
+      const lin = (out.lineage||[])[k] || {};
+      const premises = (lin.premises||[]).map(([a,b,c]) =>
+        `${short(a)} ${short(b)} ${short(c)}`).join('<br>');
+      const bindings = Object.entries(lin.bindings||{}).map(([k,v]) =>
+        `${k}=${short(v)}`).join(', ');
+      return `
+        <tr>
+          <td style="padding:4px 6px"><code>${short(s)}</code></td>
+          <td style="padding:4px 6px;color:var(--muted)"><code>${short(p)}</code></td>
+          <td style="padding:4px 6px"><code>${short(o)}</code></td>
+          <td style="padding:4px 6px;color:var(--muted);font-size:11px">${bindings||'—'}</td>
+        </tr>
+        ${premises ? `<tr><td colspan="4" style="padding:0 6px 6px 18px;font-size:10px;color:var(--muted)">↳ premises:<br>${premises}</td></tr>` : ''}
+      `;
+    }).join('');
+    const trunc = out.derived_count > 25
+      ? `<div style="padding:6px 10px;font-size:11px;color:var(--muted)">… and ${out.derived_count-25} more</div>` : '';
+    host.innerHTML = `
+      <div style="background:var(--surface-2);border-radius:6px;padding:8px 10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
+          <b>✓ Produced ${out.derived_count} triple${out.derived_count===1?'':'s'}</b>
+          <span style="color:var(--muted);font-size:11px">${out.duration_ms} ms · engine ${out.engine_status}</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr>
+            <th style="text-align:left;padding:4px 6px;color:var(--muted);font-weight:500">subject</th>
+            <th style="text-align:left;padding:4px 6px;color:var(--muted);font-weight:500">predicate</th>
+            <th style="text-align:left;padding:4px 6px;color:var(--muted);font-weight:500">object</th>
+            <th style="text-align:left;padding:4px 6px;color:var(--muted);font-weight:500">bindings</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        ${trunc}
+      </div>`;
+  } catch (e) {
+    host.innerHTML = `<div style="color:#e08383;font-size:12px">✗ ${e}</div>`;
+  }
+}
+
+function setRuleEditor(i, mode) {
+  const r = _ensureRules()[i];
+  r._editor = mode;
+  if (mode === 'slots' && !r.meta) {
+    r.meta = { target_class: '', conditions: [], assertion: { path: '', value: '' } };
+  }
+  renderRules();
+}
+
+async function _hydrateSlotFill(i) {
+  const r = _ensureRules()[i];
+  const host = document.getElementById('slots-' + i);
+  if (!host) return;
+  const vocab = await _ensureVocab();
+  const classOptions = ['<option value="">— pick a class —</option>'].concat(
+    (vocab.classes||[]).map(c =>
+      `<option value="${c.qname}" ${(r.meta?.target_class||'')===c.qname?'selected':''}>${c.label||c.qname}</option>`
+    )
+  ).join('');
+  const propOptions = (vocab.properties||[]).map(p =>
+    `<option value="${p.qname}">${p.label||p.qname} <span>(${p.kind})</span></option>`
+  ).join('');
+
+  const conditions = r.meta?.conditions || [];
+  const condHtml = conditions.map((c, ci) => `
+    <div data-cond="${ci}" style="display:flex; gap:6px; margin-bottom:4px; align-items:center">
+      <input list="props-${i}" placeholder="property (e.g. :status)" value="${(c.path||'').replace(/"/g,'&quot;')}"
+             data-cf="path" data-ci="${ci}" data-i="${i}"
+             style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-family:monospace; font-size:11px"/>
+      <select data-cf="op" data-ci="${ci}" data-i="${i}"
+              style="background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-size:11px">
+        ${SLOT_OPS.map(op => `<option ${c.op===op?'selected':''}>${op}</option>`).join('')}
+      </select>
+      <input placeholder="value" value="${(c.value!==undefined?String(c.value):'').replace(/"/g,'&quot;')}"
+             data-cf="value" data-ci="${ci}" data-i="${i}" ${SLOT_OPS_NEED_VALUE.has(c.op||'=')?'':'disabled'}
+             style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-size:11px"/>
+      <button class="btn btn-ghost" style="padding:2px 6px;font-size:11px" onclick="removeSlotCondition(${i},${ci})">✕</button>
+    </div>`).join('');
+
+  const a = r.meta?.assertion || {};
+  host.innerHTML = `
+    <datalist id="props-${i}">${propOptions}</datalist>
+    <div style="display:grid; grid-template-columns:120px 1fr; gap:6px; align-items:center; margin-bottom:8px">
+      <label style="color:var(--muted)">When (target class)</label>
+      <select data-mf="target_class" data-i="${i}"
+              style="background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-size:11px">
+        ${classOptions}
+      </select>
+      <label style="color:var(--muted); align-self:start; padding-top:6px">… and matches</label>
+      <div>
+        ${condHtml || '<div style="color:var(--muted);font-size:11px;margin-bottom:4px">No conditions yet — the rule will fire for every instance of the target class.</div>'}
+        <button class="btn btn-ghost" style="padding:2px 8px;font-size:11px" onclick="addSlotCondition(${i})">+ condition</button>
+      </div>
+      <label style="color:var(--muted)">→ assert (predicate)</label>
+      <input list="props-${i}" placeholder=":hasIncident" value="${(a.path||'').replace(/"/g,'&quot;')}"
+             data-mf="assertion.path" data-i="${i}"
+             style="background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-family:monospace; font-size:11px"/>
+      <label style="color:var(--muted)">… with value</label>
+      <div style="display:flex; gap:6px">
+        <input placeholder='true / "OUTAGE" / :SomeIRI' value="${(a.value!==undefined?String(a.value):'').replace(/"/g,'&quot;')}"
+               data-mf="assertion.value" data-i="${i}"
+               style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-size:11px"/>
+        <select data-mf="assertion.value_kind" data-i="${i}"
+                style="background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:4px 8px; font-size:11px">
+          <option value="" ${!a.value_kind?'selected':''}>auto</option>
+          <option value="iri" ${a.value_kind==='iri'?'selected':''}>iri</option>
+          <option value="literal" ${a.value_kind==='literal'?'selected':''}>literal</option>
+        </select>
+      </div>
+    </div>`;
+  _wireSlotFill(i);
+}
+
+function _wireSlotFill(i) {
+  const host = document.getElementById('slots-' + i);
+  if (!host) return;
+  // Top-level meta fields
+  host.querySelectorAll('[data-mf]').forEach(el => {
+    el.addEventListener('input', () => {
+      const r = _ensureRules()[i];
+      r.meta = r.meta || {};
+      const path = el.dataset.mf;
+      if (path === 'target_class') {
+        r.meta.target_class = el.value;
+      } else if (path.startsWith('assertion.')) {
+        r.meta.assertion = r.meta.assertion || {};
+        r.meta.assertion[path.split('.')[1]] = el.value;
+      }
+      _scheduleSlotCompile(i);
+    });
+  });
+  // Per-condition fields
+  host.querySelectorAll('[data-cf]').forEach(el => {
+    el.addEventListener('input', () => {
+      const r = _ensureRules()[i];
+      const ci = +el.dataset.ci;
+      r.meta.conditions = r.meta.conditions || [];
+      const cond = r.meta.conditions[ci] || {};
+      const f = el.dataset.cf;
+      cond[f] = el.value;
+      r.meta.conditions[ci] = cond;
+      // Re-render only when op changed (enable/disable value input)
+      if (f === 'op') _hydrateSlotFill(i);
+      _scheduleSlotCompile(i);
+    });
+  });
+}
+
+function addSlotCondition(i) {
+  const r = _ensureRules()[i];
+  r.meta = r.meta || { target_class: '', conditions: [], assertion: {} };
+  r.meta.conditions = r.meta.conditions || [];
+  r.meta.conditions.push({ path: '', op: '=', value: '' });
+  _hydrateSlotFill(i);
+  _scheduleSlotCompile(i);
+}
+
+function removeSlotCondition(i, ci) {
+  const r = _ensureRules()[i];
+  if (!r.meta || !r.meta.conditions) return;
+  r.meta.conditions.splice(ci, 1);
+  _hydrateSlotFill(i);
+  _scheduleSlotCompile(i);
+}
+
+// Debounced compile — sends the meta to the server's validate endpoint
+// (which calls normalise_rule → compile_slots) and shows the generated
+// Turtle in the disclosure under the slot-fill panel.
+const _slotCompileTimers = {};
+function _scheduleSlotCompile(i) {
+  clearTimeout(_slotCompileTimers[i]);
+  _slotCompileTimers[i] = setTimeout(() => _compileSlotFill(i), 250);
+}
+
+async function _compileSlotFill(i) {
+  const r = _ensureRules()[i];
+  const sourceEl = document.getElementById('slots-source-' + i);
+  const msg = document.getElementById('rule-msg-' + i);
+  try {
+    const res = await fetch('/api/rules/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(r),
+    });
+    const out = await res.json();
+    // Server runs normalise_rule → compile_slots; the compiled body
+    // comes back via /api/rules POST normally, but validate returns
+    // ok+errors only. Re-call POST /api/rules dry-run? Simpler: call
+    // a new helper endpoint. For now, locally re-derive by asking
+    // /api/rules/validate which doesn't return body — so call the
+    // dedicated compile endpoint when available, else do nothing.
+    if (out.ok) {
+      msg.textContent = '✓ valid';
+      msg.style.color = '#5ec27a';
+    } else {
+      msg.textContent = '✗ ' + (out.errors||['validation failed']).join('; ');
+      msg.style.color = '#e08383';
+    }
+    // Compile-on-server: surface the body from the dedicated endpoint.
+    const cres = await fetch('/api/rules/compile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(r),
+    });
+    if (cres.ok) {
+      const cout = await cres.json();
+      r.body = cout.body || r.body;
+      if (sourceEl) sourceEl.textContent = r.body;
+    }
+  } catch (e) {
+    if (msg) { msg.textContent = '✗ ' + e; msg.style.color = '#e08383'; }
+  }
+}
+
+async function validateOneRule(i) {
+  const r = _ensureRules()[i];
+  const msg = document.getElementById(`rule-msg-${i}`);
+  msg.textContent = 'validating…';
+  msg.style.color = 'var(--muted)';
+  try {
+    const res = await fetch('/api/rules/validate', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(r),
+    });
+    const out = await res.json();
+    if (out.ok) {
+      msg.textContent = '✓ valid' + (out.warnings && out.warnings.length ? ' — ' + out.warnings.join('; ') : '');
+      msg.style.color = '#5ec27a';
+    } else {
+      msg.textContent = '✗ ' + (out.errors || ['validation failed']).join('; ');
+      msg.style.color = '#e08383';
+    }
+  } catch (e) { msg.textContent = '✗ ' + e; msg.style.color = '#e08383'; }
+}
+
+async function validateAllRules() {
+  const status = document.getElementById('rule-status');
+  status.textContent = 'validating…';
+  const res = await fetch('/api/rules/validate', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({rules: _ensureRules()}),
+  });
+  const out = await res.json();
+  let bad = 0;
+  Object.entries(out.results || {}).forEach(([rid, r]) => { if (!r.ok) bad++; });
+  status.textContent = bad ? `${bad} rule(s) failed validation. See per-rule messages.` : `All ${Object.keys(out.results||{}).length} rules valid.`;
+  status.style.color = bad ? '#e08383' : '#5ec27a';
+}
+
+async function saveRules() {
+  const status = document.getElementById('rule-status');
+  status.textContent = 'saving…';
+  status.style.color = 'var(--muted)';
+  try {
+    const res = await fetch('/api/rules', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({rules: _ensureRules()}),
+    });
+    const out = await res.json();
+    if (!res.ok) {
+      status.textContent = '✗ ' + (out.error || 'save failed');
+      status.style.color = '#e08383';
+      return;
+    }
+    status.textContent = `✓ Saved ${out.count} rule(s).`;
+    status.style.color = '#5ec27a';
+    _coverageCache = null;   // next graph render re-fetches the heat map
+    await saveSession();
+  } catch (e) { status.textContent = '✗ ' + e; status.style.color = '#e08383'; }
+}
+
+async function loadRuleLibrary() {
+  const sel = document.getElementById('rule-library-select');
+  const ind = sel.value;
+  if (!ind) return;
+  const res = await fetch(`/api/rules/library/${encodeURIComponent(ind)}`);
+  const out = await res.json();
+  if (!Array.isArray(out.rules)) return;
+  out.rules.forEach(r => addRule(r));
+  document.getElementById('rule-status').textContent =
+    `Loaded ${out.rules.length} starter rule(s) from "${ind}".`;
+}
+
+async function _populateRuleLibraryDropdown() {
+  try {
+    const res = await fetch('/api/rules/library');
+    const out = await res.json();
+    const sel = document.getElementById('rule-library-select');
+    (out.industries || []).forEach(i => {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = i;
+      sel.appendChild(opt);
+    });
+  } catch (_) { /* offline / dev — leave dropdown blank */ }
+}
+_populateRuleLibraryDropdown();
 
 // ── Generate ──────────────────────────────────────────────────────────────
 function toggleAllPhases(cb) {
@@ -2417,6 +3651,7 @@ function render() {
   renderEvents();
   renderRelationships();
   renderCQs();
+  renderRules();
   _paintDomainPills();
   vecRenderExamples();
   _renderPreflight();
@@ -3331,9 +4566,175 @@ async function viewOntology(slug) {
 function switchViewerTab(name) {
   document.querySelectorAll('#viewer-modal .tab-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.vtab === name));
-  ['overview','ttl','shacl','skos','jsonld'].forEach(k => {
+  ['overview','ttl','shacl','skos','jsonld','materialised'].forEach(k => {
     document.getElementById('viewer-'+k).classList.toggle('active', k === name);
   });
+  if (name === 'materialised') loadMaterialisedTriples();
+}
+
+// Phase D — Materialised tab data loaders
+async function loadMaterialisedTriples() {
+  const eng  = (document.getElementById('viewer-mat-engine')   || {}).value || '';
+  const rule = (document.getElementById('viewer-mat-rule-filter') || {}).value || '';
+  const list = document.getElementById('viewer-mat-list');
+  const count = document.getElementById('viewer-mat-count');
+  list.innerHTML = '<div style="color:var(--muted)">loading…</div>';
+  count.textContent = '';
+  try {
+    const params = new URLSearchParams();
+    if (eng)  params.set('engine', eng);
+    if (rule) params.set('rule', rule);
+    const res = await fetch('/api/materialised/triples?' + params);
+    const out = await res.json();
+    if (!out.available) {
+      list.innerHTML = '<div style="color:var(--muted)">No <code>materialised-lineage.ttl</code> on disk yet. Run <code>--phase reason</code> first.</div>';
+      return;
+    }
+    if (!out.triples.length) {
+      list.innerHTML = '<div style="color:var(--muted)">No derived triples match the current filter.</div>';
+      return;
+    }
+    count.textContent = `${out.triples.length} triple(s)`;
+    list.innerHTML = out.triples.map((t, i) => {
+      const short = (s) => (s||'').replace(/^.*[\/#]/, '');
+      return `<div class="mat-row" style="padding:4px 6px;border-radius:4px;cursor:pointer;border-left:3px solid var(--accent)"
+                   onclick="explainMaterialisedTriple(${i})">
+                <div><b>${short(t.subject)}</b> <span style="color:var(--muted)">${short(t.predicate)}</span> <b>${short(t.object)}</b></div>
+                <div style="color:var(--muted);font-size:10px">${t.engine||''} · ${t.rule||''}</div>
+              </div>`;
+    }).join('');
+    window._materialised_cache = out.triples;
+  } catch (e) {
+    list.innerHTML = '<div style="color:#e08383">'+e+'</div>';
+  }
+}
+
+// Suggestion #5 — recursive premise tree on the Materialised tab.
+// Each derived triple may have premises that are themselves derived;
+// expanding a premise lazily fetches its own lineage so the tree only
+// grows on demand. A small cache per (s,p,o) avoids duplicate work
+// when the same premise appears in multiple branches of the tree.
+const _EXPLAIN_MAX_DEPTH = 4;
+window._explain_cache = window._explain_cache || {};
+
+function _shortIri(s) { return (s || '').replace(/^.*[\/#]/, ''); }
+function _tripleKey(s, p, o) { return `${s}|${p}|${o}`; }
+
+async function _fetchExplain(subject, predicate, object) {
+  const key = _tripleKey(subject, predicate, object);
+  if (window._explain_cache[key]) return window._explain_cache[key];
+  const params = new URLSearchParams({subject, predicate, object});
+  const res = await fetch('/api/explain?' + params);
+  const out = await res.json();
+  window._explain_cache[key] = out;
+  return out;
+}
+
+function _renderTripleHeader(s, p, o, asserted) {
+  const tag = asserted
+    ? '<span style="color:#5ec27a;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">asserted</span>'
+    : '<span style="color:#7aa6ff;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">derived</span>';
+  return `<span style="font-family:monospace;font-size:12px"><b>${_shortIri(s)}</b> <span style="color:var(--muted)">${_shortIri(p)}</span> <b>${_shortIri(o)}</b></span> &nbsp; ${tag}`;
+}
+
+function _renderDerivationBody(d) {
+  const bindings = Object.keys(d.bindings || {}).length
+    ? `<div style="margin:6px 0"><span style="color:var(--muted);font-size:11px">bindings:</span>
+         <pre style="margin:2px 0 4px 12px;padding:4px 6px;background:var(--bg);border-radius:4px;font-size:11px;white-space:pre-wrap">${
+           Object.entries(d.bindings).map(([k,v])=>`${k} = ${_shortIri(v)}`).join('\n')
+         }</pre></div>`
+    : '';
+  return `
+    <div style="font-size:12px;margin:4px 0 4px 0">
+      <div><span style="color:var(--muted)">rule:</span> <code>${d.rule||'?'}</code>
+           &nbsp;<span style="color:var(--muted)">engine:</span> ${d.engine||'?'}</div>
+      ${bindings}
+    </div>`;
+}
+
+/**
+ * Recursively render a triple and its derivations. Called by
+ * explainMaterialisedTriple as the entry point and again per premise
+ * when the user expands a <details> branch.
+ *
+ * Lazy expansion: premise <details> elements fetch their own lineage
+ * only when opened — keeps initial render fast on big trees.
+ */
+async function _renderPremiseTree(subject, predicate, object, depth) {
+  const explain = await _fetchExplain(subject, predicate, object);
+  if (explain.asserted) {
+    // No further drilling — render the triple inline with an "asserted" tag.
+    return `<div style="padding:4px 0">${_renderTripleHeader(subject, predicate, object, true)}</div>`;
+  }
+  const derivations = explain.derivations || [];
+  if (!derivations.length) {
+    return `<div style="padding:4px 0;color:var(--muted)">${_renderTripleHeader(subject, predicate, object, true)}</div>`;
+  }
+  const stop = depth >= _EXPLAIN_MAX_DEPTH;
+  const branches = derivations.map((d, idx) => {
+    const premiseListId = `prem-${Math.random().toString(36).slice(2,8)}`;
+    const premises = (d.premises || []);
+    const premiseChildren = stop
+      ? `<div style="color:var(--muted);font-size:11px;padding:4px 0">…max depth ${_EXPLAIN_MAX_DEPTH} reached. Increase via <code>_EXPLAIN_MAX_DEPTH</code>.</div>`
+      : premises.map(([ps, pp, po]) => {
+          const childKey = _tripleKey(ps, pp, po);
+          const childId = `child-${childKey.replace(/[^a-zA-Z0-9]/g,'_')}`;
+          // Lazy: render a closed <details>; on open, hydrate.
+          return `
+            <details style="margin:2px 0 2px 14px;padding-left:8px;border-left:1px solid var(--border)"
+                     data-prem-s="${ps}" data-prem-p="${pp}" data-prem-o="${po}" data-depth="${depth+1}"
+                     ontoggle="if (this.open && !this.dataset.hydrated) _hydratePremise(this)">
+              <summary style="cursor:pointer;list-style:none">
+                ${_renderTripleHeader(ps, pp, po, false)}
+                <span style="color:var(--muted);font-size:10px">▼</span>
+              </summary>
+              <div class="prem-body" style="margin-top:4px"></div>
+            </details>`;
+        }).join('');
+    return `
+      <div style="margin-top:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px">
+        <div style="font-weight:600;font-size:12px;margin-bottom:2px">Derivation ${idx+1}</div>
+        ${_renderDerivationBody(d)}
+        ${premises.length ? `
+          <div style="font-size:11px;color:var(--muted);margin:6px 0 2px 0">premises:</div>
+          ${premiseChildren}` : `<div style="font-size:11px;color:var(--muted);margin-top:4px">(no captured premises — engine ${d.engine||'?'} attributes coarsely)</div>`}
+      </div>`;
+  }).join('');
+  return `
+    <div style="padding:4px 0">${_renderTripleHeader(subject, predicate, object, false)}</div>
+    ${branches}`;
+}
+
+async function _hydratePremise(detailsEl) {
+  detailsEl.dataset.hydrated = '1';
+  const body = detailsEl.querySelector('.prem-body');
+  if (!body) return;
+  body.innerHTML = '<div style="color:var(--muted);font-size:11px">expanding…</div>';
+  try {
+    const html = await _renderPremiseTree(
+      detailsEl.dataset.premS, detailsEl.dataset.premP, detailsEl.dataset.premO,
+      +detailsEl.dataset.depth
+    );
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = `<div style="color:#e08383;font-size:11px">${e}</div>`;
+  }
+}
+
+async function explainMaterialisedTriple(i) {
+  const t = (window._materialised_cache || [])[i];
+  const detail = document.getElementById('viewer-mat-detail');
+  if (!t) { detail.textContent = ''; return; }
+  detail.innerHTML = '<div style="color:var(--muted)">loading…</div>';
+  // Fresh selection — drop the cache so the user sees up-to-date lineage
+  // if they ran --phase reason in the background.
+  window._explain_cache = {};
+  try {
+    const html = await _renderPremiseTree(t.subject, t.predicate, t.object, 0);
+    detail.innerHTML = html;
+  } catch (e) {
+    detail.innerHTML = '<div style="color:#e08383">'+e+'</div>';
+  }
 }
 
 async function loadFromViewer() {
@@ -3402,6 +4803,89 @@ async function saveDomainVisibility() {
     document.getElementById('settings-status').textContent = 'Save failed';
   }
 }
+
+// ── Phase E — LLM Providers panel + Insights ask ─────────────────────────
+async function loadInsightsProviders() {
+  const list = document.getElementById('insights-providers');
+  const sel  = document.getElementById('insights-provider-select');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--muted)">loading…</div>';
+  try {
+    const res = await fetch('/api/insights/providers');
+    const out = await res.json();
+    const providers = out.providers || [];
+    list.innerHTML = providers.map(p => {
+      const mark = p.configured ? '✓' : '⚠';
+      const colour = p.configured ? '#5ec27a' : '#e8a83a';
+      const reason = p.reason ? ` <span style="color:var(--muted);font-size:11px">— ${p.reason}</span>` : '';
+      return `<div style="display:flex;align-items:center;gap:8px">
+        <span style="color:${colour};font-weight:700">${mark}</span>
+        <b style="min-width:140px">${p.label}</b>
+        <code style="font-size:11px;color:var(--muted)">${p.model||'—'}</code>
+        <span class="badge" style="background:var(--surface-2);color:var(--muted-2);font-size:10px">${p.residency}</span>
+        ${reason}
+      </div>`;
+    }).join('');
+    // refresh select with configured providers
+    while (sel.options.length > 1) sel.remove(1);
+    providers.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = `${p.label}${p.configured?'':' (unconfigured)'}`;
+      if (!p.configured) opt.disabled = true;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    list.innerHTML = '<div style="color:#e08383">failed to load: '+e+'</div>';
+  }
+}
+
+async function askInsights() {
+  const q = (document.getElementById('insights-question').value || '').trim();
+  const status = document.getElementById('insights-status');
+  const answer = document.getElementById('insights-answer');
+  if (!q) { status.textContent = 'enter a question first'; return; }
+  status.textContent = 'asking…'; status.style.color = 'var(--muted)';
+  answer.innerHTML = '';
+  try {
+    const res = await fetch('/api/insights/ask', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        question: q,
+        provider: document.getElementById('insights-provider-select').value || null,
+        include_materialised: document.getElementById('insights-include-materialised').checked,
+      }),
+    });
+    const out = await res.json();
+    if (!res.ok) {
+      status.textContent = '✗ ' + (out.error || 'error');
+      status.style.color = '#e08383';
+      return;
+    }
+    status.textContent = `${out.duration_ms} ms · ${out.provider}/${out.model||'?'}`;
+    status.style.color = 'var(--muted)';
+    const warn = (out.warnings||[]).map(w =>
+      `<div style="color:#e8a83a;font-size:12px;margin:6px 0">⚠ ${w}</div>`).join('');
+    const grounded = (out.grounded_iris||[]).map(i => `<code style="font-size:11px;color:#5ec27a">${i}</code>`).join(' ');
+    const unknown  = (out.unknown_iris||[]).map(i => `<code style="font-size:11px;color:#e08383">${i}</code>`).join(' ');
+    answer.innerHTML = `
+      ${warn}
+      <div style="margin-top:6px;padding:10px;background:var(--surface-2);border-radius:6px;white-space:pre-wrap;font-size:13px">${(out.answer||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+      <div style="margin-top:8px;font-size:11px"><b style="color:var(--muted)">Grounded IRIs:</b> ${grounded||'<span style="color:var(--muted)">(none)</span>'}</div>
+      <div style="margin-top:4px;font-size:11px"><b style="color:var(--muted)">Unknown IRIs:</b> ${unknown||'<span style="color:var(--muted)">(none)</span>'}</div>
+    `;
+  } catch (e) {
+    status.textContent = '✗ ' + e; status.style.color = '#e08383';
+  }
+}
+// auto-load when the Settings step opens
+document.addEventListener('DOMContentLoaded', () => {
+  const stepNav = document.getElementById('step-nav');
+  if (stepNav) stepNav.addEventListener('click', e => {
+    if (e.target.closest('[data-step="settings"]')) loadInsightsProviders();
+  });
+});
 
 // ── Post-generation tool strip + preflight ──────────────────────────────
 

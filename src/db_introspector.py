@@ -82,6 +82,12 @@ class ColumnModel:
     semantic_type: Optional[str] = None  # xsd type or owl hint
     sensitivity_tier: str = "Internal"
     cq_coverage: List[str] = field(default_factory=list)
+    # ── Phase A: object-property characteristics ──────────────
+    is_transitive: bool = False
+    is_symmetric: bool = False
+    is_functional: bool = False
+    is_inverse_functional: bool = False
+    inverse_of: Optional[str] = None  # counterpart property name (lowerCamel)
 
     @property
     def class_name(self):
@@ -93,6 +99,10 @@ class ColumnModel:
 
     @property
     def is_object_property(self):
+        # Explicit xsd: metadata overrides the `_id$` heuristic — authors
+        # can mark columns like `external_id` as plain string identifiers.
+        if self.semantic_type and self.semantic_type.startswith("xsd:"):
+            return False
         return (self.is_fk or
                 self.semantic_type == "owl:ObjectProperty" or
                 (self.name.endswith("_id") and not self.is_pk))
@@ -128,6 +138,9 @@ class TableModel:
     skos_pref_label: Optional[str] = None
     skos_alt_labels: List[str] = field(default_factory=list)
     cq_coverage: List[str] = field(default_factory=list)
+    # ── Phase A: class-level axiom signals ─────────────────────
+    disjoint_group: Optional[str] = None     # shared name → AllDisjointClasses
+    has_key_columns: List[str] = field(default_factory=list)  # → owl:hasKey
 
     @property
     def class_name(self):
@@ -248,6 +261,11 @@ class DBIntrospector:
                 semantic_type=col_meta.get("semantic_type"),
                 sensitivity_tier=col_meta.get("sensitivity_tier", "Internal"),
                 cq_coverage=cq,
+                is_transitive=bool(col_meta.get("is_transitive", 0)),
+                is_symmetric=bool(col_meta.get("is_symmetric", 0)),
+                is_functional=bool(col_meta.get("is_functional", 0)),
+                is_inverse_functional=bool(col_meta.get("is_inverse_functional", 0)),
+                inverse_of=col_meta.get("inverse_of"),
             ))
         return models
 
@@ -268,6 +286,10 @@ class DBIntrospector:
         if meta.get("cq_coverage"):
             cq = [x.strip() for x in meta["cq_coverage"].split(",") if x.strip()]
 
+        has_key_cols: List[str] = []
+        if meta.get("has_key_columns"):
+            has_key_cols = [x.strip() for x in meta["has_key_columns"].split(",") if x.strip()]
+
         return TableModel(
             name=table,
             columns=columns,
@@ -281,6 +303,8 @@ class DBIntrospector:
             skos_pref_label=meta.get("skos_pref_label"),
             skos_alt_labels=alt_labels,
             cq_coverage=cq,
+            disjoint_group=meta.get("disjoint_group"),
+            has_key_columns=has_key_cols,
         )
 
     def introspect_all(self) -> List[TableModel]:
