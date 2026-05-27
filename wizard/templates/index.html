@@ -477,6 +477,7 @@
       <li class="step-divider" aria-hidden="true">Build</li>
       <li class="active" data-step="domain"><span class="step-num">1</span> Domain Identity</li>
       <li data-step="entities"><span class="step-num">2</span> Entities</li>
+      <li data-step="log-discovery"><span class="step-num">2.5</span> Log Discovery</li>
       <li data-step="events"><span class="step-num">3</span> Events</li>
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
       <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
@@ -615,7 +616,65 @@
         <button class="btn btn-ghost" onclick="goStep('domain')">← Back</button>
         <span class="nav-hint">Step 2 of 6 · Entities are optional but recommended.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('events')">Skip →</button>
+          <button class="btn btn-ghost"   onclick="goStep('log-discovery')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('log-discovery')">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2.5 — Log Discovery (L4) -->
+    <div class="step-panel" id="step-log-discovery">
+      <div class="step-title">Log Discovery <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span></div>
+      <div class="step-subtitle">Review entities, relationships, events, and causal edges extracted from your logs by Phase L1 (templates + PMI) and Phase L2 (HMM anomalies). Approve to bring them into your session.</div>
+
+      <div class="card" id="log-disco-empty" style="display:none">
+        <h3>No log mining yet</h3>
+        <div class="box-help">
+          Point the toolkit at a folder of logs to extract candidate
+          patterns. The miner runs <b>Drain</b> template clustering,
+          <b>PMI-weighted</b> entity graph, and <b>HMM</b> trajectory
+          anomaly detection in one shot.
+        </div>
+        <pre style="background:var(--bg);padding:8px;border-radius:6px;font-size:12px">python toolkit.py --phase mine --log-path /path/to/logs/
+python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
+        <button class="btn btn-ghost" onclick="loadLogDiscovery()">↻ Re-check for results</button>
+      </div>
+
+      <div class="card" id="log-disco-content" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+          <h3 style="margin:0">Candidates <span id="log-disco-counts" class="badge"></span></h3>
+          <div style="display:flex; gap:8px; align-items:center">
+            <label style="font-size:12px; color:var(--muted)">Kind</label>
+            <select id="log-disco-kind" onchange="loadLogDiscovery()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px">
+              <option value="">All</option>
+              <option value="LOG_EVENT">Events</option>
+              <option value="LOG_ENTITY">Entities</option>
+              <option value="LOG_RELATIONSHIP">Relationships</option>
+              <option value="LOG_CAUSAL_EDGE">Causal edges</option>
+            </select>
+            <label style="font-size:12px; color:var(--muted)">Status</label>
+            <select id="log-disco-status" onchange="loadLogDiscovery()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px">
+              <option value="PENDING">Pending</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="ALL">All</option>
+            </select>
+            <button class="btn btn-ghost" onclick="reseedLogDiscovery()" title="Re-build proposals from the latest mining outputs">↻ Re-seed</button>
+          </div>
+        </div>
+        <div class="box-help">
+          Sort order is <b>confidence × consequence</b> — the highest-impact candidates land first.
+          Each row carries the proposal kind, a confidence bar, a short evidence sample,
+          and four actions: <b>✓ approve</b> (drop into session), <b>✕ reject</b> (mark dismissed),
+          <b>✎ edit</b> (override label/name before approving), <b>🔀 merge</b> (fold into existing).
+        </div>
+        <div id="log-disco-list" style="margin-top:8px"></div>
+      </div>
+
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('entities')">← Back</button>
+        <span class="nav-hint">Step 2.5 of 6 · Optional. Engineers run this after pointing the toolkit at a log folder.</span>
+        <div class="nav-right">
           <button class="btn btn-primary" onclick="goStep('events')">Continue →</button>
         </div>
       </div>
@@ -1678,6 +1737,7 @@ function goStep(name) {
   }
   if (name === 'library')  refreshLibrary();
   if (name === 'settings') refreshSettings();
+  if (name === 'log-discovery') loadLogDiscovery();
   if (['evolve','comply','retrieve'].includes(name)) {
     _highlightPeerPill(name);
     _runPreflight(name);
@@ -2824,6 +2884,216 @@ function _renderRuleCard(r, i) {
       <div id="rule-msg-${i}" style="margin-top:6px; font-size:12px; min-height:14px;"></div>
       <div id="rule-fire-${i}" style="margin-top:6px"></div>
     </div>`;
+}
+
+// ── L4 — Log Discovery review step ────────────────────────────────────
+// Reads from the new /api/log-discovery/* endpoints and routes approvals
+// back into session.entities / events / relationships / causal_rules.
+async function loadLogDiscovery() {
+  const empty = document.getElementById('log-disco-empty');
+  const content = document.getElementById('log-disco-content');
+  if (!empty || !content) return;
+  const kind = (document.getElementById('log-disco-kind') || {}).value || '';
+  const status = (document.getElementById('log-disco-status') || {}).value || 'PENDING';
+
+  // First, summary to decide which card to show.
+  try {
+    const sres = await fetch('/api/log-discovery/summary');
+    const sout = await sres.json();
+    if (!sout.available) {
+      content.style.display = 'none';
+      empty.style.display = '';
+      empty.querySelector('h3').nextSibling;
+      return;
+    }
+    const total = Object.values(sout.by_kind || {})
+      .reduce((sum, kindCounts) => sum + Object.values(kindCounts || {}).reduce((s, n) => s + n, 0), 0);
+    if (!total) {
+      empty.style.display = '';
+      content.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    content.style.display = '';
+    const headline = Object.entries(sout.by_kind || {}).map(([k, sc]) =>
+      `${k.replace('LOG_','').toLowerCase()}: ${Object.values(sc).reduce((s,n)=>s+n,0)}`
+    ).join(' · ');
+    document.getElementById('log-disco-counts').textContent = `(${headline})`;
+  } catch (_) {
+    empty.style.display = '';
+    content.style.display = 'none';
+    return;
+  }
+
+  // Fetch the candidate list.
+  const params = new URLSearchParams();
+  if (kind) params.set('kind', kind);
+  if (status) params.set('status', status);
+  params.set('limit', '50');
+  const list = document.getElementById('log-disco-list');
+  list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">loading…</div>';
+  try {
+    const res = await fetch('/api/log-discovery/candidates?' + params);
+    const out = await res.json();
+    const cands = out.candidates || [];
+    if (!cands.length) {
+      list.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:8px">No candidates match the current filter.</div>`;
+      return;
+    }
+    list.innerHTML = cands.map(c => _renderLogDiscoveryRow(c)).join('');
+  } catch (e) {
+    list.innerHTML = `<div style="color:#e08383;font-size:12px;padding:8px">${e}</div>`;
+  }
+}
+
+function _renderLogDiscoveryRow(c) {
+  const kindBadge = {
+    'LOG_EVENT': ['Event', '#4338ca'],
+    'LOG_ENTITY': ['Entity', '#0e7490'],
+    'LOG_RELATIONSHIP': ['Relationship', '#0f766e'],
+    'LOG_CAUSAL_EDGE': ['Causal edge', '#9333ea'],
+  }[c.kind] || [c.kind, 'var(--muted)'];
+  const conf = Math.round((c.confidence_score || 0) * 100);
+  const sample = (c.evidence_sample || '').toString().slice(0, 120);
+  const showMiniGraph = (c.kind === 'LOG_RELATIONSHIP' || c.kind === 'LOG_CAUSAL_EDGE');
+  const isPending = (c.status === 'PENDING');
+  return `
+    <div class="card" style="padding:10px;margin-bottom:8px" id="log-disco-row-${c.proposal_id}">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+        <span style="background:${kindBadge[1]};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${kindBadge[0]}</span>
+        <span style="flex:1;font-size:13px;color:var(--text);font-weight:500">${(c.title || '').replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</span>
+        <div style="display:flex;align-items:center;gap:6px;min-width:140px">
+          <div style="background:var(--bg);border-radius:4px;height:6px;width:80px;overflow:hidden">
+            <div style="background:#5ec27a;height:100%;width:${conf}%"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted);font-family:monospace">${conf}%</span>
+        </div>
+      </div>
+      ${sample ? `<div style="font-size:11px;color:var(--muted);font-family:monospace;padding:4px 8px;background:var(--bg);border-radius:4px;margin:4px 0">${sample.replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</div>` : ''}
+      ${showMiniGraph && isPending ? `<div id="log-disco-mini-${c.proposal_id}" style="margin-top:6px"></div>` : ''}
+      <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+        ${isPending ? `
+          <button class="btn btn-primary" style="padding:3px 10px;font-size:11px" onclick="approveLogCandidate('${c.proposal_id}')">✓ Approve</button>
+          <button class="btn btn-ghost"   style="padding:3px 10px;font-size:11px" onclick="rejectLogCandidate('${c.proposal_id}')">✕ Reject</button>
+          <button class="btn btn-ghost"   style="padding:3px 10px;font-size:11px" onclick="editLogCandidate('${c.proposal_id}')">✎ Edit</button>
+          <button class="btn btn-ghost"   style="padding:3px 10px;font-size:11px" onclick="mergeLogCandidate('${c.proposal_id}')">🔀 Merge</button>
+        ` : `<span style="color:var(--muted);font-size:11px">${c.status} — ${(c.detection_strategy||'').replace(/_/g, ' ').toLowerCase()}</span>`}
+        ${showMiniGraph && isPending ? `<button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;margin-left:auto" onclick="renderLogMiniGraph('${c.proposal_id}')">👁 Show endpoints</button>` : ''}
+      </div>
+    </div>`;
+}
+
+async function approveLogCandidate(pid, edits) {
+  try {
+    const res = await fetch(`/api/log-discovery/${encodeURIComponent(pid)}/approve`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({edits: edits || {}}),
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Approve failed: ' + (out.error || 'unknown')); return; }
+    showToast(`Approved — added to session.${out.kind === 'LOG_EVENT' ? 'events' : out.kind === 'LOG_ENTITY' ? 'entities' : out.kind === 'LOG_RELATIONSHIP' ? 'relationships' : 'causal_rules'}`);
+    // Refresh the panel + the session-driven step renders so the user
+    // sees the new entry on its destination step immediately.
+    await reloadSessionAndRender();
+    loadLogDiscovery();
+  } catch (e) { showToast('Approve error: ' + e); }
+}
+
+async function rejectLogCandidate(pid) {
+  const note = prompt('Reason for rejection (optional)') || '';
+  try {
+    const res = await fetch(`/api/log-discovery/${encodeURIComponent(pid)}/reject`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({note}),
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Reject failed'); return; }
+    loadLogDiscovery();
+  } catch (e) { showToast('Reject error: ' + e); }
+}
+
+function editLogCandidate(pid) {
+  const newLabel = prompt('Edit label for this candidate before approving:');
+  if (newLabel === null) return;
+  approveLogCandidate(pid, {label: newLabel});
+}
+
+async function mergeLogCandidate(pid) {
+  const into = prompt('Merge into existing session entry name/label:');
+  if (!into) return;
+  try {
+    const res = await fetch(`/api/log-discovery/${encodeURIComponent(pid)}/merge`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({into}),
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Merge failed'); return; }
+    showToast('Merged into ' + (out.merged_into || into));
+    await reloadSessionAndRender();
+    loadLogDiscovery();
+  } catch (e) { showToast('Merge error: ' + e); }
+}
+
+async function reseedLogDiscovery() {
+  try {
+    const res = await fetch('/api/log-discovery/seed', {method: 'POST'});
+    const out = await res.json();
+    if (!res.ok) { showToast('Re-seed failed: ' + (out.error || '')); return; }
+    showToast(`Re-seeded ${Object.values(out.counts).reduce((s,n)=>s+n,0)} candidate(s)`);
+    loadLogDiscovery();
+  } catch (e) { showToast('Re-seed error: ' + e); }
+}
+
+// L4.5 — mini graph for relationship / causal-edge candidates. We
+// extract the two endpoint labels from the candidate title (which the
+// L4.1 seeding writes in `src ↔ dst` / `src → dst` shape) and draw a
+// tiny vis-network with those two nodes lit up.
+async function renderLogMiniGraph(pid) {
+  const host = document.getElementById('log-disco-mini-' + pid);
+  if (!host) return;
+  if (host._rendered) { host.innerHTML = ''; host._rendered = false; return; }
+  const row = document.getElementById('log-disco-row-' + pid);
+  const title = (row && row.querySelector('span:nth-child(2)').textContent) || '';
+  // Title shape: "Relationship candidate: <src> ↔ <dst> (PMI 6.65)"
+  //            or "Causal candidate: <src> → <dst> (PMI 6.65)"
+  const m = title.match(/:\s*(.+?)\s*(↔|→)\s*(.+?)\s+\(/);
+  const src = m ? m[1] : '?';
+  const dst = m ? m[3] : '?';
+  const arrow = m ? m[2] === '→' : false;
+  host.innerHTML = `<div id="log-disco-canvas-${pid}" style="height:120px;background:var(--bg);border-radius:6px;margin-top:6px"></div>`;
+  host._rendered = true;
+  if (typeof vis === 'undefined' || !vis.Network) return;
+  const accent = _cssVar('--accent', '#4f46e5');
+  const text = _cssVar('--text', '#0f172a');
+  const idle = _cssVar('--surface', '#ffffff');
+  const border = _cssVar('--border', '#cbd5e1');
+  const nodes = new vis.DataSet([
+    {id: 'src', label: src, color: {background: accent, border: accent},
+     font: {color: _cssVar('--on-accent', '#ffffff'), size: 11, face: 'Inter,system-ui'}, shape: 'box', margin: 8},
+    {id: 'dst', label: dst, color: {background: idle, border: border},
+     font: {color: text, size: 11, face: 'Inter,system-ui'}, shape: 'box', margin: 8, borderWidth: 1},
+  ]);
+  const edges = new vis.DataSet([{
+    from: 'src', to: 'dst', arrows: arrow ? 'to' : '',
+    color: {color: _cssVar('--muted-2', '#94a3b6')},
+    label: arrow ? 'precedes' : 'related to',
+    font: {color: text, size: 10, background: idle, strokeWidth: 0},
+  }]);
+  new vis.Network(
+    document.getElementById('log-disco-canvas-' + pid),
+    {nodes, edges},
+    {physics: {stabilization: {iterations: 50, fit: true}},
+     interaction: {dragView: false, zoomView: false}}
+  );
+}
+
+// Trigger a session reload so other steps reflect new approvals.
+async function reloadSessionAndRender() {
+  try {
+    const r = await fetch('/api/session');
+    session = await r.json();
+    render();
+  } catch (_) {}
 }
 
 // Suggestion #2 — NL summary round-trip helpers.

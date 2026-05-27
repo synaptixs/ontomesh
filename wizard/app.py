@@ -821,6 +821,119 @@ def insights_ask():
     return jsonify(result.to_dict())
 
 
+# ── Phase L4 — Log Discovery review surface ──────────────────────────────
+
+
+_ENTERPRISE_DB = os.path.join(ROOT, "db", "enterprise.db")
+
+
+def _log_review_conn():
+    import sqlite3 as _sqlite3
+    return _sqlite3.connect(_ENTERPRISE_DB)
+
+
+@app.route("/api/log-discovery/summary", methods=["GET"])
+def log_discovery_summary():
+    """Headline counts per kind/status. Used by the Log Discovery
+    sidebar entry to show how many proposals await review."""
+    import sqlite3
+    from wizard import log_review
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"available": False,
+                        "reason": "no enterprise.db — run --phase mine first"})
+    conn = _log_review_conn()
+    try:
+        out = log_review.summary(conn)
+    finally:
+        conn.close()
+    return jsonify(out)
+
+
+@app.route("/api/log-discovery/candidates", methods=["GET"])
+def log_discovery_candidates():
+    """List candidates. Query params: kind, status, limit."""
+    from wizard import log_review
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"candidates": [], "available": False})
+    kind = request.args.get("kind") or None
+    status = request.args.get("status") or "PENDING"
+    try:
+        limit = max(1, min(500, int(request.args.get("limit", "50"))))
+    except ValueError:
+        limit = 50
+    conn = _log_review_conn()
+    try:
+        cands = log_review.list_candidates(
+            conn, kind=kind, status=status, limit=limit)
+    finally:
+        conn.close()
+    return jsonify({"candidates": cands, "available": True})
+
+
+@app.route("/api/log-discovery/seed", methods=["POST"])
+def log_discovery_seed():
+    """Re-seed the proposal store from the latest L1/L2 outputs.
+    Idempotent; safe to call from the UI after a fresh mining run."""
+    from wizard import log_review
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    conn = _log_review_conn()
+    try:
+        counts = log_review.seed_from_mining(conn)
+    finally:
+        conn.close()
+    return jsonify({"ok": True, "counts": counts})
+
+
+@app.route("/api/log-discovery/<proposal_id>/approve", methods=["POST"])
+def log_discovery_approve(proposal_id):
+    from wizard import log_review
+    body = request.get_json(force=True) or {}
+    edits = body.get("edits") or {}
+    session = _load_session()
+    conn = _log_review_conn()
+    try:
+        result = log_review.approve(conn, session, proposal_id, edits=edits)
+    except KeyError:
+        return jsonify({"error": "proposal not found"}), 404
+    finally:
+        conn.close()
+    _save_session(session)
+    return jsonify(result)
+
+
+@app.route("/api/log-discovery/<proposal_id>/reject", methods=["POST"])
+def log_discovery_reject(proposal_id):
+    from wizard import log_review
+    body = request.get_json(force=True) or {}
+    note = (body.get("note") or "").strip()
+    conn = _log_review_conn()
+    try:
+        result = log_review.reject(conn, proposal_id, note=note)
+    finally:
+        conn.close()
+    return jsonify(result)
+
+
+@app.route("/api/log-discovery/<proposal_id>/merge", methods=["POST"])
+def log_discovery_merge(proposal_id):
+    from wizard import log_review
+    body = request.get_json(force=True) or {}
+    into = (body.get("into") or "").strip()
+    if not into:
+        return jsonify({"error": "into is required"}), 400
+    session = _load_session()
+    conn = _log_review_conn()
+    try:
+        result = log_review.merge(conn, session, proposal_id, into_name=into)
+    except KeyError:
+        return jsonify({"error": "proposal not found"}), 404
+    finally:
+        conn.close()
+    _save_session(session)
+    return jsonify(result)
+
+
 @app.route("/api/pipeline/status", methods=["GET"])
 def pipeline_status():
     return jsonify({
