@@ -873,16 +873,43 @@ def log_discovery_candidates():
 @app.route("/api/log-discovery/seed", methods=["POST"])
 def log_discovery_seed():
     """Re-seed the proposal store from the latest L1/L2 outputs.
-    Idempotent; safe to call from the UI after a fresh mining run."""
+
+    Body (optional):
+        {"log_path": "/path/to/logs", "with_causality": true}
+
+    When ``log_path`` is supplied, re-mines the corpus briefly to get
+    the in-memory extractions and runs L3's triangulation gate. Without
+    a log_path the seed falls back to the L1-only path (directed PMI
+    edges → causal proposals, no statistical gating).
+    """
     from wizard import log_review
     if not os.path.isfile(_ENTERPRISE_DB):
         return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    body = request.get_json(silent=True) or {}
+    log_path = (body.get("log_path") or "").strip()
+    extractions = None
+    if log_path and body.get("with_causality", True):
+        try:
+            from log_corpus import LogCorpus
+            from log_templates import LogTemplateMiner
+            miner = LogTemplateMiner(_log_review_conn())
+            for rec in LogCorpus(log_path).iter():
+                miner.consume(rec.message, timestamp=rec.timestamp,
+                              severity=rec.severity,
+                              service=rec.fields.get("service") if rec.fields else None,
+                              trace_id=rec.fields.get("trace_id") if rec.fields else None)
+            miner.flush()
+            extractions = miner.extractions
+        except Exception:                       # noqa: BLE001 — fall back to L1-only
+            extractions = None
+
     conn = _log_review_conn()
     try:
-        counts = log_review.seed_from_mining(conn)
+        counts = log_review.seed_from_mining(conn, extractions=extractions)
     finally:
         conn.close()
-    return jsonify({"ok": True, "counts": counts})
+    return jsonify({"ok": True, "counts": counts,
+                    "triangulation": bool(extractions)})
 
 
 @app.route("/api/log-discovery/<proposal_id>/approve", methods=["POST"])

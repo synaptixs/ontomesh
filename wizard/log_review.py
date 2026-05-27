@@ -93,11 +93,21 @@ def _slot_qname(template: str, slot_idx: int, slot_type: str) -> str:
     return f":{stem}Field{slot_idx}"
 
 
-def seed_from_mining(conn: sqlite3.Connection) -> Dict[str, int]:
+def seed_from_mining(conn: sqlite3.Connection,
+                     extractions: Optional[Sequence[dict]] = None
+                     ) -> Dict[str, int]:
     """Convert log_templates / log_template_slots / log_entity_edges
     into ontology_evolution_proposals rows. Idempotent — re-runs upsert
     instead of duplicating, and any row already ``APPROVED`` /
     ``REJECTED`` is left untouched.
+
+    If ``extractions`` is supplied (from a fresh L1 mining run), L3's
+    causality miner runs to gate the directed edges:
+      - edges that pass the (PMI + temporal + Granger/TE) triangulation
+        become LOG_CAUSAL_EDGE with confidence reflecting all three;
+      - edges that fail downgrade to LOG_RELATIONSHIP.
+    When ``extractions`` is None we fall back to the L1-only path: every
+    directed PMI edge → LOG_CAUSAL_EDGE (no statistical gating).
     """
     if not _table_exists(conn, "ontology_evolution_proposals"):
         return {"log_event": 0, "log_entity": 0, "log_relationship": 0,
@@ -105,6 +115,27 @@ def seed_from_mining(conn: sqlite3.Connection) -> Dict[str, int]:
 
     counts = {"log_event": 0, "log_entity": 0,
               "log_relationship": 0, "log_causal_edge": 0}
+
+    # L3 — if we have the L1 extractions in hand, run the causality
+    # miner and build a set of (src, dst) pairs that survived the
+    # triangulation gate. Directed edges absent from this set will be
+    # demoted to LOG_RELATIONSHIP below.
+    causal_pairs: set = set()
+    causal_meta: Dict[tuple, dict] = {}
+    if extractions:
+        try:
+            import sys as _sys, os as _os
+            _src = _os.path.join(_os.path.dirname(_os.path.dirname(
+                _os.path.abspath(__file__))), "src")
+            if _src not in _sys.path:
+                _sys.path.insert(0, _src)
+            from causality_miner import find_causality_candidates  # noqa: E402
+            cands = find_causality_candidates(extractions, conn)
+            for c in cands:
+                causal_pairs.add((c.src, c.dst))
+                causal_meta[(c.src, c.dst)] = c.to_dict()
+        except Exception:                       # noqa: BLE001 — never break seed
+            pass
 
     # 1. LOG_EVENT — every non-merged template with hits ≥ 3 becomes
     #    a candidate event class.
@@ -185,27 +216,49 @@ def seed_from_mining(conn: sqlite3.Connection) -> Dict[str, int]:
             )
             counts["log_entity"] += 1
 
-    # 3. LOG_RELATIONSHIP (undirected) and LOG_CAUSAL_EDGE (directed)
+    # 3. LOG_RELATIONSHIP (undirected) and LOG_CAUSAL_EDGE (directed +
+    #    triangulation-gated when L3 ran). Edges with `directed=1` but
+    #    no causal_pairs entry are demoted to LOG_RELATIONSHIP — they
+    #    co-occur and have a temporal lead but the past of `src` doesn't
+    #    inform the future of `dst` beyond what `dst`'s own past does.
     if _table_exists(conn, "log_entity_edges"):
         for row in conn.execute(
             "SELECT src, dst, pmi, cooccurrence_count, temporal_lead_ratio, directed "
             "FROM log_entity_edges WHERE pmi >= 3.0"
         ):
             src, dst, pmi, count, lead, directed = row
-            if directed:
+            gated_causal = directed and (src, dst) in causal_pairs
+            cmeta = causal_meta.get((src, dst))
+            if gated_causal:
                 ptype = "LOG_CAUSAL_EDGE"
                 kind_key = "log_causal_edge"
-                title = f"Causal candidate: {src[:30]} → {dst[:30]} (PMI {pmi:.1f})"
+                title = (f"Causal candidate: {src[:30]} → {dst[:30]} "
+                         f"(PMI {pmi:.1f}, via {cmeta['via']})")
+                strategy = "GRANGER_CAUSALITY"
+                # Use the triangulated confidence — it blends all three signals.
+                confidence = cmeta["confidence"]
+            elif directed:
+                # Directed by PMI temporal-ordering but failed statistical
+                # gating — surface as a relationship instead so the
+                # reviewer sees the signal without the causal claim.
+                ptype = "LOG_RELATIONSHIP"
+                kind_key = "log_relationship"
+                title = (f"Relationship (directed but ungated): "
+                         f"{src[:30]} → {dst[:30]} (PMI {pmi:.1f})")
+                strategy = "PMI_TEMPORAL_ORDERING"
+                confidence = min(1.0, 0.4 + (pmi - 3.0) / 10.0)
             else:
                 ptype = "LOG_RELATIONSHIP"
                 kind_key = "log_relationship"
                 title = f"Relationship candidate: {src[:30]} ↔ {dst[:30]} (PMI {pmi:.1f})"
+                strategy = "PMI_TEMPORAL_ORDERING"
+                confidence = min(1.0, 0.4 + (pmi - 3.0) / 10.0)
             pid = _stable_id(f"{ptype.lower()}:{src}::{dst}")
-            confidence = min(1.0, 0.4 + (pmi - 3.0) / 10.0)
             candidate_turtle = (
-                f"# Candidate {('directed' if directed else 'undirected')} "
-                f"edge\n# src={src}  dst={dst}  PMI={pmi:.2f}  "
-                f"lead_ratio={lead}\n"
+                f"# {ptype}\n# src={src}\n# dst={dst}\n"
+                f"# PMI={pmi:.2f}  lead_ratio={lead}\n"
+                + (f"# granger_p={cmeta['granger_p']:.4f} lag={cmeta['granger_lag']}\n"
+                   f"# te_z={cmeta['te_z']:.2f}\n" if cmeta else "")
             )
             evidence_sparql = (
                 f"PREFIX : <https://ontology.example.com/enterprise/>\n"
@@ -217,14 +270,16 @@ def seed_from_mining(conn: sqlite3.Connection) -> Dict[str, int]:
                 title=title,
                 candidate_turtle=candidate_turtle,
                 evidence_sparql=evidence_sparql,
-                detection_strategy=(
-                    "PMI_TEMPORAL_ORDERING" if directed
-                    else "PMI_TEMPORAL_ORDERING"
-                ),
+                detection_strategy=strategy,
                 confidence_score=confidence,
                 dim_evidence_volume=min(1.0, count / 30.0),
                 dim_cross_domain=min(1.0, pmi / 10.0),
-                evidence_sample=f"{src} → {dst}" if directed else f"{src} ↔ {dst}",
+                # Park the Granger p-value in dim_consistency_risk so
+                # the UI panel can show it without parsing turtle.
+                dim_consistency_risk=(1.0 - cmeta["granger_p"]) if cmeta else 0.0,
+                evidence_sample=(f"{src} → {dst}"
+                                 if gated_causal or directed
+                                 else f"{src} ↔ {dst}"),
             )
             counts[kind_key] += 1
 
@@ -469,11 +524,18 @@ def _build_session_entry(cand: dict, edits: dict) -> dict:
             "proposal_id": cand["proposal_id"],
         }
     if kind == "LOG_CAUSAL_EDGE":
+        # Carry cause_class / effect_class / window_seconds through to
+        # the session so wizard.rules.compile_causal_rule can build a
+        # proper SPARQL CONSTRUCT — the stub `candidate_turtle` is
+        # comment-only and won't parse.
         return {
             "id": edits.get("id", cand["proposal_id"][:8]),
             "kind": "sparql",
             "label": edits.get("label", cand["title"]),
-            "body": edits.get("body", cand["candidate_turtle"]),
+            "cause_class": edits.get("cause_class"),
+            "effect_class": edits.get("effect_class"),
+            "window_seconds": edits.get("window_seconds", 60),
+            "body": edits.get("body"),       # optional override
             "enabled": True,
             "source": "log-discovery",
             "proposal_id": cand["proposal_id"],

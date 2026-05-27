@@ -159,8 +159,20 @@ def phase2_ontology(db_path: str, out_path: str):
     from db_introspector import DBIntrospector
     from ontology_generator import generate_ontology
 
+    # Load the wizard session if present so log-discovery (Phase L5)
+    # classes + RCA taxonomy land in enterprise.ttl automatically.
+    session = None
+    session_path = os.path.join(HERE, ".wizard_session.json")
+    if os.path.isfile(session_path):
+        try:
+            with open(session_path) as f:
+                session = json.load(f)
+        except Exception:
+            session = None
+
     intro = DBIntrospector(db_path)
-    generate_ontology(intro, os.path.join(out_path, "ontology"))
+    generate_ontology(intro, os.path.join(out_path, "ontology"),
+                      session=session)
     intro.close()
 
     # Reasoner integration — classify and snapshot (graceful if ROBOT absent)
@@ -209,6 +221,7 @@ def phase_reason(db_path: str, out_path: str):
             with open(session_path) as f:
                 session = json.load(f)
             session_rules = session.get("rules") or []
+            causal_rules = session.get("causal_rules") or []
             if session_rules:
                 sys.path.insert(0, HERE)
                 from wizard.rules import export_rules
@@ -219,6 +232,16 @@ def phase_reason(db_path: str, out_path: str):
                       f"({counts['skipped']} skipped)")
                 for rid, msg in export["skipped"]:
                     print(f"    ✗ {rid}: {msg}")
+            # L5.3 — approved LOG_CAUSAL_EDGE entries compile to SPARQL
+            # CONSTRUCTs that Phase B materialisation picks up.
+            if causal_rules:
+                sys.path.insert(0, HERE)
+                from wizard.rules import export_causal_rules
+                cexp = export_causal_rules(causal_rules, out_path)
+                if cexp["written"]:
+                    print(f"  ↪ Causal rules exported: {len(cexp['written'])}")
+                for rid, msg in cexp.get("skipped", []):
+                    print(f"    ✗ causal {rid}: {msg}")
         except Exception as exc:  # noqa: BLE001
             print(f"  ⚠ Rule export failed: {exc}")
 
@@ -806,12 +829,40 @@ def main():
 
         report = mine_corpus(corpus, conn)
         r = report.as_dict()
+
+        # L3 — triangulation-gate the directed edges + seed proposals.
+        try:
+            from log_templates import LogTemplateMiner
+            from wizard.log_review import seed_from_mining
+            # Build a fresh extractions list for L3 — cheap compared to
+            # re-running the whole pipeline. We seed proposals using
+            # those extractions so the causality gate runs.
+            seed_miner = LogTemplateMiner(conn)
+            for rec in corpus.iter():
+                seed_miner.consume(
+                    rec.message, timestamp=rec.timestamp,
+                    severity=rec.severity,
+                    service=rec.fields.get("service") if rec.fields else None,
+                    trace_id=rec.fields.get("trace_id") if rec.fields else None)
+            seed_miner.flush()
+            seed_counts = seed_from_mining(conn, extractions=seed_miner.extractions)
+            r["proposals_seeded"] = sum(seed_counts.values())
+            r["proposal_breakdown"] = seed_counts
+        except Exception as exc:                # noqa: BLE001
+            r["proposals_seeded_error"] = str(exc)[:120]
+
         print(f"  ✓ records ingested      {r['records_ingested']:>6,}")
         print(f"  ✓ templates             {r['templates']:>6,}"
               f"  (after EM merge: {r['templates_after_em']}, "
               f"merges: {r['em_merges']})")
         print(f"  ✓ slots profiled        {r['slots_profiled']:>6,}")
         print(f"  ✓ entity edges          {r['edges_persisted']:>6,}")
+        if "proposal_breakdown" in r:
+            pb = r["proposal_breakdown"]
+            print(f"  ✓ proposals seeded      "
+                  f"{r['proposals_seeded']:>6,}  "
+                  f"(event={pb['log_event']} entity={pb['log_entity']} "
+                  f"rel={pb['log_relationship']} causal={pb['log_causal_edge']})")
         print(f"  ✓ duration              {r['duration_s']:>6}s")
         # Write a small JSON summary alongside the standard reports dir
         # so the wizard's Log Discovery step (L4) can show the headline
