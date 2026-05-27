@@ -608,7 +608,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
+                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
                                  "embed","retrieve"],
                         help="Run a specific phase only")
@@ -756,6 +756,73 @@ def main():
             custom_regex=args.log_regex,
             dry_run=args.dry_run,
         )
+
+    def phase_mine(db_path: str, out_path: str):
+        """Phase L1 — Log mining for RCA bootstrap.
+
+        Reads logs from a folder (or glob, or single file), clusters
+        them into templates via Drain, classifies the variable slots,
+        builds a PMI-weighted entity graph with temporal direction,
+        and persists every layer to SQLite for the engineer-review step.
+
+        See docs/log-rca-roadmap.md and docs/log-rca-dev-plan.md.
+
+        Inputs are gathered from existing CLI flags:
+          --log-path <folder|glob|file>   (required)
+          --log-format auto|jsonl|syslog|cef|otlp|regex
+          --log-regex <pattern>           (regex format only)
+          --db                            (output SQLite path)
+        """
+        step("L1", "Log Mining — Templates · Slot Typing · PMI Graph")
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase mine")
+            print("    Example: python3 toolkit.py --phase mine "
+                  "--log-path examples/log-rca/sample/")
+            return
+        try:
+            from log_corpus import LogCorpus
+            from log_miner import mine_corpus
+            from db.migrations.log_rca_proposals import migrate as _migrate_proposals
+        except ImportError as exc:
+            print(f"  ✗ {exc}")
+            print("    Install the mining extras: pip install -e .[mining]")
+            return
+
+        os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        # Make sure the proposal store can receive log-mined candidates
+        # if/when L4 review pushes them. Idempotent.
+        _migrate_proposals(conn)
+
+        corpus = LogCorpus(log_path, fmt=args.log_format,
+                           custom_regex=args.log_regex)
+        files = corpus.resolve_files()
+        print(f"  ↪ corpus: {len(files)} file(s) under {log_path}")
+        if not files:
+            print("  ⚠ no log files matched — supported extensions: "
+                  ".jsonl .json .log .syslog .cef .otlp .txt")
+            return
+
+        report = mine_corpus(corpus, conn)
+        r = report.as_dict()
+        print(f"  ✓ records ingested      {r['records_ingested']:>6,}")
+        print(f"  ✓ templates             {r['templates']:>6,}"
+              f"  (after EM merge: {r['templates_after_em']}, "
+              f"merges: {r['em_merges']})")
+        print(f"  ✓ slots profiled        {r['slots_profiled']:>6,}")
+        print(f"  ✓ entity edges          {r['edges_persisted']:>6,}")
+        print(f"  ✓ duration              {r['duration_s']:>6}s")
+        # Write a small JSON summary alongside the standard reports dir
+        # so the wizard's Log Discovery step (L4) can show the headline
+        # numbers without re-running the pipeline.
+        reports_dir = os.path.join(out_path, "reports")
+        os.makedirs(reports_dir, exist_ok=True)
+        summary_path = os.path.join(reports_dir, "log_mining_summary.json")
+        with open(summary_path, "w") as f:
+            json.dump(r, f, indent=2)
+        print(f"  ✓ summary               → {summary_path}")
+        conn.close()
 
     def phase_security(db_path: str, out_path: str):
         step(0, "Named-Graph RBAC Config Generation")
@@ -1283,6 +1350,7 @@ def main():
         "reasoner": [(phase_reasoner,  [args.db, args.out])],
         "sparql":   [(phase_sparql,    [args.db, args.out])],
         "log":       [(phase_log,       [args.db, args.out])],
+        "mine":      [(phase_mine,      [args.db, args.out])],
         "security":  [(phase_security,  [args.db, args.out])],
         "conflict":  [(phase_conflict,  [args.db, args.out])],
         "alignment": [(phase_alignment, [args.db, args.out])],
