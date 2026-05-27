@@ -144,11 +144,18 @@ class LogTemplateMiner:
         self._pending_service: Dict[int, Dict[str, int]] = {}
         self._pending_templates: Dict[int, Tuple[str, str]] = {}  # cid → (template, sample)
 
+        # L1.3 / L1.4 / L1.5 — per-message extraction record. Each entry:
+        # {cluster_id, template, slots, ts, trace_id, service}. Used by
+        # downstream slot-typing and PMI graph computation. Kept in
+        # memory; flush() does not persist these (they're transient).
+        self.extractions: List[dict] = []
+
     # ── consume ────────────────────────────────────────────────────────
 
     def consume(self, message: str, *, timestamp: str = "",
                 severity: Optional[str] = None,
-                service: Optional[str] = None) -> int:
+                service: Optional[str] = None,
+                trace_id: Optional[str] = None) -> int:
         """Feed one log message and return its cluster id."""
         result = self._tm.add_log_message(message)
         cid = result["cluster_id"]
@@ -166,6 +173,27 @@ class LogTemplateMiner:
             bucket = self._pending_service.setdefault(cid, {})
             bucket[service] = bucket.get(service, 0) + 1
         self._pending_templates[cid] = (template, message)
+
+        # L1.3: capture the actual slot values that filled the <*>
+        # placeholders. Drain3's extract_parameters runs the same
+        # tokeniser used at clustering time so the slot ordering is
+        # stable across runs.
+        slots: List[str] = []
+        try:
+            params = self._tm.extract_parameters(template, message)
+            if params:
+                slots = [p.value for p in params]
+        except Exception:  # noqa: BLE001 — never let extraction kill ingest
+            pass
+        self.extractions.append({
+            "cluster_id": cid,
+            "template":   template,
+            "slots":      slots,
+            "ts":         timestamp,
+            "trace_id":   trace_id,
+            "service":    service,
+            "severity":   severity,
+        })
         return cid
 
     # ── flush ──────────────────────────────────────────────────────────

@@ -58,9 +58,18 @@ _PROBE_STRATEGIES = (
 def migrate(conn: sqlite3.Connection) -> dict:
     """Run the migration on `conn`. Returns a small dict describing
     what was applied so callers can log it. Never raises on an
-    already-migrated DB.
+    already-migrated DB. No-op on DBs that don't have
+    ``ontology_evolution_proposals`` yet — L1 mining persists templates
+    to a new database that hasn't been through phase 1, and we don't
+    want to fail there. The table will be created and migrated when
+    phase 1 runs, or when the Studio's review step (L4) first opens
+    the proposal store.
     """
-    applied = {"columns_added": [], "table_rebuilt": False}
+    applied = {"columns_added": [], "table_rebuilt": False, "skipped": False}
+
+    if not _table_exists(conn, "ontology_evolution_proposals"):
+        applied["skipped"] = True
+        return applied
 
     _add_missing_columns(conn, applied)
     if not _check_accepts_new_types(conn):
@@ -68,6 +77,14 @@ def migrate(conn: sqlite3.Connection) -> dict:
         applied["table_rebuilt"] = True
     conn.commit()
     return applied
+
+
+def _table_exists(conn: sqlite3.Connection, name: str) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (name,),
+    ).fetchone()
+    return row is not None
 
 
 # ── Step 1: column additions ─────────────────────────────────────────────
