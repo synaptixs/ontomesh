@@ -75,6 +75,95 @@ def _sensitivity_property() -> str:
 """
 
 
+# ── L5.2 helpers — log-derived class emission ──────────────────────────
+
+
+_SEVERITY_TO_TIER = {
+    "DEBUG":   "Public",
+    "INFO":    "Public",
+    "WARN":    "Internal",
+    "WARNING": "Internal",
+    "ERROR":   "Confidential",
+    "CRITICAL": "Restricted",
+    "FATAL":   "Restricted",
+}
+
+
+def _session_has_log_discovery(session) -> bool:
+    if not isinstance(session, dict):
+        return False
+    for bucket in ("events", "entities", "relationships", "causal_rules"):
+        for item in (session.get(bucket) or []):
+            if isinstance(item, dict) and item.get("source") == "log-discovery":
+                return True
+    return False
+
+
+def _emit_log_derived_classes(session: dict) -> str:
+    """Per log-derived event/entity, emit a class block subclass-of
+    :CausalEvent (events) or :DomainEntity (entities), with
+    auto-generated time-interval data properties on events and a
+    severity-mapped sensitivity tier."""
+    if not isinstance(session, dict):
+        return ""
+    parts = ["# ── Log-Derived Classes (Phase L5) ──────────────────────────────────\n"]
+    seen = set()
+    for ev in session.get("events") or []:
+        if not isinstance(ev, dict) or ev.get("source") != "log-discovery":
+            continue
+        cls = _to_class_name(ev.get("name") or ev.get("label") or "LogEvent")
+        if cls in seen:
+            continue
+        seen.add(cls)
+        tier = _SEVERITY_TO_TIER.get(
+            (ev.get("severity") or "INFO").upper(), "Internal"
+        )
+        label = (ev.get("label") or cls).replace('"', "'")
+        comment = (ev.get("description") or "Mined from log corpus.").replace('"', "'")
+        parts.append(
+            f":{cls}\n"
+            f"  a owl:Class ;\n"
+            f"  rdfs:subClassOf :CausalEvent ;\n"
+            f'  rdfs:label "{label}" ;\n'
+            f'  rdfs:comment "{comment}" ;\n'
+            f"  :sensitivityTier :{tier} .\n"
+        )
+        # Time-interval data properties (one set per class — keeps the
+        # ontology compact, every log-derived class shares them).
+    if not seen:
+        return ""
+    parts.append(
+        ":startedAt\n"
+        "  a owl:DatatypeProperty ;\n"
+        "  rdfs:label \"started at\" ;\n"
+        "  rdfs:domain :CausalEvent ;\n"
+        "  rdfs:range xsd:dateTime ;\n"
+        "  :sensitivityTier :Internal .\n\n"
+        ":endedAt\n"
+        "  a owl:DatatypeProperty ;\n"
+        "  rdfs:label \"ended at\" ;\n"
+        "  rdfs:domain :CausalEvent ;\n"
+        "  rdfs:range xsd:dateTime ;\n"
+        "  :sensitivityTier :Internal .\n\n"
+        ":duration\n"
+        "  a owl:DatatypeProperty ;\n"
+        "  rdfs:label \"duration\" ;\n"
+        "  rdfs:domain :CausalEvent ;\n"
+        "  rdfs:range xsd:duration ;\n"
+        "  :sensitivityTier :Internal .\n"
+    )
+    return "\n".join(parts) + "\n"
+
+
+def _to_class_name(s: str) -> str:
+    """`event_18` / `Network Failure` / `outage event` → `Event18` /
+    `NetworkFailure` / `OutageEvent`."""
+    out = []
+    for token in (s or "").replace("-", " ").replace("_", " ").split():
+        out.append(token[0].upper() + token[1:])
+    return "".join(out) or "LogClass"
+
+
 def _base_classes() -> str:
     return """\
 # ── Base Classes ──────────────────────────────────────────────────────
@@ -343,7 +432,20 @@ def _prov_patterns() -> str:
 
 # ── Main generator ───────────────────────────────────────────────────────
 
-def generate_ontology(intro: DBIntrospector, output_dir: str):
+def generate_ontology(intro: DBIntrospector, output_dir: str,
+                      *, session: dict = None):
+    """Generate the enterprise ontology.
+
+    Args:
+        intro: introspector around the operational DB.
+        output_dir: where to write enterprise.ttl + sibling files.
+        session: optional wizard session. When the session contains any
+            event/entity with ``source == "log-discovery"``, the RCA
+            taxonomy (:class:`rca_taxonomy.emit_taxonomy`) is included
+            so :hasCause / :rootCause queries work end-to-end. Per-class
+            time-interval data properties and severity-tier mappings
+            are also emitted for log-derived classes.
+    """
     tables = intro.introspect_all()
     os.makedirs(output_dir, exist_ok=True)
 
@@ -361,6 +463,14 @@ def generate_ontology(intro: DBIntrospector, output_dir: str):
         _sensitivity_property(),
         _base_classes(),
     ]
+
+    # L5.1 — RCA taxonomy. Pulled in when the active session carries
+    # any log-discovery output so :hasCause/:rootCause queries work.
+    if _session_has_log_discovery(session):
+        from rca_taxonomy import emit_taxonomy
+        lines.append(emit_taxonomy())
+        # L5.2 — log-derived classes from session.events + entities.
+        lines.append(_emit_log_derived_classes(session))
 
     lines.append("# ── Domain Classes ──────────────────────────────────────────────────\n")
     for t in tables:
