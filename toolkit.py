@@ -608,7 +608,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","security","conflict","alignment","runtime",
+                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","sequence","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
                                  "embed","retrieve"],
                         help="Run a specific phase only")
@@ -822,6 +822,64 @@ def main():
         with open(summary_path, "w") as f:
             json.dump(r, f, indent=2)
         print(f"  ✓ summary               → {summary_path}")
+        conn.close()
+
+    def phase_sequence(db_path: str, out_path: str):
+        """Phase L2 — Sequence + anomaly learning.
+
+        Reads the L1 mining artefacts, builds per-service trajectories,
+        fits a per-service Categorical HMM (BIC-selected state count),
+        and flags anomalous trajectories into the proposal store.
+        Re-runs --phase mine first so the sequence pass always sees a
+        fresh template catalogue — cheap on small corpora, idempotent
+        on larger ones.
+        """
+        step("L2", "Sequence Learning — Trajectories · HMM · Anomalies")
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase sequence")
+            return
+        try:
+            from log_corpus import LogCorpus
+            from log_miner import mine_corpus
+            from log_templates import LogTemplateMiner
+            from sequence_learner import mine_sequences
+            from db.migrations.log_rca_proposals import migrate as _migrate
+        except ImportError as exc:
+            print(f"  ✗ {exc}")
+            print("    Install the mining extras: pip install -e .[mining]")
+            return
+
+        os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        _migrate(conn)
+
+        corpus = LogCorpus(log_path, fmt=args.log_format,
+                           custom_regex=args.log_regex)
+        files = corpus.resolve_files()
+        if not files:
+            print(f"  ⚠ no log files matched: {log_path}")
+            return
+        print(f"  ↪ corpus: {len(files)} file(s)")
+
+        # Re-mine so the HMM sees the latest cluster ids.
+        miner = LogTemplateMiner(conn)
+        for rec in corpus.iter():
+            miner.consume(rec.message,
+                          timestamp=rec.timestamp,
+                          severity=rec.severity,
+                          service=rec.fields.get("service") if rec.fields else None,
+                          trace_id=rec.fields.get("trace_id") if rec.fields else None)
+        miner.flush()
+        miner.refine()
+
+        seq_report = mine_sequences(miner.extractions, conn)
+        r = seq_report.as_dict()
+        print(f"  ✓ trajectories          {r['trajectories']}")
+        print(f"  ✓ services fit          {r['services_fit']}")
+        print(f"  ✓ anomalies             {r['anomalies']}")
+        print(f"  ✓ proposals             {r['proposals_persisted']}")
+        print(f"  ✓ duration              {r['duration_s']}s")
         conn.close()
 
     def phase_security(db_path: str, out_path: str):
@@ -1351,6 +1409,7 @@ def main():
         "sparql":   [(phase_sparql,    [args.db, args.out])],
         "log":       [(phase_log,       [args.db, args.out])],
         "mine":      [(phase_mine,      [args.db, args.out])],
+        "sequence":  [(phase_sequence,  [args.db, args.out])],
         "security":  [(phase_security,  [args.db, args.out])],
         "conflict":  [(phase_conflict,  [args.db, args.out])],
         "alignment": [(phase_alignment, [args.db, args.out])],
