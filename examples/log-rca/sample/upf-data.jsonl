@@ -1,0 +1,27 @@
+{"ts": "2026-05-07T09:00:15+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-000", "message": "GTP-U tunnel activated sessionId=pdu-0000 teid=0x00000000"}
+{"ts": "2026-05-07T09:00:15.030000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-000", "message": "Data path enabled sessionId=pdu-0000"}
+{"ts": "2026-05-07T09:00:17.030000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-001", "message": "GTP-U tunnel activated sessionId=pdu-0001 teid=0x00000001"}
+{"ts": "2026-05-07T09:00:17.060000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-001", "message": "Data path enabled sessionId=pdu-0001"}
+{"ts": "2026-05-07T09:00:19.060000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-002", "message": "GTP-U tunnel activated sessionId=pdu-0002 teid=0x00000002"}
+{"ts": "2026-05-07T09:00:19.090000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-002", "message": "Data path enabled sessionId=pdu-0002"}
+{"ts": "2026-05-07T09:00:21.090000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-003", "message": "GTP-U tunnel activated sessionId=pdu-0003 teid=0x00000003"}
+{"ts": "2026-05-07T09:00:21.120000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-003", "message": "Data path enabled sessionId=pdu-0003"}
+{"ts": "2026-05-07T09:00:23.120000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-004", "message": "GTP-U tunnel activated sessionId=pdu-0004 teid=0x00000004"}
+{"ts": "2026-05-07T09:00:23.150000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-004", "message": "Data path enabled sessionId=pdu-0004"}
+{"ts": "2026-05-07T09:00:25.150000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-005", "message": "GTP-U tunnel activated sessionId=pdu-0005 teid=0x00000005"}
+{"ts": "2026-05-07T09:00:25.180000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-005", "message": "Data path enabled sessionId=pdu-0005"}
+{"ts": "2026-05-07T09:00:27.180000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-006", "message": "GTP-U tunnel activated sessionId=pdu-0006 teid=0x00000006"}
+{"ts": "2026-05-07T09:00:27.210000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-006", "message": "Data path enabled sessionId=pdu-0006"}
+{"ts": "2026-05-07T09:00:29.210000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-007", "message": "GTP-U tunnel activated sessionId=pdu-0007 teid=0x00000007"}
+{"ts": "2026-05-07T09:00:29.240000+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-007", "message": "Data path enabled sessionId=pdu-0007"}
+{"ts": "2026-05-07T09:00:32.240000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-000", "message": "Throughput below SLA sessionId=pdu-0000 measuredMbps=8 minMbps=50"}
+{"ts": "2026-05-07T09:00:33.240000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-001", "message": "Throughput below SLA sessionId=pdu-0001 measuredMbps=8 minMbps=50"}
+{"ts": "2026-05-07T09:00:34.240000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-002", "message": "Throughput below SLA sessionId=pdu-0002 measuredMbps=8 minMbps=50"}
+{"ts": "2026-05-07T09:00:35.240000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-003", "message": "Throughput below SLA sessionId=pdu-0003 measuredMbps=8 minMbps=50"}
+{"ts": "2026-05-07T09:00:36.240000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-004", "message": "Throughput below SLA sessionId=pdu-0004 measuredMbps=8 minMbps=50"}
+{"ts": "2026-05-07T09:00:38.240000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "sla-aggregate", "message": "SLA aggregate breach detected for sst=1 affectedSessions=5"}
+{"ts": "2026-05-07T09:00:39.240000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-000", "message": "Throughput restored sessionId=pdu-0000 measuredMbps=120"}
+{"ts": "2026-05-07T09:00:40.240000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-001", "message": "Throughput restored sessionId=pdu-0001 measuredMbps=120"}
+{"ts": "2026-05-07T09:00:41.240000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-002", "message": "Throughput restored sessionId=pdu-0002 measuredMbps=120"}
+{"ts": "2026-05-07T09:00:42.240000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-003", "message": "Throughput restored sessionId=pdu-0003 measuredMbps=120"}
+{"ts": "2026-05-07T09:00:43.240000+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-004", "message": "Throughput restored sessionId=pdu-0004 measuredMbps=120"}

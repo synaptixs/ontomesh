@@ -1,0 +1,45 @@
+{"ts": "2026-05-07T09:00:05+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-000", "message": "InitialUEMessage received for ueId=imsi-001010000000000"}
+{"ts": "2026-05-07T09:00:05.050000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-000", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000000"}
+{"ts": "2026-05-07T09:00:05.170000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-000", "message": "AuthResponse received for ueId=imsi-001010000000000 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:05.200000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-000", "message": "Registration accepted for ueId=imsi-001010000000000 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:06.200000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-001", "message": "InitialUEMessage received for ueId=imsi-001010000000001"}
+{"ts": "2026-05-07T09:00:06.250000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-001", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000001"}
+{"ts": "2026-05-07T09:00:06.370000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-001", "message": "AuthResponse received for ueId=imsi-001010000000001 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:06.400000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-001", "message": "Registration accepted for ueId=imsi-001010000000001 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:07.400000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-002", "message": "InitialUEMessage received for ueId=imsi-001010000000002"}
+{"ts": "2026-05-07T09:00:07.450000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-002", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000002"}
+{"ts": "2026-05-07T09:00:07.570000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-002", "message": "AuthResponse received for ueId=imsi-001010000000002 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:07.600000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-002", "message": "Registration accepted for ueId=imsi-001010000000002 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:08.600000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-003", "message": "InitialUEMessage received for ueId=imsi-001010000000003"}
+{"ts": "2026-05-07T09:00:08.650000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-003", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000003"}
+{"ts": "2026-05-07T09:00:08.770000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-003", "message": "AuthResponse received for ueId=imsi-001010000000003 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:08.800000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-003", "message": "Registration accepted for ueId=imsi-001010000000003 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:09.800000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-004", "message": "InitialUEMessage received for ueId=imsi-001010000000004"}
+{"ts": "2026-05-07T09:00:09.850000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-004", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000004"}
+{"ts": "2026-05-07T09:00:09.970000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-004", "message": "AuthResponse received for ueId=imsi-001010000000004 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:10+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-004", "message": "Registration accepted for ueId=imsi-001010000000004 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:11+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-005", "message": "InitialUEMessage received for ueId=imsi-001010000000005"}
+{"ts": "2026-05-07T09:00:11.050000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-005", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000005"}
+{"ts": "2026-05-07T09:00:11.170000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-005", "message": "AuthResponse received for ueId=imsi-001010000000005 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:11.200000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-005", "message": "Registration accepted for ueId=imsi-001010000000005 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:12.200000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-006", "message": "InitialUEMessage received for ueId=imsi-001010000000006"}
+{"ts": "2026-05-07T09:00:12.250000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-006", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000006"}
+{"ts": "2026-05-07T09:00:12.370000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-006", "message": "AuthResponse received for ueId=imsi-001010000000006 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:12.400000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-006", "message": "Registration accepted for ueId=imsi-001010000000006 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:13.400000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-007", "message": "InitialUEMessage received for ueId=imsi-001010000000007"}
+{"ts": "2026-05-07T09:00:13.450000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-007", "message": "AuthRequest sent to AUSF for ueId=imsi-001010000000007"}
+{"ts": "2026-05-07T09:00:13.570000+00:00", "severity": "DEBUG", "service": "AMF", "trace_id": "ue-reg-007", "message": "AuthResponse received for ueId=imsi-001010000000007 result=SUCCESS"}
+{"ts": "2026-05-07T09:00:13.600000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-007", "message": "Registration accepted for ueId=imsi-001010000000007 registrationState=REGISTERED"}
+{"ts": "2026-05-07T09:00:16.600000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ue-reg-fail-099", "message": "InitialUEMessage received for ueId=imsi-001010000099X"}
+{"ts": "2026-05-07T09:00:16.680000+00:00", "severity": "ERROR", "service": "AMF", "trace_id": "ue-reg-fail-099", "message": "AuthResponse received for ueId=imsi-001010000099X result=AUTH_FAILURE"}
+{"ts": "2026-05-07T09:00:16.700000+00:00", "severity": "ERROR", "service": "AMF", "trace_id": "ue-reg-fail-099", "message": "Registration rejected for ueId=imsi-001010000099X cause=AUTH_FAILURE"}
+{"ts": "2026-05-07T09:00:19.700000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-000", "message": "ContextTransfer requested for ueId=imsi-0010100000010 fromAmfId=AMF-01"}
+{"ts": "2026-05-07T09:00:19.800000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-000", "message": "ContextTransfer completed for ueId=imsi-0010100000010"}
+{"ts": "2026-05-07T09:00:22.800000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-001", "message": "ContextTransfer requested for ueId=imsi-0010100000011 fromAmfId=AMF-01"}
+{"ts": "2026-05-07T09:00:22.900000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-001", "message": "ContextTransfer completed for ueId=imsi-0010100000011"}
+{"ts": "2026-05-07T09:00:25.900000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-002", "message": "ContextTransfer requested for ueId=imsi-0010100000012 fromAmfId=AMF-01"}
+{"ts": "2026-05-07T09:00:26+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-002", "message": "ContextTransfer completed for ueId=imsi-0010100000012"}
+{"ts": "2026-05-07T09:00:29+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-003", "message": "ContextTransfer requested for ueId=imsi-0010100000013 fromAmfId=AMF-01"}
+{"ts": "2026-05-07T09:00:29.100000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-003", "message": "ContextTransfer completed for ueId=imsi-0010100000013"}
+{"ts": "2026-05-07T09:00:32.100000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-004", "message": "ContextTransfer requested for ueId=imsi-0010100000014 fromAmfId=AMF-01"}
+{"ts": "2026-05-07T09:00:32.200000+00:00", "severity": "INFO", "service": "AMF", "trace_id": "ctx-xfer-004", "message": "ContextTransfer completed for ueId=imsi-0010100000014"}
