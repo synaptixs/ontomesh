@@ -530,27 +530,76 @@
       </div>
 
       <div class="card">
-        <h3>Import from file</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
-          Drop a <code>.json</code> session file (wizard or onboard.py format) or a
-          <code>.json</code> schema. SQL DDL import lands in a follow-up step (#16).
-        </p>
-        <label id="import-drop"
-               style="display:flex;flex-direction:column;align-items:center;gap:8px;
-                      padding:24px;border:2px dashed var(--border);border-radius:8px;
-                      cursor:pointer;background:rgba(91,138,247,.04);
-                      transition:border-color .15s,background .15s">
-          <span style="font-size:24px;opacity:.55">⤓</span>
-          <span style="font-size:13px;color:var(--muted)">
-            Drag &amp; drop, or <span style="color:var(--accent);font-weight:600">click to browse</span>
-          </span>
-          <span id="import-filename" style="font-size:11px;color:var(--muted-2)"></span>
-          <input type="file" id="import-file" accept=".json,.sql" style="display:none"
-                 onchange="onImportPicked(event)" />
-        </label>
-        <div id="import-error" style="display:none;color:var(--danger);font-size:12px;
-                                       margin-top:8px;padding:8px 12px;
-                                       background:rgba(247,107,107,.08);border-radius:4px"></div>
+        <h3 style="margin-bottom:8px">Import an existing schema</h3>
+        <ul class="tabs" role="tablist" style="margin-bottom:10px">
+          <li><button type="button" class="tab-btn active" data-imp-tab="file"
+                      onclick="switchImportTab('file')">📄 From file</button></li>
+          <li><button type="button" class="tab-btn" data-imp-tab="db"
+                      onclick="switchImportTab('db')">🗄️ Connect to database</button></li>
+        </ul>
+
+        <!-- File-import tab ─────────────────────────────────────────────── -->
+        <div id="imp-tab-file" class="tab-panel active">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
+            Drop a <code>.json</code> session file (wizard or onboard.py format) or a
+            <code>.json</code> schema. SQL DDL import lands in a follow-up step (#16).
+          </p>
+          <label id="import-drop"
+                 style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                        padding:24px;border:2px dashed var(--border);border-radius:8px;
+                        cursor:pointer;background:rgba(91,138,247,.04);
+                        transition:border-color .15s,background .15s">
+            <span style="font-size:24px;opacity:.55">⤓</span>
+            <span style="font-size:13px;color:var(--muted)">
+              Drag &amp; drop, or <span style="color:var(--accent);font-weight:600">click to browse</span>
+            </span>
+            <span id="import-filename" style="font-size:11px;color:var(--muted-2)"></span>
+            <input type="file" id="import-file" accept=".json,.sql" style="display:none"
+                   onchange="onImportPicked(event)" />
+          </label>
+          <div id="import-error" style="display:none;color:var(--danger);font-size:12px;
+                                         margin-top:8px;padding:8px 12px;
+                                         background:rgba(247,107,107,.08);border-radius:4px"></div>
+        </div>
+
+        <!-- Database-direct tab ────────────────────────────────────────── -->
+        <div id="imp-tab-db" class="tab-panel">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
+            Connect directly to your operational database. The toolkit lists tables,
+            classifies columns, and lifts foreign keys into relationships — same review
+            modal as the file path, no upload needed.
+          </p>
+
+          <!-- Saved profiles strip -->
+          <div id="db-profiles-strip" style="display:none; margin-bottom:12px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Saved profiles</div>
+            <div id="db-profiles-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+
+          <!-- Vendor + config form -->
+          <div style="display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:start">
+            <!-- Vendor picker -->
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Vendor</div>
+              <div id="db-vendor-grid" style="display:flex;flex-direction:column;gap:4px">
+                <!-- populated by loadDbVendors() -->
+              </div>
+            </div>
+
+            <!-- Config form -->
+            <div>
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Connection details</div>
+              <div id="db-vendor-help" style="font-size:12px;color:var(--muted);margin-bottom:8px;min-height:18px"></div>
+              <div id="db-form-fields" style="display:grid;grid-template-columns:1fr;gap:8px"></div>
+              <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <button class="btn btn-ghost"   style="padding:5px 14px;font-size:12px" onclick="testDbConnection()">🔌 Test connection</button>
+                <button class="btn btn-ghost"   style="padding:5px 14px;font-size:12px" onclick="saveDbProfile()">💾 Save profile…</button>
+                <button class="btn btn-primary" style="padding:5px 14px;font-size:12px" onclick="importFromDatabase()">⤓ Generate from this database</button>
+              </div>
+              <div id="db-test-result" style="margin-top:10px;font-size:12px"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -1986,6 +2035,239 @@ function _imSetupDropZone() {
   });
 }
 
+// ── Tabbed import (file vs database) ────────────────────────────────────
+function switchImportTab(name) {
+  document.querySelectorAll('[data-imp-tab]').forEach(b =>
+    b.classList.toggle('active', b.dataset.impTab === name));
+  ['file', 'db'].forEach(k =>
+    document.getElementById('imp-tab-' + k).classList.toggle('active', k === name));
+  if (name === 'db') {
+    loadDbVendors();
+    loadDbProfiles();
+  }
+}
+
+// ── Vendor + form rendering ─────────────────────────────────────────────
+let _dbVendors = {};       // {vendor_id → spec}
+let _dbCurrentVendor = null;
+let _dbCurrentProfileId = null;   // when reusing a saved profile
+
+async function loadDbVendors() {
+  const grid = document.getElementById('db-vendor-grid');
+  if (!grid || Object.keys(_dbVendors).length) return _renderDbForm();
+  try {
+    const res = await fetch('/api/db/vendors');
+    const out = await res.json();
+    for (const v of (out.vendors || [])) _dbVendors[v.id] = v;
+  } catch (_) { /* offline; vendor grid stays empty */ }
+  grid.innerHTML = Object.values(_dbVendors).map(v => `
+    <button type="button" class="db-vendor-pill" data-vendor="${v.id}"
+            onclick="selectDbVendor('${v.id}')"
+            style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);background:var(--surface);border-radius:6px;cursor:pointer;text-align:left;font-size:12px;color:var(--text)">
+      <span style="font-size:14px">${v.icon || '·'}</span>
+      <span>${v.label}</span>
+    </button>`).join('');
+  // Default to first vendor.
+  const first = Object.keys(_dbVendors)[0];
+  if (first) selectDbVendor(first);
+}
+
+function selectDbVendor(vid) {
+  _dbCurrentVendor = vid;
+  document.querySelectorAll('.db-vendor-pill').forEach(b => {
+    const active = b.dataset.vendor === vid;
+    b.style.background = active ? 'var(--accent)' : 'var(--surface)';
+    b.style.color = active ? 'var(--on-accent)' : 'var(--text)';
+    b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+  });
+  _renderDbForm();
+}
+
+function _renderDbForm() {
+  const vendor = _dbVendors[_dbCurrentVendor];
+  const help = document.getElementById('db-vendor-help');
+  const fields = document.getElementById('db-form-fields');
+  if (!vendor) {
+    if (help) help.textContent = 'Pick a vendor on the left.';
+    if (fields) fields.innerHTML = '';
+    return;
+  }
+  if (help) help.textContent = vendor.description || '';
+  if (!fields) return;
+  fields.innerHTML = (vendor.fields || []).map(f => {
+    const id = `db-field-${f.name}`;
+    const req = f.required ? '<span style="color:#dc2626">*</span>' : '';
+    const inputType = f.secret ? 'password' : (f.kind === 'number' ? 'number' : 'text');
+    const inputBase = `id="${id}" data-field="${f.name}" value="${(f.default!==undefined&&f.default!==null)?String(f.default).replace(/"/g,'&quot;'):''}" placeholder="${(f.hint||'').replace(/"/g,'&quot;')}"
+                       style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:13px;width:100%"`;
+    const ctl = (f.kind === 'select')
+      ? `<input type="text" ${inputBase} list="${id}-list"/>
+         <datalist id="${id}-list"></datalist>`
+      : `<input type="${inputType}" ${inputBase}/>`;
+    const hintLine = f.hint && f.kind !== 'select'
+      ? `<div style="font-size:10px;color:var(--muted)">${f.hint}</div>` : '';
+    return `<div style="display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center">
+              <label style="font-size:12px;color:var(--muted)" for="${id}">${f.label} ${req}</label>
+              <div>${ctl}${hintLine}</div>
+            </div>`;
+  }).join('');
+}
+
+function _readDbForm() {
+  const config = {};
+  document.querySelectorAll('#db-form-fields [data-field]').forEach(el => {
+    const v = el.value;
+    if (v !== '' && v !== null && v !== undefined) {
+      config[el.dataset.field] = (el.type === 'number' && v !== '') ? Number(v) : v;
+    }
+  });
+  return { vendor: _dbCurrentVendor, config };
+}
+
+// ── Saved profiles strip ────────────────────────────────────────────────
+async function loadDbProfiles() {
+  const strip = document.getElementById('db-profiles-strip');
+  const list = document.getElementById('db-profiles-list');
+  if (!strip || !list) return;
+  try {
+    const res = await fetch('/api/db/profiles');
+    const out = await res.json();
+    const profiles = out.profiles || [];
+    if (!profiles.length) { strip.style.display = 'none'; return; }
+    strip.style.display = '';
+    list.innerHTML = profiles.map(p => `
+      <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3px 4px 3px 10px;font-size:11px">
+        <span style="margin-right:4px">${(_dbVendors[p.vendor] && _dbVendors[p.vendor].icon) || '·'}</span>
+        <button class="btn btn-ghost" style="padding:0 6px;font-size:11px"
+                onclick="useDbProfile(${p.id})" title="Load into form">${p.name}</button>
+        <span style="color:var(--muted);font-size:10px">${p.vendor}</span>
+        <button class="btn btn-ghost" style="padding:0 4px;font-size:10px;color:var(--muted)"
+                onclick="deleteDbProfile(${p.id},'${p.name.replace(/'/g,'\\\'')}')">✕</button>
+      </div>`).join('');
+  } catch (_) { strip.style.display = 'none'; }
+}
+
+async function useDbProfile(id) {
+  try {
+    const res = await fetch('/api/db/profiles');
+    const out = await res.json();
+    const p = (out.profiles || []).find(x => x.id === id);
+    if (!p) { showToast('Profile vanished'); return; }
+    _dbCurrentProfileId = p.id;
+    selectDbVendor(p.vendor);
+    // Wait one tick for the form to render, then fill values (passwords
+    // come back masked; the user re-enters them only if they want to
+    // override — otherwise the server uses the stored value via
+    // profile_id in the request body).
+    setTimeout(() => {
+      for (const [k, v] of Object.entries(p.config || {})) {
+        const el = document.querySelector(`#db-form-fields [data-field="${k}"]`);
+        if (el && (v !== '●●●●●●' && v !== null && v !== undefined)) {
+          el.value = v;
+        }
+      }
+      showToast('Loaded profile: ' + p.name);
+    }, 30);
+  } catch (e) { showToast('Load failed: ' + e); }
+}
+
+async function deleteDbProfile(id, name) {
+  if (!confirm(`Delete profile "${name}"?`)) return;
+  try {
+    const res = await fetch(`/api/db/profiles/${id}`, { method: 'DELETE' });
+    if (!res.ok) { showToast('Delete failed'); return; }
+    if (_dbCurrentProfileId === id) _dbCurrentProfileId = null;
+    loadDbProfiles();
+  } catch (e) { showToast('Delete error: ' + e); }
+}
+
+async function saveDbProfile() {
+  const { vendor, config } = _readDbForm();
+  if (!vendor) { showToast('Pick a vendor first'); return; }
+  const name = prompt('Profile name (e.g. "Prod read-replica"):');
+  if (!name) return;
+  try {
+    const res = await fetch('/api/db/profiles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: _dbCurrentProfileId, name, vendor, config }),
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Save failed: ' + (out.error || 'unknown')); return; }
+    _dbCurrentProfileId = out.profile && out.profile.id;
+    showToast('Saved profile: ' + out.profile.name);
+    loadDbProfiles();
+  } catch (e) { showToast('Save error: ' + e); }
+}
+
+// ── Test + Import ───────────────────────────────────────────────────────
+async function testDbConnection() {
+  const out = document.getElementById('db-test-result');
+  out.innerHTML = '<span style="color:var(--muted)">connecting…</span>';
+  const { vendor, config } = _readDbForm();
+  if (!vendor) { out.textContent = 'Pick a vendor first'; return; }
+  const body = _dbCurrentProfileId
+    ? { profile_id: _dbCurrentProfileId, vendor, config }   // server uses stored secrets
+    : { vendor, config };
+  try {
+    const res = await fetch('/api/db/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const r = await res.json();
+    if (r.ok) {
+      const samples = (r.sample_tables || []).slice(0, 8).map(t =>
+        `<code style="font-size:10px;background:var(--surface-2);padding:1px 4px;border-radius:3px;margin-right:3px">${t}</code>`).join('');
+      out.innerHTML = `<div style="color:#16a34a"><b>✓ Connected.</b>
+        ${r.tables} tables in ${r.duration_ms} ms.</div>
+        ${samples ? `<div style="margin-top:4px;color:var(--muted);font-size:11px">Sample: ${samples}${r.tables>8?` …+${r.tables-8} more`:''}</div>` : ''}`;
+    } else {
+      out.innerHTML = `<div style="color:#dc2626"><b>✗ Could not connect.</b> ${r.error || ''}</div>`;
+    }
+  } catch (e) {
+    out.innerHTML = `<div style="color:#dc2626">${e}</div>`;
+  }
+}
+
+async function importFromDatabase() {
+  const out = document.getElementById('db-test-result');
+  out.innerHTML = '<span style="color:var(--muted)">introspecting tables…</span>';
+  const { vendor, config } = _readDbForm();
+  if (!vendor) { out.textContent = 'Pick a vendor first'; return; }
+  const body = _dbCurrentProfileId
+    ? { profile_id: _dbCurrentProfileId,
+        domain_name: document.getElementById('d-name')?.value,
+        base_iri:    document.getElementById('d-iri')?.value }
+    : { vendor, config,
+        domain_name: document.getElementById('d-name')?.value,
+        base_iri:    document.getElementById('d-iri')?.value };
+  try {
+    const res = await fetch('/api/db/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const result = await res.json();
+    if (!result.ok) {
+      const msg = (result.errors && result.errors[0] && result.errors[0].message) || 'introspection failed';
+      out.innerHTML = `<div style="color:#dc2626"><b>✗ Import failed.</b> ${msg}</div>`;
+      return;
+    }
+    out.innerHTML = `<div style="color:#16a34a"><b>✓ Found ${result.stats.entities} tables</b> · ${result.stats.relationships} foreign-key relationships</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">Opening review modal…</div>`;
+    // Reuse the existing file-import review modal so file + DB paths
+    // share their final-guard validation and commit code path.
+    if (typeof openImportReview === 'function') {
+      openImportReview(result);
+    } else {
+      showToast('Review modal not wired — session not committed.');
+    }
+  } catch (e) {
+    out.innerHTML = `<div style="color:#dc2626">${e}</div>`;
+  }
+}
+
 function onImportPicked(ev) {
   const f = ev.target.files && ev.target.files[0];
   if (f) _imUploadFile(f);
@@ -2013,6 +2295,13 @@ async function _imUploadFile(file) {
     errBox.style.display = '';
     return;
   }
+  openImportReview(res);
+}
+
+// Shared between file-import and database-import paths. Both end up
+// at the same review modal so the final-guard commit code is one
+// implementation.
+function openImportReview(res) {
   _importResult = res;
   _imRenderModal(res);
   document.getElementById('import-modal').style.display = 'flex';
