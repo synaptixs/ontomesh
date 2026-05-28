@@ -169,10 +169,12 @@
                 justify-content: center; font-size: 12px; font-weight: 600;
                 flex-shrink: 0; color: var(--muted-2);
                 transition: background .12s, color .12s; }
-    /* Section divider in the sidebar nav — separates the linear "build"
-       steps (1–6) from the post-generation tools (7–9). Not interactive,
-       no hover, no click target. Continuous numbering avoids the
-       letter-vs-number mismatch users found confusing. */
+    /* Section divider in the sidebar nav — labels the three phases of
+       the build journey (Define · Enrich · Build) and separates them
+       from the post-generation tools. Integer step numbers reset
+       inside each phase via the markup ordering, so adding a step
+       later only renumbers within its own phase. Not interactive, no
+       hover, no click target. */
     .step-nav li.step-divider {
       cursor: default; padding: 14px 14px 6px 14px;
       font-size: 11px; font-weight: 500; color: var(--muted-2);
@@ -474,19 +476,21 @@
     </div>
     <ul class="step-nav" id="step-nav">
       <li data-step="library"><span class="step-num">📚</span> Library</li>
-      <li class="step-divider" aria-hidden="true">Build</li>
+      <li class="step-divider" aria-hidden="true">Define</li>
       <li class="active" data-step="domain"><span class="step-num">1</span> Domain Identity</li>
       <li data-step="entities"><span class="step-num">2</span> Entities</li>
-      <li data-step="log-discovery"><span class="step-num">2.5</span> Log Discovery</li>
       <li data-step="events"><span class="step-num">3</span> Events</li>
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
-      <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
-      <li data-step="rules"><span class="step-num">5.5</span> Rules &amp; Reasoning</li>
-      <li data-step="generate"><span class="step-num">6</span> Generate</li>
+      <li class="step-divider" aria-hidden="true">Enrich</li>
+      <li data-step="log-discovery"><span class="step-num">5</span> Log Discovery</li>
+      <li data-step="cqs"><span class="step-num">6</span> Competency Questions</li>
+      <li data-step="rules"><span class="step-num">7</span> Rules &amp; Reasoning</li>
+      <li class="step-divider" aria-hidden="true">Build</li>
+      <li data-step="generate"><span class="step-num">8</span> Generate</li>
       <li class="step-divider" aria-hidden="true">After generation</li>
-      <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
-      <li data-step="comply"><span class="step-num">8</span> Compliance Dashboard</li>
-      <li data-step="retrieve"><span class="step-num">9</span> Vector Retrieval</li>
+      <li data-step="evolve"><span class="step-num">9</span> Evolution Review</li>
+      <li data-step="comply"><span class="step-num">10</span> Compliance Dashboard</li>
+      <li data-step="retrieve"><span class="step-num">11</span> Vector Retrieval</li>
       <li class="step-divider" aria-hidden="true">Configuration</li>
       <li data-step="settings"><span class="step-num">⚙</span> Settings</li>
     </ul>
@@ -671,7 +675,7 @@
             <option value="custom">Custom</option>
           </select></div>
         <div class="step-nav-footer">
-          <span class="nav-hint">Step 1 of 6 · You can skip ahead and come back any time.</span>
+          <span class="nav-hint">Phase 1 of 3 · Define · You can skip ahead and come back any time.</span>
           <div class="nav-right">
             <button class="btn btn-ghost"   onclick="goStep('entities')">Skip →</button>
             <button class="btn btn-primary" onclick="saveDomain()">Save &amp; Continue →</button>
@@ -702,15 +706,15 @@
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('domain')">← Back</button>
-        <span class="nav-hint">Step 2 of 6 · Entities are optional but recommended.</span>
+        <span class="nav-hint">Phase 1 of 3 · Define · Entities are optional but recommended.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('log-discovery')">Skip →</button>
-          <button class="btn btn-primary" onclick="goStep('log-discovery')">Continue →</button>
+          <button class="btn btn-ghost"   onclick="goStep('events')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('events')">Continue →</button>
         </div>
       </div>
     </div>
 
-    <!-- Step 2.5 — Log Discovery (L4) -->
+    <!-- Step 5 — Log Discovery (L4 · first step in the Enrich phase) -->
     <div class="step-panel" id="step-log-discovery">
       <div class="step-title">Log Discovery <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span></div>
       <div class="step-subtitle">Convert a folder of raw logs into ontology candidates an engineer reviews one at a time. Approved candidates flow into the regular Wizard steps (Entities · Events · Relationships · Rules) and end up as classes, properties, and SPARQL rules in your generated ontology.</div>
@@ -740,7 +744,7 @@
             <div style="font-size:20px;line-height:1">👁️</div>
             <div style="font-size:11px;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Review</div>
             <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35"><b>You are here.</b> Approve / reject / edit / merge proposals so they flow into your session</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">Step 2.5 (this screen)</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">Step 5 (this screen)</div>
           </div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px">
@@ -815,7 +819,7 @@
             </div>
             <div style="font-size:12px;line-height:1.5;color:var(--text)">A directed edge that <b>passed all three gates</b>: PMI, temporal ordering, and Granger or transfer-entropy.</div>
             <div style="margin-top:8px;font-size:11px;color:var(--muted-2)">
-              <b>Approval lands in:</b> Step 5.5 — Rules<br>
+              <b>Approval lands in:</b> Step 7 — Rules<br>
               <b>Becomes:</b> SPARQL CONSTRUCT for <code style="font-size:10px">:hasCause</code><br>
               <b>Materialised in:</b> <code style="font-size:10px">--phase reason</code>
             </div>
@@ -831,7 +835,7 @@
             <span style="background:#16a34a;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">✓</span>
             <div>
               <div style="font-size:12px;font-weight:600;color:var(--text)">Approve</div>
-              <div style="font-size:11px;color:var(--muted);line-height:1.45">Marks <code>APPROVED</code> and pushes into the matching session bucket. Visible on Steps 2 / 3 / 4 / 5.5 right away.</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.45">Marks <code>APPROVED</code> and pushes into the matching session bucket. Visible on Steps 2 / 3 / 4 / 7 right away.</div>
             </div>
           </div>
           <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start">
@@ -929,10 +933,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
 
       <div class="step-nav-footer">
-        <button class="btn btn-ghost" onclick="goStep('entities')">← Back</button>
-        <span class="nav-hint">Step 2.5 of 6 · Optional. Engineers run this after pointing the toolkit at a log folder.</span>
+        <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
+        <span class="nav-hint">Phase 2 of 3 · Enrich · Optional. Engineers run this after pointing the toolkit at a log folder.</span>
         <div class="nav-right">
-          <button class="btn btn-primary" onclick="goStep('events')">Continue →</button>
+          <button class="btn btn-primary" onclick="goStep('cqs')">Continue →</button>
         </div>
       </div>
     </div>
@@ -959,7 +963,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('entities')">← Back</button>
-        <span class="nav-hint">Step 3 of 6 · Skip if your domain has no time-stamped events.</span>
+        <span class="nav-hint">Phase 1 of 3 · Define · Skip if your domain has no time-stamped events.</span>
         <div class="nav-right">
           <button class="btn btn-ghost"   onclick="goStep('relationships')">Skip →</button>
           <button class="btn btn-primary" onclick="goStep('relationships')">Continue →</button>
@@ -1027,10 +1031,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('events')">← Back</button>
-        <span class="nav-hint">Step 4 of 6 · Even one or two relationships make the graph more useful.</span>
+        <span class="nav-hint">Phase 1 of 3 · Define · Even one or two relationships make the graph more useful.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('cqs')">Skip →</button>
-          <button class="btn btn-primary" onclick="goStep('cqs')">Continue →</button>
+          <button class="btn btn-ghost"   onclick="goStep('log-discovery')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('log-discovery')">Continue →</button>
         </div>
       </div>
     </div>
@@ -1061,8 +1065,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         </div>
       </div>
       <div class="step-nav-footer">
-        <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
-        <span class="nav-hint">Step 5 of 6 · CQs drive the governance scorecard. Optional but recommended.</span>
+        <button class="btn btn-ghost" onclick="goStep('log-discovery')">← Back</button>
+        <span class="nav-hint">Phase 2 of 3 · Enrich · CQs drive the governance scorecard. Optional but recommended.</span>
         <div class="nav-right">
           <button class="btn btn-ghost"   onclick="goStep('rules')">Skip →</button>
           <button class="btn btn-primary" onclick="goStep('rules')">Continue →</button>
@@ -1070,7 +1074,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
     </div>
 
-    <!-- Step 5.5: Rules & Reasoning -->
+    <!-- Step 7 — Rules & Reasoning (third step in the Enrich phase) -->
     <div class="step-panel" id="step-rules">
       <div class="step-title">Rules &amp; Reasoning</div>
       <div class="step-subtitle">Author SHACL, SPARQL CONSTRUCT, and OWL-axiom rules. Saved rules are validated, persisted to <code>session.rules</code>, and consumed by <code>--phase reason</code> at materialisation time.</div>
@@ -1106,7 +1110,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
-        <span class="nav-hint">Step 5.5 of 6 · Optional. Rules feed the materialisation phase.</span>
+        <span class="nav-hint">Phase 2 of 3 · Enrich · Optional. Rules feed the materialisation phase.</span>
         <div class="nav-right">
           <button class="btn btn-primary" onclick="goStep('generate')">Continue →</button>
         </div>
@@ -1215,8 +1219,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         </div>
       </div>
       <div class="step-nav-footer">
-        <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
-        <span class="nav-hint">Step 6 of 6 · Last step. Run the pipeline above, then save to the Library.</span>
+        <button class="btn btn-ghost" onclick="goStep('rules')">← Back</button>
+        <span class="nav-hint">Phase 3 of 3 · Build · Last step. Run the pipeline above, then save to the Library.</span>
         <div class="nav-right">
           <button class="btn btn-ghost" onclick="goStep('library')">View Library →</button>
         </div>
@@ -3233,7 +3237,7 @@ function _renderHeatLegend(cov) {
   const covered = (cov.summary && cov.summary.covered_classes) || 0;
   const total = (cov.summary && cov.summary.all_classes) || 0;
   if (!max) {
-    host.innerHTML = `<span>Rule-impact overlay: no rules touch any class yet. Add rules in <a href="#" onclick="goStep('rules');return false">Step 5.5</a> to see the heat map.</span>`;
+    host.innerHTML = `<span>Rule-impact overlay: no rules touch any class yet. Add rules in <a href="#" onclick="goStep('rules');return false">Step 7 · Rules &amp; Reasoning</a> to see the heat map.</span>`;
     return;
   }
   host.innerHTML = `
@@ -3349,7 +3353,7 @@ function renderCQs() {
 
 document.getElementById('new-cq').addEventListener('keydown', e => { if (e.key==='Enter') addCQ(); });
 
-// ── Rules & Reasoning (Step 5.5) ──────────────────────────────────────────
+// ── Rules & Reasoning (Step 7 — Enrich phase) ─────────────────────────────
 function _ensureRules() {
   if (!Array.isArray(session.rules)) session.rules = [];
   return session.rules;
@@ -5853,7 +5857,7 @@ async function _runPreflight(name) {
   banner.innerHTML =
     `<span class="pf-icon">${icon}</span>` +
     `<span class="pf-text">${result.message}</span>` +
-    (result.ready ? '' : `<button onclick="goStep('generate')">Open Step 6 →</button>`);
+    (result.ready ? '' : `<button onclick="goStep('generate')">Open Step 8 · Generate →</button>`);
 }
 
 // ── Evolution strategy explanations ─────────────────────────────────────
