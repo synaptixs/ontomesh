@@ -1,0 +1,38 @@
+{"ts": "2026-05-07T09:00:08+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-000", "message": "SliceSelection requested snssai=1-000001"}
+{"ts": "2026-05-07T09:00:08.020000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-000", "message": "SliceProfile resolved snssai=1-000001 sliceType=eMBB"}
+{"ts": "2026-05-07T09:00:08.050000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-000", "message": "SliceSelection completed snssai=1-000001 sliceProfileId=prof-eMBB-01"}
+{"ts": "2026-05-07T09:00:09.050000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-001", "message": "SliceSelection requested snssai=2-000001"}
+{"ts": "2026-05-07T09:00:09.070000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-001", "message": "SliceProfile resolved snssai=2-000001 sliceType=URLLC"}
+{"ts": "2026-05-07T09:00:09.100000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-001", "message": "SliceSelection completed snssai=2-000001 sliceProfileId=prof-URLLC-01"}
+{"ts": "2026-05-07T09:00:10.100000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-002", "message": "SliceSelection requested snssai=3-000001"}
+{"ts": "2026-05-07T09:00:10.120000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-002", "message": "SliceProfile resolved snssai=3-000001 sliceType=mIoT"}
+{"ts": "2026-05-07T09:00:10.150000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-002", "message": "SliceSelection completed snssai=3-000001 sliceProfileId=prof-mIoT-01"}
+{"ts": "2026-05-07T09:00:11.150000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-003", "message": "SliceSelection requested snssai=4-000001"}
+{"ts": "2026-05-07T09:00:11.170000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-003", "message": "SliceProfile resolved snssai=4-000001 sliceType=V2X"}
+{"ts": "2026-05-07T09:00:11.200000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-003", "message": "SliceSelection completed snssai=4-000001 sliceProfileId=prof-V2X-01"}
+{"ts": "2026-05-07T09:00:12.200000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-004", "message": "SliceSelection requested snssai=1-000001"}
+{"ts": "2026-05-07T09:00:12.220000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-004", "message": "SliceProfile resolved snssai=1-000001 sliceType=eMBB"}
+{"ts": "2026-05-07T09:00:12.250000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-004", "message": "SliceSelection completed snssai=1-000001 sliceProfileId=prof-eMBB-01"}
+{"ts": "2026-05-07T09:00:13.250000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-005", "message": "SliceSelection requested snssai=2-000001"}
+{"ts": "2026-05-07T09:00:13.270000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-005", "message": "SliceProfile resolved snssai=2-000001 sliceType=URLLC"}
+{"ts": "2026-05-07T09:00:13.300000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-005", "message": "SliceSelection completed snssai=2-000001 sliceProfileId=prof-URLLC-01"}
+{"ts": "2026-05-07T09:00:14.300000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-006", "message": "SliceSelection requested snssai=3-000001"}
+{"ts": "2026-05-07T09:00:14.320000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-006", "message": "SliceProfile resolved snssai=3-000001 sliceType=mIoT"}
+{"ts": "2026-05-07T09:00:14.350000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-006", "message": "SliceSelection completed snssai=3-000001 sliceProfileId=prof-mIoT-01"}
+{"ts": "2026-05-07T09:00:15.350000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-007", "message": "SliceSelection requested snssai=4-000001"}
+{"ts": "2026-05-07T09:00:15.370000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-007", "message": "SliceProfile resolved snssai=4-000001 sliceType=V2X"}
+{"ts": "2026-05-07T09:00:15.400000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-007", "message": "SliceSelection completed snssai=4-000001 sliceProfileId=prof-V2X-01"}
+{"ts": "2026-05-07T09:00:16.400000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-008", "message": "SliceSelection requested snssai=1-000001"}
+{"ts": "2026-05-07T09:00:16.420000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-008", "message": "SliceProfile resolved snssai=1-000001 sliceType=eMBB"}
+{"ts": "2026-05-07T09:00:16.450000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-008", "message": "SliceSelection completed snssai=1-000001 sliceProfileId=prof-eMBB-01"}
+{"ts": "2026-05-07T09:00:17.450000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-009", "message": "SliceSelection requested snssai=2-000001"}
+{"ts": "2026-05-07T09:00:17.470000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-009", "message": "SliceProfile resolved snssai=2-000001 sliceType=URLLC"}
+{"ts": "2026-05-07T09:00:17.500000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-009", "message": "SliceSelection completed snssai=2-000001 sliceProfileId=prof-URLLC-01"}
+{"ts": "2026-05-07T09:00:18.500000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-010", "message": "SliceSelection requested snssai=3-000001"}
+{"ts": "2026-05-07T09:00:18.520000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-010", "message": "SliceProfile resolved snssai=3-000001 sliceType=mIoT"}
+{"ts": "2026-05-07T09:00:18.550000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-010", "message": "SliceSelection completed snssai=3-000001 sliceProfileId=prof-mIoT-01"}
+{"ts": "2026-05-07T09:00:19.550000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-011", "message": "SliceSelection requested snssai=4-000001"}
+{"ts": "2026-05-07T09:00:19.570000+00:00", "severity": "DEBUG", "service": "NSSF", "trace_id": "slice-sel-011", "message": "SliceProfile resolved snssai=4-000001 sliceType=V2X"}
+{"ts": "2026-05-07T09:00:19.600000+00:00", "severity": "INFO", "service": "NSSF", "trace_id": "slice-sel-011", "message": "SliceSelection completed snssai=4-000001 sliceProfileId=prof-V2X-01"}
+{"ts": "2026-05-07T09:00:22.600000+00:00", "severity": "WARN", "service": "NSSF", "trace_id": "slice-fail-1", "message": "SliceSelection requested snssai=99-000001"}
+{"ts": "2026-05-07T09:00:22.615000+00:00", "severity": "ERROR", "service": "NSSF", "trace_id": "slice-fail-1", "message": "SliceProfile lookup failed snssai=99-000001 cause=UNKNOWN_SST"}

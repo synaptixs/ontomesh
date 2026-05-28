@@ -159,8 +159,20 @@ def phase2_ontology(db_path: str, out_path: str):
     from db_introspector import DBIntrospector
     from ontology_generator import generate_ontology
 
+    # Load the wizard session if present so log-discovery (Phase L5)
+    # classes + RCA taxonomy land in enterprise.ttl automatically.
+    session = None
+    session_path = os.path.join(HERE, ".wizard_session.json")
+    if os.path.isfile(session_path):
+        try:
+            with open(session_path) as f:
+                session = json.load(f)
+        except Exception:
+            session = None
+
     intro = DBIntrospector(db_path)
-    generate_ontology(intro, os.path.join(out_path, "ontology"))
+    generate_ontology(intro, os.path.join(out_path, "ontology"),
+                      session=session)
     intro.close()
 
     # Reasoner integration — classify and snapshot (graceful if ROBOT absent)
@@ -209,6 +221,7 @@ def phase_reason(db_path: str, out_path: str):
             with open(session_path) as f:
                 session = json.load(f)
             session_rules = session.get("rules") or []
+            causal_rules = session.get("causal_rules") or []
             if session_rules:
                 sys.path.insert(0, HERE)
                 from wizard.rules import export_rules
@@ -219,6 +232,16 @@ def phase_reason(db_path: str, out_path: str):
                       f"({counts['skipped']} skipped)")
                 for rid, msg in export["skipped"]:
                     print(f"    ✗ {rid}: {msg}")
+            # L5.3 — approved LOG_CAUSAL_EDGE entries compile to SPARQL
+            # CONSTRUCTs that Phase B materialisation picks up.
+            if causal_rules:
+                sys.path.insert(0, HERE)
+                from wizard.rules import export_causal_rules
+                cexp = export_causal_rules(causal_rules, out_path)
+                if cexp["written"]:
+                    print(f"  ↪ Causal rules exported: {len(cexp['written'])}")
+                for rid, msg in cexp.get("skipped", []):
+                    print(f"    ✗ causal {rid}: {msg}")
         except Exception as exc:  # noqa: BLE001
             print(f"  ⚠ Rule export failed: {exc}")
 
@@ -608,7 +631,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","security","conflict","alignment","runtime",
+                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","sequence","drift-templates","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
                                  "embed","retrieve"],
                         help="Run a specific phase only")
@@ -756,6 +779,200 @@ def main():
             custom_regex=args.log_regex,
             dry_run=args.dry_run,
         )
+
+    def phase_mine(db_path: str, out_path: str):
+        """Phase L1 — Log mining for RCA bootstrap.
+
+        Reads logs from a folder (or glob, or single file), clusters
+        them into templates via Drain, classifies the variable slots,
+        builds a PMI-weighted entity graph with temporal direction,
+        and persists every layer to SQLite for the engineer-review step.
+
+        See docs/log-rca-roadmap.md and docs/log-rca-dev-plan.md.
+
+        Inputs are gathered from existing CLI flags:
+          --log-path <folder|glob|file>   (required)
+          --log-format auto|jsonl|syslog|cef|otlp|regex
+          --log-regex <pattern>           (regex format only)
+          --db                            (output SQLite path)
+        """
+        step("L1", "Log Mining — Templates · Slot Typing · PMI Graph")
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase mine")
+            print("    Example: python3 toolkit.py --phase mine "
+                  "--log-path examples/log-rca/sample/")
+            return
+        try:
+            from log_corpus import LogCorpus
+            from log_miner import mine_corpus
+            from db.migrations.log_rca_proposals import migrate as _migrate_proposals
+        except ImportError as exc:
+            print(f"  ✗ {exc}")
+            print("    Install the mining extras: pip install -e .[mining]")
+            return
+
+        os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        # Make sure the proposal store can receive log-mined candidates
+        # if/when L4 review pushes them. Idempotent.
+        _migrate_proposals(conn)
+
+        corpus = LogCorpus(log_path, fmt=args.log_format,
+                           custom_regex=args.log_regex)
+        files = corpus.resolve_files()
+        print(f"  ↪ corpus: {len(files)} file(s) under {log_path}")
+        if not files:
+            print("  ⚠ no log files matched — supported extensions: "
+                  ".jsonl .json .log .syslog .cef .otlp .txt")
+            return
+
+        report = mine_corpus(corpus, conn)
+        r = report.as_dict()
+
+        # L3 — triangulation-gate the directed edges + seed proposals.
+        try:
+            from log_templates import LogTemplateMiner
+            from wizard.log_review import seed_from_mining
+            # Build a fresh extractions list for L3 — cheap compared to
+            # re-running the whole pipeline. We seed proposals using
+            # those extractions so the causality gate runs.
+            seed_miner = LogTemplateMiner(conn)
+            for rec in corpus.iter():
+                seed_miner.consume(
+                    rec.message, timestamp=rec.timestamp,
+                    severity=rec.severity,
+                    service=rec.fields.get("service") if rec.fields else None,
+                    trace_id=rec.fields.get("trace_id") if rec.fields else None)
+            seed_miner.flush()
+            seed_counts = seed_from_mining(conn, extractions=seed_miner.extractions)
+            r["proposals_seeded"] = sum(seed_counts.values())
+            r["proposal_breakdown"] = seed_counts
+        except Exception as exc:                # noqa: BLE001
+            r["proposals_seeded_error"] = str(exc)[:120]
+
+        print(f"  ✓ records ingested      {r['records_ingested']:>6,}")
+        print(f"  ✓ templates             {r['templates']:>6,}"
+              f"  (after EM merge: {r['templates_after_em']}, "
+              f"merges: {r['em_merges']})")
+        print(f"  ✓ slots profiled        {r['slots_profiled']:>6,}")
+        print(f"  ✓ entity edges          {r['edges_persisted']:>6,}")
+        if "proposal_breakdown" in r:
+            pb = r["proposal_breakdown"]
+            print(f"  ✓ proposals seeded      "
+                  f"{r['proposals_seeded']:>6,}  "
+                  f"(event={pb['log_event']} entity={pb['log_entity']} "
+                  f"rel={pb['log_relationship']} causal={pb['log_causal_edge']})")
+        print(f"  ✓ duration              {r['duration_s']:>6}s")
+        # Write a small JSON summary alongside the standard reports dir
+        # so the wizard's Log Discovery step (L4) can show the headline
+        # numbers without re-running the pipeline.
+        reports_dir = os.path.join(out_path, "reports")
+        os.makedirs(reports_dir, exist_ok=True)
+        summary_path = os.path.join(reports_dir, "log_mining_summary.json")
+        with open(summary_path, "w") as f:
+            json.dump(r, f, indent=2)
+        print(f"  ✓ summary               → {summary_path}")
+        conn.close()
+
+    def phase_sequence(db_path: str, out_path: str):
+        """Phase L2 — Sequence + anomaly learning.
+
+        Reads the L1 mining artefacts, builds per-service trajectories,
+        fits a per-service Categorical HMM (BIC-selected state count),
+        and flags anomalous trajectories into the proposal store.
+        Re-runs --phase mine first so the sequence pass always sees a
+        fresh template catalogue — cheap on small corpora, idempotent
+        on larger ones.
+        """
+        step("L2", "Sequence Learning — Trajectories · HMM · Anomalies")
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase sequence")
+            return
+        try:
+            from log_corpus import LogCorpus
+            from log_miner import mine_corpus
+            from log_templates import LogTemplateMiner
+            from sequence_learner import mine_sequences
+            from db.migrations.log_rca_proposals import migrate as _migrate
+        except ImportError as exc:
+            print(f"  ✗ {exc}")
+            print("    Install the mining extras: pip install -e .[mining]")
+            return
+
+        os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        _migrate(conn)
+
+        corpus = LogCorpus(log_path, fmt=args.log_format,
+                           custom_regex=args.log_regex)
+        files = corpus.resolve_files()
+        if not files:
+            print(f"  ⚠ no log files matched: {log_path}")
+            return
+        print(f"  ↪ corpus: {len(files)} file(s)")
+
+        # Re-mine so the HMM sees the latest cluster ids.
+        miner = LogTemplateMiner(conn)
+        for rec in corpus.iter():
+            miner.consume(rec.message,
+                          timestamp=rec.timestamp,
+                          severity=rec.severity,
+                          service=rec.fields.get("service") if rec.fields else None,
+                          trace_id=rec.fields.get("trace_id") if rec.fields else None)
+        miner.flush()
+        miner.refine()
+
+        seq_report = mine_sequences(miner.extractions, conn)
+        r = seq_report.as_dict()
+        print(f"  ✓ trajectories          {r['trajectories']}")
+        print(f"  ✓ services fit          {r['services_fit']}")
+        print(f"  ✓ anomalies             {r['anomalies']}")
+        print(f"  ✓ proposals             {r['proposals_persisted']}")
+        print(f"  ✓ duration              {r['duration_s']}s")
+        conn.close()
+
+    def phase_drift_templates(db_path: str, out_path: str):
+        """Phase L7 — closed-loop drift on log templates.
+
+        Re-runs Drain against ``--log-path``, comparing each line to the
+        approved template catalogue. Lines that yield *new* clusters
+        graduate into the proposal store as ``DRIFT_ON_NEW_TEMPLATE``
+        once they clear the hit floor. Engineers see them in the same
+        Step 2.5 review queue alongside bootstrap candidates.
+        """
+        step("L7", "Drift Detection — New Log Templates")
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase drift-templates")
+            return
+        try:
+            from log_corpus import LogCorpus
+            from runtime.drift.log_template_drift import detect_template_drift
+            from db.migrations.log_rca_proposals import migrate as _migrate
+        except ImportError as exc:
+            print(f"  ✗ {exc}")
+            print("    Install the mining extras: pip install -e .[mining]")
+            return
+        os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        _migrate(conn)
+
+        corpus = LogCorpus(log_path)
+        files = corpus.resolve_files()
+        if not files:
+            print(f"  ⚠ no log files matched: {log_path}")
+            conn.close()
+            return
+        print(f"  ↪ scanning {len(files)} file(s) against approved templates")
+        rep = detect_template_drift(corpus, conn)
+        r = rep.as_dict()
+        print(f"  ✓ lines seen            {r['lines_seen']:>6,}")
+        print(f"  ✓ new templates         {r['new_templates']:>6,}")
+        print(f"  ✓ proposals queued      {r['new_proposals']:>6,}")
+        print(f"  ✓ duration              {r['duration_s']:>6}s")
+        conn.close()
 
     def phase_security(db_path: str, out_path: str):
         step(0, "Named-Graph RBAC Config Generation")
@@ -1283,6 +1500,9 @@ def main():
         "reasoner": [(phase_reasoner,  [args.db, args.out])],
         "sparql":   [(phase_sparql,    [args.db, args.out])],
         "log":       [(phase_log,       [args.db, args.out])],
+        "mine":      [(phase_mine,      [args.db, args.out])],
+        "sequence":  [(phase_sequence,  [args.db, args.out])],
+        "drift-templates": [(phase_drift_templates, [args.db, args.out])],
         "security":  [(phase_security,  [args.db, args.out])],
         "conflict":  [(phase_conflict,  [args.db, args.out])],
         "alignment": [(phase_alignment, [args.db, args.out])],

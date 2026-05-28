@@ -1,0 +1,619 @@
+{"ts": "2026-05-07T09:00:49.892364+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00023", "message": "GTP-U tunnel activated sessionId=pdu-00023 teid=0x00000017"}
+{"ts": "2026-05-07T09:00:49.913364+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00023", "message": "Data path enabled sessionId=pdu-00023"}
+{"ts": "2026-05-07T09:00:50.129556+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00155", "message": "GTP-U tunnel activated sessionId=pdu-00155 teid=0x0000009b"}
+{"ts": "2026-05-07T09:00:50.148556+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00155", "message": "Data path enabled sessionId=pdu-00155"}
+{"ts": "2026-05-07T09:00:51.707099+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00218", "message": "GTP-U tunnel activated sessionId=pdu-00218 teid=0x000000da"}
+{"ts": "2026-05-07T09:00:51.722099+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00218", "message": "Data path enabled sessionId=pdu-00218"}
+{"ts": "2026-05-07T09:00:53.897027+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00147", "message": "GTP-U tunnel activated sessionId=pdu-00147 teid=0x00000093"}
+{"ts": "2026-05-07T09:00:53.921027+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00147", "message": "Data path enabled sessionId=pdu-00147"}
+{"ts": "2026-05-07T09:01:15.067737+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00240", "message": "GTP-U tunnel activated sessionId=pdu-00240 teid=0x000000f0"}
+{"ts": "2026-05-07T09:01:15.088737+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00240", "message": "Data path enabled sessionId=pdu-00240"}
+{"ts": "2026-05-07T09:01:18.539786+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00125", "message": "GTP-U tunnel activated sessionId=pdu-00125 teid=0x0000007d"}
+{"ts": "2026-05-07T09:01:18.562786+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00125", "message": "Data path enabled sessionId=pdu-00125"}
+{"ts": "2026-05-07T09:01:18.801028+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00113", "message": "GTP-U tunnel activated sessionId=pdu-00113 teid=0x00000071"}
+{"ts": "2026-05-07T09:01:18.826028+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00113", "message": "Data path enabled sessionId=pdu-00113"}
+{"ts": "2026-05-07T09:01:24.516621+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00022", "message": "GTP-U tunnel activated sessionId=pdu-00022 teid=0x00000016"}
+{"ts": "2026-05-07T09:01:24.542621+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00022", "message": "Data path enabled sessionId=pdu-00022"}
+{"ts": "2026-05-07T09:01:37.955300+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00228", "message": "GTP-U tunnel activated sessionId=pdu-00228 teid=0x000000e4"}
+{"ts": "2026-05-07T09:01:37.979300+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00228", "message": "Data path enabled sessionId=pdu-00228"}
+{"ts": "2026-05-07T09:01:46.632828+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00169", "message": "GTP-U tunnel activated sessionId=pdu-00169 teid=0x000000a9"}
+{"ts": "2026-05-07T09:01:46.651828+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00169", "message": "Data path enabled sessionId=pdu-00169"}
+{"ts": "2026-05-07T09:01:58.825365+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00080", "message": "GTP-U tunnel activated sessionId=pdu-00080 teid=0x00000050"}
+{"ts": "2026-05-07T09:01:58.846365+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00080", "message": "Data path enabled sessionId=pdu-00080"}
+{"ts": "2026-05-07T09:02:00.856064+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00150", "message": "GTP-U tunnel activated sessionId=pdu-00150 teid=0x00000096"}
+{"ts": "2026-05-07T09:02:00.878064+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00150", "message": "Data path enabled sessionId=pdu-00150"}
+{"ts": "2026-05-07T09:02:10.145374+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00250", "message": "GTP-U tunnel activated sessionId=pdu-00250 teid=0x000000fa"}
+{"ts": "2026-05-07T09:02:10.159374+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00250", "message": "Data path enabled sessionId=pdu-00250"}
+{"ts": "2026-05-07T09:02:12.738664+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00145", "message": "GTP-U tunnel activated sessionId=pdu-00145 teid=0x00000091"}
+{"ts": "2026-05-07T09:02:12.757664+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00145", "message": "Data path enabled sessionId=pdu-00145"}
+{"ts": "2026-05-07T09:02:14.379633+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00136", "message": "GTP-U tunnel activated sessionId=pdu-00136 teid=0x00000088"}
+{"ts": "2026-05-07T09:02:14.398633+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00136", "message": "Data path enabled sessionId=pdu-00136"}
+{"ts": "2026-05-07T09:02:17.007218+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00170", "message": "GTP-U tunnel activated sessionId=pdu-00170 teid=0x000000aa"}
+{"ts": "2026-05-07T09:02:17.024218+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00170", "message": "Data path enabled sessionId=pdu-00170"}
+{"ts": "2026-05-07T09:02:18.231387+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00231", "message": "GTP-U tunnel activated sessionId=pdu-00231 teid=0x000000e7"}
+{"ts": "2026-05-07T09:02:18.244387+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00231", "message": "Data path enabled sessionId=pdu-00231"}
+{"ts": "2026-05-07T09:02:28.249649+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00189", "message": "GTP-U tunnel activated sessionId=pdu-00189 teid=0x000000bd"}
+{"ts": "2026-05-07T09:02:28.267649+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00189", "message": "Data path enabled sessionId=pdu-00189"}
+{"ts": "2026-05-07T09:02:53.924217+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00210", "message": "GTP-U tunnel activated sessionId=pdu-00210 teid=0x000000d2"}
+{"ts": "2026-05-07T09:02:53.936217+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00210", "message": "Data path enabled sessionId=pdu-00210"}
+{"ts": "2026-05-07T09:02:54.598135+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00184", "message": "GTP-U tunnel activated sessionId=pdu-00184 teid=0x000000b8"}
+{"ts": "2026-05-07T09:02:54.616135+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00184", "message": "Data path enabled sessionId=pdu-00184"}
+{"ts": "2026-05-07T09:02:55.102301+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00118", "message": "GTP-U tunnel activated sessionId=pdu-00118 teid=0x00000076"}
+{"ts": "2026-05-07T09:02:55.128301+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00118", "message": "Data path enabled sessionId=pdu-00118"}
+{"ts": "2026-05-07T09:02:56.435714+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00209", "message": "GTP-U tunnel activated sessionId=pdu-00209 teid=0x000000d1"}
+{"ts": "2026-05-07T09:02:56.458714+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00209", "message": "Data path enabled sessionId=pdu-00209"}
+{"ts": "2026-05-07T09:03:01.591848+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00164", "message": "GTP-U tunnel activated sessionId=pdu-00164 teid=0x000000a4"}
+{"ts": "2026-05-07T09:03:01.607848+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00164", "message": "Data path enabled sessionId=pdu-00164"}
+{"ts": "2026-05-07T09:03:03.645553+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00068", "message": "GTP-U tunnel activated sessionId=pdu-00068 teid=0x00000044"}
+{"ts": "2026-05-07T09:03:03.670553+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00068", "message": "Data path enabled sessionId=pdu-00068"}
+{"ts": "2026-05-07T09:03:13.356874+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00243", "message": "GTP-U tunnel activated sessionId=pdu-00243 teid=0x000000f3"}
+{"ts": "2026-05-07T09:03:13.382874+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00243", "message": "Data path enabled sessionId=pdu-00243"}
+{"ts": "2026-05-07T09:03:38.610949+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00227", "message": "GTP-U tunnel activated sessionId=pdu-00227 teid=0x000000e3"}
+{"ts": "2026-05-07T09:03:38.624949+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00227", "message": "Data path enabled sessionId=pdu-00227"}
+{"ts": "2026-05-07T09:03:47.843775+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00088", "message": "GTP-U tunnel activated sessionId=pdu-00088 teid=0x00000058"}
+{"ts": "2026-05-07T09:03:47.866775+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00088", "message": "Data path enabled sessionId=pdu-00088"}
+{"ts": "2026-05-07T09:03:54.104325+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00049", "message": "GTP-U tunnel activated sessionId=pdu-00049 teid=0x00000031"}
+{"ts": "2026-05-07T09:03:54.120325+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00049", "message": "Data path enabled sessionId=pdu-00049"}
+{"ts": "2026-05-07T09:04:12.856365+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00173", "message": "GTP-U tunnel activated sessionId=pdu-00173 teid=0x000000ad"}
+{"ts": "2026-05-07T09:04:12.866365+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00173", "message": "Data path enabled sessionId=pdu-00173"}
+{"ts": "2026-05-07T09:04:22.274350+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00220", "message": "GTP-U tunnel activated sessionId=pdu-00220 teid=0x000000dc"}
+{"ts": "2026-05-07T09:04:22.287350+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00220", "message": "Data path enabled sessionId=pdu-00220"}
+{"ts": "2026-05-07T09:04:22.991900+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00205", "message": "GTP-U tunnel activated sessionId=pdu-00205 teid=0x000000cd"}
+{"ts": "2026-05-07T09:04:23.008900+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00205", "message": "Data path enabled sessionId=pdu-00205"}
+{"ts": "2026-05-07T09:04:37.206717+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00208", "message": "GTP-U tunnel activated sessionId=pdu-00208 teid=0x000000d0"}
+{"ts": "2026-05-07T09:04:37.225717+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00208", "message": "Data path enabled sessionId=pdu-00208"}
+{"ts": "2026-05-07T09:04:37.874020+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00200", "message": "GTP-U tunnel activated sessionId=pdu-00200 teid=0x000000c8"}
+{"ts": "2026-05-07T09:04:37.901020+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00200", "message": "Data path enabled sessionId=pdu-00200"}
+{"ts": "2026-05-07T09:04:46.035796+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00072", "message": "GTP-U tunnel activated sessionId=pdu-00072 teid=0x00000048"}
+{"ts": "2026-05-07T09:04:46.047796+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00072", "message": "Data path enabled sessionId=pdu-00072"}
+{"ts": "2026-05-07T09:04:47.361029+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00213", "message": "GTP-U tunnel activated sessionId=pdu-00213 teid=0x000000d5"}
+{"ts": "2026-05-07T09:04:47.376029+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00213", "message": "Data path enabled sessionId=pdu-00213"}
+{"ts": "2026-05-07T09:04:49+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-0-0", "message": "Throughput below SLA sessionId=pdu-06593 measuredMbps=12 minMbps=50"}
+{"ts": "2026-05-07T09:04:49.400000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-0-1", "message": "Throughput below SLA sessionId=pdu-04669 measuredMbps=11 minMbps=50"}
+{"ts": "2026-05-07T09:04:49.800000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-0-2", "message": "Throughput below SLA sessionId=pdu-02526 measuredMbps=9 minMbps=50"}
+{"ts": "2026-05-07T09:04:50.200000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-0-3", "message": "Throughput below SLA sessionId=pdu-01976 measuredMbps=15 minMbps=50"}
+{"ts": "2026-05-07T09:04:50.600000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-0-4", "message": "Throughput below SLA sessionId=pdu-04892 measuredMbps=14 minMbps=50"}
+{"ts": "2026-05-07T09:04:51.500000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "sla-aggregate-0", "message": "SLA aggregate breach detected for sst=1 affectedSessions=5"}
+{"ts": "2026-05-07T09:05:00.382847+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00007", "message": "GTP-U tunnel activated sessionId=pdu-00007 teid=0x00000007"}
+{"ts": "2026-05-07T09:05:00.393847+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00007", "message": "Data path enabled sessionId=pdu-00007"}
+{"ts": "2026-05-07T09:05:00.885241+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00101", "message": "GTP-U tunnel activated sessionId=pdu-00101 teid=0x00000065"}
+{"ts": "2026-05-07T09:05:00.904241+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00101", "message": "Data path enabled sessionId=pdu-00101"}
+{"ts": "2026-05-07T09:05:02.903783+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00216", "message": "GTP-U tunnel activated sessionId=pdu-00216 teid=0x000000d8"}
+{"ts": "2026-05-07T09:05:02.914783+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00216", "message": "Data path enabled sessionId=pdu-00216"}
+{"ts": "2026-05-07T09:05:05.302582+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00196", "message": "GTP-U tunnel activated sessionId=pdu-00196 teid=0x000000c4"}
+{"ts": "2026-05-07T09:05:05.328582+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00196", "message": "Data path enabled sessionId=pdu-00196"}
+{"ts": "2026-05-07T09:05:08.427454+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00244", "message": "GTP-U tunnel activated sessionId=pdu-00244 teid=0x000000f4"}
+{"ts": "2026-05-07T09:05:08.457454+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00244", "message": "Data path enabled sessionId=pdu-00244"}
+{"ts": "2026-05-07T09:05:09.621795+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00050", "message": "GTP-U tunnel activated sessionId=pdu-00050 teid=0x00000032"}
+{"ts": "2026-05-07T09:05:09.632795+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00050", "message": "Data path enabled sessionId=pdu-00050"}
+{"ts": "2026-05-07T09:05:14.304216+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00269", "message": "GTP-U tunnel activated sessionId=pdu-00269 teid=0x0000010d"}
+{"ts": "2026-05-07T09:05:14.319565+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-0-0", "message": "Throughput restored sessionId=pdu-06593 measuredMbps=129"}
+{"ts": "2026-05-07T09:05:14.328216+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00269", "message": "Data path enabled sessionId=pdu-00269"}
+{"ts": "2026-05-07T09:05:14.905429+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-0-1", "message": "Throughput restored sessionId=pdu-04669 measuredMbps=152"}
+{"ts": "2026-05-07T09:05:15.565633+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-0-2", "message": "Throughput restored sessionId=pdu-02526 measuredMbps=91"}
+{"ts": "2026-05-07T09:05:16.319527+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-0-3", "message": "Throughput restored sessionId=pdu-01976 measuredMbps=127"}
+{"ts": "2026-05-07T09:05:16.987848+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-0-4", "message": "Throughput restored sessionId=pdu-04892 measuredMbps=135"}
+{"ts": "2026-05-07T09:05:27.308243+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00159", "message": "GTP-U tunnel activated sessionId=pdu-00159 teid=0x0000009f"}
+{"ts": "2026-05-07T09:05:27.323243+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00159", "message": "Data path enabled sessionId=pdu-00159"}
+{"ts": "2026-05-07T09:05:36.187321+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00217", "message": "GTP-U tunnel activated sessionId=pdu-00217 teid=0x000000d9"}
+{"ts": "2026-05-07T09:05:36.206321+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00217", "message": "Data path enabled sessionId=pdu-00217"}
+{"ts": "2026-05-07T09:05:48.361756+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00270", "message": "GTP-U tunnel activated sessionId=pdu-00270 teid=0x0000010e"}
+{"ts": "2026-05-07T09:05:48.384756+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00270", "message": "Data path enabled sessionId=pdu-00270"}
+{"ts": "2026-05-07T09:05:52.632841+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00166", "message": "GTP-U tunnel activated sessionId=pdu-00166 teid=0x000000a6"}
+{"ts": "2026-05-07T09:05:52.659841+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00166", "message": "Data path enabled sessionId=pdu-00166"}
+{"ts": "2026-05-07T09:05:56.008077+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00206", "message": "GTP-U tunnel activated sessionId=pdu-00206 teid=0x000000ce"}
+{"ts": "2026-05-07T09:05:56.035077+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00206", "message": "Data path enabled sessionId=pdu-00206"}
+{"ts": "2026-05-07T09:06:04.666340+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00012", "message": "GTP-U tunnel activated sessionId=pdu-00012 teid=0x0000000c"}
+{"ts": "2026-05-07T09:06:04.693340+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00012", "message": "Data path enabled sessionId=pdu-00012"}
+{"ts": "2026-05-07T09:06:34.819452+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00160", "message": "GTP-U tunnel activated sessionId=pdu-00160 teid=0x000000a0"}
+{"ts": "2026-05-07T09:06:34.831452+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00160", "message": "Data path enabled sessionId=pdu-00160"}
+{"ts": "2026-05-07T09:06:41.539039+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00185", "message": "GTP-U tunnel activated sessionId=pdu-00185 teid=0x000000b9"}
+{"ts": "2026-05-07T09:06:41.564039+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00185", "message": "Data path enabled sessionId=pdu-00185"}
+{"ts": "2026-05-07T09:06:46.872105+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00084", "message": "GTP-U tunnel activated sessionId=pdu-00084 teid=0x00000054"}
+{"ts": "2026-05-07T09:06:46.894105+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00084", "message": "Data path enabled sessionId=pdu-00084"}
+{"ts": "2026-05-07T09:06:47.341628+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00229", "message": "GTP-U tunnel activated sessionId=pdu-00229 teid=0x000000e5"}
+{"ts": "2026-05-07T09:06:47.366628+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00229", "message": "Data path enabled sessionId=pdu-00229"}
+{"ts": "2026-05-07T09:06:48.064507+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00013", "message": "GTP-U tunnel activated sessionId=pdu-00013 teid=0x0000000d"}
+{"ts": "2026-05-07T09:06:48.082507+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00013", "message": "Data path enabled sessionId=pdu-00013"}
+{"ts": "2026-05-07T09:06:54.330603+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00180", "message": "GTP-U tunnel activated sessionId=pdu-00180 teid=0x000000b4"}
+{"ts": "2026-05-07T09:06:54.353603+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00180", "message": "Data path enabled sessionId=pdu-00180"}
+{"ts": "2026-05-07T09:06:58.176866+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00198", "message": "GTP-U tunnel activated sessionId=pdu-00198 teid=0x000000c6"}
+{"ts": "2026-05-07T09:06:58.206866+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00198", "message": "Data path enabled sessionId=pdu-00198"}
+{"ts": "2026-05-07T09:06:58.743138+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00110", "message": "GTP-U tunnel activated sessionId=pdu-00110 teid=0x0000006e"}
+{"ts": "2026-05-07T09:06:58.767138+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00110", "message": "Data path enabled sessionId=pdu-00110"}
+{"ts": "2026-05-07T09:07:00.076627+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00077", "message": "GTP-U tunnel activated sessionId=pdu-00077 teid=0x0000004d"}
+{"ts": "2026-05-07T09:07:00.087627+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00077", "message": "Data path enabled sessionId=pdu-00077"}
+{"ts": "2026-05-07T09:07:00.362391+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00151", "message": "GTP-U tunnel activated sessionId=pdu-00151 teid=0x00000097"}
+{"ts": "2026-05-07T09:07:00.385391+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00151", "message": "Data path enabled sessionId=pdu-00151"}
+{"ts": "2026-05-07T09:07:03.717142+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00176", "message": "GTP-U tunnel activated sessionId=pdu-00176 teid=0x000000b0"}
+{"ts": "2026-05-07T09:07:03.744142+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00176", "message": "Data path enabled sessionId=pdu-00176"}
+{"ts": "2026-05-07T09:07:04.631959+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00083", "message": "GTP-U tunnel activated sessionId=pdu-00083 teid=0x00000053"}
+{"ts": "2026-05-07T09:07:04.641959+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00083", "message": "Data path enabled sessionId=pdu-00083"}
+{"ts": "2026-05-07T09:07:05.555445+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00141", "message": "GTP-U tunnel activated sessionId=pdu-00141 teid=0x0000008d"}
+{"ts": "2026-05-07T09:07:05.566445+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00141", "message": "Data path enabled sessionId=pdu-00141"}
+{"ts": "2026-05-07T09:07:08.392315+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00252", "message": "GTP-U tunnel activated sessionId=pdu-00252 teid=0x000000fc"}
+{"ts": "2026-05-07T09:07:08.416315+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00252", "message": "Data path enabled sessionId=pdu-00252"}
+{"ts": "2026-05-07T09:07:18.783996+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00104", "message": "GTP-U tunnel activated sessionId=pdu-00104 teid=0x00000068"}
+{"ts": "2026-05-07T09:07:18.794996+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00104", "message": "Data path enabled sessionId=pdu-00104"}
+{"ts": "2026-05-07T09:07:18.895937+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00214", "message": "GTP-U tunnel activated sessionId=pdu-00214 teid=0x000000d6"}
+{"ts": "2026-05-07T09:07:18.916937+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00214", "message": "Data path enabled sessionId=pdu-00214"}
+{"ts": "2026-05-07T09:07:23.337873+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00082", "message": "GTP-U tunnel activated sessionId=pdu-00082 teid=0x00000052"}
+{"ts": "2026-05-07T09:07:23.352873+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00082", "message": "Data path enabled sessionId=pdu-00082"}
+{"ts": "2026-05-07T09:07:27.005955+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00266", "message": "GTP-U tunnel activated sessionId=pdu-00266 teid=0x0000010a"}
+{"ts": "2026-05-07T09:07:27.019955+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00266", "message": "Data path enabled sessionId=pdu-00266"}
+{"ts": "2026-05-07T09:07:28.791067+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00233", "message": "GTP-U tunnel activated sessionId=pdu-00233 teid=0x000000e9"}
+{"ts": "2026-05-07T09:07:28.804067+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00233", "message": "Data path enabled sessionId=pdu-00233"}
+{"ts": "2026-05-07T09:07:40.545759+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00029", "message": "GTP-U tunnel activated sessionId=pdu-00029 teid=0x0000001d"}
+{"ts": "2026-05-07T09:07:40.574759+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00029", "message": "Data path enabled sessionId=pdu-00029"}
+{"ts": "2026-05-07T09:07:42.110866+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00079", "message": "GTP-U tunnel activated sessionId=pdu-00079 teid=0x0000004f"}
+{"ts": "2026-05-07T09:07:42.136866+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00079", "message": "Data path enabled sessionId=pdu-00079"}
+{"ts": "2026-05-07T09:07:43.828266+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00109", "message": "GTP-U tunnel activated sessionId=pdu-00109 teid=0x0000006d"}
+{"ts": "2026-05-07T09:07:43.854266+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00109", "message": "Data path enabled sessionId=pdu-00109"}
+{"ts": "2026-05-07T09:07:59.673872+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00045", "message": "GTP-U tunnel activated sessionId=pdu-00045 teid=0x0000002d"}
+{"ts": "2026-05-07T09:07:59.683872+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00045", "message": "Data path enabled sessionId=pdu-00045"}
+{"ts": "2026-05-07T09:08:00.070743+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00024", "message": "GTP-U tunnel activated sessionId=pdu-00024 teid=0x00000018"}
+{"ts": "2026-05-07T09:08:00.086743+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00024", "message": "Data path enabled sessionId=pdu-00024"}
+{"ts": "2026-05-07T09:08:05.379294+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00153", "message": "GTP-U tunnel activated sessionId=pdu-00153 teid=0x00000099"}
+{"ts": "2026-05-07T09:08:05.407294+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00153", "message": "Data path enabled sessionId=pdu-00153"}
+{"ts": "2026-05-07T09:08:11.792395+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00177", "message": "GTP-U tunnel activated sessionId=pdu-00177 teid=0x000000b1"}
+{"ts": "2026-05-07T09:08:11.807395+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00177", "message": "Data path enabled sessionId=pdu-00177"}
+{"ts": "2026-05-07T09:08:21.522806+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00129", "message": "GTP-U tunnel activated sessionId=pdu-00129 teid=0x00000081"}
+{"ts": "2026-05-07T09:08:21.535806+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00129", "message": "Data path enabled sessionId=pdu-00129"}
+{"ts": "2026-05-07T09:08:26.255748+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00178", "message": "GTP-U tunnel activated sessionId=pdu-00178 teid=0x000000b2"}
+{"ts": "2026-05-07T09:08:26.279748+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00178", "message": "Data path enabled sessionId=pdu-00178"}
+{"ts": "2026-05-07T09:08:29.158143+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00146", "message": "GTP-U tunnel activated sessionId=pdu-00146 teid=0x00000092"}
+{"ts": "2026-05-07T09:08:29.176143+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00146", "message": "Data path enabled sessionId=pdu-00146"}
+{"ts": "2026-05-07T09:08:32.373498+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00102", "message": "GTP-U tunnel activated sessionId=pdu-00102 teid=0x00000066"}
+{"ts": "2026-05-07T09:08:32.402498+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00102", "message": "Data path enabled sessionId=pdu-00102"}
+{"ts": "2026-05-07T09:08:33.568488+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00212", "message": "GTP-U tunnel activated sessionId=pdu-00212 teid=0x000000d4"}
+{"ts": "2026-05-07T09:08:33.593488+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00212", "message": "Data path enabled sessionId=pdu-00212"}
+{"ts": "2026-05-07T09:08:49.296476+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00165", "message": "GTP-U tunnel activated sessionId=pdu-00165 teid=0x000000a5"}
+{"ts": "2026-05-07T09:08:49.308476+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00165", "message": "Data path enabled sessionId=pdu-00165"}
+{"ts": "2026-05-07T09:08:51.613271+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00112", "message": "GTP-U tunnel activated sessionId=pdu-00112 teid=0x00000070"}
+{"ts": "2026-05-07T09:08:51.635271+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00112", "message": "Data path enabled sessionId=pdu-00112"}
+{"ts": "2026-05-07T09:08:52.624213+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00262", "message": "GTP-U tunnel activated sessionId=pdu-00262 teid=0x00000106"}
+{"ts": "2026-05-07T09:08:52.654213+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00262", "message": "Data path enabled sessionId=pdu-00262"}
+{"ts": "2026-05-07T09:08:58.730722+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00135", "message": "GTP-U tunnel activated sessionId=pdu-00135 teid=0x00000087"}
+{"ts": "2026-05-07T09:08:58.759722+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00135", "message": "Data path enabled sessionId=pdu-00135"}
+{"ts": "2026-05-07T09:09:03.571301+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00221", "message": "GTP-U tunnel activated sessionId=pdu-00221 teid=0x000000dd"}
+{"ts": "2026-05-07T09:09:03.584301+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00221", "message": "Data path enabled sessionId=pdu-00221"}
+{"ts": "2026-05-07T09:09:06.814991+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00036", "message": "GTP-U tunnel activated sessionId=pdu-00036 teid=0x00000024"}
+{"ts": "2026-05-07T09:09:06.828991+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00036", "message": "Data path enabled sessionId=pdu-00036"}
+{"ts": "2026-05-07T09:09:07.277418+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00039", "message": "GTP-U tunnel activated sessionId=pdu-00039 teid=0x00000027"}
+{"ts": "2026-05-07T09:09:07.301418+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00039", "message": "Data path enabled sessionId=pdu-00039"}
+{"ts": "2026-05-07T09:09:13.685046+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00032", "message": "GTP-U tunnel activated sessionId=pdu-00032 teid=0x00000020"}
+{"ts": "2026-05-07T09:09:13.709046+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00032", "message": "Data path enabled sessionId=pdu-00032"}
+{"ts": "2026-05-07T09:09:36.919766+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00133", "message": "GTP-U tunnel activated sessionId=pdu-00133 teid=0x00000085"}
+{"ts": "2026-05-07T09:09:36.949766+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00133", "message": "Data path enabled sessionId=pdu-00133"}
+{"ts": "2026-05-07T09:09:40+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-1-0", "message": "Throughput below SLA sessionId=pdu-06980 measuredMbps=12 minMbps=50"}
+{"ts": "2026-05-07T09:09:40.074513+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00086", "message": "GTP-U tunnel activated sessionId=pdu-00086 teid=0x00000056"}
+{"ts": "2026-05-07T09:09:40.090513+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00086", "message": "Data path enabled sessionId=pdu-00086"}
+{"ts": "2026-05-07T09:09:40.400000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-1-1", "message": "Throughput below SLA sessionId=pdu-01523 measuredMbps=15 minMbps=50"}
+{"ts": "2026-05-07T09:09:40.800000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-1-2", "message": "Throughput below SLA sessionId=pdu-00663 measuredMbps=8 minMbps=50"}
+{"ts": "2026-05-07T09:09:41.200000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-1-3", "message": "Throughput below SLA sessionId=pdu-08411 measuredMbps=15 minMbps=50"}
+{"ts": "2026-05-07T09:09:41.600000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-1-4", "message": "Throughput below SLA sessionId=pdu-05600 measuredMbps=15 minMbps=50"}
+{"ts": "2026-05-07T09:09:42.500000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "sla-aggregate-1", "message": "SLA aggregate breach detected for sst=2 affectedSessions=5"}
+{"ts": "2026-05-07T09:09:48.588706+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00070", "message": "GTP-U tunnel activated sessionId=pdu-00070 teid=0x00000046"}
+{"ts": "2026-05-07T09:09:48.618706+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00070", "message": "Data path enabled sessionId=pdu-00070"}
+{"ts": "2026-05-07T09:10:03.950934+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00183", "message": "GTP-U tunnel activated sessionId=pdu-00183 teid=0x000000b7"}
+{"ts": "2026-05-07T09:10:03.978934+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00183", "message": "Data path enabled sessionId=pdu-00183"}
+{"ts": "2026-05-07T09:10:08.417168+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-1-0", "message": "Throughput restored sessionId=pdu-06980 measuredMbps=139"}
+{"ts": "2026-05-07T09:10:08.979581+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-1-1", "message": "Throughput restored sessionId=pdu-01523 measuredMbps=141"}
+{"ts": "2026-05-07T09:10:09.459817+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-1-2", "message": "Throughput restored sessionId=pdu-00663 measuredMbps=96"}
+{"ts": "2026-05-07T09:10:10.170405+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-1-3", "message": "Throughput restored sessionId=pdu-08411 measuredMbps=118"}
+{"ts": "2026-05-07T09:10:10.975328+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-1-4", "message": "Throughput restored sessionId=pdu-05600 measuredMbps=146"}
+{"ts": "2026-05-07T09:10:11.049025+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00224", "message": "GTP-U tunnel activated sessionId=pdu-00224 teid=0x000000e0"}
+{"ts": "2026-05-07T09:10:11.062025+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00224", "message": "Data path enabled sessionId=pdu-00224"}
+{"ts": "2026-05-07T09:10:15.184290+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00124", "message": "GTP-U tunnel activated sessionId=pdu-00124 teid=0x0000007c"}
+{"ts": "2026-05-07T09:10:15.201290+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00124", "message": "Data path enabled sessionId=pdu-00124"}
+{"ts": "2026-05-07T09:10:23.190094+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00030", "message": "GTP-U tunnel activated sessionId=pdu-00030 teid=0x0000001e"}
+{"ts": "2026-05-07T09:10:23.209094+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00030", "message": "Data path enabled sessionId=pdu-00030"}
+{"ts": "2026-05-07T09:10:38.030172+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00191", "message": "GTP-U tunnel activated sessionId=pdu-00191 teid=0x000000bf"}
+{"ts": "2026-05-07T09:10:38.059172+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00191", "message": "Data path enabled sessionId=pdu-00191"}
+{"ts": "2026-05-07T09:10:39.845237+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00025", "message": "GTP-U tunnel activated sessionId=pdu-00025 teid=0x00000019"}
+{"ts": "2026-05-07T09:10:39.859237+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00025", "message": "Data path enabled sessionId=pdu-00025"}
+{"ts": "2026-05-07T09:10:54.650200+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00091", "message": "GTP-U tunnel activated sessionId=pdu-00091 teid=0x0000005b"}
+{"ts": "2026-05-07T09:10:54.666200+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00091", "message": "Data path enabled sessionId=pdu-00091"}
+{"ts": "2026-05-07T09:11:15.672788+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00081", "message": "GTP-U tunnel activated sessionId=pdu-00081 teid=0x00000051"}
+{"ts": "2026-05-07T09:11:15.699788+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00081", "message": "Data path enabled sessionId=pdu-00081"}
+{"ts": "2026-05-07T09:11:17.115413+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00095", "message": "GTP-U tunnel activated sessionId=pdu-00095 teid=0x0000005f"}
+{"ts": "2026-05-07T09:11:17.134413+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00095", "message": "Data path enabled sessionId=pdu-00095"}
+{"ts": "2026-05-07T09:11:21.335617+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00257", "message": "GTP-U tunnel activated sessionId=pdu-00257 teid=0x00000101"}
+{"ts": "2026-05-07T09:11:21.350617+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00257", "message": "Data path enabled sessionId=pdu-00257"}
+{"ts": "2026-05-07T09:11:24.919454+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00128", "message": "GTP-U tunnel activated sessionId=pdu-00128 teid=0x00000080"}
+{"ts": "2026-05-07T09:11:24.931454+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00128", "message": "Data path enabled sessionId=pdu-00128"}
+{"ts": "2026-05-07T09:11:34.087375+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00273", "message": "GTP-U tunnel activated sessionId=pdu-00273 teid=0x00000111"}
+{"ts": "2026-05-07T09:11:34.099375+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00273", "message": "Data path enabled sessionId=pdu-00273"}
+{"ts": "2026-05-07T09:11:45.767093+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00203", "message": "GTP-U tunnel activated sessionId=pdu-00203 teid=0x000000cb"}
+{"ts": "2026-05-07T09:11:45.777093+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00203", "message": "Data path enabled sessionId=pdu-00203"}
+{"ts": "2026-05-07T09:11:49.197195+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00187", "message": "GTP-U tunnel activated sessionId=pdu-00187 teid=0x000000bb"}
+{"ts": "2026-05-07T09:11:49.227195+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00187", "message": "Data path enabled sessionId=pdu-00187"}
+{"ts": "2026-05-07T09:11:52.598997+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00003", "message": "GTP-U tunnel activated sessionId=pdu-00003 teid=0x00000003"}
+{"ts": "2026-05-07T09:11:52.611997+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00003", "message": "Data path enabled sessionId=pdu-00003"}
+{"ts": "2026-05-07T09:11:52.941279+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00004", "message": "GTP-U tunnel activated sessionId=pdu-00004 teid=0x00000004"}
+{"ts": "2026-05-07T09:11:52.959279+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00004", "message": "Data path enabled sessionId=pdu-00004"}
+{"ts": "2026-05-07T09:11:53.964267+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00211", "message": "GTP-U tunnel activated sessionId=pdu-00211 teid=0x000000d3"}
+{"ts": "2026-05-07T09:11:53.992267+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00211", "message": "Data path enabled sessionId=pdu-00211"}
+{"ts": "2026-05-07T09:11:59.790954+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00149", "message": "GTP-U tunnel activated sessionId=pdu-00149 teid=0x00000095"}
+{"ts": "2026-05-07T09:11:59.806954+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00149", "message": "Data path enabled sessionId=pdu-00149"}
+{"ts": "2026-05-07T09:12:00.595982+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00130", "message": "GTP-U tunnel activated sessionId=pdu-00130 teid=0x00000082"}
+{"ts": "2026-05-07T09:12:00.615982+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00130", "message": "Data path enabled sessionId=pdu-00130"}
+{"ts": "2026-05-07T09:12:02.373029+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00267", "message": "GTP-U tunnel activated sessionId=pdu-00267 teid=0x0000010b"}
+{"ts": "2026-05-07T09:12:02.383029+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00267", "message": "Data path enabled sessionId=pdu-00267"}
+{"ts": "2026-05-07T09:12:14.896945+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00253", "message": "GTP-U tunnel activated sessionId=pdu-00253 teid=0x000000fd"}
+{"ts": "2026-05-07T09:12:14.906945+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00253", "message": "Data path enabled sessionId=pdu-00253"}
+{"ts": "2026-05-07T09:12:15.687977+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00242", "message": "GTP-U tunnel activated sessionId=pdu-00242 teid=0x000000f2"}
+{"ts": "2026-05-07T09:12:15.697977+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00242", "message": "Data path enabled sessionId=pdu-00242"}
+{"ts": "2026-05-07T09:12:23.376234+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00063", "message": "GTP-U tunnel activated sessionId=pdu-00063 teid=0x0000003f"}
+{"ts": "2026-05-07T09:12:23.402234+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00063", "message": "Data path enabled sessionId=pdu-00063"}
+{"ts": "2026-05-07T09:12:37.192692+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00131", "message": "GTP-U tunnel activated sessionId=pdu-00131 teid=0x00000083"}
+{"ts": "2026-05-07T09:12:37.220692+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00131", "message": "Data path enabled sessionId=pdu-00131"}
+{"ts": "2026-05-07T09:12:39.500643+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00139", "message": "GTP-U tunnel activated sessionId=pdu-00139 teid=0x0000008b"}
+{"ts": "2026-05-07T09:12:39.529643+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00139", "message": "Data path enabled sessionId=pdu-00139"}
+{"ts": "2026-05-07T09:12:51.245735+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00119", "message": "GTP-U tunnel activated sessionId=pdu-00119 teid=0x00000077"}
+{"ts": "2026-05-07T09:12:51.265735+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00119", "message": "Data path enabled sessionId=pdu-00119"}
+{"ts": "2026-05-07T09:13:05.701785+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00194", "message": "GTP-U tunnel activated sessionId=pdu-00194 teid=0x000000c2"}
+{"ts": "2026-05-07T09:13:05.725785+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00194", "message": "Data path enabled sessionId=pdu-00194"}
+{"ts": "2026-05-07T09:13:07.065771+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00248", "message": "GTP-U tunnel activated sessionId=pdu-00248 teid=0x000000f8"}
+{"ts": "2026-05-07T09:13:07.093771+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00248", "message": "Data path enabled sessionId=pdu-00248"}
+{"ts": "2026-05-07T09:13:08.988580+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00140", "message": "GTP-U tunnel activated sessionId=pdu-00140 teid=0x0000008c"}
+{"ts": "2026-05-07T09:13:09.003580+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00140", "message": "Data path enabled sessionId=pdu-00140"}
+{"ts": "2026-05-07T09:13:10.594831+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00044", "message": "GTP-U tunnel activated sessionId=pdu-00044 teid=0x0000002c"}
+{"ts": "2026-05-07T09:13:10.614831+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00044", "message": "Data path enabled sessionId=pdu-00044"}
+{"ts": "2026-05-07T09:13:15.621509+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00168", "message": "GTP-U tunnel activated sessionId=pdu-00168 teid=0x000000a8"}
+{"ts": "2026-05-07T09:13:15.635509+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00168", "message": "Data path enabled sessionId=pdu-00168"}
+{"ts": "2026-05-07T09:13:31.832770+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00060", "message": "GTP-U tunnel activated sessionId=pdu-00060 teid=0x0000003c"}
+{"ts": "2026-05-07T09:13:31.843770+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00060", "message": "Data path enabled sessionId=pdu-00060"}
+{"ts": "2026-05-07T09:13:32.183762+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00127", "message": "GTP-U tunnel activated sessionId=pdu-00127 teid=0x0000007f"}
+{"ts": "2026-05-07T09:13:32.200762+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00127", "message": "Data path enabled sessionId=pdu-00127"}
+{"ts": "2026-05-07T09:13:36.595147+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00274", "message": "GTP-U tunnel activated sessionId=pdu-00274 teid=0x00000112"}
+{"ts": "2026-05-07T09:13:36.624147+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00274", "message": "Data path enabled sessionId=pdu-00274"}
+{"ts": "2026-05-07T09:13:50.520796+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00186", "message": "GTP-U tunnel activated sessionId=pdu-00186 teid=0x000000ba"}
+{"ts": "2026-05-07T09:13:50.547796+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00186", "message": "Data path enabled sessionId=pdu-00186"}
+{"ts": "2026-05-07T09:13:59.955918+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00148", "message": "GTP-U tunnel activated sessionId=pdu-00148 teid=0x00000094"}
+{"ts": "2026-05-07T09:13:59.969918+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00148", "message": "Data path enabled sessionId=pdu-00148"}
+{"ts": "2026-05-07T09:14:00.222531+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00179", "message": "GTP-U tunnel activated sessionId=pdu-00179 teid=0x000000b3"}
+{"ts": "2026-05-07T09:14:00.250531+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00179", "message": "Data path enabled sessionId=pdu-00179"}
+{"ts": "2026-05-07T09:14:09.391699+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00238", "message": "GTP-U tunnel activated sessionId=pdu-00238 teid=0x000000ee"}
+{"ts": "2026-05-07T09:14:09.402699+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00238", "message": "Data path enabled sessionId=pdu-00238"}
+{"ts": "2026-05-07T09:14:09.576688+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00162", "message": "GTP-U tunnel activated sessionId=pdu-00162 teid=0x000000a2"}
+{"ts": "2026-05-07T09:14:09.586688+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00162", "message": "Data path enabled sessionId=pdu-00162"}
+{"ts": "2026-05-07T09:14:11.245784+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00230", "message": "GTP-U tunnel activated sessionId=pdu-00230 teid=0x000000e6"}
+{"ts": "2026-05-07T09:14:11.257784+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00230", "message": "Data path enabled sessionId=pdu-00230"}
+{"ts": "2026-05-07T09:14:22.080297+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00234", "message": "GTP-U tunnel activated sessionId=pdu-00234 teid=0x000000ea"}
+{"ts": "2026-05-07T09:14:22.100297+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00234", "message": "Data path enabled sessionId=pdu-00234"}
+{"ts": "2026-05-07T09:14:24.488370+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00027", "message": "GTP-U tunnel activated sessionId=pdu-00027 teid=0x0000001b"}
+{"ts": "2026-05-07T09:14:24.516370+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00027", "message": "Data path enabled sessionId=pdu-00027"}
+{"ts": "2026-05-07T09:14:27+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-2-0", "message": "Throughput below SLA sessionId=pdu-04842 measuredMbps=5 minMbps=50"}
+{"ts": "2026-05-07T09:14:27.400000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-2-1", "message": "Throughput below SLA sessionId=pdu-09315 measuredMbps=13 minMbps=50"}
+{"ts": "2026-05-07T09:14:27.800000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-2-2", "message": "Throughput below SLA sessionId=pdu-00782 measuredMbps=6 minMbps=50"}
+{"ts": "2026-05-07T09:14:28.200000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-2-3", "message": "Throughput below SLA sessionId=pdu-09028 measuredMbps=13 minMbps=50"}
+{"ts": "2026-05-07T09:14:28.600000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-2-4", "message": "Throughput below SLA sessionId=pdu-01254 measuredMbps=11 minMbps=50"}
+{"ts": "2026-05-07T09:14:29.500000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "sla-aggregate-2", "message": "SLA aggregate breach detected for sst=3 affectedSessions=5"}
+{"ts": "2026-05-07T09:14:44.633974+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00100", "message": "GTP-U tunnel activated sessionId=pdu-00100 teid=0x00000064"}
+{"ts": "2026-05-07T09:14:44.648974+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00100", "message": "Data path enabled sessionId=pdu-00100"}
+{"ts": "2026-05-07T09:14:53.560532+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-2-0", "message": "Throughput restored sessionId=pdu-04842 measuredMbps=112"}
+{"ts": "2026-05-07T09:14:54.211873+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-2-1", "message": "Throughput restored sessionId=pdu-09315 measuredMbps=178"}
+{"ts": "2026-05-07T09:14:54.813940+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-2-2", "message": "Throughput restored sessionId=pdu-00782 measuredMbps=94"}
+{"ts": "2026-05-07T09:14:55.558250+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-2-3", "message": "Throughput restored sessionId=pdu-09028 measuredMbps=139"}
+{"ts": "2026-05-07T09:14:55.965981+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-2-4", "message": "Throughput restored sessionId=pdu-01254 measuredMbps=103"}
+{"ts": "2026-05-07T09:15:01.817123+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00256", "message": "GTP-U tunnel activated sessionId=pdu-00256 teid=0x00000100"}
+{"ts": "2026-05-07T09:15:01.830123+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00256", "message": "Data path enabled sessionId=pdu-00256"}
+{"ts": "2026-05-07T09:15:02.450938+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00121", "message": "GTP-U tunnel activated sessionId=pdu-00121 teid=0x00000079"}
+{"ts": "2026-05-07T09:15:02.470938+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00121", "message": "Data path enabled sessionId=pdu-00121"}
+{"ts": "2026-05-07T09:15:04.630696+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00120", "message": "GTP-U tunnel activated sessionId=pdu-00120 teid=0x00000078"}
+{"ts": "2026-05-07T09:15:04.644696+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00120", "message": "Data path enabled sessionId=pdu-00120"}
+{"ts": "2026-05-07T09:15:13.294696+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00225", "message": "GTP-U tunnel activated sessionId=pdu-00225 teid=0x000000e1"}
+{"ts": "2026-05-07T09:15:13.307696+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00225", "message": "Data path enabled sessionId=pdu-00225"}
+{"ts": "2026-05-07T09:15:21.075850+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00258", "message": "GTP-U tunnel activated sessionId=pdu-00258 teid=0x00000102"}
+{"ts": "2026-05-07T09:15:21.092850+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00258", "message": "Data path enabled sessionId=pdu-00258"}
+{"ts": "2026-05-07T09:15:34.362380+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00197", "message": "GTP-U tunnel activated sessionId=pdu-00197 teid=0x000000c5"}
+{"ts": "2026-05-07T09:15:34.392380+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00197", "message": "Data path enabled sessionId=pdu-00197"}
+{"ts": "2026-05-07T09:15:34.433504+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00020", "message": "GTP-U tunnel activated sessionId=pdu-00020 teid=0x00000014"}
+{"ts": "2026-05-07T09:15:34.458504+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00020", "message": "Data path enabled sessionId=pdu-00020"}
+{"ts": "2026-05-07T09:15:37.801937+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00103", "message": "GTP-U tunnel activated sessionId=pdu-00103 teid=0x00000067"}
+{"ts": "2026-05-07T09:15:37.826937+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00103", "message": "Data path enabled sessionId=pdu-00103"}
+{"ts": "2026-05-07T09:15:42.638865+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00097", "message": "GTP-U tunnel activated sessionId=pdu-00097 teid=0x00000061"}
+{"ts": "2026-05-07T09:15:42.653865+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00097", "message": "Data path enabled sessionId=pdu-00097"}
+{"ts": "2026-05-07T09:15:43.004456+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00236", "message": "GTP-U tunnel activated sessionId=pdu-00236 teid=0x000000ec"}
+{"ts": "2026-05-07T09:15:43.024456+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00236", "message": "Data path enabled sessionId=pdu-00236"}
+{"ts": "2026-05-07T09:15:48.818842+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00064", "message": "GTP-U tunnel activated sessionId=pdu-00064 teid=0x00000040"}
+{"ts": "2026-05-07T09:15:48.838842+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00064", "message": "Data path enabled sessionId=pdu-00064"}
+{"ts": "2026-05-07T09:15:49.069638+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00065", "message": "GTP-U tunnel activated sessionId=pdu-00065 teid=0x00000041"}
+{"ts": "2026-05-07T09:15:49.079638+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00065", "message": "Data path enabled sessionId=pdu-00065"}
+{"ts": "2026-05-07T09:15:57.134461+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00132", "message": "GTP-U tunnel activated sessionId=pdu-00132 teid=0x00000084"}
+{"ts": "2026-05-07T09:15:57.163461+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00132", "message": "Data path enabled sessionId=pdu-00132"}
+{"ts": "2026-05-07T09:15:59.789139+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00237", "message": "GTP-U tunnel activated sessionId=pdu-00237 teid=0x000000ed"}
+{"ts": "2026-05-07T09:15:59.808139+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00237", "message": "Data path enabled sessionId=pdu-00237"}
+{"ts": "2026-05-07T09:16:09.497695+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00202", "message": "GTP-U tunnel activated sessionId=pdu-00202 teid=0x000000ca"}
+{"ts": "2026-05-07T09:16:09.521695+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00202", "message": "Data path enabled sessionId=pdu-00202"}
+{"ts": "2026-05-07T09:16:22.118207+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00062", "message": "GTP-U tunnel activated sessionId=pdu-00062 teid=0x0000003e"}
+{"ts": "2026-05-07T09:16:22.139207+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00062", "message": "Data path enabled sessionId=pdu-00062"}
+{"ts": "2026-05-07T09:16:24.441786+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00073", "message": "GTP-U tunnel activated sessionId=pdu-00073 teid=0x00000049"}
+{"ts": "2026-05-07T09:16:24.467786+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00073", "message": "Data path enabled sessionId=pdu-00073"}
+{"ts": "2026-05-07T09:16:28.670054+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00144", "message": "GTP-U tunnel activated sessionId=pdu-00144 teid=0x00000090"}
+{"ts": "2026-05-07T09:16:28.685054+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00144", "message": "Data path enabled sessionId=pdu-00144"}
+{"ts": "2026-05-07T09:16:29.597365+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00021", "message": "GTP-U tunnel activated sessionId=pdu-00021 teid=0x00000015"}
+{"ts": "2026-05-07T09:16:29.619365+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00021", "message": "Data path enabled sessionId=pdu-00021"}
+{"ts": "2026-05-07T09:16:30.830044+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00190", "message": "GTP-U tunnel activated sessionId=pdu-00190 teid=0x000000be"}
+{"ts": "2026-05-07T09:16:30.841044+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00190", "message": "Data path enabled sessionId=pdu-00190"}
+{"ts": "2026-05-07T09:16:35.518835+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00105", "message": "GTP-U tunnel activated sessionId=pdu-00105 teid=0x00000069"}
+{"ts": "2026-05-07T09:16:35.541835+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00105", "message": "Data path enabled sessionId=pdu-00105"}
+{"ts": "2026-05-07T09:16:38.948374+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00193", "message": "GTP-U tunnel activated sessionId=pdu-00193 teid=0x000000c1"}
+{"ts": "2026-05-07T09:16:38.974374+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00193", "message": "Data path enabled sessionId=pdu-00193"}
+{"ts": "2026-05-07T09:16:39.217865+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00142", "message": "GTP-U tunnel activated sessionId=pdu-00142 teid=0x0000008e"}
+{"ts": "2026-05-07T09:16:39.243865+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00142", "message": "Data path enabled sessionId=pdu-00142"}
+{"ts": "2026-05-07T09:16:47.255070+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00181", "message": "GTP-U tunnel activated sessionId=pdu-00181 teid=0x000000b5"}
+{"ts": "2026-05-07T09:16:47.279070+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00181", "message": "Data path enabled sessionId=pdu-00181"}
+{"ts": "2026-05-07T09:16:53.854304+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00002", "message": "GTP-U tunnel activated sessionId=pdu-00002 teid=0x00000002"}
+{"ts": "2026-05-07T09:16:53.871304+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00002", "message": "Data path enabled sessionId=pdu-00002"}
+{"ts": "2026-05-07T09:17:00.575373+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00172", "message": "GTP-U tunnel activated sessionId=pdu-00172 teid=0x000000ac"}
+{"ts": "2026-05-07T09:17:00.598373+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00172", "message": "Data path enabled sessionId=pdu-00172"}
+{"ts": "2026-05-07T09:17:01.578451+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00232", "message": "GTP-U tunnel activated sessionId=pdu-00232 teid=0x000000e8"}
+{"ts": "2026-05-07T09:17:01.603451+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00232", "message": "Data path enabled sessionId=pdu-00232"}
+{"ts": "2026-05-07T09:17:01.804688+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00094", "message": "GTP-U tunnel activated sessionId=pdu-00094 teid=0x0000005e"}
+{"ts": "2026-05-07T09:17:01.821688+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00094", "message": "Data path enabled sessionId=pdu-00094"}
+{"ts": "2026-05-07T09:17:05.046920+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00066", "message": "GTP-U tunnel activated sessionId=pdu-00066 teid=0x00000042"}
+{"ts": "2026-05-07T09:17:05.062920+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00066", "message": "Data path enabled sessionId=pdu-00066"}
+{"ts": "2026-05-07T09:17:06.083357+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00090", "message": "GTP-U tunnel activated sessionId=pdu-00090 teid=0x0000005a"}
+{"ts": "2026-05-07T09:17:06.108357+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00090", "message": "Data path enabled sessionId=pdu-00090"}
+{"ts": "2026-05-07T09:17:09.955507+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00055", "message": "GTP-U tunnel activated sessionId=pdu-00055 teid=0x00000037"}
+{"ts": "2026-05-07T09:17:09.974507+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00055", "message": "Data path enabled sessionId=pdu-00055"}
+{"ts": "2026-05-07T09:17:29.763441+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00175", "message": "GTP-U tunnel activated sessionId=pdu-00175 teid=0x000000af"}
+{"ts": "2026-05-07T09:17:29.793441+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00175", "message": "Data path enabled sessionId=pdu-00175"}
+{"ts": "2026-05-07T09:17:32.337754+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00108", "message": "GTP-U tunnel activated sessionId=pdu-00108 teid=0x0000006c"}
+{"ts": "2026-05-07T09:17:32.356754+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00108", "message": "Data path enabled sessionId=pdu-00108"}
+{"ts": "2026-05-07T09:17:34.086246+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00096", "message": "GTP-U tunnel activated sessionId=pdu-00096 teid=0x00000060"}
+{"ts": "2026-05-07T09:17:34.112246+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00096", "message": "Data path enabled sessionId=pdu-00096"}
+{"ts": "2026-05-07T09:17:54.282887+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00137", "message": "GTP-U tunnel activated sessionId=pdu-00137 teid=0x00000089"}
+{"ts": "2026-05-07T09:17:54.298887+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00137", "message": "Data path enabled sessionId=pdu-00137"}
+{"ts": "2026-05-07T09:18:05.596265+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00182", "message": "GTP-U tunnel activated sessionId=pdu-00182 teid=0x000000b6"}
+{"ts": "2026-05-07T09:18:05.624265+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00182", "message": "Data path enabled sessionId=pdu-00182"}
+{"ts": "2026-05-07T09:18:08.735462+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00071", "message": "GTP-U tunnel activated sessionId=pdu-00071 teid=0x00000047"}
+{"ts": "2026-05-07T09:18:08.755462+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00071", "message": "Data path enabled sessionId=pdu-00071"}
+{"ts": "2026-05-07T09:18:15.656524+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00056", "message": "GTP-U tunnel activated sessionId=pdu-00056 teid=0x00000038"}
+{"ts": "2026-05-07T09:18:15.685524+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00056", "message": "Data path enabled sessionId=pdu-00056"}
+{"ts": "2026-05-07T09:18:21+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "anom-orphan-000", "message": "GTP-U tunnel activated sessionId=pdu-orphan-0000 teid=0xdeadbeef"}
+{"ts": "2026-05-07T09:18:21.029000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "anom-orphan-000", "message": "PDU session lookup failed sessionId=pdu-orphan-0000"}
+{"ts": "2026-05-07T09:18:21.215571+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00265", "message": "GTP-U tunnel activated sessionId=pdu-00265 teid=0x00000109"}
+{"ts": "2026-05-07T09:18:21.231571+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00265", "message": "Data path enabled sessionId=pdu-00265"}
+{"ts": "2026-05-07T09:18:28.432209+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00114", "message": "GTP-U tunnel activated sessionId=pdu-00114 teid=0x00000072"}
+{"ts": "2026-05-07T09:18:28.452209+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00114", "message": "Data path enabled sessionId=pdu-00114"}
+{"ts": "2026-05-07T09:18:30.815171+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00268", "message": "GTP-U tunnel activated sessionId=pdu-00268 teid=0x0000010c"}
+{"ts": "2026-05-07T09:18:30.830171+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00268", "message": "Data path enabled sessionId=pdu-00268"}
+{"ts": "2026-05-07T09:18:32.137750+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00157", "message": "GTP-U tunnel activated sessionId=pdu-00157 teid=0x0000009d"}
+{"ts": "2026-05-07T09:18:32.161750+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00157", "message": "Data path enabled sessionId=pdu-00157"}
+{"ts": "2026-05-07T09:18:32.435318+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00241", "message": "GTP-U tunnel activated sessionId=pdu-00241 teid=0x000000f1"}
+{"ts": "2026-05-07T09:18:32.450318+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00241", "message": "Data path enabled sessionId=pdu-00241"}
+{"ts": "2026-05-07T09:18:34.368998+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00001", "message": "GTP-U tunnel activated sessionId=pdu-00001 teid=0x00000001"}
+{"ts": "2026-05-07T09:18:34.385998+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00001", "message": "Data path enabled sessionId=pdu-00001"}
+{"ts": "2026-05-07T09:18:40.425106+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00161", "message": "GTP-U tunnel activated sessionId=pdu-00161 teid=0x000000a1"}
+{"ts": "2026-05-07T09:18:40.445106+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00161", "message": "Data path enabled sessionId=pdu-00161"}
+{"ts": "2026-05-07T09:18:48.893501+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00059", "message": "GTP-U tunnel activated sessionId=pdu-00059 teid=0x0000003b"}
+{"ts": "2026-05-07T09:18:48.905501+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00059", "message": "Data path enabled sessionId=pdu-00059"}
+{"ts": "2026-05-07T09:18:53.860928+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00134", "message": "GTP-U tunnel activated sessionId=pdu-00134 teid=0x00000086"}
+{"ts": "2026-05-07T09:18:53.884928+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00134", "message": "Data path enabled sessionId=pdu-00134"}
+{"ts": "2026-05-07T09:18:54.166609+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00235", "message": "GTP-U tunnel activated sessionId=pdu-00235 teid=0x000000eb"}
+{"ts": "2026-05-07T09:18:54.191609+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00235", "message": "Data path enabled sessionId=pdu-00235"}
+{"ts": "2026-05-07T09:19:02.386166+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00048", "message": "GTP-U tunnel activated sessionId=pdu-00048 teid=0x00000030"}
+{"ts": "2026-05-07T09:19:02.401166+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00048", "message": "Data path enabled sessionId=pdu-00048"}
+{"ts": "2026-05-07T09:19:10.901150+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00123", "message": "GTP-U tunnel activated sessionId=pdu-00123 teid=0x0000007b"}
+{"ts": "2026-05-07T09:19:10.911150+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00123", "message": "Data path enabled sessionId=pdu-00123"}
+{"ts": "2026-05-07T09:19:11.161575+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00275", "message": "GTP-U tunnel activated sessionId=pdu-00275 teid=0x00000113"}
+{"ts": "2026-05-07T09:19:11.176575+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00275", "message": "Data path enabled sessionId=pdu-00275"}
+{"ts": "2026-05-07T09:19:11.812363+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00255", "message": "GTP-U tunnel activated sessionId=pdu-00255 teid=0x000000ff"}
+{"ts": "2026-05-07T09:19:11.840363+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00255", "message": "Data path enabled sessionId=pdu-00255"}
+{"ts": "2026-05-07T09:19:15.725716+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00011", "message": "GTP-U tunnel activated sessionId=pdu-00011 teid=0x0000000b"}
+{"ts": "2026-05-07T09:19:15.743716+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00011", "message": "Data path enabled sessionId=pdu-00011"}
+{"ts": "2026-05-07T09:19:19.865599+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00239", "message": "GTP-U tunnel activated sessionId=pdu-00239 teid=0x000000ef"}
+{"ts": "2026-05-07T09:19:19.876599+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00239", "message": "Data path enabled sessionId=pdu-00239"}
+{"ts": "2026-05-07T09:19:20.615670+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00016", "message": "GTP-U tunnel activated sessionId=pdu-00016 teid=0x00000010"}
+{"ts": "2026-05-07T09:19:20.642670+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00016", "message": "Data path enabled sessionId=pdu-00016"}
+{"ts": "2026-05-07T09:19:30.589439+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00152", "message": "GTP-U tunnel activated sessionId=pdu-00152 teid=0x00000098"}
+{"ts": "2026-05-07T09:19:30.612439+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00152", "message": "Data path enabled sessionId=pdu-00152"}
+{"ts": "2026-05-07T09:19:35.633436+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00215", "message": "GTP-U tunnel activated sessionId=pdu-00215 teid=0x000000d7"}
+{"ts": "2026-05-07T09:19:35.651436+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00215", "message": "Data path enabled sessionId=pdu-00215"}
+{"ts": "2026-05-07T09:19:39.758920+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00051", "message": "GTP-U tunnel activated sessionId=pdu-00051 teid=0x00000033"}
+{"ts": "2026-05-07T09:19:39.783920+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00051", "message": "Data path enabled sessionId=pdu-00051"}
+{"ts": "2026-05-07T09:19:44.979742+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00106", "message": "GTP-U tunnel activated sessionId=pdu-00106 teid=0x0000006a"}
+{"ts": "2026-05-07T09:19:44.991742+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00106", "message": "Data path enabled sessionId=pdu-00106"}
+{"ts": "2026-05-07T09:19:53+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-3-0", "message": "Throughput below SLA sessionId=pdu-06439 measuredMbps=10 minMbps=50"}
+{"ts": "2026-05-07T09:19:53.400000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-3-1", "message": "Throughput below SLA sessionId=pdu-00742 measuredMbps=14 minMbps=50"}
+{"ts": "2026-05-07T09:19:53.800000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-3-2", "message": "Throughput below SLA sessionId=pdu-01365 measuredMbps=12 minMbps=50"}
+{"ts": "2026-05-07T09:19:54.200000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-3-3", "message": "Throughput below SLA sessionId=pdu-06820 measuredMbps=15 minMbps=50"}
+{"ts": "2026-05-07T09:19:54.600000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-3-4", "message": "Throughput below SLA sessionId=pdu-04877 measuredMbps=12 minMbps=50"}
+{"ts": "2026-05-07T09:19:55.236204+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00038", "message": "GTP-U tunnel activated sessionId=pdu-00038 teid=0x00000026"}
+{"ts": "2026-05-07T09:19:55.259204+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00038", "message": "Data path enabled sessionId=pdu-00038"}
+{"ts": "2026-05-07T09:19:55.500000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "sla-aggregate-3", "message": "SLA aggregate breach detected for sst=4 affectedSessions=5"}
+{"ts": "2026-05-07T09:20:04.690495+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00188", "message": "GTP-U tunnel activated sessionId=pdu-00188 teid=0x000000bc"}
+{"ts": "2026-05-07T09:20:04.712495+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00188", "message": "Data path enabled sessionId=pdu-00188"}
+{"ts": "2026-05-07T09:20:08.274765+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00204", "message": "GTP-U tunnel activated sessionId=pdu-00204 teid=0x000000cc"}
+{"ts": "2026-05-07T09:20:08.298765+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00204", "message": "Data path enabled sessionId=pdu-00204"}
+{"ts": "2026-05-07T09:20:10.214385+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00054", "message": "GTP-U tunnel activated sessionId=pdu-00054 teid=0x00000036"}
+{"ts": "2026-05-07T09:20:10.241385+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00054", "message": "Data path enabled sessionId=pdu-00054"}
+{"ts": "2026-05-07T09:20:27.346450+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-3-0", "message": "Throughput restored sessionId=pdu-06439 measuredMbps=107"}
+{"ts": "2026-05-07T09:20:27.757502+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-3-1", "message": "Throughput restored sessionId=pdu-00742 measuredMbps=175"}
+{"ts": "2026-05-07T09:20:28.646814+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-3-2", "message": "Throughput restored sessionId=pdu-01365 measuredMbps=113"}
+{"ts": "2026-05-07T09:20:28.717428+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00246", "message": "GTP-U tunnel activated sessionId=pdu-00246 teid=0x000000f6"}
+{"ts": "2026-05-07T09:20:28.743428+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00246", "message": "Data path enabled sessionId=pdu-00246"}
+{"ts": "2026-05-07T09:20:29.469783+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-3-3", "message": "Throughput restored sessionId=pdu-06820 measuredMbps=93"}
+{"ts": "2026-05-07T09:20:29.850782+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00099", "message": "GTP-U tunnel activated sessionId=pdu-00099 teid=0x00000063"}
+{"ts": "2026-05-07T09:20:29.871782+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00099", "message": "Data path enabled sessionId=pdu-00099"}
+{"ts": "2026-05-07T09:20:30.030062+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-3-4", "message": "Throughput restored sessionId=pdu-04877 measuredMbps=82"}
+{"ts": "2026-05-07T09:20:40.086171+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00009", "message": "GTP-U tunnel activated sessionId=pdu-00009 teid=0x00000009"}
+{"ts": "2026-05-07T09:20:40.101171+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00009", "message": "Data path enabled sessionId=pdu-00009"}
+{"ts": "2026-05-07T09:21:01.111816+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00042", "message": "GTP-U tunnel activated sessionId=pdu-00042 teid=0x0000002a"}
+{"ts": "2026-05-07T09:21:01.134816+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00042", "message": "Data path enabled sessionId=pdu-00042"}
+{"ts": "2026-05-07T09:21:15.239391+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00122", "message": "GTP-U tunnel activated sessionId=pdu-00122 teid=0x0000007a"}
+{"ts": "2026-05-07T09:21:15.255391+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00122", "message": "Data path enabled sessionId=pdu-00122"}
+{"ts": "2026-05-07T09:21:19.058024+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00277", "message": "GTP-U tunnel activated sessionId=pdu-00277 teid=0x00000115"}
+{"ts": "2026-05-07T09:21:19.076024+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00277", "message": "Data path enabled sessionId=pdu-00277"}
+{"ts": "2026-05-07T09:21:19.097482+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00033", "message": "GTP-U tunnel activated sessionId=pdu-00033 teid=0x00000021"}
+{"ts": "2026-05-07T09:21:19.111482+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00033", "message": "Data path enabled sessionId=pdu-00033"}
+{"ts": "2026-05-07T09:21:21.137823+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00154", "message": "GTP-U tunnel activated sessionId=pdu-00154 teid=0x0000009a"}
+{"ts": "2026-05-07T09:21:21.147823+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00154", "message": "Data path enabled sessionId=pdu-00154"}
+{"ts": "2026-05-07T09:21:26.649862+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00000", "message": "GTP-U tunnel activated sessionId=pdu-00000 teid=0x00000000"}
+{"ts": "2026-05-07T09:21:26.659862+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00000", "message": "Data path enabled sessionId=pdu-00000"}
+{"ts": "2026-05-07T09:21:36.733120+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00107", "message": "GTP-U tunnel activated sessionId=pdu-00107 teid=0x0000006b"}
+{"ts": "2026-05-07T09:21:36.751120+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00107", "message": "Data path enabled sessionId=pdu-00107"}
+{"ts": "2026-05-07T09:21:38.630476+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00052", "message": "GTP-U tunnel activated sessionId=pdu-00052 teid=0x00000034"}
+{"ts": "2026-05-07T09:21:38.657476+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00052", "message": "Data path enabled sessionId=pdu-00052"}
+{"ts": "2026-05-07T09:21:42.781976+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00074", "message": "GTP-U tunnel activated sessionId=pdu-00074 teid=0x0000004a"}
+{"ts": "2026-05-07T09:21:42.809976+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00074", "message": "Data path enabled sessionId=pdu-00074"}
+{"ts": "2026-05-07T09:21:47.697941+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00035", "message": "GTP-U tunnel activated sessionId=pdu-00035 teid=0x00000023"}
+{"ts": "2026-05-07T09:21:47.709941+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00035", "message": "Data path enabled sessionId=pdu-00035"}
+{"ts": "2026-05-07T09:21:54.950747+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00158", "message": "GTP-U tunnel activated sessionId=pdu-00158 teid=0x0000009e"}
+{"ts": "2026-05-07T09:21:54.961747+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00158", "message": "Data path enabled sessionId=pdu-00158"}
+{"ts": "2026-05-07T09:21:55.563758+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00076", "message": "GTP-U tunnel activated sessionId=pdu-00076 teid=0x0000004c"}
+{"ts": "2026-05-07T09:21:55.577758+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00076", "message": "Data path enabled sessionId=pdu-00076"}
+{"ts": "2026-05-07T09:22:01+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "anom-orphan-001", "message": "GTP-U tunnel activated sessionId=pdu-orphan-0001 teid=0xdeadbeef"}
+{"ts": "2026-05-07T09:22:01.035000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "anom-orphan-001", "message": "PDU session lookup failed sessionId=pdu-orphan-0001"}
+{"ts": "2026-05-07T09:22:02.017099+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00192", "message": "GTP-U tunnel activated sessionId=pdu-00192 teid=0x000000c0"}
+{"ts": "2026-05-07T09:22:02.047099+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00192", "message": "Data path enabled sessionId=pdu-00192"}
+{"ts": "2026-05-07T09:22:07.359071+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00075", "message": "GTP-U tunnel activated sessionId=pdu-00075 teid=0x0000004b"}
+{"ts": "2026-05-07T09:22:07.380071+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00075", "message": "Data path enabled sessionId=pdu-00075"}
+{"ts": "2026-05-07T09:22:12.470909+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00163", "message": "GTP-U tunnel activated sessionId=pdu-00163 teid=0x000000a3"}
+{"ts": "2026-05-07T09:22:12.481909+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00163", "message": "Data path enabled sessionId=pdu-00163"}
+{"ts": "2026-05-07T09:22:27.045249+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00053", "message": "GTP-U tunnel activated sessionId=pdu-00053 teid=0x00000035"}
+{"ts": "2026-05-07T09:22:27.067249+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00053", "message": "Data path enabled sessionId=pdu-00053"}
+{"ts": "2026-05-07T09:22:34.517153+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00222", "message": "GTP-U tunnel activated sessionId=pdu-00222 teid=0x000000de"}
+{"ts": "2026-05-07T09:22:34.529153+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00222", "message": "Data path enabled sessionId=pdu-00222"}
+{"ts": "2026-05-07T09:22:37.958253+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00219", "message": "GTP-U tunnel activated sessionId=pdu-00219 teid=0x000000db"}
+{"ts": "2026-05-07T09:22:37.972253+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00219", "message": "Data path enabled sessionId=pdu-00219"}
+{"ts": "2026-05-07T09:22:42.761176+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00041", "message": "GTP-U tunnel activated sessionId=pdu-00041 teid=0x00000029"}
+{"ts": "2026-05-07T09:22:42.784176+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00041", "message": "Data path enabled sessionId=pdu-00041"}
+{"ts": "2026-05-07T09:22:51.091545+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00014", "message": "GTP-U tunnel activated sessionId=pdu-00014 teid=0x0000000e"}
+{"ts": "2026-05-07T09:22:51.116545+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00014", "message": "Data path enabled sessionId=pdu-00014"}
+{"ts": "2026-05-07T09:22:58.817151+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00043", "message": "GTP-U tunnel activated sessionId=pdu-00043 teid=0x0000002b"}
+{"ts": "2026-05-07T09:22:58.833151+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00043", "message": "Data path enabled sessionId=pdu-00043"}
+{"ts": "2026-05-07T09:23:09.874409+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00026", "message": "GTP-U tunnel activated sessionId=pdu-00026 teid=0x0000001a"}
+{"ts": "2026-05-07T09:23:09.890409+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00026", "message": "Data path enabled sessionId=pdu-00026"}
+{"ts": "2026-05-07T09:23:14.986709+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00047", "message": "GTP-U tunnel activated sessionId=pdu-00047 teid=0x0000002f"}
+{"ts": "2026-05-07T09:23:15.010709+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00047", "message": "Data path enabled sessionId=pdu-00047"}
+{"ts": "2026-05-07T09:23:17.986055+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00057", "message": "GTP-U tunnel activated sessionId=pdu-00057 teid=0x00000039"}
+{"ts": "2026-05-07T09:23:18.005055+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00057", "message": "Data path enabled sessionId=pdu-00057"}
+{"ts": "2026-05-07T09:23:18.742492+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00069", "message": "GTP-U tunnel activated sessionId=pdu-00069 teid=0x00000045"}
+{"ts": "2026-05-07T09:23:18.754492+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00069", "message": "Data path enabled sessionId=pdu-00069"}
+{"ts": "2026-05-07T09:23:19.767707+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00078", "message": "GTP-U tunnel activated sessionId=pdu-00078 teid=0x0000004e"}
+{"ts": "2026-05-07T09:23:19.792707+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00078", "message": "Data path enabled sessionId=pdu-00078"}
+{"ts": "2026-05-07T09:23:21.356731+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00017", "message": "GTP-U tunnel activated sessionId=pdu-00017 teid=0x00000011"}
+{"ts": "2026-05-07T09:23:21.372731+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00017", "message": "Data path enabled sessionId=pdu-00017"}
+{"ts": "2026-05-07T09:23:23.446555+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00067", "message": "GTP-U tunnel activated sessionId=pdu-00067 teid=0x00000043"}
+{"ts": "2026-05-07T09:23:23.460555+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00067", "message": "Data path enabled sessionId=pdu-00067"}
+{"ts": "2026-05-07T09:23:24.922293+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00263", "message": "GTP-U tunnel activated sessionId=pdu-00263 teid=0x00000107"}
+{"ts": "2026-05-07T09:23:24.945293+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00263", "message": "Data path enabled sessionId=pdu-00263"}
+{"ts": "2026-05-07T09:23:24.951627+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00008", "message": "GTP-U tunnel activated sessionId=pdu-00008 teid=0x00000008"}
+{"ts": "2026-05-07T09:23:24.968627+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00008", "message": "Data path enabled sessionId=pdu-00008"}
+{"ts": "2026-05-07T09:23:25.800046+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00247", "message": "GTP-U tunnel activated sessionId=pdu-00247 teid=0x000000f7"}
+{"ts": "2026-05-07T09:23:25.823046+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00247", "message": "Data path enabled sessionId=pdu-00247"}
+{"ts": "2026-05-07T09:23:26.129359+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00249", "message": "GTP-U tunnel activated sessionId=pdu-00249 teid=0x000000f9"}
+{"ts": "2026-05-07T09:23:26.152359+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00249", "message": "Data path enabled sessionId=pdu-00249"}
+{"ts": "2026-05-07T09:23:26.925446+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00264", "message": "GTP-U tunnel activated sessionId=pdu-00264 teid=0x00000108"}
+{"ts": "2026-05-07T09:23:26.952446+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00264", "message": "Data path enabled sessionId=pdu-00264"}
+{"ts": "2026-05-07T09:23:43.677352+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00061", "message": "GTP-U tunnel activated sessionId=pdu-00061 teid=0x0000003d"}
+{"ts": "2026-05-07T09:23:43.694352+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00061", "message": "Data path enabled sessionId=pdu-00061"}
+{"ts": "2026-05-07T09:23:44.882908+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00058", "message": "GTP-U tunnel activated sessionId=pdu-00058 teid=0x0000003a"}
+{"ts": "2026-05-07T09:23:44.907908+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00058", "message": "Data path enabled sessionId=pdu-00058"}
+{"ts": "2026-05-07T09:23:46.786966+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00019", "message": "GTP-U tunnel activated sessionId=pdu-00019 teid=0x00000013"}
+{"ts": "2026-05-07T09:23:46.811966+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00019", "message": "Data path enabled sessionId=pdu-00019"}
+{"ts": "2026-05-07T09:23:51.232754+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00028", "message": "GTP-U tunnel activated sessionId=pdu-00028 teid=0x0000001c"}
+{"ts": "2026-05-07T09:23:51.253754+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00028", "message": "Data path enabled sessionId=pdu-00028"}
+{"ts": "2026-05-07T09:23:53.563416+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00245", "message": "GTP-U tunnel activated sessionId=pdu-00245 teid=0x000000f5"}
+{"ts": "2026-05-07T09:23:53.591416+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00245", "message": "Data path enabled sessionId=pdu-00245"}
+{"ts": "2026-05-07T09:23:55.424854+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00260", "message": "GTP-U tunnel activated sessionId=pdu-00260 teid=0x00000104"}
+{"ts": "2026-05-07T09:23:55.443854+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00260", "message": "Data path enabled sessionId=pdu-00260"}
+{"ts": "2026-05-07T09:23:56.139144+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00199", "message": "GTP-U tunnel activated sessionId=pdu-00199 teid=0x000000c7"}
+{"ts": "2026-05-07T09:23:56.158144+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00199", "message": "Data path enabled sessionId=pdu-00199"}
+{"ts": "2026-05-07T09:23:57.002644+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00117", "message": "GTP-U tunnel activated sessionId=pdu-00117 teid=0x00000075"}
+{"ts": "2026-05-07T09:23:57.021644+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00117", "message": "Data path enabled sessionId=pdu-00117"}
+{"ts": "2026-05-07T09:23:58.516210+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00138", "message": "GTP-U tunnel activated sessionId=pdu-00138 teid=0x0000008a"}
+{"ts": "2026-05-07T09:23:58.530210+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00138", "message": "Data path enabled sessionId=pdu-00138"}
+{"ts": "2026-05-07T09:23:59.830733+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00251", "message": "GTP-U tunnel activated sessionId=pdu-00251 teid=0x000000fb"}
+{"ts": "2026-05-07T09:23:59.853733+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00251", "message": "Data path enabled sessionId=pdu-00251"}
+{"ts": "2026-05-07T09:24:00+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-4-0", "message": "Throughput below SLA sessionId=pdu-06471 measuredMbps=12 minMbps=50"}
+{"ts": "2026-05-07T09:24:00.400000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-4-1", "message": "Throughput below SLA sessionId=pdu-01912 measuredMbps=11 minMbps=50"}
+{"ts": "2026-05-07T09:24:00.800000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-4-2", "message": "Throughput below SLA sessionId=pdu-00218 measuredMbps=15 minMbps=50"}
+{"ts": "2026-05-07T09:24:01.200000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-4-3", "message": "Throughput below SLA sessionId=pdu-02814 measuredMbps=14 minMbps=50"}
+{"ts": "2026-05-07T09:24:01.600000+00:00", "severity": "WARN", "service": "UPF", "trace_id": "sla-breach-4-4", "message": "Throughput below SLA sessionId=pdu-07818 measuredMbps=12 minMbps=50"}
+{"ts": "2026-05-07T09:24:02.500000+00:00", "severity": "ERROR", "service": "UPF", "trace_id": "sla-aggregate-4", "message": "SLA aggregate breach detected for sst=1 affectedSessions=5"}
+{"ts": "2026-05-07T09:24:06.224636+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00040", "message": "GTP-U tunnel activated sessionId=pdu-00040 teid=0x00000028"}
+{"ts": "2026-05-07T09:24:06.249636+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00040", "message": "Data path enabled sessionId=pdu-00040"}
+{"ts": "2026-05-07T09:24:11.831673+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00226", "message": "GTP-U tunnel activated sessionId=pdu-00226 teid=0x000000e2"}
+{"ts": "2026-05-07T09:24:11.844673+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00226", "message": "Data path enabled sessionId=pdu-00226"}
+{"ts": "2026-05-07T09:24:26.985925+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00037", "message": "GTP-U tunnel activated sessionId=pdu-00037 teid=0x00000025"}
+{"ts": "2026-05-07T09:24:27.012925+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00037", "message": "Data path enabled sessionId=pdu-00037"}
+{"ts": "2026-05-07T09:24:28.474284+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-4-0", "message": "Throughput restored sessionId=pdu-06471 measuredMbps=130"}
+{"ts": "2026-05-07T09:24:29.257068+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-4-1", "message": "Throughput restored sessionId=pdu-01912 measuredMbps=91"}
+{"ts": "2026-05-07T09:24:29.632122+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-4-2", "message": "Throughput restored sessionId=pdu-00218 measuredMbps=81"}
+{"ts": "2026-05-07T09:24:30.046603+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-4-3", "message": "Throughput restored sessionId=pdu-02814 measuredMbps=82"}
+{"ts": "2026-05-07T09:24:30.764222+00:00", "severity": "INFO", "service": "UPF", "trace_id": "sla-recovery-4-4", "message": "Throughput restored sessionId=pdu-07818 measuredMbps=104"}
+{"ts": "2026-05-07T09:24:40.195276+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00031", "message": "GTP-U tunnel activated sessionId=pdu-00031 teid=0x0000001f"}
+{"ts": "2026-05-07T09:24:40.217276+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00031", "message": "Data path enabled sessionId=pdu-00031"}
+{"ts": "2026-05-07T09:24:47.561456+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00085", "message": "GTP-U tunnel activated sessionId=pdu-00085 teid=0x00000055"}
+{"ts": "2026-05-07T09:24:47.584456+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00085", "message": "Data path enabled sessionId=pdu-00085"}
+{"ts": "2026-05-07T09:24:56.257576+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00276", "message": "GTP-U tunnel activated sessionId=pdu-00276 teid=0x00000114"}
+{"ts": "2026-05-07T09:24:56.271576+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00276", "message": "Data path enabled sessionId=pdu-00276"}
+{"ts": "2026-05-07T09:25:11.268287+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00174", "message": "GTP-U tunnel activated sessionId=pdu-00174 teid=0x000000ae"}
+{"ts": "2026-05-07T09:25:11.298287+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00174", "message": "Data path enabled sessionId=pdu-00174"}
+{"ts": "2026-05-07T09:25:12.447149+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00093", "message": "GTP-U tunnel activated sessionId=pdu-00093 teid=0x0000005d"}
+{"ts": "2026-05-07T09:25:12.469149+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00093", "message": "Data path enabled sessionId=pdu-00093"}
+{"ts": "2026-05-07T09:25:13.126214+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00116", "message": "GTP-U tunnel activated sessionId=pdu-00116 teid=0x00000074"}
+{"ts": "2026-05-07T09:25:13.146214+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00116", "message": "Data path enabled sessionId=pdu-00116"}
+{"ts": "2026-05-07T09:25:18.572744+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00126", "message": "GTP-U tunnel activated sessionId=pdu-00126 teid=0x0000007e"}
+{"ts": "2026-05-07T09:25:18.599744+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00126", "message": "Data path enabled sessionId=pdu-00126"}
+{"ts": "2026-05-07T09:25:23.064830+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00156", "message": "GTP-U tunnel activated sessionId=pdu-00156 teid=0x0000009c"}
+{"ts": "2026-05-07T09:25:23.078830+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00156", "message": "Data path enabled sessionId=pdu-00156"}
+{"ts": "2026-05-07T09:25:26.147495+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00098", "message": "GTP-U tunnel activated sessionId=pdu-00098 teid=0x00000062"}
+{"ts": "2026-05-07T09:25:26.177495+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00098", "message": "Data path enabled sessionId=pdu-00098"}
+{"ts": "2026-05-07T09:25:38.414355+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00261", "message": "GTP-U tunnel activated sessionId=pdu-00261 teid=0x00000105"}
+{"ts": "2026-05-07T09:25:38.436355+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00261", "message": "Data path enabled sessionId=pdu-00261"}
+{"ts": "2026-05-07T09:25:40.981616+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00201", "message": "GTP-U tunnel activated sessionId=pdu-00201 teid=0x000000c9"}
+{"ts": "2026-05-07T09:25:41.001616+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00201", "message": "Data path enabled sessionId=pdu-00201"}
+{"ts": "2026-05-07T09:25:45.363152+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00272", "message": "GTP-U tunnel activated sessionId=pdu-00272 teid=0x00000110"}
+{"ts": "2026-05-07T09:25:45.377152+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00272", "message": "Data path enabled sessionId=pdu-00272"}
+{"ts": "2026-05-07T09:25:49.125735+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00087", "message": "GTP-U tunnel activated sessionId=pdu-00087 teid=0x00000057"}
+{"ts": "2026-05-07T09:25:49.137735+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00087", "message": "Data path enabled sessionId=pdu-00087"}
+{"ts": "2026-05-07T09:26:06.687778+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00223", "message": "GTP-U tunnel activated sessionId=pdu-00223 teid=0x000000df"}
+{"ts": "2026-05-07T09:26:06.699778+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00223", "message": "Data path enabled sessionId=pdu-00223"}
+{"ts": "2026-05-07T09:26:19.590261+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00115", "message": "GTP-U tunnel activated sessionId=pdu-00115 teid=0x00000073"}
+{"ts": "2026-05-07T09:26:19.617261+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00115", "message": "Data path enabled sessionId=pdu-00115"}
+{"ts": "2026-05-07T09:26:23.690290+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00018", "message": "GTP-U tunnel activated sessionId=pdu-00018 teid=0x00000012"}
+{"ts": "2026-05-07T09:26:23.707290+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00018", "message": "Data path enabled sessionId=pdu-00018"}
+{"ts": "2026-05-07T09:26:24.528640+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00010", "message": "GTP-U tunnel activated sessionId=pdu-00010 teid=0x0000000a"}
+{"ts": "2026-05-07T09:26:24.554640+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00010", "message": "Data path enabled sessionId=pdu-00010"}
+{"ts": "2026-05-07T09:26:28.643551+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00089", "message": "GTP-U tunnel activated sessionId=pdu-00089 teid=0x00000059"}
+{"ts": "2026-05-07T09:26:28.658551+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00089", "message": "Data path enabled sessionId=pdu-00089"}
+{"ts": "2026-05-07T09:26:34.876727+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00259", "message": "GTP-U tunnel activated sessionId=pdu-00259 teid=0x00000103"}
+{"ts": "2026-05-07T09:26:34.906727+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00259", "message": "Data path enabled sessionId=pdu-00259"}
+{"ts": "2026-05-07T09:26:40.661353+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00034", "message": "GTP-U tunnel activated sessionId=pdu-00034 teid=0x00000022"}
+{"ts": "2026-05-07T09:26:40.674353+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00034", "message": "Data path enabled sessionId=pdu-00034"}
+{"ts": "2026-05-07T09:26:48.889088+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00195", "message": "GTP-U tunnel activated sessionId=pdu-00195 teid=0x000000c3"}
+{"ts": "2026-05-07T09:26:48.911088+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00195", "message": "Data path enabled sessionId=pdu-00195"}
+{"ts": "2026-05-07T09:26:56.948731+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00092", "message": "GTP-U tunnel activated sessionId=pdu-00092 teid=0x0000005c"}
+{"ts": "2026-05-07T09:26:56.972731+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00092", "message": "Data path enabled sessionId=pdu-00092"}
+{"ts": "2026-05-07T09:27:09.410576+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00207", "message": "GTP-U tunnel activated sessionId=pdu-00207 teid=0x000000cf"}
+{"ts": "2026-05-07T09:27:09.439576+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00207", "message": "Data path enabled sessionId=pdu-00207"}
+{"ts": "2026-05-07T09:27:14.039448+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00143", "message": "GTP-U tunnel activated sessionId=pdu-00143 teid=0x0000008f"}
+{"ts": "2026-05-07T09:27:14.066448+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00143", "message": "Data path enabled sessionId=pdu-00143"}
+{"ts": "2026-05-07T09:27:15.426671+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00015", "message": "GTP-U tunnel activated sessionId=pdu-00015 teid=0x0000000f"}
+{"ts": "2026-05-07T09:27:15.439671+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00015", "message": "Data path enabled sessionId=pdu-00015"}
+{"ts": "2026-05-07T09:27:19.642107+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00254", "message": "GTP-U tunnel activated sessionId=pdu-00254 teid=0x000000fe"}
+{"ts": "2026-05-07T09:27:19.671107+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00254", "message": "Data path enabled sessionId=pdu-00254"}
+{"ts": "2026-05-07T09:27:24.313814+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00167", "message": "GTP-U tunnel activated sessionId=pdu-00167 teid=0x000000a7"}
+{"ts": "2026-05-07T09:27:24.324814+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00167", "message": "Data path enabled sessionId=pdu-00167"}
+{"ts": "2026-05-07T09:27:50.428897+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00171", "message": "GTP-U tunnel activated sessionId=pdu-00171 teid=0x000000ab"}
+{"ts": "2026-05-07T09:27:50.442897+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00171", "message": "Data path enabled sessionId=pdu-00171"}
+{"ts": "2026-05-07T09:28:00.960801+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00006", "message": "GTP-U tunnel activated sessionId=pdu-00006 teid=0x00000006"}
+{"ts": "2026-05-07T09:28:00.977801+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00006", "message": "Data path enabled sessionId=pdu-00006"}
+{"ts": "2026-05-07T09:28:06.504786+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00005", "message": "GTP-U tunnel activated sessionId=pdu-00005 teid=0x00000005"}
+{"ts": "2026-05-07T09:28:06.531786+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00005", "message": "Data path enabled sessionId=pdu-00005"}
+{"ts": "2026-05-07T09:28:11.037660+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00278", "message": "GTP-U tunnel activated sessionId=pdu-00278 teid=0x00000116"}
+{"ts": "2026-05-07T09:28:11.048660+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00278", "message": "Data path enabled sessionId=pdu-00278"}
+{"ts": "2026-05-07T09:28:12.149441+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00271", "message": "GTP-U tunnel activated sessionId=pdu-00271 teid=0x0000010f"}
+{"ts": "2026-05-07T09:28:12.163441+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00271", "message": "Data path enabled sessionId=pdu-00271"}
+{"ts": "2026-05-07T09:28:12.171911+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00279", "message": "GTP-U tunnel activated sessionId=pdu-00279 teid=0x00000117"}
+{"ts": "2026-05-07T09:28:12.198911+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00279", "message": "Data path enabled sessionId=pdu-00279"}
+{"ts": "2026-05-07T09:28:16.762955+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00046", "message": "GTP-U tunnel activated sessionId=pdu-00046 teid=0x0000002e"}
+{"ts": "2026-05-07T09:28:16.776955+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00046", "message": "Data path enabled sessionId=pdu-00046"}
+{"ts": "2026-05-07T09:28:18.476302+00:00", "severity": "INFO", "service": "UPF", "trace_id": "upf-act-00111", "message": "GTP-U tunnel activated sessionId=pdu-00111 teid=0x0000006f"}
+{"ts": "2026-05-07T09:28:18.506302+00:00", "severity": "DEBUG", "service": "UPF", "trace_id": "upf-act-00111", "message": "Data path enabled sessionId=pdu-00111"}

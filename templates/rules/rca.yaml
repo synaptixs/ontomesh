@@ -1,0 +1,87 @@
+industry: rca
+description: |
+  Starter rules for Root-Cause Analysis on top of the Phase L5 causal
+  taxonomy (:CausalEvent, :hasCause, :triggers, :precededBy, :rootCause).
+  These rules live alongside the engineer-authored causal edges
+  exported by wizard.rules.export_causal_rules — Phase B materialises
+  both in the same pass so a downstream Insights query can resolve a
+  :rootCause back through the asserted-and-derived graph with full
+  prov:wasDerivedFrom lineage.
+
+rules:
+  # ── Cause-chain closure ────────────────────────────────────────────
+  # Walks the transitive closure of :hasCause and declares the
+  # terminal node (the cause that has no further :hasCause edge of its
+  # own) as :rootCause of the effect. rdflib SPARQL doesn't support
+  # `+` property paths in CONSTRUCT cleanly across versions, so we
+  # explicitly handle the one-hop and two-hop cases. Engineers chain
+  # additional rules for longer paths if the corpus needs them.
+  - id: rca-rootcause-onehop
+    kind: sparql
+    label: "Root cause: direct (one hop)"
+    body: |
+      PREFIX : <https://ontology.example.com/enterprise/>
+      CONSTRUCT { ?effect :rootCause ?cause }
+      WHERE {
+        ?effect :hasCause ?cause .
+        FILTER NOT EXISTS { ?cause :hasCause ?_ }
+      }
+
+  - id: rca-rootcause-twohop
+    kind: sparql
+    label: "Root cause: two hops"
+    body: |
+      PREFIX : <https://ontology.example.com/enterprise/>
+      CONSTRUCT { ?effect :rootCause ?root }
+      WHERE {
+        ?effect :hasCause ?intermediate .
+        ?intermediate :hasCause ?root .
+        FILTER NOT EXISTS { ?root :hasCause ?_ }
+      }
+
+  # ── Concurrent-cause flagging ─────────────────────────────────────
+  # When more than one :hasCause edge points at the same effect, flag
+  # the effect so reviewers don't get tunnel vision on whichever cause
+  # they happened to look at first. Materialised as a boolean marker
+  # that the wizard's Materialised tab and Insights both surface.
+  - id: rca-multiple-causes
+    kind: sparql
+    label: "Effects with more than one candidate cause"
+    body: |
+      PREFIX : <https://ontology.example.com/enterprise/>
+      CONSTRUCT { ?effect :multipleCandidateCauses true }
+      WHERE {
+        ?effect :hasCause ?cause1 .
+        ?effect :hasCause ?cause2 .
+        FILTER (?cause1 != ?cause2)
+      }
+
+  # ── Heartbeat-inferred vs explicit deregister ─────────────────────
+  # Encodes the 3GPP R4 ambiguity from the 5G demo: an NF can leave
+  # the NRF via explicit Nnrf_NFManagement_NFDeregister or via NRF-side
+  # heartbeat-timeout. The two have the same end-state but different
+  # root cause. Tagging the derivationMethod lets RCA tell them apart.
+  - id: rca-derivation-inferred
+    kind: sparql
+    label: "Mark heartbeat-timeout deregisters as INFERRED"
+    body: |
+      PREFIX : <https://ontology.example.com/enterprise/>
+      CONSTRUCT { ?dereg :derivationMethod "INFERRED" }
+      WHERE {
+        ?dereg a :NfDeregister ; :hasCause ?cause .
+        ?cause a :HeartbeatTimeout .
+      }
+
+  - id: rca-derivation-measured
+    kind: sparql
+    label: "Mark explicit deregisters as MEASURED"
+    body: |
+      PREFIX : <https://ontology.example.com/enterprise/>
+      CONSTRUCT { ?dereg :derivationMethod "MEASURED" }
+      WHERE {
+        ?dereg a :NfDeregister .
+        FILTER NOT EXISTS {
+          ?dereg :hasCause ?c .
+          ?c a :HeartbeatTimeout .
+        }
+      }
