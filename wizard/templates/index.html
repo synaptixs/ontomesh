@@ -625,21 +625,78 @@
     <!-- Step 2.5 — Log Discovery (L4) -->
     <div class="step-panel" id="step-log-discovery">
       <div class="step-title">Log Discovery <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span></div>
-      <div class="step-subtitle">Review entities, relationships, events, and causal edges extracted from your logs by Phase L1 (templates + PMI) and Phase L2 (HMM anomalies). Approve to bring them into your session.</div>
+      <div class="step-subtitle">Convert a folder of raw logs into ontology candidates an engineer reviews one at a time. Approved candidates flow into the regular Wizard steps (Entities · Events · Relationships · Rules) and end up as classes, properties, and SPARQL rules in your generated ontology.</div>
 
+      <!-- ── What happens here (always visible overview) ─────────────────── -->
+      <div class="card">
+        <h3 style="margin-top:0">How this step works</h3>
+        <ol style="margin:6px 0 12px 18px; padding:0; font-size:13px; line-height:1.55">
+          <li><b>Mine</b> — point <code>--phase mine</code> at a log folder. The toolkit clusters log lines into <b>templates</b> (Drain), classifies the variable slots (IRI / IP / UUID / ENUM / numeric / freetext), builds a <b>PMI-weighted entity graph</b>, and gates directed edges with a <b>Granger / transfer-entropy</b> statistical test before claiming they're causal.</li>
+          <li><b>Sequence (optional)</b> — <code>--phase sequence</code> fits a per-service <b>HMM</b> over the template-id trajectories. Sequences that fall in the lower percentile of likelihood × cluster-bag novelty surface as anomalous-event candidates.</li>
+          <li><b>Review</b> — this screen. Every mined signal lands here as a <i>proposal</i>. You decide which become real ontology constructs.</li>
+          <li><b>Generate</b> — your approvals show up in Steps 2/3/4/5.5 like any other Wizard-authored entity. <code>--phase 2</code> emits an RCA-shaped ontology with the <code>:CausalEvent / :hasCause / :rootCause</code> taxonomy attached to your approved log-derived classes.</li>
+          <li><b>Reason</b> — <code>--phase reason</code> materialises the inferred graph. Approved causal edges become SPARQL CONSTRUCT rules that derive <code>:hasCause</code> + <code>:triggers</code> triples with full <code>prov:wasDerivedFrom</code> lineage. Ask Insights "what caused this event?" against the result.</li>
+        </ol>
+
+        <h3 style="margin-bottom:6px">The four candidate kinds</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; font-size:12px; line-height:1.5">
+          <div>
+            <span style="background:#4338ca;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Event</span>
+            <span style="color:var(--muted)"> · LOG_EVENT</span><br>
+            One <b>recurring message pattern</b> Drain found. Approval adds a class to Step 3 — Events. Becomes <code>rdfs:subClassOf :CausalEvent</code> with auto <code>:startedAt</code> / <code>:endedAt</code> / <code>:duration</code> data properties.
+          </div>
+          <div>
+            <span style="background:#0e7490;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Entity</span>
+            <span style="color:var(--muted)"> · LOG_ENTITY</span><br>
+            A <b>variable slot</b> typed as IRI / UUID / ENUM — i.e. an identifier the template carries. Approval adds a class or property to Step 2 — Entities, ready for further refinement.
+          </div>
+          <div>
+            <span style="background:#0f766e;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Relationship</span>
+            <span style="color:var(--muted)"> · LOG_RELATIONSHIP</span><br>
+            Two entities that <b>co-occur</b> with strong PMI but where the statistical-causality test was inconclusive (or never ran). Approval adds an undirected edge to Step 4 — Relationships.
+          </div>
+          <div>
+            <span style="background:#9333ea;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Causal edge</span>
+            <span style="color:var(--muted)"> · LOG_CAUSAL_EDGE</span><br>
+            A directed edge that passed all three gates: <b>high PMI</b>, <b>stable temporal ordering</b>, and <b>Granger or transfer-entropy</b>. Approval adds a SPARQL rule to Step 5.5 that will materialise <code>:hasCause</code>.
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:6px">What each button does</h3>
+        <table style="width:100%; font-size:12px; line-height:1.6; border-collapse:collapse">
+          <tr><td style="padding:3px 12px 3px 0; width:80px"><b>✓ Approve</b></td><td>Marks the proposal <code>APPROVED</code> and adds an entry to the corresponding session bucket — visible on Steps 2 / 3 / 4 / 5.5 immediately.</td></tr>
+          <tr><td style="padding:3px 12px 3px 0"><b>✕ Reject</b></td><td>Marks <code>REJECTED</code> with an optional note. Re-running <code>--phase mine</code> later <b>won't</b> bring it back — your decision is preserved across re-runs.</td></tr>
+          <tr><td style="padding:3px 12px 3px 0"><b>✎ Edit</b></td><td>Override the suggested label/name before approving. Useful when the auto-suggestion ("Event template #18") needs a human-readable name ("NF Heartbeat Timeout").</td></tr>
+          <tr><td style="padding:3px 12px 3px 0"><b>🔀 Merge</b></td><td>Fold the proposal into an existing session entry by name — the candidate's sample log line goes into the target's <code>evidence_samples</code> array instead of creating a duplicate.</td></tr>
+        </table>
+
+        <div class="box-help" style="margin-top:12px">
+          <b>Sort order:</b> confidence × consequence. The PRML Ch. 1 decision-theoretic ranking puts the highest-impact candidates first — a low-confidence CRITICAL-severity row outranks a high-confidence INFO row.<br>
+          <b>Privacy:</b> slot values matching <code>imsi · msisdn · email · ssn · tax</code> automatically default to a higher sensitivity tier (<code>Confidential</code>) which you can downgrade at approval time.<br>
+          <b>Drift loop:</b> once an ontology exists, <code>--phase drift-templates</code> watches new logs and queues never-seen patterns here as <code>DRIFT_ON_NEW_TEMPLATE</code> proposals — same review surface for bootstrap and steady-state.
+        </div>
+      </div>
+
+      <!-- ── Empty state ─────────────────────────────────────────────────── -->
       <div class="card" id="log-disco-empty" style="display:none">
         <h3>No log mining yet</h3>
         <div class="box-help">
           Point the toolkit at a folder of logs to extract candidate
           patterns. The miner runs <b>Drain</b> template clustering,
-          <b>PMI-weighted</b> entity graph, and <b>HMM</b> trajectory
-          anomaly detection in one shot.
+          <b>PMI-weighted</b> entity graph, <b>Granger-gated</b> causality,
+          and <b>HMM</b> trajectory anomaly detection in one shot.
         </div>
-        <pre style="background:var(--bg);padding:8px;border-radius:6px;font-size:12px">python toolkit.py --phase mine --log-path /path/to/logs/
+        <pre style="background:var(--bg);padding:8px;border-radius:6px;font-size:12px">python toolkit.py --phase mine     --log-path /path/to/logs/
 python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
-        <button class="btn btn-ghost" onclick="loadLogDiscovery()">↻ Re-check for results</button>
+        <div style="font-size:12px; color:var(--muted); margin-top:6px">
+          Need a quick example to try? The toolkit ships a 215-line synthetic
+          5G network-function corpus at <code>examples/log-rca/sample/</code>.
+          Mine that, then come back to this screen.
+        </div>
+        <button class="btn btn-ghost" onclick="loadLogDiscovery()" style="margin-top:8px">↻ Re-check for results</button>
       </div>
 
+      <!-- ── Candidate list ─────────────────────────────────────────────── -->
       <div class="card" id="log-disco-content" style="display:none">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
           <h3 style="margin:0">Candidates <span id="log-disco-counts" class="badge"></span></h3>
@@ -662,11 +719,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
             <button class="btn btn-ghost" onclick="reseedLogDiscovery()" title="Re-build proposals from the latest mining outputs">↻ Re-seed</button>
           </div>
         </div>
-        <div class="box-help">
-          Sort order is <b>confidence × consequence</b> — the highest-impact candidates land first.
-          Each row carries the proposal kind, a confidence bar, a short evidence sample,
-          and four actions: <b>✓ approve</b> (drop into session), <b>✕ reject</b> (mark dismissed),
-          <b>✎ edit</b> (override label/name before approving), <b>🔀 merge</b> (fold into existing).
+        <div class="box-help" style="margin-bottom:8px">
+          <b>Tip:</b> work the kinds in this order — <b>Events</b> first (they define your domain vocabulary), then <b>Entities</b> (the identifiers that thread them together), then <b>Relationships</b> and <b>Causal edges</b> (which depend on the classes already being approved). Click <b>👁 Show endpoints</b> on a relationship or causal candidate to see its two endpoint classes lit up on a mini-graph.
         </div>
         <div id="log-disco-list" style="margin-top:8px"></div>
       </div>
