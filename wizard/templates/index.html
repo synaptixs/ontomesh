@@ -564,41 +564,118 @@
 
         <!-- Database-direct tab ────────────────────────────────────────── -->
         <div id="imp-tab-db" class="tab-panel">
-          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
-            Connect directly to your operational database. The toolkit lists tables,
-            classifies columns, and lifts foreign keys into relationships — same review
-            modal as the file path, no upload needed.
-          </p>
 
-          <!-- Saved profiles strip -->
-          <div id="db-profiles-strip" style="display:none; margin-bottom:12px">
-            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Saved profiles</div>
-            <div id="db-profiles-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          <!-- Pipeline at a glance — four-step visual flow -->
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr) ; gap:0; margin-bottom:14px">
+            <div class="db-flow-step" data-step="1" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff); border-radius:8px 0 0 8px; padding:10px 12px; border-top:3px solid #4338ca; position:relative">
+              <div style="display:flex; align-items:center; gap:6px">
+                <span style="background:#4338ca;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">1</span>
+                <span style="font-size:11px;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Pick vendor</span>
+              </div>
+              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Choose your driver — SQLite, Postgres, MySQL, MSSQL, Oracle, DB2</div>
+            </div>
+            <div class="db-flow-step" data-step="2" style="background:linear-gradient(135deg,#ecfeff,#cffafe); padding:10px 12px; border-top:3px solid #0891b2">
+              <div style="display:flex; align-items:center; gap:6px">
+                <span style="background:#0891b2;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">2</span>
+                <span style="font-size:11px;color:#0891b2;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Configure</span>
+              </div>
+              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Host, port, credentials — fields rendered dynamically per vendor</div>
+            </div>
+            <div class="db-flow-step" data-step="3" style="background:linear-gradient(135deg,#fef3c7,#fde68a); padding:10px 12px; border-top:3px solid #d97706">
+              <div style="display:flex; align-items:center; gap:6px">
+                <span style="background:#d97706;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">3</span>
+                <span style="font-size:11px;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Test &amp; save</span>
+              </div>
+              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Verify the connection, then save credentials as a reusable profile</div>
+            </div>
+            <div class="db-flow-step" data-step="4" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0); border-radius:0 8px 8px 0; padding:10px 12px; border-top:3px solid #059669">
+              <div style="display:flex; align-items:center; gap:6px">
+                <span style="background:#059669;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">4</span>
+                <span style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Generate</span>
+              </div>
+              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Pull tables + foreign keys → review modal → commit</div>
+            </div>
           </div>
 
-          <!-- Vendor + config form -->
-          <div style="display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:start">
-            <!-- Vendor picker -->
+          <!-- Saved profiles strip — proper cards rather than text chips -->
+          <div id="db-profiles-strip" style="display:none; margin-bottom:14px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+              <span>💾</span><span>Saved profiles</span>
+              <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;font-size:10px">— click to load · ✕ to delete</span>
+            </div>
+            <div id="db-profiles-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+          </div>
+
+          <!-- ── Step 1 + 2: Vendor + form, side by side ───────────────── -->
+          <div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;margin-bottom:14px">
+
+            <!-- Vendor cards — visual grid -->
             <div>
-              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Vendor</div>
-              <div id="db-vendor-grid" style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Database vendor</div>
+              <div id="db-vendor-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
                 <!-- populated by loadDbVendors() -->
               </div>
             </div>
 
-            <!-- Config form -->
-            <div>
-              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Connection details</div>
-              <div id="db-vendor-help" style="font-size:12px;color:var(--muted);margin-bottom:8px;min-height:18px"></div>
-              <div id="db-form-fields" style="display:grid;grid-template-columns:1fr;gap:8px"></div>
-              <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn btn-ghost"   style="padding:5px 14px;font-size:12px" onclick="testDbConnection()">🔌 Test connection</button>
-                <button class="btn btn-ghost"   style="padding:5px 14px;font-size:12px" onclick="saveDbProfile()">💾 Save profile…</button>
-                <button class="btn btn-primary" style="padding:5px 14px;font-size:12px" onclick="importFromDatabase()">⤓ Generate from this database</button>
+            <!-- Config form — boxed card with sections -->
+            <div style="border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:14px">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
+                <span id="db-vendor-icon" style="font-size:20px">🗄️</span>
+                <div>
+                  <div id="db-vendor-title" style="font-size:13px;font-weight:600;color:var(--text)">Pick a vendor</div>
+                  <div id="db-vendor-help" style="font-size:11px;color:var(--muted)">Choose a database type on the left.</div>
+                </div>
               </div>
-              <div id="db-test-result" style="margin-top:10px;font-size:12px"></div>
+              <div id="db-form-fields" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
             </div>
           </div>
+
+          <!-- ── Step 3 + 4: Action bar with three coloured cards ──────── -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+            <button onclick="testDbConnection()"
+                    style="background:#fef3c7;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:8px;padding:12px;text-align:left;cursor:pointer;transition:background .15s">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:18px">🔌</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#451a03">Test connection</div>
+                  <div style="font-size:11px;color:#78350f">Verify host + credentials, list tables</div>
+                </div>
+              </div>
+            </button>
+            <button onclick="saveDbProfile()"
+                    style="background:#ecfeff;border:1px solid #67e8f9;border-left:4px solid #0891b2;border-radius:8px;padding:12px;text-align:left;cursor:pointer;transition:background .15s">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:18px">💾</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#0c4a6e">Save profile</div>
+                  <div style="font-size:11px;color:#075985">Reuse later without retyping credentials</div>
+                </div>
+              </div>
+            </button>
+            <button onclick="importFromDatabase()"
+                    style="background:#dcfce7;border:1px solid #86efac;border-left:4px solid #059669;border-radius:8px;padding:12px;text-align:left;cursor:pointer;transition:background .15s">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:18px">⤓</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#064e3b">Generate from database</div>
+                  <div style="font-size:11px;color:#065f46">Pull tables → review modal → commit</div>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Test result panel — green/red card -->
+          <div id="db-test-result" style="font-size:12px;min-height:18px"></div>
+
+          <!-- Privacy + security callout -->
+          <div style="margin-top:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:11px;color:#450a0a;line-height:1.55">
+            <b style="color:#991b1b">🔒 Credential handling.</b>
+            Passwords are <b>base64-obfuscated</b> in the local SQLite store (shoulder-surfer defence, not real encryption).
+            Profiles never leave your machine. For production secrets, point the wizard at credentials provided via your
+            organisation's key store. Masked values (<code>●●●●●●</code>) shown in the saved-profile list are display-only
+            — the server uses the stored value when you import via <code>profile_id</code>.
+          </div>
+
         </div>
       </div>
 
@@ -2052,21 +2129,43 @@ let _dbVendors = {};       // {vendor_id → spec}
 let _dbCurrentVendor = null;
 let _dbCurrentProfileId = null;   // when reusing a saved profile
 
+// Per-vendor accent colours — used for the selected card outline +
+// vendor icon on the config card.
+const _DB_VENDOR_ACCENTS = {
+  sqlite:     '#475569',   // slate
+  postgresql: '#336791',   // postgres blue
+  mysql:      '#00758f',   // mysql teal
+  mssql:      '#a8004f',   // mssql magenta
+  oracle:     '#c74634',   // oracle red
+  db2:        '#1f70c1',   // db2 blue
+};
+
 async function loadDbVendors() {
   const grid = document.getElementById('db-vendor-grid');
-  if (!grid || Object.keys(_dbVendors).length) return _renderDbForm();
-  try {
-    const res = await fetch('/api/db/vendors');
-    const out = await res.json();
-    for (const v of (out.vendors || [])) _dbVendors[v.id] = v;
-  } catch (_) { /* offline; vendor grid stays empty */ }
-  grid.innerHTML = Object.values(_dbVendors).map(v => `
-    <button type="button" class="db-vendor-pill" data-vendor="${v.id}"
+  if (!grid) return;
+  if (!Object.keys(_dbVendors).length) {
+    try {
+      const res = await fetch('/api/db/vendors');
+      const out = await res.json();
+      for (const v of (out.vendors || [])) _dbVendors[v.id] = v;
+    } catch (_) { /* offline; vendor grid stays empty */ }
+  }
+  // Each vendor card: icon + label + small description, accent-coloured
+  // top border, hover lift. Selected state lifts the whole card.
+  grid.innerHTML = Object.values(_dbVendors).map(v => {
+    const accent = _DB_VENDOR_ACCENTS[v.id] || 'var(--accent)';
+    return `
+    <button type="button" class="db-vendor-card" data-vendor="${v.id}"
             onclick="selectDbVendor('${v.id}')"
-            style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);background:var(--surface);border-radius:6px;cursor:pointer;text-align:left;font-size:12px;color:var(--text)">
-      <span style="font-size:14px">${v.icon || '·'}</span>
-      <span>${v.label}</span>
-    </button>`).join('');
+            style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;
+                   padding:10px;border:1px solid var(--border);background:var(--surface);
+                   border-top:3px solid ${accent};border-radius:6px;cursor:pointer;
+                   text-align:left;font-size:11px;color:var(--text);
+                   transition:transform .12s ease, box-shadow .12s ease, background .12s ease">
+      <span style="font-size:22px;line-height:1">${v.icon || '·'}</span>
+      <span style="font-weight:600;font-size:12px;color:var(--text)">${v.label}</span>
+    </button>`;
+  }).join('');
   // Default to first vendor.
   const first = Object.keys(_dbVendors)[0];
   if (first) selectDbVendor(first);
@@ -2074,43 +2173,95 @@ async function loadDbVendors() {
 
 function selectDbVendor(vid) {
   _dbCurrentVendor = vid;
-  document.querySelectorAll('.db-vendor-pill').forEach(b => {
+  const accent = _DB_VENDOR_ACCENTS[vid] || 'var(--accent)';
+  document.querySelectorAll('.db-vendor-card').forEach(b => {
     const active = b.dataset.vendor === vid;
-    b.style.background = active ? 'var(--accent)' : 'var(--surface)';
-    b.style.color = active ? 'var(--on-accent)' : 'var(--text)';
-    b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    b.style.background = active ? 'rgba(99,102,241,0.06)' : 'var(--surface)';
+    b.style.boxShadow  = active ? `0 0 0 2px ${accent}` : 'none';
+    b.style.transform  = active ? 'translateY(-1px)'    : 'translateY(0)';
   });
   _renderDbForm();
 }
 
 function _renderDbForm() {
   const vendor = _dbVendors[_dbCurrentVendor];
-  const help = document.getElementById('db-vendor-help');
+  const icon  = document.getElementById('db-vendor-icon');
+  const title = document.getElementById('db-vendor-title');
+  const help  = document.getElementById('db-vendor-help');
   const fields = document.getElementById('db-form-fields');
   if (!vendor) {
-    if (help) help.textContent = 'Pick a vendor on the left.';
+    if (icon)  icon.textContent  = '🗄️';
+    if (title) title.textContent = 'Pick a vendor';
+    if (help)  help.textContent  = 'Choose a database type on the left.';
     if (fields) fields.innerHTML = '';
     return;
   }
-  if (help) help.textContent = vendor.description || '';
+  if (icon)  icon.textContent  = vendor.icon || '🗄️';
+  if (title) title.textContent = vendor.label;
+  if (help)  help.textContent  = vendor.description || '';
   if (!fields) return;
-  fields.innerHTML = (vendor.fields || []).map(f => {
+
+  // Split fields into required and optional — render with subtle
+  // section headers so it's clear which inputs are mandatory.
+  const required = (vendor.fields || []).filter(f => f.required);
+  const optional = (vendor.fields || []).filter(f => !f.required);
+
+  const renderField = f => {
     const id = `db-field-${f.name}`;
-    const req = f.required ? '<span style="color:#dc2626">*</span>' : '';
+    const reqDot = f.required
+      ? '<span style="color:#dc2626;font-weight:700;margin-left:2px">*</span>' : '';
     const inputType = f.secret ? 'password' : (f.kind === 'number' ? 'number' : 'text');
-    const inputBase = `id="${id}" data-field="${f.name}" value="${(f.default!==undefined&&f.default!==null)?String(f.default).replace(/"/g,'&quot;'):''}" placeholder="${(f.hint||'').replace(/"/g,'&quot;')}"
-                       style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:13px;width:100%"`;
+    const fieldIcon = f.secret ? '🔒'
+                    : (f.kind === 'number' ? '#️⃣'
+                    : (['host','db_path'].includes(f.name) ? '🌐'
+                    : (f.name === 'port' ? '#️⃣'
+                    : (['user'].includes(f.name) ? '👤'
+                    : (['dbname','database','service_name','schema'].includes(f.name) ? '🗃️' : '·')))));
+    const defaultStr = (f.default!==undefined&&f.default!==null) ? String(f.default).replace(/"/g,'&quot;') : '';
+    const placeholder = (f.hint || '').replace(/"/g,'&quot;');
+    const inputBase = `id="${id}" data-field="${f.name}" value="${defaultStr}" placeholder="${placeholder}"
+                       style="background:var(--bg);border:1px solid var(--border);border-radius:6px;
+                              color:var(--text);padding:6px 10px 6px 28px;font-size:13px;width:100%"`;
     const ctl = (f.kind === 'select')
       ? `<input type="text" ${inputBase} list="${id}-list"/>
          <datalist id="${id}-list"></datalist>`
       : `<input type="${inputType}" ${inputBase}/>`;
     const hintLine = f.hint && f.kind !== 'select'
-      ? `<div style="font-size:10px;color:var(--muted)">${f.hint}</div>` : '';
-    return `<div style="display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center">
-              <label style="font-size:12px;color:var(--muted)" for="${id}">${f.label} ${req}</label>
-              <div>${ctl}${hintLine}</div>
-            </div>`;
-  }).join('');
+      ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${f.hint}</div>` : '';
+    return `
+      <div>
+        <label for="${id}" style="display:block;font-size:11px;color:var(--muted);
+                                  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">
+          ${f.label}${reqDot}
+        </label>
+        <div style="position:relative">
+          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);
+                       font-size:13px;opacity:.55;pointer-events:none">${fieldIcon}</span>
+          ${ctl}
+        </div>
+        ${hintLine}
+      </div>`;
+  };
+
+  const reqHeader = required.length
+    ? `<div style="font-size:10px;color:#dc2626;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:-2px">Required</div>`
+    : '';
+  const reqBlock = required.length
+    ? `${reqHeader}
+       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:${optional.length?'6px':'0'}">
+         ${required.map(renderField).join('')}
+       </div>` : '';
+
+  const optHeader = optional.length
+    ? `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:-2px;margin-top:4px">Optional</div>`
+    : '';
+  const optBlock = optional.length
+    ? `${optHeader}
+       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+         ${optional.map(renderField).join('')}
+       </div>` : '';
+
+  fields.innerHTML = reqBlock + optBlock;
 }
 
 function _readDbForm() {
@@ -2135,15 +2286,30 @@ async function loadDbProfiles() {
     const profiles = out.profiles || [];
     if (!profiles.length) { strip.style.display = 'none'; return; }
     strip.style.display = '';
-    list.innerHTML = profiles.map(p => `
-      <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3px 4px 3px 10px;font-size:11px">
-        <span style="margin-right:4px">${(_dbVendors[p.vendor] && _dbVendors[p.vendor].icon) || '·'}</span>
-        <button class="btn btn-ghost" style="padding:0 6px;font-size:11px"
-                onclick="useDbProfile(${p.id})" title="Load into form">${p.name}</button>
-        <span style="color:var(--muted);font-size:10px">${p.vendor}</span>
-        <button class="btn btn-ghost" style="padding:0 4px;font-size:10px;color:var(--muted)"
-                onclick="deleteDbProfile(${p.id},'${p.name.replace(/'/g,'\\\'')}')">✕</button>
-      </div>`).join('');
+    list.innerHTML = profiles.map(p => {
+      const accent = _DB_VENDOR_ACCENTS[p.vendor] || 'var(--accent)';
+      const icon = (_dbVendors[p.vendor] && _dbVendors[p.vendor].icon) || '🗄️';
+      const venLabel = (_dbVendors[p.vendor] && _dbVendors[p.vendor].label) || p.vendor;
+      const host = p.config && (p.config.host || p.config.db_path || '');
+      return `
+      <div class="db-profile-card"
+           style="background:var(--surface);border:1px solid var(--border);
+                  border-left:4px solid ${accent};border-radius:8px;padding:10px 12px;
+                  display:flex;align-items:center;gap:10px;cursor:pointer;
+                  transition:transform .12s ease, box-shadow .12s ease"
+           onclick="useDbProfile(${p.id})"
+           onmouseenter="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(15,23,42,.08)'"
+           onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+        <span style="font-size:22px;flex-shrink:0">${icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+          <div style="font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${venLabel}${host?' · '+host:''}</div>
+        </div>
+        <button class="btn btn-ghost" style="padding:2px 6px;font-size:13px;color:var(--muted);flex-shrink:0"
+                onclick="event.stopPropagation();deleteDbProfile(${p.id},'${p.name.replace(/'/g,'\\\'')}')"
+                title="Delete profile">✕</button>
+      </div>`;
+    }).join('');
   } catch (_) { strip.style.display = 'none'; }
 }
 
@@ -2201,11 +2367,45 @@ async function saveDbProfile() {
 }
 
 // ── Test + Import ───────────────────────────────────────────────────────
-async function testDbConnection() {
+// Renders a coloured status card for test/import results. Three states:
+// 'pending' (yellow spinner), 'ok' (green), 'err' (red).
+function _renderDbResultCard(state, opts) {
   const out = document.getElementById('db-test-result');
-  out.innerHTML = '<span style="color:var(--muted)">connecting…</span>';
+  if (!out) return;
+  const palette = {
+    pending: { bg:'#fffbeb', bd:'#fde68a', tx:'#92400e', icon:'⏳' },
+    ok:      { bg:'#f0fdf4', bd:'#86efac', tx:'#065f46', icon:'✓'  },
+    err:     { bg:'#fef2f2', bd:'#fecaca', tx:'#991b1b', icon:'✗'  },
+  }[state] || { bg:'#f3f4f6', bd:'#d1d5db', tx:'#374151', icon:'·' };
+  const samplesHtml = (opts.samples || []).length
+    ? `<div style="margin-top:8px"><span style="font-size:10px;color:${palette.tx};text-transform:uppercase;letter-spacing:0.05em;opacity:.85">Sample tables</span>
+       <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">
+         ${opts.samples.map(t => `<code style="font-size:11px;background:rgba(255,255,255,0.7);border:1px solid ${palette.bd};padding:2px 6px;border-radius:4px;color:${palette.tx}">${t}</code>`).join('')}
+         ${opts.totalExtra ? `<span style="font-size:11px;color:${palette.tx};opacity:.7;padding:2px 4px">…+${opts.totalExtra} more</span>` : ''}
+       </div></div>` : '';
+  const metaLine = opts.meta
+    ? `<div style="font-size:11px;color:${palette.tx};opacity:.85;margin-top:2px">${opts.meta}</div>` : '';
+  out.innerHTML = `
+    <div style="background:${palette.bg};border:1px solid ${palette.bd};border-left:4px solid ${palette.tx};
+                border-radius:8px;padding:10px 12px;color:${palette.tx}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px;line-height:1">${palette.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${opts.title || ''}</div>
+          ${metaLine}
+        </div>
+      </div>
+      ${samplesHtml}
+    </div>`;
+}
+
+async function testDbConnection() {
+  _renderDbResultCard('pending', { title: 'Connecting…', meta: 'Opening a connection and listing tables' });
   const { vendor, config } = _readDbForm();
-  if (!vendor) { out.textContent = 'Pick a vendor first'; return; }
+  if (!vendor) {
+    _renderDbResultCard('err', { title: 'Pick a vendor first' });
+    return;
+  }
   const body = _dbCurrentProfileId
     ? { profile_id: _dbCurrentProfileId, vendor, config }   // server uses stored secrets
     : { vendor, config };
@@ -2217,24 +2417,35 @@ async function testDbConnection() {
     });
     const r = await res.json();
     if (r.ok) {
-      const samples = (r.sample_tables || []).slice(0, 8).map(t =>
-        `<code style="font-size:10px;background:var(--surface-2);padding:1px 4px;border-radius:3px;margin-right:3px">${t}</code>`).join('');
-      out.innerHTML = `<div style="color:#16a34a"><b>✓ Connected.</b>
-        ${r.tables} tables in ${r.duration_ms} ms.</div>
-        ${samples ? `<div style="margin-top:4px;color:var(--muted);font-size:11px">Sample: ${samples}${r.tables>8?` …+${r.tables-8} more`:''}</div>` : ''}`;
+      const sampleAll = r.sample_tables || [];
+      const samples = sampleAll.slice(0, 8);
+      _renderDbResultCard('ok', {
+        title: `Connected · ${r.tables} table${r.tables===1?'':'s'} discovered`,
+        meta:  `Round-trip ${r.duration_ms} ms · vendor ${r.vendor}`,
+        samples,
+        totalExtra: Math.max(0, r.tables - samples.length),
+      });
     } else {
-      out.innerHTML = `<div style="color:#dc2626"><b>✗ Could not connect.</b> ${r.error || ''}</div>`;
+      _renderDbResultCard('err', {
+        title: 'Could not connect',
+        meta:  r.error || 'No error detail returned.',
+      });
     }
   } catch (e) {
-    out.innerHTML = `<div style="color:#dc2626">${e}</div>`;
+    _renderDbResultCard('err', { title: 'Network error', meta: String(e) });
   }
 }
 
 async function importFromDatabase() {
-  const out = document.getElementById('db-test-result');
-  out.innerHTML = '<span style="color:var(--muted)">introspecting tables…</span>';
+  _renderDbResultCard('pending', {
+    title: 'Introspecting tables…',
+    meta:  'Walking the schema and lifting foreign keys into relationships',
+  });
   const { vendor, config } = _readDbForm();
-  if (!vendor) { out.textContent = 'Pick a vendor first'; return; }
+  if (!vendor) {
+    _renderDbResultCard('err', { title: 'Pick a vendor first' });
+    return;
+  }
   const body = _dbCurrentProfileId
     ? { profile_id: _dbCurrentProfileId,
         domain_name: document.getElementById('d-name')?.value,
@@ -2251,11 +2462,13 @@ async function importFromDatabase() {
     const result = await res.json();
     if (!result.ok) {
       const msg = (result.errors && result.errors[0] && result.errors[0].message) || 'introspection failed';
-      out.innerHTML = `<div style="color:#dc2626"><b>✗ Import failed.</b> ${msg}</div>`;
+      _renderDbResultCard('err', { title: 'Import failed', meta: msg });
       return;
     }
-    out.innerHTML = `<div style="color:#16a34a"><b>✓ Found ${result.stats.entities} tables</b> · ${result.stats.relationships} foreign-key relationships</div>
-      <div style="color:var(--muted);font-size:11px;margin-top:2px">Opening review modal…</div>`;
+    _renderDbResultCard('ok', {
+      title: `Found ${result.stats.entities} table${result.stats.entities===1?'':'s'}`,
+      meta:  `${result.stats.relationships} foreign-key relationship${result.stats.relationships===1?'':'s'} · opening review modal…`,
+    });
     // Reuse the existing file-import review modal so file + DB paths
     // share their final-guard validation and commit code path.
     if (typeof openImportReview === 'function') {
@@ -2264,7 +2477,7 @@ async function importFromDatabase() {
       showToast('Review modal not wired — session not committed.');
     }
   } catch (e) {
-    out.innerHTML = `<div style="color:#dc2626">${e}</div>`;
+    _renderDbResultCard('err', { title: 'Network error', meta: String(e) });
   }
 }
 
