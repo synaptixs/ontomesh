@@ -76,10 +76,21 @@ _DDLS = (
 )
 
 
+_PROPOSAL_COLUMNS_L8 = (
+    # L8: regime tag travels on the LOG_EVENT proposal row so the review
+    # queue can render "Regime 2 of 3" without a join. Nullable so any
+    # row written before L8 fits (or by other proposal kinds) survives.
+    ("regime_tag",        "TEXT"),
+    ("regime_posterior",  "REAL"),
+)
+
+
 def migrate(conn: sqlite3.Connection) -> dict:
-    """Apply the migration. Returns ``{'tables_created': [...]}`` for
-    logging. Idempotent: re-running reports an empty list."""
+    """Apply the migration. Returns
+    ``{'tables_created': [...], 'columns_added': [...]}`` for logging.
+    Idempotent: re-running reports empty lists."""
     created = []
+    cols_added = []
     existing = {
         row[0] for row in conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table'"
@@ -89,8 +100,23 @@ def migrate(conn: sqlite3.Connection) -> dict:
         if name not in existing:
             conn.execute(ddl)
             created.append(name)
+
+    if "ontology_evolution_proposals" in existing:
+        proposal_cols = {
+            r[1] for r in conn.execute(
+                "PRAGMA table_info(ontology_evolution_proposals)"
+            )
+        }
+        for col, decl in _PROPOSAL_COLUMNS_L8:
+            if col not in proposal_cols:
+                conn.execute(
+                    f"ALTER TABLE ontology_evolution_proposals "
+                    f"ADD COLUMN {col} {decl}"
+                )
+                cols_added.append(col)
+
     conn.commit()
-    return {"tables_created": created}
+    return {"tables_created": created, "columns_added": cols_added}
 
 
 __all__ = ["migrate"]

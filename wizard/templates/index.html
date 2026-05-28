@@ -3582,6 +3582,7 @@ function _renderLogDiscoveryRow(c) {
     <div class="card" style="padding:10px;margin-bottom:8px" id="log-disco-row-${c.proposal_id}">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
         <span style="background:${kindBadge[1]};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${kindBadge[0]}</span>
+        ${c.regime_tag ? `<span title="L8 — regime-aware HMM" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${c.regime_tag}</span>` : ''}
         <span style="flex:1;font-size:13px;color:var(--text);font-weight:500">${(c.title || '').replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</span>
         <div style="display:flex;align-items:center;gap:6px;min-width:140px">
           <div style="background:var(--bg);border-radius:4px;height:6px;width:80px;overflow:hidden">
