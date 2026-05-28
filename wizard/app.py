@@ -1054,11 +1054,30 @@ def insights_ask():
 
 
 _ENTERPRISE_DB = os.path.join(ROOT, "db", "enterprise.db")
+_REVIEW_RANKER_PATH = os.path.join(ROOT, "db", "review_ranker.pkl")
 
 
 def _log_review_conn():
     import sqlite3 as _sqlite3
-    return _sqlite3.connect(_ENTERPRISE_DB)
+    conn = _sqlite3.connect(_ENTERPRISE_DB)
+    # Ensure L9 (and reserved L8) tables exist whenever the wizard
+    # opens the proposal store. Cheap — idempotent IF NOT EXISTS.
+    try:
+        from db.migrations.log_discovery_v2 import migrate as _v2_migrate
+        _v2_migrate(conn)
+    except Exception:                                      # noqa: BLE001
+        pass
+    return conn
+
+
+def _load_review_ranker():
+    """Forgiving loader for the L9 ranker. Returns None if absent or
+    unloadable — callers degrade to SQL-default ordering."""
+    try:
+        from wizard.review_ranker import ReviewRanker
+        return ReviewRanker.load_or_none(_REVIEW_RANKER_PATH)
+    except Exception:                                      # noqa: BLE001
+        return None
 
 
 @app.route("/api/log-discovery/summary", methods=["GET"])
@@ -1091,12 +1110,17 @@ def log_discovery_candidates():
     except ValueError:
         limit = 50
     conn = _log_review_conn()
+    ranker = _load_review_ranker()
     try:
         cands = log_review.list_candidates(
-            conn, kind=kind, status=status, limit=limit)
+            conn, kind=kind, status=status, limit=limit, ranker=ranker)
     finally:
         conn.close()
-    return jsonify({"candidates": cands, "available": True})
+    return jsonify({
+        "candidates": cands,
+        "available": True,
+        "ranked": bool(ranker and ranker.is_fitted()),
+    })
 
 
 @app.route("/api/log-discovery/seed", methods=["POST"])
@@ -1188,6 +1212,46 @@ def log_discovery_merge(proposal_id):
         conn.close()
     _save_session(session)
     return jsonify(result)
+
+
+@app.route("/api/log-discovery/rerank", methods=["POST"])
+def log_discovery_rerank():
+    """L9 — refit the active-learning ranker on the current set of
+    APPROVED/REJECTED proposals and persist it to disk. The next
+    ``/candidates`` call automatically picks the new model up via
+    ``_load_review_ranker``."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    try:
+        from wizard.review_ranker import fit_from_conn
+    except Exception as exc:                               # noqa: BLE001
+        return jsonify({"error": f"ranker module unavailable: {exc}"}), 500
+    conn = _log_review_conn()
+    try:
+        summary = fit_from_conn(conn, _REVIEW_RANKER_PATH)
+    finally:
+        conn.close()
+    return jsonify({"ok": True, **summary})
+
+
+@app.route("/api/log-discovery/ranker-status", methods=["GET"])
+def log_discovery_ranker_status():
+    """Tiny GET for the UI badge. Returns the most recent fit metadata
+    if a model exists; otherwise ``{'fitted': false}``."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"fitted": False, "reason": "no enterprise.db"})
+    try:
+        from wizard.review_ranker import latest_meta
+    except Exception:                                      # noqa: BLE001
+        return jsonify({"fitted": False, "reason": "ranker module unavailable"})
+    conn = _log_review_conn()
+    try:
+        meta = latest_meta(conn)
+    finally:
+        conn.close()
+    ranker = _load_review_ranker()
+    fitted = bool(ranker and ranker.is_fitted())
+    return jsonify({"fitted": fitted, "latest_meta": meta})
 
 
 @app.route("/api/pipeline/status", methods=["GET"])

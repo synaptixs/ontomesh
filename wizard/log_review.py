@@ -340,11 +340,17 @@ _LOG_KINDS = ("LOG_ENTITY", "LOG_RELATIONSHIP", "LOG_EVENT", "LOG_CAUSAL_EDGE")
 def list_candidates(conn: sqlite3.Connection, *,
                     kind: Optional[str] = None,
                     status: str = "PENDING",
-                    limit: int = 50) -> List[dict]:
+                    limit: int = 50,
+                    ranker: Any = None) -> List[dict]:
     """Return candidates sorted by (confidence_score × consequence).
 
     Consequence pulled from `dim_evidence_recency` which carries the
     severity-weight from `seed_from_mining`.
+
+    If `ranker` is a fitted ``wizard.review_ranker.ReviewRanker``, the
+    SQL-default order is replaced by the ranker's posterior. An
+    unfitted or `None` ranker is a no-op — the L9 ordering only takes
+    effect once a model has been trained.
     """
     if not _table_exists(conn, "ontology_evolution_proposals"):
         return []
@@ -381,6 +387,8 @@ def list_candidates(conn: sqlite3.Connection, *,
             "evidence_sample": r[14], "created_at": r[15],
             "updated_at": r[16],
         })
+    if ranker is not None and getattr(ranker, "is_fitted", lambda: False)():
+        out = ranker.rerank(out)
     return out
 
 

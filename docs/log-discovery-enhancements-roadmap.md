@@ -248,11 +248,13 @@ A reviewer running on `examples/log-rca/large/`:
 
 ## 8. Open questions to resolve before coding L8
 
-1. **Regime count K — fixed or learned?** Lean toward "learned via ELBO, capped at K=5". Defaults need agreeing.
-2. **Regime tag persistence.** Store per-trajectory regime in the proposal? Or only show it transiently in the UI? Persistence matters if downstream Insights queries want to filter by regime.
-3. **Cross-service regimes.** Do we fit a *global* regime that gates multiple services' HMMs, or independent regimes per service? Cross-service captures the "whole site under maintenance" case but is computationally heavier.
-4. **Ranker feature set.** The list in §3.L9 is a starting point. Whether to include the regime tag as a feature depends on whether L8 ships first (it should, per the ordering above).
-5. **VB stopping criterion.** ELBO change threshold + max iterations. Defaults need pinning per the dev plan that follows.
+> **Resolved 2026-05-28.** Decisions captured inline below.
+
+1. **Regime count K — fixed or learned?** **Decision:** learned via ELBO, capped at K≤5.
+2. **Regime tag persistence.** **Decision:** persist per-trajectory in DB via `log_trajectory_regimes(trajectory_id, regime_id, posterior)` as specified in §3.L8. Enables Insights filters and audit.
+3. **Cross-service regimes.** **Decision:** per-service regimes (no global gate). Cheaper; services with no regime structure stay K=1.
+4. **Ranker feature set.** **Decision:** include the L8 regime tag as a ranker feature. Ordering note: L9 ships before L8, so the ranker handles the missing tag gracefully (NaN-imputed / dropped) and picks it up automatically on the first refit after L8 lands.
+5. **VB stopping criterion.** **Decision:** ELBO Δ < 1e-4, max 200 iterations, 3 random restarts (matches the §6 local-minima mitigation).
 
 ---
 
