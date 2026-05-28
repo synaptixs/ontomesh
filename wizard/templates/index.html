@@ -936,6 +936,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
             </select>
             <button class="btn btn-ghost" onclick="reseedLogDiscovery()" title="Re-build proposals from the latest mining outputs">↻ Re-seed</button>
             <button class="btn btn-ghost" onclick="rerankLogDiscovery()" title="Refit the active-learning ranker on your approve/reject history (L9)">↻ Re-rank with feedback</button>
+            <button class="btn btn-ghost" onclick="mineRateAnomalies()" title="Run the GP rate-deviation detector (L13)">↻ GP rate scan</button>
             <span id="log-disco-ranker-badge" class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px"></span>
           </div>
         </div>
@@ -3595,7 +3596,9 @@ function _renderLogDiscoveryRow(c) {
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
         <span style="background:${kindBadge[1]};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${kindBadge[0]}</span>
         ${c.regime_tag ? `<span title="L8 — regime-aware HMM" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${c.regime_tag}</span>` : ''}
+        ${c.detection_strategy === 'GP_RATE_DEVIATION' ? `<span title="L13 — GP rate anomaly" style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">GP rate</span>` : ''}
         <span style="flex:1;font-size:13px;color:var(--text);font-weight:500">${(c.title || '').replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</span>
+        ${c.rate_sparkline ? _renderSparkline(c.rate_sparkline) : ''}
         <div style="display:flex;align-items:center;gap:6px;min-width:140px">
           <div style="background:var(--bg);border-radius:4px;height:6px;width:80px;overflow:hidden">
             <div style="background:#5ec27a;height:100%;width:${conf}%"></div>
@@ -3731,6 +3734,33 @@ function _renderEmbeddingScatter(payload) {
       `<span title="distance ${m.distance.toFixed(3)}" style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:11px;margin-right:4px">#${m.cluster_id_a} ≈ #${m.cluster_id_b}</span>`
     ).join('') + (merges.length > 5 ? ` <span style="color:var(--muted)">+ ${merges.length - 5} more</span>` : '');
   }
+}
+
+// L13 — inline sparkline for GP_RATE_DEVIATION proposals.
+// `raw` is a JSON-encoded list of per-bin counts (capped at 64).
+function _renderSparkline(raw) {
+  let arr;
+  try { arr = typeof raw === 'string' ? JSON.parse(raw) : raw; }
+  catch (_) { return ''; }
+  if (!Array.isArray(arr) || !arr.length) return '';
+  const w = 80, h = 20;
+  const max = Math.max(...arr) || 1;
+  const dx = w / Math.max(1, arr.length - 1);
+  const pts = arr.map((v, i) => `${(i * dx).toFixed(1)},${(h - (v / max) * h).toFixed(1)}`).join(' ');
+  return `<svg width="${w}" height="${h}" style="margin-left:6px" title="GP rate sparkline (${arr.length} bins)"><polyline points="${pts}" fill="none" stroke="#16a34a" stroke-width="1.2"/></svg>`;
+}
+
+async function mineRateAnomalies() {
+  try {
+    const res = await fetch('/api/log-discovery/rate-anomalies', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Rate-anomaly mining failed: ' + (out.error || '')); return; }
+    const r = out.report || {};
+    showToast(`GP rate anomalies: ${r.anomalies || 0} flagged in ${r.duration_s || 0}s`);
+    loadLogDiscovery();
+  } catch (e) { showToast('Rate-anomaly error: ' + e); }
 }
 
 async function reseedLogDiscovery() {
