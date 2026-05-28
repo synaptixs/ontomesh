@@ -123,6 +123,16 @@ def health():
     return jsonify({"ok": True, "timestamp": _now()})
 
 
+@app.route("/log-discovery/help")
+def log_discovery_help():
+    """Serve the Log Discovery help page — capabilities, algorithms,
+    benefits, and the user-facing workflow. Linked from the Step 5
+    panel header."""
+    return send_from_directory(
+        os.path.join(HERE, "templates"), "log_discovery_help.html",
+    )
+
+
 @app.route("/api/session", methods=["GET"])
 def get_session():
     return jsonify(_load_session())
