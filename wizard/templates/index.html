@@ -244,6 +244,12 @@
     .box-help li { margin-bottom: 3px; }
     .box-help li b { color: var(--text); }
 
+    /* L4 — collapsible candidate groups. Collapsed by default; the
+       chevron rotates 90° when the section is opened. */
+    details.ld-group summary::-webkit-details-marker { display: none; }
+    details.ld-group[open] .ld-chev { transform: rotate(90deg); display: inline-block; }
+    details.ld-group summary:hover { filter: brightness(0.97); }
+
     /* ── Form fields ───────────────────────────────────────────────────── */
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 11px; font-weight: 500;
@@ -3632,14 +3638,14 @@ function _renderGroupedCandidates(cands) {
     }
 
     html += `
-      <details open style="margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
-        <summary style="cursor:pointer;padding:8px 12px;background:${meta.color}15;border-bottom:1px solid var(--border);list-style:none;display:flex;align-items:center;gap:8px">
+      <details class="ld-group" style="margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <summary style="cursor:pointer;padding:8px 12px;background:${meta.color}15;list-style:none;display:flex;align-items:center;gap:8px">
           <span style="background:${meta.color};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.04em">${meta.label.toUpperCase()}</span>
           <span style="font-size:13px;font-weight:600;color:var(--text)">${rows.length} candidate${rows.length === 1 ? '' : 's'}</span>
           <span style="font-size:11px;color:var(--muted);flex:1">${meta.help}</span>
-          <span style="font-size:10px;color:var(--muted)">▾</span>
+          <span class="ld-chev" style="font-size:11px;color:var(--muted);transition:transform .15s">▸</span>
         </summary>
-        <div style="padding:10px 8px 4px">
+        <div style="padding:10px 8px 4px;border-top:1px solid var(--border)">
           ${extraNote}
           ${rows.map(c => _renderLogDiscoveryRow(c)).join('')}
         </div>
