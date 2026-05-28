@@ -564,116 +564,78 @@
 
         <!-- Database-direct tab ────────────────────────────────────────── -->
         <div id="imp-tab-db" class="tab-panel">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:16px">
+            Connect directly to your operational database. Tables, columns, and foreign
+            keys are read into the same review modal as the file path — no upload required.
+          </p>
 
-          <!-- Pipeline at a glance — four-step visual flow -->
-          <div style="display:grid; grid-template-columns: repeat(4, 1fr) ; gap:0; margin-bottom:14px">
-            <div class="db-flow-step" data-step="1" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff); border-radius:8px 0 0 8px; padding:10px 12px; border-top:3px solid #4338ca; position:relative">
-              <div style="display:flex; align-items:center; gap:6px">
-                <span style="background:#4338ca;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">1</span>
-                <span style="font-size:11px;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Pick vendor</span>
-              </div>
-              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Choose your driver — SQLite, Postgres, MySQL, MSSQL, Oracle, DB2</div>
-            </div>
-            <div class="db-flow-step" data-step="2" style="background:linear-gradient(135deg,#ecfeff,#cffafe); padding:10px 12px; border-top:3px solid #0891b2">
-              <div style="display:flex; align-items:center; gap:6px">
-                <span style="background:#0891b2;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">2</span>
-                <span style="font-size:11px;color:#0891b2;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Configure</span>
-              </div>
-              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Host, port, credentials — fields rendered dynamically per vendor</div>
-            </div>
-            <div class="db-flow-step" data-step="3" style="background:linear-gradient(135deg,#fef3c7,#fde68a); padding:10px 12px; border-top:3px solid #d97706">
-              <div style="display:flex; align-items:center; gap:6px">
-                <span style="background:#d97706;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">3</span>
-                <span style="font-size:11px;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Test &amp; save</span>
-              </div>
-              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Verify the connection, then save credentials as a reusable profile</div>
-            </div>
-            <div class="db-flow-step" data-step="4" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0); border-radius:0 8px 8px 0; padding:10px 12px; border-top:3px solid #059669">
-              <div style="display:flex; align-items:center; gap:6px">
-                <span style="background:#059669;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">4</span>
-                <span style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Generate</span>
-              </div>
-              <div style="font-size:11px;color:var(--text);margin-top:4px;line-height:1.3">Pull tables + foreign keys → review modal → commit</div>
-            </div>
-          </div>
-
-          <!-- Saved profiles strip — proper cards rather than text chips -->
-          <div id="db-profiles-strip" style="display:none; margin-bottom:14px">
-            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;gap:6px">
-              <span>💾</span><span>Saved profiles</span>
-              <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;font-size:10px">— click to load · ✕ to delete</span>
-            </div>
-            <div id="db-profiles-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
-          </div>
-
-          <!-- ── Step 1 + 2: Vendor + form, side by side ───────────────── -->
-          <div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;margin-bottom:14px">
-
-            <!-- Vendor cards — visual grid -->
-            <div>
-              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Database vendor</div>
-              <div id="db-vendor-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-                <!-- populated by loadDbVendors() -->
-              </div>
+          <!-- ── Vendor + profile header row ────────────────────────────── -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="field" style="margin:0">
+              <label for="db-vendor-select"
+                     style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">Database vendor</label>
+              <select id="db-vendor-select" onchange="selectDbVendor(this.value)"
+                      style="width:100%;background:var(--bg);border:1px solid var(--border);
+                             border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px">
+                <option value="">— Select a vendor —</option>
+              </select>
+              <div id="db-vendor-help" style="font-size:11px;color:var(--muted);margin-top:4px;min-height:14px"></div>
             </div>
 
-            <!-- Config form — boxed card with sections -->
-            <div style="border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:14px">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
-                <span id="db-vendor-icon" style="font-size:20px">🗄️</span>
-                <div>
-                  <div id="db-vendor-title" style="font-size:13px;font-weight:600;color:var(--text)">Pick a vendor</div>
-                  <div id="db-vendor-help" style="font-size:11px;color:var(--muted)">Choose a database type on the left.</div>
-                </div>
+            <div class="field" style="margin:0">
+              <label for="db-profile-select"
+                     style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">
+                Saved profile
+                <span id="db-profile-count" style="color:var(--muted-2);font-weight:normal"></span>
+              </label>
+              <div style="display:flex;gap:6px">
+                <select id="db-profile-select" onchange="useDbProfile(this.value)"
+                        style="flex:1;background:var(--bg);border:1px solid var(--border);
+                               border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px">
+                  <option value="">— New connection —</option>
+                </select>
+                <button class="btn btn-ghost" id="db-profile-delete-btn" onclick="deleteCurrentDbProfile()"
+                        title="Delete the selected profile" disabled
+                        style="padding:6px 10px;font-size:12px">Delete</button>
               </div>
-              <div id="db-form-fields" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;min-height:14px">
+                Pick an existing profile to pre-fill the form, or leave on
+                <i>— New connection —</i> to enter fresh credentials.
+              </div>
             </div>
           </div>
 
-          <!-- ── Step 3 + 4: Action bar with three coloured cards ──────── -->
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
-            <button onclick="testDbConnection()"
-                    style="background:#fef3c7;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:8px;padding:12px;text-align:left;cursor:pointer;transition:background .15s">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:18px">🔌</span>
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:#451a03">Test connection</div>
-                  <div style="font-size:11px;color:#78350f">Verify host + credentials, list tables</div>
-                </div>
-              </div>
-            </button>
-            <button onclick="saveDbProfile()"
-                    style="background:#ecfeff;border:1px solid #67e8f9;border-left:4px solid #0891b2;border-radius:8px;padding:12px;text-align:left;cursor:pointer;transition:background .15s">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:18px">💾</span>
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:#0c4a6e">Save profile</div>
-                  <div style="font-size:11px;color:#075985">Reuse later without retyping credentials</div>
-                </div>
-              </div>
-            </button>
-            <button onclick="importFromDatabase()"
-                    style="background:#dcfce7;border:1px solid #86efac;border-left:4px solid #059669;border-radius:8px;padding:12px;text-align:left;cursor:pointer;transition:background .15s">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:18px">⤓</span>
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:#064e3b">Generate from database</div>
-                  <div style="font-size:11px;color:#065f46">Pull tables → review modal → commit</div>
-                </div>
-              </div>
-            </button>
+          <!-- ── Config form ────────────────────────────────────────────── -->
+          <fieldset id="db-form-fieldset" disabled
+                    style="border:1px solid var(--border);border-radius:6px;padding:14px 16px 16px;
+                           margin:0 0 16px;background:var(--surface);min-width:0">
+            <legend style="padding:0 6px;font-size:12px;font-weight:600;color:var(--text)">Connection details</legend>
+            <div id="db-form-fields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px"></div>
+          </fieldset>
+
+          <!-- ── Action row ────────────────────────────────────────────── -->
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="db-import-btn" onclick="importFromDatabase()"
+                    style="padding:8px 18px;font-size:13px" disabled>Generate from database</button>
+            <button class="btn btn-ghost" id="db-test-btn" onclick="testDbConnection()"
+                    style="padding:8px 14px;font-size:13px" disabled>Test connection</button>
+            <button class="btn btn-ghost" id="db-save-btn" onclick="saveDbProfile()"
+                    style="padding:8px 14px;font-size:13px" disabled>Save as profile…</button>
+            <span style="flex:1"></span>
+            <span id="db-action-hint" style="font-size:11px;color:var(--muted)">Select a vendor to enable these actions.</span>
           </div>
 
-          <!-- Test result panel — green/red card -->
-          <div id="db-test-result" style="font-size:12px;min-height:18px"></div>
+          <!-- Inline status (small, single-line; expands for sample tables) -->
+          <div id="db-test-result" style="font-size:12px;min-height:14px"></div>
 
-          <!-- Privacy + security callout -->
-          <div style="margin-top:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:11px;color:#450a0a;line-height:1.55">
-            <b style="color:#991b1b">🔒 Credential handling.</b>
-            Passwords are <b>base64-obfuscated</b> in the local SQLite store (shoulder-surfer defence, not real encryption).
-            Profiles never leave your machine. For production secrets, point the wizard at credentials provided via your
-            organisation's key store. Masked values (<code>●●●●●●</code>) shown in the saved-profile list are display-only
-            — the server uses the stored value when you import via <code>profile_id</code>.
+          <!-- Subtle privacy footnote -->
+          <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);
+                      font-size:11px;color:var(--muted);line-height:1.5">
+            <b style="color:var(--text);font-weight:600">Credential handling.</b>
+            Passwords are stored locally in <code>db/ontologies.db</code> with base64
+            obfuscation — a defence against casual inspection, not encryption. Profiles
+            never leave your machine. For production credentials, prefer secrets
+            provided via your organisation's key store at runtime.
           </div>
 
         </div>
@@ -2129,139 +2091,112 @@ let _dbVendors = {};       // {vendor_id → spec}
 let _dbCurrentVendor = null;
 let _dbCurrentProfileId = null;   // when reusing a saved profile
 
-// Per-vendor accent colours — used for the selected card outline +
-// vendor icon on the config card.
-const _DB_VENDOR_ACCENTS = {
-  sqlite:     '#475569',   // slate
-  postgresql: '#336791',   // postgres blue
-  mysql:      '#00758f',   // mysql teal
-  mssql:      '#a8004f',   // mssql magenta
-  oracle:     '#c74634',   // oracle red
-  db2:        '#1f70c1',   // db2 blue
-};
-
 async function loadDbVendors() {
-  const grid = document.getElementById('db-vendor-grid');
-  if (!grid) return;
+  const select = document.getElementById('db-vendor-select');
+  if (!select) return;
   if (!Object.keys(_dbVendors).length) {
     try {
       const res = await fetch('/api/db/vendors');
       const out = await res.json();
       for (const v of (out.vendors || [])) _dbVendors[v.id] = v;
-    } catch (_) { /* offline; vendor grid stays empty */ }
+    } catch (_) { /* offline; the placeholder option stays */ }
   }
-  // Each vendor card: icon + label + small description, accent-coloured
-  // top border, hover lift. Selected state lifts the whole card.
-  grid.innerHTML = Object.values(_dbVendors).map(v => {
-    const accent = _DB_VENDOR_ACCENTS[v.id] || 'var(--accent)';
-    return `
-    <button type="button" class="db-vendor-card" data-vendor="${v.id}"
-            onclick="selectDbVendor('${v.id}')"
-            style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;
-                   padding:10px;border:1px solid var(--border);background:var(--surface);
-                   border-top:3px solid ${accent};border-radius:6px;cursor:pointer;
-                   text-align:left;font-size:11px;color:var(--text);
-                   transition:transform .12s ease, box-shadow .12s ease, background .12s ease">
-      <span style="font-size:22px;line-height:1">${v.icon || '·'}</span>
-      <span style="font-weight:600;font-size:12px;color:var(--text)">${v.label}</span>
-    </button>`;
-  }).join('');
-  // Default to first vendor.
-  const first = Object.keys(_dbVendors)[0];
-  if (first) selectDbVendor(first);
+  // Populate options. Keep the leading placeholder so the form sits
+  // disabled until the user has explicitly chosen a driver.
+  while (select.options.length > 1) select.remove(1);
+  for (const v of Object.values(_dbVendors)) {
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.label;
+    select.appendChild(opt);
+  }
+  _updateDbActionState();
 }
 
 function selectDbVendor(vid) {
-  _dbCurrentVendor = vid;
-  const accent = _DB_VENDOR_ACCENTS[vid] || 'var(--accent)';
-  document.querySelectorAll('.db-vendor-card').forEach(b => {
-    const active = b.dataset.vendor === vid;
-    b.style.background = active ? 'rgba(99,102,241,0.06)' : 'var(--surface)';
-    b.style.boxShadow  = active ? `0 0 0 2px ${accent}` : 'none';
-    b.style.transform  = active ? 'translateY(-1px)'    : 'translateY(0)';
-  });
+  _dbCurrentVendor = vid || null;
+  const select = document.getElementById('db-vendor-select');
+  if (select && select.value !== (vid || '')) select.value = vid || '';
+  const help = document.getElementById('db-vendor-help');
+  if (help) {
+    const v = _dbVendors[vid];
+    help.textContent = v ? (v.description || '') : '';
+  }
   _renderDbForm();
+  _updateDbActionState();
+}
+
+// Action buttons stay disabled until the user picks a vendor. The
+// hint text under the action row mirrors the current state so the
+// reason is always visible.
+function _updateDbActionState() {
+  const enabled = !!_dbCurrentVendor;
+  const fset = document.getElementById('db-form-fieldset');
+  if (fset) fset.disabled = !enabled;
+  ['db-import-btn', 'db-test-btn', 'db-save-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = !enabled;
+  });
+  const hint = document.getElementById('db-action-hint');
+  if (hint) {
+    hint.textContent = enabled
+      ? 'Test the connection before generating, or save as a profile to reuse later.'
+      : 'Select a vendor to enable these actions.';
+  }
+  const delBtn = document.getElementById('db-profile-delete-btn');
+  if (delBtn) delBtn.disabled = !_dbCurrentProfileId;
 }
 
 function _renderDbForm() {
   const vendor = _dbVendors[_dbCurrentVendor];
-  const icon  = document.getElementById('db-vendor-icon');
-  const title = document.getElementById('db-vendor-title');
-  const help  = document.getElementById('db-vendor-help');
   const fields = document.getElementById('db-form-fields');
-  if (!vendor) {
-    if (icon)  icon.textContent  = '🗄️';
-    if (title) title.textContent = 'Pick a vendor';
-    if (help)  help.textContent  = 'Choose a database type on the left.';
-    if (fields) fields.innerHTML = '';
-    return;
-  }
-  if (icon)  icon.textContent  = vendor.icon || '🗄️';
-  if (title) title.textContent = vendor.label;
-  if (help)  help.textContent  = vendor.description || '';
   if (!fields) return;
+  if (!vendor) { fields.innerHTML = ''; return; }
 
-  // Split fields into required and optional — render with subtle
-  // section headers so it's clear which inputs are mandatory.
-  const required = (vendor.fields || []).filter(f => f.required);
-  const optional = (vendor.fields || []).filter(f => !f.required);
+  // Single, ordered grid — required fields first, optional after.
+  // Standard form rendering: label above input, micro-hint below.
+  // No inline icons; no per-vendor colour theming. The aim is "looks
+  // like every other admin tool" rather than "looks decorated".
+  const ordered = [
+    ...(vendor.fields || []).filter(f => f.required),
+    ...(vendor.fields || []).filter(f => !f.required),
+  ];
 
-  const renderField = f => {
+  fields.innerHTML = ordered.map(f => {
     const id = `db-field-${f.name}`;
-    const reqDot = f.required
-      ? '<span style="color:#dc2626;font-weight:700;margin-left:2px">*</span>' : '';
     const inputType = f.secret ? 'password' : (f.kind === 'number' ? 'number' : 'text');
-    const fieldIcon = f.secret ? '🔒'
-                    : (f.kind === 'number' ? '#️⃣'
-                    : (['host','db_path'].includes(f.name) ? '🌐'
-                    : (f.name === 'port' ? '#️⃣'
-                    : (['user'].includes(f.name) ? '👤'
-                    : (['dbname','database','service_name','schema'].includes(f.name) ? '🗃️' : '·')))));
-    const defaultStr = (f.default!==undefined&&f.default!==null) ? String(f.default).replace(/"/g,'&quot;') : '';
-    const placeholder = (f.hint || '').replace(/"/g,'&quot;');
-    const inputBase = `id="${id}" data-field="${f.name}" value="${defaultStr}" placeholder="${placeholder}"
-                       style="background:var(--bg);border:1px solid var(--border);border-radius:6px;
-                              color:var(--text);padding:6px 10px 6px 28px;font-size:13px;width:100%"`;
+    const reqMark = f.required
+      ? '<span style="color:#dc2626;margin-left:2px" title="Required">*</span>'
+      : '';
+    const optMark = !f.required
+      ? '<span style="color:var(--muted-2);font-weight:normal;font-size:10px;margin-left:6px;text-transform:none;letter-spacing:0">(optional)</span>'
+      : '';
+    const defaultStr = (f.default !== undefined && f.default !== null)
+      ? String(f.default).replace(/"/g, '&quot;') : '';
+    const placeholder = (f.hint || '').replace(/"/g, '&quot;');
+    const inputAttrs = `id="${id}" data-field="${f.name}" value="${defaultStr}"
+                        placeholder="${placeholder}"
+                        autocomplete="${f.secret ? 'off' : 'on'}"
+                        ${f.secret ? 'autocomplete="new-password" spellcheck="false"' : ''}
+                        style="width:100%;background:var(--bg);border:1px solid var(--border);
+                               border-radius:6px;color:var(--text);padding:7px 10px;font-size:13px"`;
     const ctl = (f.kind === 'select')
-      ? `<input type="text" ${inputBase} list="${id}-list"/>
+      ? `<input type="text" ${inputAttrs} list="${id}-list"/>
          <datalist id="${id}-list"></datalist>`
-      : `<input type="${inputType}" ${inputBase}/>`;
-    const hintLine = f.hint && f.kind !== 'select'
-      ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${f.hint}</div>` : '';
+      : `<input type="${inputType}" ${inputAttrs}/>`;
+    const hint = f.hint
+      ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4">${f.hint}</div>`
+      : '';
     return `
-      <div>
-        <label for="${id}" style="display:block;font-size:11px;color:var(--muted);
-                                  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">
-          ${f.label}${reqDot}
+      <div class="field" style="margin:0">
+        <label for="${id}" style="display:block;font-size:12px;color:var(--text);
+                                   font-weight:500;margin-bottom:4px">
+          ${f.label}${reqMark}${optMark}
         </label>
-        <div style="position:relative">
-          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);
-                       font-size:13px;opacity:.55;pointer-events:none">${fieldIcon}</span>
-          ${ctl}
-        </div>
-        ${hintLine}
+        ${ctl}
+        ${hint}
       </div>`;
-  };
-
-  const reqHeader = required.length
-    ? `<div style="font-size:10px;color:#dc2626;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:-2px">Required</div>`
-    : '';
-  const reqBlock = required.length
-    ? `${reqHeader}
-       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:${optional.length?'6px':'0'}">
-         ${required.map(renderField).join('')}
-       </div>` : '';
-
-  const optHeader = optional.length
-    ? `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-bottom:-2px;margin-top:4px">Optional</div>`
-    : '';
-  const optBlock = optional.length
-    ? `${optHeader}
-       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
-         ${optional.map(renderField).join('')}
-       </div>` : '';
-
-  fields.innerHTML = reqBlock + optBlock;
+  }).join('');
 }
 
 function _readDbForm() {
@@ -2275,74 +2210,78 @@ function _readDbForm() {
   return { vendor: _dbCurrentVendor, config };
 }
 
-// ── Saved profiles strip ────────────────────────────────────────────────
+// ── Saved profiles dropdown ─────────────────────────────────────────────
+// Holds the full list with deobfuscated config so useDbProfile can fill
+// the form without an extra round-trip per pick.
+let _dbProfilesCache = [];
+
 async function loadDbProfiles() {
-  const strip = document.getElementById('db-profiles-strip');
-  const list = document.getElementById('db-profiles-list');
-  if (!strip || !list) return;
+  const select = document.getElementById('db-profile-select');
+  const count = document.getElementById('db-profile-count');
+  if (!select) return;
   try {
     const res = await fetch('/api/db/profiles');
     const out = await res.json();
-    const profiles = out.profiles || [];
-    if (!profiles.length) { strip.style.display = 'none'; return; }
-    strip.style.display = '';
-    list.innerHTML = profiles.map(p => {
-      const accent = _DB_VENDOR_ACCENTS[p.vendor] || 'var(--accent)';
-      const icon = (_dbVendors[p.vendor] && _dbVendors[p.vendor].icon) || '🗄️';
-      const venLabel = (_dbVendors[p.vendor] && _dbVendors[p.vendor].label) || p.vendor;
-      const host = p.config && (p.config.host || p.config.db_path || '');
-      return `
-      <div class="db-profile-card"
-           style="background:var(--surface);border:1px solid var(--border);
-                  border-left:4px solid ${accent};border-radius:8px;padding:10px 12px;
-                  display:flex;align-items:center;gap:10px;cursor:pointer;
-                  transition:transform .12s ease, box-shadow .12s ease"
-           onclick="useDbProfile(${p.id})"
-           onmouseenter="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(15,23,42,.08)'"
-           onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='none'">
-        <span style="font-size:22px;flex-shrink:0">${icon}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
-          <div style="font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${venLabel}${host?' · '+host:''}</div>
-        </div>
-        <button class="btn btn-ghost" style="padding:2px 6px;font-size:13px;color:var(--muted);flex-shrink:0"
-                onclick="event.stopPropagation();deleteDbProfile(${p.id},'${p.name.replace(/'/g,'\\\'')}')"
-                title="Delete profile">✕</button>
-      </div>`;
-    }).join('');
-  } catch (_) { strip.style.display = 'none'; }
+    _dbProfilesCache = out.profiles || [];
+  } catch (_) {
+    _dbProfilesCache = [];
+  }
+  while (select.options.length > 1) select.remove(1);
+  for (const p of _dbProfilesCache) {
+    const opt = document.createElement('option');
+    opt.value = String(p.id);
+    const venLabel = (_dbVendors[p.vendor] && _dbVendors[p.vendor].label) || p.vendor;
+    const host = p.config && (p.config.host || p.config.db_path || '');
+    opt.textContent = host
+      ? `${p.name}  —  ${venLabel} · ${host}`
+      : `${p.name}  —  ${venLabel}`;
+    select.appendChild(opt);
+  }
+  if (count) {
+    count.textContent = _dbProfilesCache.length
+      ? `(${_dbProfilesCache.length})` : '';
+  }
+  _updateDbActionState();
 }
 
-async function useDbProfile(id) {
-  try {
-    const res = await fetch('/api/db/profiles');
-    const out = await res.json();
-    const p = (out.profiles || []).find(x => x.id === id);
-    if (!p) { showToast('Profile vanished'); return; }
-    _dbCurrentProfileId = p.id;
-    selectDbVendor(p.vendor);
-    // Wait one tick for the form to render, then fill values (passwords
-    // come back masked; the user re-enters them only if they want to
-    // override — otherwise the server uses the stored value via
-    // profile_id in the request body).
-    setTimeout(() => {
-      for (const [k, v] of Object.entries(p.config || {})) {
-        const el = document.querySelector(`#db-form-fields [data-field="${k}"]`);
-        if (el && (v !== '●●●●●●' && v !== null && v !== undefined)) {
-          el.value = v;
-        }
+function useDbProfile(idStr) {
+  const id = idStr ? Number(idStr) : null;
+  if (!id) {
+    _dbCurrentProfileId = null;
+    _updateDbActionState();
+    return;
+  }
+  const p = _dbProfilesCache.find(x => x.id === id);
+  if (!p) { showToast('Profile vanished'); return; }
+  _dbCurrentProfileId = p.id;
+  selectDbVendor(p.vendor);
+  // Wait one tick for the form to render, then fill values. Passwords
+  // come back masked; the user re-enters them only if they want to
+  // override — otherwise the server uses the stored value via
+  // profile_id in the request body.
+  setTimeout(() => {
+    for (const [k, v] of Object.entries(p.config || {})) {
+      const el = document.querySelector(`#db-form-fields [data-field="${k}"]`);
+      if (el && v !== '●●●●●●' && v !== null && v !== undefined) {
+        el.value = v;
       }
-      showToast('Loaded profile: ' + p.name);
-    }, 30);
-  } catch (e) { showToast('Load failed: ' + e); }
+    }
+    _updateDbActionState();
+  }, 30);
 }
 
-async function deleteDbProfile(id, name) {
-  if (!confirm(`Delete profile "${name}"?`)) return;
+async function deleteCurrentDbProfile() {
+  if (!_dbCurrentProfileId) return;
+  const p = _dbProfilesCache.find(x => x.id === _dbCurrentProfileId);
+  if (!p) return;
+  if (!confirm(`Delete profile "${p.name}"?`)) return;
   try {
-    const res = await fetch(`/api/db/profiles/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/db/profiles/${p.id}`, { method: 'DELETE' });
     if (!res.ok) { showToast('Delete failed'); return; }
-    if (_dbCurrentProfileId === id) _dbCurrentProfileId = null;
+    _dbCurrentProfileId = null;
+    const select = document.getElementById('db-profile-select');
+    if (select) select.value = '';
+    showToast(`Deleted profile: ${p.name}`);
     loadDbProfiles();
   } catch (e) { showToast('Delete error: ' + e); }
 }
@@ -2350,7 +2289,12 @@ async function deleteDbProfile(id, name) {
 async function saveDbProfile() {
   const { vendor, config } = _readDbForm();
   if (!vendor) { showToast('Pick a vendor first'); return; }
-  const name = prompt('Profile name (e.g. "Prod read-replica"):');
+  const existingName = _dbCurrentProfileId
+    ? (_dbProfilesCache.find(p => p.id === _dbCurrentProfileId) || {}).name
+    : '';
+  const name = prompt(
+    'Profile name', existingName || ''
+  );
   if (!name) return;
   try {
     const res = await fetch('/api/db/profiles', {
@@ -2362,41 +2306,40 @@ async function saveDbProfile() {
     if (!res.ok) { showToast('Save failed: ' + (out.error || 'unknown')); return; }
     _dbCurrentProfileId = out.profile && out.profile.id;
     showToast('Saved profile: ' + out.profile.name);
-    loadDbProfiles();
+    await loadDbProfiles();
+    const select = document.getElementById('db-profile-select');
+    if (select && _dbCurrentProfileId) select.value = String(_dbCurrentProfileId);
+    _updateDbActionState();
   } catch (e) { showToast('Save error: ' + e); }
 }
 
 // ── Test + Import ───────────────────────────────────────────────────────
-// Renders a coloured status card for test/import results. Three states:
-// 'pending' (yellow spinner), 'ok' (green), 'err' (red).
+// Inline status row for test/import results. Subtle: a single line of
+// coloured text with an optional sample-tables chip row below. Matches
+// the rest of the wizard's chrome — no banner gradients.
 function _renderDbResultCard(state, opts) {
   const out = document.getElementById('db-test-result');
   if (!out) return;
+  if (!state) { out.innerHTML = ''; return; }
   const palette = {
-    pending: { bg:'#fffbeb', bd:'#fde68a', tx:'#92400e', icon:'⏳' },
-    ok:      { bg:'#f0fdf4', bd:'#86efac', tx:'#065f46', icon:'✓'  },
-    err:     { bg:'#fef2f2', bd:'#fecaca', tx:'#991b1b', icon:'✗'  },
-  }[state] || { bg:'#f3f4f6', bd:'#d1d5db', tx:'#374151', icon:'·' };
-  const samplesHtml = (opts.samples || []).length
-    ? `<div style="margin-top:8px"><span style="font-size:10px;color:${palette.tx};text-transform:uppercase;letter-spacing:0.05em;opacity:.85">Sample tables</span>
-       <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">
-         ${opts.samples.map(t => `<code style="font-size:11px;background:rgba(255,255,255,0.7);border:1px solid ${palette.bd};padding:2px 6px;border-radius:4px;color:${palette.tx}">${t}</code>`).join('')}
-         ${opts.totalExtra ? `<span style="font-size:11px;color:${palette.tx};opacity:.7;padding:2px 4px">…+${opts.totalExtra} more</span>` : ''}
-       </div></div>` : '';
-  const metaLine = opts.meta
-    ? `<div style="font-size:11px;color:${palette.tx};opacity:.85;margin-top:2px">${opts.meta}</div>` : '';
+    pending: { tx:'var(--muted)',  icon:'…' },
+    ok:      { tx:'#059669',       icon:'✓' },
+    err:     { tx:'#b91c1c',       icon:'✗' },
+  }[state] || { tx:'var(--text)', icon:'·' };
+  const meta = opts.meta
+    ? `<span style="color:var(--muted);margin-left:8px">${opts.meta}</span>` : '';
+  const samples = (opts.samples || []).length
+    ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+         <span style="font-size:11px;color:var(--muted);margin-right:2px">Sample tables:</span>
+         ${opts.samples.map(t => `<code style="font-size:11px;background:var(--surface-2);padding:1px 6px;border-radius:3px;color:var(--text)">${t}</code>`).join('')}
+         ${opts.totalExtra ? `<span style="font-size:11px;color:var(--muted)">+ ${opts.totalExtra} more</span>` : ''}
+       </div>` : '';
   out.innerHTML = `
-    <div style="background:${palette.bg};border:1px solid ${palette.bd};border-left:4px solid ${palette.tx};
-                border-radius:8px;padding:10px 12px;color:${palette.tx}">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px;line-height:1">${palette.icon}</span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600">${opts.title || ''}</div>
-          ${metaLine}
-        </div>
-      </div>
-      ${samplesHtml}
-    </div>`;
+    <div style="font-size:12px;line-height:1.5">
+      <span style="color:${palette.tx};font-weight:600">${palette.icon} ${opts.title || ''}</span>
+      ${meta}
+    </div>
+    ${samples}`;
 }
 
 async function testDbConnection() {
