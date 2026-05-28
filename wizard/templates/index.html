@@ -627,53 +627,168 @@
       <div class="step-title">Log Discovery <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span></div>
       <div class="step-subtitle">Convert a folder of raw logs into ontology candidates an engineer reviews one at a time. Approved candidates flow into the regular Wizard steps (Entities · Events · Relationships · Rules) and end up as classes, properties, and SPARQL rules in your generated ontology.</div>
 
-      <!-- ── What happens here (always visible overview) ─────────────────── -->
-      <div class="card">
-        <h3 style="margin-top:0">How this step works</h3>
-        <ol style="margin:6px 0 12px 18px; padding:0; font-size:13px; line-height:1.55">
-          <li><b>Mine</b> — point <code>--phase mine</code> at a log folder. The toolkit clusters log lines into <b>templates</b> (Drain), classifies the variable slots (IRI / IP / UUID / ENUM / numeric / freetext), builds a <b>PMI-weighted entity graph</b>, and gates directed edges with a <b>Granger / transfer-entropy</b> statistical test before claiming they're causal.</li>
-          <li><b>Sequence (optional)</b> — <code>--phase sequence</code> fits a per-service <b>HMM</b> over the template-id trajectories. Sequences that fall in the lower percentile of likelihood × cluster-bag novelty surface as anomalous-event candidates.</li>
-          <li><b>Review</b> — this screen. Every mined signal lands here as a <i>proposal</i>. You decide which become real ontology constructs.</li>
-          <li><b>Generate</b> — your approvals show up in Steps 2/3/4/5.5 like any other Wizard-authored entity. <code>--phase 2</code> emits an RCA-shaped ontology with the <code>:CausalEvent / :hasCause / :rootCause</code> taxonomy attached to your approved log-derived classes.</li>
-          <li><b>Reason</b> — <code>--phase reason</code> materialises the inferred graph. Approved causal edges become SPARQL CONSTRUCT rules that derive <code>:hasCause</code> + <code>:triggers</code> triples with full <code>prov:wasDerivedFrom</code> lineage. Ask Insights "what caused this event?" against the result.</li>
-        </ol>
+      <!-- ── Visual overview — pipeline · candidate kinds · actions ────────── -->
 
-        <h3 style="margin-bottom:6px">The four candidate kinds</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; font-size:12px; line-height:1.5">
-          <div>
-            <span style="background:#4338ca;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Event</span>
-            <span style="color:var(--muted)"> · LOG_EVENT</span><br>
-            One <b>recurring message pattern</b> Drain found. Approval adds a class to Step 3 — Events. Becomes <code>rdfs:subClassOf :CausalEvent</code> with auto <code>:startedAt</code> / <code>:endedAt</code> / <code>:duration</code> data properties.
+      <!-- 1. Pipeline flow: five-stage visual with arrows ─────────────────── -->
+      <div style="margin-bottom:14px">
+        <h3 style="margin:0 0 8px 4px; font-size:14px">Pipeline at a glance</h3>
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr) auto; gap:0; align-items:stretch">
+          <!-- Stage cards alternate with arrow cells via wrapper divs -->
+          <div class="ld-stage" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff); border-radius:8px; padding:12px; border-top:3px solid #4338ca">
+            <div style="font-size:20px;line-height:1">📂</div>
+            <div style="font-size:11px;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Mine</div>
+            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35"><b>Drain</b> clusters log lines into templates; typed slots; <b>PMI</b> entity graph; <b>Granger</b> causality gate</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase mine</div>
           </div>
-          <div>
-            <span style="background:#0e7490;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Entity</span>
-            <span style="color:var(--muted)"> · LOG_ENTITY</span><br>
-            A <b>variable slot</b> typed as IRI / UUID / ENUM — i.e. an identifier the template carries. Approval adds a class or property to Step 2 — Entities, ready for further refinement.
+          <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted-2)">→</div>
+          <div class="ld-stage" style="background:linear-gradient(135deg,#ecfeff,#cffafe); border-radius:8px; padding:12px; border-top:3px solid #0891b2">
+            <div style="font-size:20px;line-height:1">📈</div>
+            <div style="font-size:11px;color:#0891b2;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Sequence</div>
+            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">Per-service <b>HMM</b> over trajectories; anomalous sequences surface as event candidates</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase sequence</div>
           </div>
-          <div>
-            <span style="background:#0f766e;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Relationship</span>
-            <span style="color:var(--muted)"> · LOG_RELATIONSHIP</span><br>
-            Two entities that <b>co-occur</b> with strong PMI but where the statistical-causality test was inconclusive (or never ran). Approval adds an undirected edge to Step 4 — Relationships.
-          </div>
-          <div>
-            <span style="background:#9333ea;color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">Causal edge</span>
-            <span style="color:var(--muted)"> · LOG_CAUSAL_EDGE</span><br>
-            A directed edge that passed all three gates: <b>high PMI</b>, <b>stable temporal ordering</b>, and <b>Granger or transfer-entropy</b>. Approval adds a SPARQL rule to Step 5.5 that will materialise <code>:hasCause</code>.
+          <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted-2)">→</div>
+          <div class="ld-stage" style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:8px; padding:12px; border-top:3px solid #d97706">
+            <div style="font-size:20px;line-height:1">👁️</div>
+            <div style="font-size:11px;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Review</div>
+            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35"><b>You are here.</b> Approve / reject / edit / merge proposals so they flow into your session</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">Step 2.5 (this screen)</div>
           </div>
         </div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px">
+          <div class="ld-stage" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0); border-radius:8px; padding:12px; border-top:3px solid #059669">
+            <div style="font-size:20px;line-height:1">🛠️</div>
+            <div style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Generate</div>
+            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">RCA-shaped ontology with <code style="font-size:11px">:CausalEvent · :hasCause · :rootCause</code> taxonomy</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase 2</div>
+          </div>
+          <div class="ld-stage" style="background:linear-gradient(135deg,#f3e8ff,#e9d5ff); border-radius:8px; padding:12px; border-top:3px solid #9333ea">
+            <div style="font-size:20px;line-height:1">🧠</div>
+            <div style="font-size:11px;color:#9333ea;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Reason</div>
+            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">Materialise derived <code style="font-size:11px">:hasCause</code> + <code style="font-size:11px">:triggers</code> with <code style="font-size:11px">prov:wasDerivedFrom</code> lineage</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase reason</div>
+          </div>
+          <div class="ld-stage" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8); border-radius:8px; padding:12px; border-top:3px solid #db2777">
+            <div style="font-size:20px;line-height:1">💬</div>
+            <div style="font-size:11px;color:#db2777;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Ask</div>
+            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">Insights preset <i>"what caused this event?"</i> answers from the materialised graph</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">/api/insights/rca</div>
+          </div>
+        </div>
+      </div>
 
-        <h3 style="margin-bottom:6px">What each button does</h3>
-        <table style="width:100%; font-size:12px; line-height:1.6; border-collapse:collapse">
-          <tr><td style="padding:3px 12px 3px 0; width:80px"><b>✓ Approve</b></td><td>Marks the proposal <code>APPROVED</code> and adds an entry to the corresponding session bucket — visible on Steps 2 / 3 / 4 / 5.5 immediately.</td></tr>
-          <tr><td style="padding:3px 12px 3px 0"><b>✕ Reject</b></td><td>Marks <code>REJECTED</code> with an optional note. Re-running <code>--phase mine</code> later <b>won't</b> bring it back — your decision is preserved across re-runs.</td></tr>
-          <tr><td style="padding:3px 12px 3px 0"><b>✎ Edit</b></td><td>Override the suggested label/name before approving. Useful when the auto-suggestion ("Event template #18") needs a human-readable name ("NF Heartbeat Timeout").</td></tr>
-          <tr><td style="padding:3px 12px 3px 0"><b>🔀 Merge</b></td><td>Fold the proposal into an existing session entry by name — the candidate's sample log line goes into the target's <code>evidence_samples</code> array instead of creating a duplicate.</td></tr>
-        </table>
+      <!-- 2. Candidate kinds — 4-up grid of richer cards ─────────────────── -->
+      <div style="margin-bottom:14px">
+        <h3 style="margin:0 0 8px 4px; font-size:14px">The four candidate kinds</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:10px">
+          <div style="background:var(--surface); border:1px solid var(--border); border-left:4px solid #4338ca; border-radius:8px; padding:12px">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
+              <span style="background:#4338ca;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">📅 Event</span>
+              <code style="font-size:10px;color:var(--muted)">LOG_EVENT</code>
+            </div>
+            <div style="font-size:12px;line-height:1.5;color:var(--text)">A <b>recurring message pattern</b> Drain found in your logs. Approving it creates an OWL class.</div>
+            <div style="margin-top:8px;font-size:11px;color:var(--muted-2)">
+              <b>Approval lands in:</b> Step 3 — Events<br>
+              <b>Becomes:</b> <code style="font-size:10px">rdfs:subClassOf :CausalEvent</code><br>
+              <b>Auto-emits:</b> <code style="font-size:10px">:startedAt · :endedAt · :duration</code>
+            </div>
+          </div>
 
-        <div class="box-help" style="margin-top:12px">
-          <b>Sort order:</b> confidence × consequence. The PRML Ch. 1 decision-theoretic ranking puts the highest-impact candidates first — a low-confidence CRITICAL-severity row outranks a high-confidence INFO row.<br>
-          <b>Privacy:</b> slot values matching <code>imsi · msisdn · email · ssn · tax</code> automatically default to a higher sensitivity tier (<code>Confidential</code>) which you can downgrade at approval time.<br>
-          <b>Drift loop:</b> once an ontology exists, <code>--phase drift-templates</code> watches new logs and queues never-seen patterns here as <code>DRIFT_ON_NEW_TEMPLATE</code> proposals — same review surface for bootstrap and steady-state.
+          <div style="background:var(--surface); border:1px solid var(--border); border-left:4px solid #0e7490; border-radius:8px; padding:12px">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
+              <span style="background:#0e7490;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">🏷️ Entity</span>
+              <code style="font-size:10px;color:var(--muted)">LOG_ENTITY</code>
+            </div>
+            <div style="font-size:12px;line-height:1.5;color:var(--text)">A <b>variable slot</b> the template carries — typed as IRI / UUID / ENUM. An identifier worth modelling.</div>
+            <div style="margin-top:8px;font-size:11px;color:var(--muted-2)">
+              <b>Approval lands in:</b> Step 2 — Entities<br>
+              <b>PII heuristic:</b> <code style="font-size:10px">imsi · msisdn · email</code> auto-flagged<br>
+              <b>Sensitivity:</b> defaults to Confidential when PII
+            </div>
+          </div>
+
+          <div style="background:var(--surface); border:1px solid var(--border); border-left:4px solid #0f766e; border-radius:8px; padding:12px">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
+              <span style="background:#0f766e;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">🔗 Relationship</span>
+              <code style="font-size:10px;color:var(--muted)">LOG_RELATIONSHIP</code>
+            </div>
+            <div style="font-size:12px;line-height:1.5;color:var(--text)">Two entities that <b>co-occur</b> with strong PMI but where the statistical causality test was inconclusive.</div>
+            <div style="margin-top:8px;font-size:11px;color:var(--muted-2)">
+              <b>Approval lands in:</b> Step 4 — Relationships<br>
+              <b>Direction:</b> undirected<br>
+              <b>Signal:</b> PMI ≥ 3.0
+            </div>
+          </div>
+
+          <div style="background:var(--surface); border:1px solid var(--border); border-left:4px solid #9333ea; border-radius:8px; padding:12px">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
+              <span style="background:#9333ea;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">⚡ Causal edge</span>
+              <code style="font-size:10px;color:var(--muted)">LOG_CAUSAL_EDGE</code>
+            </div>
+            <div style="font-size:12px;line-height:1.5;color:var(--text)">A directed edge that <b>passed all three gates</b>: PMI, temporal ordering, and Granger or transfer-entropy.</div>
+            <div style="margin-top:8px;font-size:11px;color:var(--muted-2)">
+              <b>Approval lands in:</b> Step 5.5 — Rules<br>
+              <b>Becomes:</b> SPARQL CONSTRUCT for <code style="font-size:10px">:hasCause</code><br>
+              <b>Materialised in:</b> <code style="font-size:10px">--phase reason</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Action chips ──────────────────────────────────────────────── -->
+      <div style="margin-bottom:14px">
+        <h3 style="margin:0 0 8px 4px; font-size:14px">What each button does</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:10px">
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start">
+            <span style="background:#16a34a;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">✓</span>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Approve</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.45">Marks <code>APPROVED</code> and pushes into the matching session bucket. Visible on Steps 2 / 3 / 4 / 5.5 right away.</div>
+            </div>
+          </div>
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start">
+            <span style="background:#dc2626;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">✕</span>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Reject</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.45">Marks <code>REJECTED</code> with an optional note. <b>Persists across re-mines</b> — your decision sticks.</div>
+            </div>
+          </div>
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start">
+            <span style="background:#2563eb;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">✎</span>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Edit</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.45">Override the auto-suggested label before approving. Turn <i>"Event template #18"</i> into <i>"Heartbeat Timeout"</i>.</div>
+            </div>
+          </div>
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start">
+            <span style="background:#7c3aed;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">🔀</span>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Merge</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.45">Fold into an existing session entry by name. The sample log line joins the target's <code>evidence_samples</code>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Three context callouts — colored banners ─────────────────────── -->
+      <div style="margin-bottom:14px; display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px">
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px">
+          <div style="font-size:11px;font-weight:600;color:#92400e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">📊 Sort order</div>
+          <div style="font-size:12px;color:#451a03;line-height:1.5">
+            <b>Confidence × consequence.</b> PRML Ch. 1 decision-theoretic ranking — a low-confidence <b>CRITICAL</b> row outranks a high-confidence <b>INFO</b> row.
+          </div>
+        </div>
+        <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 12px">
+          <div style="font-size:11px;font-weight:600;color:#991b1b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">🔒 Privacy</div>
+          <div style="font-size:12px;color:#450a0a;line-height:1.5">
+            Slot values matching <code style="font-size:10px">imsi · msisdn · email · ssn · tax</code> default to <b>Confidential</b> sensitivity. Downgrade at approval time if appropriate.
+          </div>
+        </div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 12px">
+          <div style="font-size:11px;font-weight:600;color:#1e40af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">🔄 Drift loop</div>
+          <div style="font-size:12px;color:#1e3a8a;line-height:1.5">
+            <code style="font-size:10px">--phase drift-templates</code> watches new logs and queues never-seen patterns <b>here</b> with strategy <code style="font-size:10px">DRIFT_ON_NEW_TEMPLATE</code> — same review surface for bootstrap + steady-state.
+          </div>
         </div>
       </div>
 
