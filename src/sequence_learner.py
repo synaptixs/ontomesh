@@ -187,10 +187,28 @@ def fit_hmm_for_service(trajectories: Sequence[Trajectory],
                         *, min_states: int = MIN_STATES_DEFAULT,
                         max_states: int = MAX_STATES_DEFAULT,
                         percentile: float = ANOMALY_PERCENTILE,
+                        inference: str = "em",
                         ) -> Optional[FittedHMM]:
-    """Fit a CategoricalHMM with BIC-selected state count. Returns None
-    if the trajectory volume is too small to train.
+    """Fit a per-service HMM. Returns None if the trajectory volume
+    is too small to train.
+
+    Inference paths
+    ───────────────
+    - ``inference='em'`` (default) — BIC-selected CategoricalHMM via
+      Expectation-Maximisation. The v1 path. Confidence in
+      ``score_anomalies`` uses the heuristic blend with the 0.6 floor.
+    - ``inference='vb'`` — Variational Bayes HMM (L10) with Dirichlet
+      priors and Bayesian model averaging across K. The returned
+      ``FittedHMM.model`` is a ``VBHMM`` instance; downstream
+      ``score_anomalies`` detects this and substitutes a calibrated
+      posterior-probability confidence (no 0.6 floor).
     """
+    if inference == "vb":
+        return _fit_vb_hmm_for_service(
+            trajectories,
+            min_states=min_states, max_states=max_states,
+            percentile=percentile,
+        )
     if not _HMM_OK:
         raise ImportError(
             "hmmlearn + numpy are required. "
@@ -251,10 +269,68 @@ def fit_hmm_for_service(trajectories: Sequence[Trajectory],
     return best
 
 
+def _fit_vb_hmm_for_service(trajectories: Sequence[Trajectory],
+                            *, min_states: int, max_states: int,
+                            percentile: float,
+                            ) -> Optional[FittedHMM]:
+    """L10 VB inference path. Fits a VBHMM with model averaging
+    across K = [min_states .. max_states]; returns a FittedHMM whose
+    ``model`` field is the chosen VBHMM. The threshold is computed
+    on the variational posterior mean per-step logL (same shape as
+    the EM path, so downstream code is unchanged)."""
+    from vb_hmm import VBHMM, fit_vb_hmm_with_model_averaging
+    if not trajectories:
+        return None
+    encoding, alphabet = _encode(trajectories)
+    if alphabet < 2:
+        return None
+    sequences = []
+    for t in trajectories:
+        enc = [encoding[c] for c in t.cluster_ids]
+        if len(enc) > 0:
+            sequences.append(np.asarray(enc, dtype=int))
+    if not sequences:
+        return None
+    n_obs = int(sum(s.size for s in sequences))
+    if n_obs < MIN_HITS_FOR_HMM:
+        return None
+    upper = min(max_states, alphabet)
+    k_cands = tuple(range(min_states, upper + 1))
+    if not k_cands:
+        return None
+    try:
+        best, elbo, _ = fit_vb_hmm_with_model_averaging(
+            sequences, alphabet=alphabet, k_candidates=k_cands,
+        )
+    except Exception:                                  # noqa: BLE001
+        return None
+    # Threshold: 5th percentile of per-step logL across training
+    # trajectories under the posterior mean — same contract as EM.
+    per_step = []
+    for s in sequences:
+        try:
+            per_step.append(float(best.score(s) / s.size))
+        except Exception:                              # noqa: BLE001
+            continue
+    threshold = float(np.percentile(per_step, percentile)) if per_step else float("-inf")
+    return FittedHMM(
+        service=trajectories[0].service,
+        model=best, n_states=best.state.n_states,
+        bic=-elbo,                                     # ELBO surrogate
+                                                       # — lower-is-better
+                                                       # for the existing
+                                                       # selector contract
+        alphabet_size=alphabet, threshold=threshold,
+        n_samples=n_obs, encoding=dict(encoding),
+    )
+
+
 def fit_hmms(trajectories: Sequence[Trajectory], **kwargs
              ) -> Dict[str, FittedHMM]:
     """Fit one HMM per service. Services with too few records are
-    skipped (they can't support a stable model)."""
+    skipped (they can't support a stable model). Accepts the same
+    keyword arguments as :func:`fit_hmm_for_service`, including the
+    L10 ``inference='vb'`` switch."""
     out: Dict[str, FittedHMM] = {}
     by_service: Dict[str, List[Trajectory]] = defaultdict(list)
     for t in trajectories:
@@ -397,11 +473,28 @@ def score_anomalies(trajectories: Sequence[Trajectory],
         gap_term = min(1.0, max(0.0, gap / (abs(fh.threshold) + 1.0) if fh else 0.0))
         novelty_term = min(1.0, meta["bag_novelty"])
         confidence = float(0.5 * novelty_term + 0.5 * gap_term)
-        # Confidence floor when we have *structurally* novel signal —
-        # the dev plan's acceptance gate (≥ 0.6 on injected outliers)
-        # relies on this floor. The floor scales by how rare the rarest
-        # cluster id is across the service.
-        if meta["novel"]:
+
+        # L10 — if the per-service HMM was fitted via VB, replace the
+        # heuristic blend (and its hand-tuned floor) with a calibrated
+        # posterior probability. Detected via duck typing so the v1
+        # EM path is untouched.
+        is_vb = fh is not None and hasattr(fh.model, "calibrated_confidence")
+        if is_vb and fh is not None:
+            encoded = [fh.encoding.get(c) for c in t.cluster_ids]
+            if all(e is not None for e in encoded):
+                try:
+                    confidence = float(fh.model.calibrated_confidence(
+                        np.asarray(encoded, dtype=int), fh.threshold,
+                    ))
+                except Exception:                       # noqa: BLE001
+                    pass
+        elif meta["novel"]:
+            # Confidence floor when we have *structurally* novel signal —
+            # the dev plan's acceptance gate (≥ 0.6 on injected outliers)
+            # relies on this floor. The floor scales by how rare the
+            # rarest cluster id is across the service. The L10 VB path
+            # skips this — `calibrated_confidence` is a real probability
+            # and doesn't need a floor.
             min_rate = min(service_rates.get(t.service, {}).get(cid, 1.0)
                            for cid in meta["novel"])
             if min_rate <= 0.1:
@@ -524,15 +617,23 @@ def mine_sequences(extractions: Sequence[dict],
                    min_states: int = MIN_STATES_DEFAULT,
                    max_states: int = MAX_STATES_DEFAULT,
                    percentile: float = ANOMALY_PERCENTILE,
+                   inference: str = "em",
                    ) -> SequenceReport:
     """End-to-end L2 pipeline. ``extractions`` is what
-    :class:`log_templates.LogTemplateMiner` collected during L1."""
+    :class:`log_templates.LogTemplateMiner` collected during L1.
+
+    ``inference`` selects the per-service HMM fit path:
+    ``'em'`` (default, v1 BIC selector + heuristic confidence) or
+    ``'vb'`` (L10 — variational Bayes with calibrated confidence
+    and no 0.6 floor).
+    """
     started = time.perf_counter()
     trajectories = build_trajectories(extractions)
     fitted = fit_hmms(trajectories,
                       min_states=min_states,
                       max_states=max_states,
-                      percentile=percentile)
+                      percentile=percentile,
+                      inference=inference)
     persist_hmm_models(conn, fitted)
     hits = score_anomalies(trajectories, fitted)
     persisted = persist_anomaly_proposals(conn, hits)
