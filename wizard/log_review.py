@@ -363,12 +363,23 @@ def list_candidates(conn: sqlite3.Connection, *,
     if status and status != "ALL":
         where.append("status = ?")
         params.append(status)
+    # L8 columns (regime_tag / regime_posterior) are pulled via a
+    # tolerant subselect so the query still works against a DB whose
+    # v2 migration hasn't run yet.
+    has_regime = any(
+        r[1] == "regime_tag" for r in conn.execute(
+            "PRAGMA table_info(ontology_evolution_proposals)"
+        )
+    )
+    extra_cols = (", regime_tag, regime_posterior" if has_regime
+                  else ", NULL AS regime_tag, NULL AS regime_posterior")
     sql = (
         "SELECT id, proposal_id, proposal_type, title, candidate_turtle, "
         "       evidence_sparql, detection_strategy, confidence_score, "
         "       dim_evidence_volume, dim_evidence_recency, dim_cross_domain, "
         "       dim_consistency_risk, status, evidence_template_id, "
-        "       evidence_sample, created_at, updated_at "
+        "       evidence_sample, created_at, updated_at"
+        f"      {extra_cols} "
         "FROM ontology_evolution_proposals "
         f"WHERE {' AND '.join(where)} "
         "ORDER BY (confidence_score * (1.0 + dim_evidence_recency)) DESC "
@@ -386,6 +397,8 @@ def list_candidates(conn: sqlite3.Connection, *,
             "status": r[12], "evidence_template_id": r[13],
             "evidence_sample": r[14], "created_at": r[15],
             "updated_at": r[16],
+            "regime_tag": r[17] if len(r) > 17 else None,
+            "regime_posterior": r[18] if len(r) > 18 else None,
         })
     if ranker is not None and getattr(ranker, "is_fitted", lambda: False)():
         out = ranker.rerank(out)
