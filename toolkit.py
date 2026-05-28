@@ -631,7 +631,7 @@ def main():
     parser.add_argument("--db",       default=DB_PATH,  help="SQLite database path")
     parser.add_argument("--out",      default=OUT_PATH, help="Output directory")
     parser.add_argument("--phase",    default="all",
-                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","sequence","security","conflict","alignment","runtime",
+                        choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","sequence","drift-templates","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
                                  "embed","retrieve"],
                         help="Run a specific phase only")
@@ -931,6 +931,47 @@ def main():
         print(f"  ✓ anomalies             {r['anomalies']}")
         print(f"  ✓ proposals             {r['proposals_persisted']}")
         print(f"  ✓ duration              {r['duration_s']}s")
+        conn.close()
+
+    def phase_drift_templates(db_path: str, out_path: str):
+        """Phase L7 — closed-loop drift on log templates.
+
+        Re-runs Drain against ``--log-path``, comparing each line to the
+        approved template catalogue. Lines that yield *new* clusters
+        graduate into the proposal store as ``DRIFT_ON_NEW_TEMPLATE``
+        once they clear the hit floor. Engineers see them in the same
+        Step 2.5 review queue alongside bootstrap candidates.
+        """
+        step("L7", "Drift Detection — New Log Templates")
+        log_path = args.log_path
+        if not log_path:
+            print("  ⚠ --log-path is required for --phase drift-templates")
+            return
+        try:
+            from log_corpus import LogCorpus
+            from runtime.drift.log_template_drift import detect_template_drift
+            from db.migrations.log_rca_proposals import migrate as _migrate
+        except ImportError as exc:
+            print(f"  ✗ {exc}")
+            print("    Install the mining extras: pip install -e .[mining]")
+            return
+        os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        conn = sqlite3.connect(db_path)
+        _migrate(conn)
+
+        corpus = LogCorpus(log_path)
+        files = corpus.resolve_files()
+        if not files:
+            print(f"  ⚠ no log files matched: {log_path}")
+            conn.close()
+            return
+        print(f"  ↪ scanning {len(files)} file(s) against approved templates")
+        rep = detect_template_drift(corpus, conn)
+        r = rep.as_dict()
+        print(f"  ✓ lines seen            {r['lines_seen']:>6,}")
+        print(f"  ✓ new templates         {r['new_templates']:>6,}")
+        print(f"  ✓ proposals queued      {r['new_proposals']:>6,}")
+        print(f"  ✓ duration              {r['duration_s']:>6}s")
         conn.close()
 
     def phase_security(db_path: str, out_path: str):
@@ -1461,6 +1502,7 @@ def main():
         "log":       [(phase_log,       [args.db, args.out])],
         "mine":      [(phase_mine,      [args.db, args.out])],
         "sequence":  [(phase_sequence,  [args.db, args.out])],
+        "drift-templates": [(phase_drift_templates, [args.db, args.out])],
         "security":  [(phase_security,  [args.db, args.out])],
         "conflict":  [(phase_conflict,  [args.db, args.out])],
         "alignment": [(phase_alignment, [args.db, args.out])],
