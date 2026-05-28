@@ -1214,6 +1214,40 @@ def log_discovery_merge(proposal_id):
     return jsonify(result)
 
 
+@app.route("/api/log-discovery/template-embedding", methods=["GET"])
+def log_discovery_template_embedding():
+    """L12 — return the pPCA viz payload for the Step 5 scatter.
+
+    Body shape (success):
+        {"available": true, "points": [...], "merges": [...],
+         "n_templates": N, "explained_variance_ratio": [...], ...}
+    On any failure (no log_templates table, too few templates,
+    sklearn missing) returns ``{'available': False, 'reason': '...'}``
+    so the UI degrades gracefully — no scatter, no merge list."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"available": False,
+                        "reason": "no enterprise.db — run --phase mine first"})
+    try:
+        import sys as _sys
+        _src = os.path.join(ROOT, "src")
+        if _src not in _sys.path:
+            _sys.path.insert(0, _src)
+        from log_templates_embed import TemplateEmbedder         # noqa: E402
+    except Exception as exc:                                     # noqa: BLE001
+        return jsonify({"available": False, "reason": f"import: {exc}"})
+    conn = _log_review_conn()
+    try:
+        try:
+            e = TemplateEmbedder().fit(conn)
+        except RuntimeError as exc:
+            return jsonify({"available": False, "reason": str(exc)})
+        payload = e.viz_payload()
+    finally:
+        conn.close()
+    payload["available"] = True
+    return jsonify(payload)
+
+
 @app.route("/api/log-discovery/rerank", methods=["POST"])
 def log_discovery_rerank():
     """L9 — refit the active-learning ranker on the current set of

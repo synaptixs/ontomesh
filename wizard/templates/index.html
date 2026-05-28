@@ -903,6 +903,17 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         <button class="btn btn-ghost" onclick="loadLogDiscovery()" style="margin-top:8px">↻ Re-check for results</button>
       </div>
 
+      <!-- ── L12 — Template similarity (pPCA scatter) ──────────────────── -->
+      <div class="card" id="log-disco-embed" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="margin:0">Template similarity <span class="badge" style="background:#eef2ff;color:#4338ca;font-size:10px">L12 · pPCA</span></h3>
+          <span id="log-disco-embed-meta" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">2D PCA projection over template bag-of-tokens. Close points are merge candidates — click to inspect.</div>
+        <svg id="log-disco-embed-svg" width="100%" height="220" style="background:var(--bg);border-radius:6px"></svg>
+        <div id="log-disco-merges" style="margin-top:6px;font-size:12px;color:var(--text)"></div>
+      </div>
+
       <!-- ── Candidate list ─────────────────────────────────────────────── -->
       <div class="card" id="log-disco-content" style="display:none">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
@@ -3540,6 +3551,7 @@ async function loadLogDiscovery() {
     ).join(' · ');
     document.getElementById('log-disco-counts').textContent = `(${headline})`;
     refreshRankerBadge();
+    loadTemplateEmbedding();
   } catch (_) {
     empty.style.display = '';
     content.style.display = 'none';
@@ -3654,6 +3666,71 @@ async function mergeLogCandidate(pid) {
     await reloadSessionAndRender();
     loadLogDiscovery();
   } catch (e) { showToast('Merge error: ' + e); }
+}
+
+// L12 — pPCA template scatter. Fetches the embedding payload from
+// /api/log-discovery/template-embedding, renders an SVG scatter
+// inline, and lists merge candidates. Degrades silently when the
+// endpoint reports unavailable (corpus too small, sklearn absent).
+async function loadTemplateEmbedding() {
+  const card = document.getElementById('log-disco-embed');
+  if (!card) return;
+  try {
+    const res = await fetch('/api/log-discovery/template-embedding');
+    const out = await res.json();
+    if (!out.available) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = '';
+    document.getElementById('log-disco-embed-meta').textContent =
+      `${out.n_templates} templates · ${out.vocab_size} tokens · ` +
+      `${(out.explained_variance_ratio || []).slice(0, 2).map(v => (v*100).toFixed(0)+'%').join(' / ') || '-'} variance in first 2 PCs`;
+    _renderEmbeddingScatter(out);
+  } catch (_) { card.style.display = 'none'; }
+}
+
+function _renderEmbeddingScatter(payload) {
+  const svg = document.getElementById('log-disco-embed-svg');
+  if (!svg || !payload.points || !payload.points.length) return;
+  const W = svg.clientWidth || 600;
+  const H = 220;
+  const pad = 12;
+  const xs = payload.points.map(p => p.x);
+  const ys = payload.points.map(p => p.y);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+  const sx = v => pad + (xmax > xmin ? (v - xmin) / (xmax - xmin) : 0.5) * (W - 2*pad);
+  const sy = v => pad + (ymax > ymin ? (ymax - v) / (ymax - ymin) : 0.5) * (H - 2*pad);
+  const mergeSet = new Set();
+  (payload.merges || []).forEach(m => {
+    mergeSet.add(m.template_id_a); mergeSet.add(m.template_id_b);
+  });
+  let html = '';
+  payload.points.forEach(p => {
+    const r = mergeSet.has(p.template_id) ? 5 : 3;
+    const fill = mergeSet.has(p.template_id) ? '#f59e0b' : '#4338ca';
+    html += `<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="${r}" fill="${fill}" opacity="0.8"><title>#${p.cluster_id}: ${(p.label||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}</title></circle>`;
+  });
+  // Connect close pairs to make the merge candidates visible.
+  (payload.merges || []).slice(0, 12).forEach(m => {
+    const a = payload.points.find(p => p.template_id === m.template_id_a);
+    const b = payload.points.find(p => p.template_id === m.template_id_b);
+    if (!a || !b) return;
+    html += `<line x1="${sx(a.x).toFixed(1)}" y1="${sy(a.y).toFixed(1)}" x2="${sx(b.x).toFixed(1)}" y2="${sy(b.y).toFixed(1)}" stroke="#f59e0b" stroke-opacity="0.45" stroke-width="1"/>`;
+  });
+  svg.innerHTML = html;
+  // Merge candidate summary line under the scatter.
+  const list = document.getElementById('log-disco-merges');
+  const merges = payload.merges || [];
+  if (!merges.length) {
+    list.innerHTML = '<span style="color:var(--muted)">No merge candidates at the default threshold.</span>';
+  } else {
+    const top = merges.slice(0, 5);
+    list.innerHTML = '<b>Merge candidates:</b> ' + top.map(m =>
+      `<span title="distance ${m.distance.toFixed(3)}" style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:11px;margin-right:4px">#${m.cluster_id_a} ≈ #${m.cluster_id_b}</span>`
+    ).join('') + (merges.length > 5 ? ` <span style="color:var(--muted)">+ ${merges.length - 5} more</span>` : '');
+  }
 }
 
 async function reseedLogDiscovery() {
