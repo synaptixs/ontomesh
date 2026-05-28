@@ -1,10 +1,12 @@
-# Ontology Engineering Toolkit — v3.1
+# Ontology Engineering Toolkit — v3.2
 
-**Domain-agnostic · Rules & Reasoning · LLM Insights**
+**Domain-agnostic · Rules & Reasoning · Log-Driven RCA**
 
-A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineering Framework v1.1](docs/framework-whitepaper.md). Takes a relational database schema and produces a production-ready OWL 2 ontology, SHACL validation shapes, JSON-LD agent payloads, SKOS vocabulary, and a scored governance report — for any domain, any industry, any major relational database.
+A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineering Framework v1.1](docs/framework-whitepaper.md). Takes a relational database schema **or a folder of logs** and produces a production-ready OWL 2 ontology, SHACL validation shapes, JSON-LD agent payloads, SKOS vocabulary, materialised inference + lineage, and a scored governance report — for any domain, any industry, any major relational database.
 
-> **What's new in v3.1:** first-class rules & reasoning — richer OWL axioms, a `--phase reason` materialisation step, per-triple `prov:wasDerivedFrom` lineage, a Studio rule editor with slot-fill, natural-language drafting, test-fire previews, premise trees, rule-impact heat maps, and provider-agnostic LLM Insights. See [docs/release-notes.md](docs/release-notes.md).
+> **What's new in v3.2:** log-driven RCA pipeline — point at a folder of logs, the toolkit mines templates + an entity graph (PMI), fits per-service HMMs for anomalies, gates causal edges with Granger / transfer-entropy, and surfaces every candidate to the engineer in a new Studio Step 2.5 Log Discovery review queue. Approved candidates flow into an RCA-shaped ontology with `:CausalEvent / :hasCause / :rootCause` taxonomy; Phase B materialises derived `:hasCause` triples with full `prov:wasDerivedFrom` lineage; Insights ships two RCA prompt presets. See [docs/release-notes.md](docs/release-notes.md).
+
+> **v3.1 also still in:** first-class rules & reasoning — richer OWL axioms, `--phase reason` materialisation, per-triple lineage, Studio rule editor with slot-fill, NL drafting, test-fire previews, premise trees, rule-impact heat maps, and provider-agnostic LLM Insights.
 
 > **First time here?** Read [docs/integrate.md](docs/integrate.md) — the 5-minute integration recipe. This README is just the landing page.
 

@@ -784,6 +784,61 @@ def insights_providers():
     return jsonify({"providers": [p.to_dict() for p in provider_status()]})
 
 
+@app.route("/api/insights/rca-presets", methods=["GET"])
+def insights_rca_presets():
+    """List RCA prompt presets — keyed by name with the template
+    string. The wizard renders them in the Ask Insights panel."""
+    from runtime.insights import list_rca_presets
+    return jsonify({"presets": list_rca_presets()})
+
+
+@app.route("/api/insights/rca", methods=["POST"])
+def insights_rca():
+    """Run an RCA preset against the materialised graph. Body:
+
+        { "preset": "root-cause" | "similar-incidents",
+          "event_iri": "https://ontology.example.com/enterprise/dr_a",
+          "provider": "openai" (optional),
+          "model": "..." (optional) }
+
+    Materialised triples are sent regardless of the toggle since RCA
+    only makes sense with the inferred graph. The residency warning
+    from :class:`Insights.ask` still fires for public-cloud providers.
+    """
+    from runtime.insights import Insights, expand_rca_preset
+    body = request.get_json(force=True) or {}
+    preset = (body.get("preset") or "").strip()
+    event_iri = (body.get("event_iri") or "").strip()
+    if not (preset and event_iri):
+        return jsonify({"error": "preset and event_iri are required"}), 400
+    try:
+        question = expand_rca_preset(preset, event_iri=event_iri)
+    except KeyError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    materialised_path = os.path.join(OUTPUT_DIR, "ontology", "materialised.ttl")
+    if not os.path.isfile(ontology_path):
+        return jsonify({"error": "no ontology — run --phase 2 first"}), 400
+    insights = Insights(
+        ontology_path,
+        materialised_path if os.path.isfile(materialised_path) else None,
+    )
+    try:
+        result = insights.ask(
+            question,
+            provider=body.get("provider"),
+            model=body.get("model"),
+            include_materialised=True,    # RCA needs the inferred graph
+        )
+    except Exception as exc:                # noqa: BLE001
+        return jsonify({"error": str(exc)}), 502
+    out = result.to_dict()
+    out["preset"] = preset
+    out["event_iri"] = event_iri
+    return jsonify(out)
+
+
 @app.route("/api/insights/ask", methods=["POST"])
 def insights_ask():
     """Answer a question grounded in the active ontology. Body:
@@ -819,6 +874,146 @@ def insights_ask():
     except Exception as exc:  # noqa: BLE001
         return jsonify({"error": str(exc)}), 502
     return jsonify(result.to_dict())
+
+
+# ── Phase L4 — Log Discovery review surface ──────────────────────────────
+
+
+_ENTERPRISE_DB = os.path.join(ROOT, "db", "enterprise.db")
+
+
+def _log_review_conn():
+    import sqlite3 as _sqlite3
+    return _sqlite3.connect(_ENTERPRISE_DB)
+
+
+@app.route("/api/log-discovery/summary", methods=["GET"])
+def log_discovery_summary():
+    """Headline counts per kind/status. Used by the Log Discovery
+    sidebar entry to show how many proposals await review."""
+    import sqlite3
+    from wizard import log_review
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"available": False,
+                        "reason": "no enterprise.db — run --phase mine first"})
+    conn = _log_review_conn()
+    try:
+        out = log_review.summary(conn)
+    finally:
+        conn.close()
+    return jsonify(out)
+
+
+@app.route("/api/log-discovery/candidates", methods=["GET"])
+def log_discovery_candidates():
+    """List candidates. Query params: kind, status, limit."""
+    from wizard import log_review
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"candidates": [], "available": False})
+    kind = request.args.get("kind") or None
+    status = request.args.get("status") or "PENDING"
+    try:
+        limit = max(1, min(500, int(request.args.get("limit", "50"))))
+    except ValueError:
+        limit = 50
+    conn = _log_review_conn()
+    try:
+        cands = log_review.list_candidates(
+            conn, kind=kind, status=status, limit=limit)
+    finally:
+        conn.close()
+    return jsonify({"candidates": cands, "available": True})
+
+
+@app.route("/api/log-discovery/seed", methods=["POST"])
+def log_discovery_seed():
+    """Re-seed the proposal store from the latest L1/L2 outputs.
+
+    Body (optional):
+        {"log_path": "/path/to/logs", "with_causality": true}
+
+    When ``log_path`` is supplied, re-mines the corpus briefly to get
+    the in-memory extractions and runs L3's triangulation gate. Without
+    a log_path the seed falls back to the L1-only path (directed PMI
+    edges → causal proposals, no statistical gating).
+    """
+    from wizard import log_review
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    body = request.get_json(silent=True) or {}
+    log_path = (body.get("log_path") or "").strip()
+    extractions = None
+    if log_path and body.get("with_causality", True):
+        try:
+            from log_corpus import LogCorpus
+            from log_templates import LogTemplateMiner
+            miner = LogTemplateMiner(_log_review_conn())
+            for rec in LogCorpus(log_path).iter():
+                miner.consume(rec.message, timestamp=rec.timestamp,
+                              severity=rec.severity,
+                              service=rec.fields.get("service") if rec.fields else None,
+                              trace_id=rec.fields.get("trace_id") if rec.fields else None)
+            miner.flush()
+            extractions = miner.extractions
+        except Exception:                       # noqa: BLE001 — fall back to L1-only
+            extractions = None
+
+    conn = _log_review_conn()
+    try:
+        counts = log_review.seed_from_mining(conn, extractions=extractions)
+    finally:
+        conn.close()
+    return jsonify({"ok": True, "counts": counts,
+                    "triangulation": bool(extractions)})
+
+
+@app.route("/api/log-discovery/<proposal_id>/approve", methods=["POST"])
+def log_discovery_approve(proposal_id):
+    from wizard import log_review
+    body = request.get_json(force=True) or {}
+    edits = body.get("edits") or {}
+    session = _load_session()
+    conn = _log_review_conn()
+    try:
+        result = log_review.approve(conn, session, proposal_id, edits=edits)
+    except KeyError:
+        return jsonify({"error": "proposal not found"}), 404
+    finally:
+        conn.close()
+    _save_session(session)
+    return jsonify(result)
+
+
+@app.route("/api/log-discovery/<proposal_id>/reject", methods=["POST"])
+def log_discovery_reject(proposal_id):
+    from wizard import log_review
+    body = request.get_json(force=True) or {}
+    note = (body.get("note") or "").strip()
+    conn = _log_review_conn()
+    try:
+        result = log_review.reject(conn, proposal_id, note=note)
+    finally:
+        conn.close()
+    return jsonify(result)
+
+
+@app.route("/api/log-discovery/<proposal_id>/merge", methods=["POST"])
+def log_discovery_merge(proposal_id):
+    from wizard import log_review
+    body = request.get_json(force=True) or {}
+    into = (body.get("into") or "").strip()
+    if not into:
+        return jsonify({"error": "into is required"}), 400
+    session = _load_session()
+    conn = _log_review_conn()
+    try:
+        result = log_review.merge(conn, session, proposal_id, into_name=into)
+    except KeyError:
+        return jsonify({"error": "proposal not found"}), 404
+    finally:
+        conn.close()
+    _save_session(session)
+    return jsonify(result)
 
 
 @app.route("/api/pipeline/status", methods=["GET"])

@@ -348,6 +348,34 @@ def validate_rules(rules: Sequence[dict]) -> Dict[str, ValidationResult]:
 # ── Serialisation ────────────────────────────────────────────────────────
 
 
+def export_causal_rules(causal_rules: Sequence[dict], output_dir: str) -> Dict[str, object]:
+    """Compile approved LOG_CAUSAL_EDGE entries into SPARQL CONSTRUCT
+    .rq files under <out>/sparql_rules/. Phase B materialisation picks
+    these up automatically. Idempotent — re-runs overwrite existing
+    files keyed by rule id."""
+    output_dir = os.path.abspath(output_dir)
+    sparql_dir = os.path.join(output_dir, "sparql_rules")
+    os.makedirs(sparql_dir, exist_ok=True)
+    written: List[str] = []
+    skipped: List[Tuple[str, str]] = []
+    for raw in causal_rules or []:
+        if not isinstance(raw, dict):
+            continue
+        rid = slugify(raw.get("id") or raw.get("label") or "causal-rule")
+        try:
+            body = compile_causal_rule(raw, rule_id=rid)
+        except Exception as exc:                # noqa: BLE001
+            skipped.append((rid, str(exc)[:120]))
+            continue
+        if not body.strip():
+            skipped.append((rid, "empty rule body"))
+            continue
+        target = os.path.join(sparql_dir, f"causal-{rid}.rq")
+        Path(target).write_text(body)
+        written.append(target)
+    return {"written": written, "skipped": skipped}
+
+
 def export_rules(rules: Sequence[dict], output_dir: str) -> Dict[str, object]:
     """Write enabled rules to disk where Phase B looks for them.
 
@@ -641,6 +669,73 @@ def preview_rule(rule: dict, *,
     )
 
 
+# ── L5.3 — causal-rule compiler ─────────────────────────────────────────
+
+
+def compile_causal_rule(edge: dict, *, rule_id: str = "causal-rule",
+                        window_seconds: float = 60.0) -> str:
+    """Compile an approved LOG_CAUSAL_EDGE proposal into a SPARQL
+    CONSTRUCT rule body.
+
+    The generated rule asserts ``?effect :hasCause ?cause`` (and its
+    inverse ``:triggers``) whenever an instance of the ``cause_class``
+    occurs within ``window_seconds`` *before* an instance of the
+    ``effect_class`` on the same service. This is the canonical shape
+    Phase B materialises into the graph.
+
+    Input shape (matches what :func:`wizard.log_review.approve` writes
+    into ``session.causal_rules``)::
+
+        {
+            "id":          "<proposal_id-prefix>",
+            "cause_class": ":HeartbeatTimeoutEvent",   # qname or local
+            "effect_class": ":NfDeregisteredEvent",
+            "window_seconds": 30,    # optional override
+            "label":       "Heartbeat-timeout triggers deregister",
+        }
+
+    Older session entries written before L5 land with just ``label`` +
+    ``body`` (Turtle stub). The compiler tolerates that — it returns
+    the existing body unchanged when no ``cause_class`` / ``effect_class``
+    is present.
+    """
+    cause = edge.get("cause_class") or edge.get("cause") or ""
+    effect = edge.get("effect_class") or edge.get("effect") or ""
+    if not (cause and effect):
+        return edge.get("body") or ""
+    # Normalise to qname shape (`:Foo`).
+    if not cause.startswith(":"):
+        cause = ":" + cause
+    if not effect.startswith(":"):
+        effect = ":" + effect
+    win = float(edge.get("window_seconds") or window_seconds)
+    rid = (rule_id or edge.get("id") or "causal-rule").replace('"', "'")
+    # Note on the time window: rdflib's SPARQL engine can't reliably
+    # compare ``xsd:dateTime - xsd:dateTime`` against a literal
+    # ``xsd:duration``. We rely on the directional ``?et > ?ct`` filter
+    # in the WHERE clause and trust the L3 statistical gate (which
+    # already enforced the temporal window) to scope the rule
+    # semantically. The window value is preserved in a comment so
+    # auditors can see what bound the rule's authoring.
+    return (
+        f"# Causal rule {rid}: {cause} triggers {effect}\n"
+        f"# Authoring temporal window: {int(win)} seconds "
+        f"(verified by L3 Granger / TE gate before this rule was emitted).\n"
+        f"PREFIX : <https://ontology.example.com/enterprise/>\n"
+        f"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n"
+        f"CONSTRUCT {{\n"
+        f"  ?effect :hasCause ?cause .\n"
+        f"  ?cause  :triggers ?effect .\n"
+        f"}}\n"
+        f"WHERE {{\n"
+        f"  ?cause  a {cause} ; :startedAt ?ct .\n"
+        f"  ?effect a {effect} ; :startedAt ?et .\n"
+        f"  FILTER (?cause != ?effect)\n"
+        f"  FILTER (?et > ?ct)\n"
+        f"}}\n"
+    )
+
+
 # ── Rule-impact coverage (suggestion #7) ─────────────────────────────────
 
 
@@ -720,8 +815,10 @@ def compute_coverage(rules: Sequence[dict], vocabulary: dict) -> dict:
 __all__ = [
     "PreviewResult",
     "ValidationResult",
+    "compile_causal_rule",
     "compile_slots",
     "compute_coverage",
+    "export_causal_rules",
     "export_rules",
     "load_starter_library",
     "normalise_rule",

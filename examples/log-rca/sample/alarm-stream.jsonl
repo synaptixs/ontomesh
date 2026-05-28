@@ -1,0 +1,28 @@
+{"ts": "2026-05-07T09:00:30+00:00", "severity": "CRITICAL", "service": "OAM", "trace_id": "alarm-UPF-02", "message": "Alarm raised nfId=UPF-02 alarmId=NF_UNREACHABLE severity=CRITICAL"}
+{"ts": "2026-05-07T09:00:32+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-UPF-02", "message": "Alarm notified to OSS for nfId=UPF-02 alarmId=NF_UNREACHABLE"}
+{"ts": "2026-05-07T09:00:36+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-UPF-02", "message": "Alarm escalated to operator for nfId=UPF-02 alarmId=NF_UNREACHABLE"}
+{"ts": "2026-05-07T09:00:46+00:00", "severity": "CRITICAL", "service": "OAM", "trace_id": "alarm-AMF-02", "message": "Alarm raised nfId=AMF-02 alarmId=NF_UNREACHABLE severity=CRITICAL"}
+{"ts": "2026-05-07T09:00:48+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-AMF-02", "message": "Alarm notified to OSS for nfId=AMF-02 alarmId=NF_UNREACHABLE"}
+{"ts": "2026-05-07T09:00:52+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-AMF-02", "message": "Alarm escalated to operator for nfId=AMF-02 alarmId=NF_UNREACHABLE"}
+{"ts": "2026-05-07T09:01:07+00:00", "severity": "WARN", "service": "OAM", "trace_id": "alarm-sla-1", "message": "Alarm raised sliceType=eMBB alarmId=SLA_BREACH severity=MAJOR"}
+{"ts": "2026-05-07T09:01:19+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-sla-1", "message": "Alarm cleared sliceType=eMBB alarmId=SLA_BREACH cause=throughput_restored"}
+{"ts": "2026-05-07T09:01:21+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-000", "message": "Alarm cleared cellId=cell-000 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:23+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-001", "message": "Alarm cleared cellId=cell-001 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:25+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-002", "message": "Alarm cleared cellId=cell-002 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:27+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-003", "message": "Alarm cleared cellId=cell-003 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:29+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-004", "message": "Alarm cleared cellId=cell-004 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:31+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-005", "message": "Alarm cleared cellId=cell-005 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:33+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-006", "message": "Alarm cleared cellId=cell-006 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:35+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-007", "message": "Alarm cleared cellId=cell-007 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:37+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-008", "message": "Alarm cleared cellId=cell-008 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:39+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-009", "message": "Alarm cleared cellId=cell-009 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:41+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-010", "message": "Alarm cleared cellId=cell-010 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:43+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-011", "message": "Alarm cleared cellId=cell-011 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:45+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-012", "message": "Alarm cleared cellId=cell-012 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:47+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-013", "message": "Alarm cleared cellId=cell-013 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:49+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-014", "message": "Alarm cleared cellId=cell-014 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:51+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-015", "message": "Alarm cleared cellId=cell-015 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:53+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-016", "message": "Alarm cleared cellId=cell-016 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:55+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-017", "message": "Alarm cleared cellId=cell-017 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:57+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-018", "message": "Alarm cleared cellId=cell-018 alarmId=NEIGHBOR_RELATION_STALE"}
+{"ts": "2026-05-07T09:01:59+00:00", "severity": "INFO", "service": "OAM", "trace_id": "alarm-clear-019", "message": "Alarm cleared cellId=cell-019 alarmId=NEIGHBOR_RELATION_STALE"}

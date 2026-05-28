@@ -561,6 +561,41 @@ def draft_rule(*, nl: str, kind: str,
     )
 
 
+# ── RCA prompt presets (Phase L6) ────────────────────────────────────────
+
+
+_RCA_PRESETS: Dict[str, str] = {
+    "root-cause": (
+        "What caused the event {event}? Walk the :hasCause chain in the "
+        "materialised graph, name every intermediate cause, and identify the "
+        ":rootCause if one is asserted. Cite each step's `prov:wasDerivedFrom` "
+        "rule id so an auditor can trace the chain back."
+    ),
+    "similar-incidents": (
+        "Show past incidents similar to {event}. For each candidate, list "
+        "shared :hasCause / :triggers edges and shared severity tier. Match "
+        "only against instances already in the asserted-or-materialised "
+        "graph — do not speculate."
+    ),
+}
+
+
+def list_rca_presets() -> Dict[str, str]:
+    """Return the available RCA prompt presets keyed by short name.
+    Used by the wizard's Insights box to populate the preset menu."""
+    return dict(_RCA_PRESETS)
+
+
+def expand_rca_preset(name: str, *, event_iri: str) -> str:
+    """Substitute ``{event}`` in a preset with the supplied IRI and
+    return the question text ready to pass to :meth:`Insights.ask`.
+    """
+    template = _RCA_PRESETS.get(name)
+    if not template:
+        raise KeyError(f"Unknown RCA preset: {name!r}")
+    return template.replace("{event}", event_iri.strip())
+
+
 # ── Rule summarisation (suggestion #2) ───────────────────────────────────
 
 
@@ -620,6 +655,8 @@ __all__ = [
     "RuleDraft",
     "build_grounding",
     "draft_rule",
+    "expand_rca_preset",
+    "list_rca_presets",
     "provider_status",
     "summarise_rule",
     "validate_iris",

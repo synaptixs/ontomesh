@@ -225,7 +225,9 @@ CREATE TABLE IF NOT EXISTS ontology_evolution_proposals (
     proposal_id        TEXT NOT NULL UNIQUE,          -- UUID
     proposal_type      TEXT NOT NULL
                        CHECK(proposal_type IN (
-                         'NEW_CLASS','NEW_PROPERTY','NEW_CONSTRAINT','DEPRECATE')),
+                         'NEW_CLASS','NEW_PROPERTY','NEW_CONSTRAINT','DEPRECATE',
+                         -- ── Log-driven RCA (see docs/log-rca-roadmap.md) ──
+                         'LOG_ENTITY','LOG_RELATIONSHIP','LOG_EVENT','LOG_CAUSAL_EDGE')),
     title              TEXT NOT NULL,
     candidate_turtle   TEXT NOT NULL,                 -- OWL axiom as Turtle
     evidence_sparql    TEXT NOT NULL,                 -- query that surfaced it
@@ -234,7 +236,13 @@ CREATE TABLE IF NOT EXISTS ontology_evolution_proposals (
                          'SHACL_VIOLATION_ACCUMULATION',
                          'CARDINALITY_BREACH',
                          'CLASS_COOCCURRENCE',
-                         'NLP_CANDIDATE_PROMOTION')),
+                         'NLP_CANDIDATE_PROMOTION',
+                         -- ── Log-driven RCA strategies ──
+                         'LOG_TEMPLATE_CLUSTERING',
+                         'PMI_TEMPORAL_ORDERING',
+                         'HMM_SEQUENCE_ANOMALY',
+                         'GRANGER_CAUSALITY',
+                         'DRIFT_ON_NEW_TEMPLATE')),
     confidence_score   REAL CHECK(confidence_score BETWEEN 0.0 AND 1.0),
     dim_evidence_volume    REAL,
     dim_evidence_recency   REAL,
@@ -249,6 +257,10 @@ CREATE TABLE IF NOT EXISTS ontology_evolution_proposals (
     defer_until        TEXT,
     version_target     TEXT,                          -- e.g. '1.1.0'
     primary_cq         TEXT,                          -- CQ-ID this proposal answers
+    -- ── Log-driven RCA evidence (NULL for hand-authored proposals) ──
+    source_log_path    TEXT,
+    evidence_template_id INTEGER,
+    evidence_sample    TEXT,
     created_at         TEXT DEFAULT (datetime('now')),
     updated_at         TEXT DEFAULT (datetime('now'))
 );
