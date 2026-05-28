@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Log Discovery — Help</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #4338ca;
+    --accent-soft: #eef2ff;
+    --good: #166534;
+    --good-soft: #dcfce7;
+    --warn: #92400e;
+    --warn-soft: #fef3c7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 24px 80px; }
+  .breadcrumb {
+    font-size: 13px; color: var(--muted); margin-bottom: 24px;
+  }
+  .breadcrumb a { color: var(--accent); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  h1 {
+    font-size: 32px; margin: 0 0 8px; line-height: 1.2;
+  }
+  .subtitle {
+    font-size: 16px; color: var(--muted); margin-bottom: 32px;
+  }
+  h2 {
+    font-size: 22px; margin-top: 40px; margin-bottom: 12px;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  h3 {
+    font-size: 17px; margin-top: 24px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  code, .mono {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    background: #f1f5f9; padding: 1px 5px; border-radius: 3px;
+  }
+  pre {
+    background: #0f172a; color: #f8fafc; padding: 12px 14px;
+    border-radius: 6px; font-size: 13px; overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 600; vertical-align: middle;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge.v1 { background: var(--accent-soft); color: var(--accent); }
+  .badge.v2 { background: var(--good-soft); color: var(--good); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 18px; margin: 12px 0;
+  }
+  .card .what, .card .algo, .card .why, .card .expect {
+    margin-top: 8px;
+  }
+  .card .what::before { content: "What: "; font-weight: 600; color: var(--accent); }
+  .card .algo::before { content: "Algorithm: "; font-weight: 600; color: var(--accent); }
+  .card .why::before { content: "Why it matters: "; font-weight: 600; color: var(--accent); }
+  .card .expect::before { content: "What you'll see: "; font-weight: 600; color: var(--accent); }
+  .pipeline {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin: 16px 0;
+  }
+  .pipeline .step {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px; font-size: 13px;
+  }
+  .pipeline .step b { display: block; margin-bottom: 4px; color: var(--accent); font-size: 11px; text-transform: uppercase; }
+  .callout {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0;
+  }
+  .callout.warn {
+    background: var(--warn-soft); border-left-color: var(--warn);
+  }
+  table.compare {
+    width: 100%; border-collapse: collapse; margin: 12px 0;
+    font-size: 13px;
+  }
+  table.compare th, table.compare td {
+    border: 1px solid var(--border); padding: 8px 10px; text-align: left;
+    vertical-align: top;
+  }
+  table.compare th {
+    background: var(--bg); font-weight: 600;
+  }
+  .toc {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 20px; margin: 0 0 32px;
+  }
+  .toc h4 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; }
+  .toc ul { columns: 2; column-gap: 32px; margin: 0; padding-left: 18px; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="breadcrumb">
+  <a href="/">← Back to Studio</a>
+  &nbsp;·&nbsp; Step 5 · Log Discovery · Help
+</div>
+
+<h1>Log Discovery</h1>
+<p class="subtitle">
+  Turn a folder of raw operational logs into reviewable ontology
+  candidates — events, entities, relationships, and causal rules —
+  using a chain of statistical and Bayesian methods. No labels, no
+  hand-written regexes, no neural fine-tuning. The engineer reviews
+  what surfaces and decides what becomes a class.
+</p>
+
+<div class="toc">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#why">Why this exists</a></li>
+    <li><a href="#flow">The pipeline at a glance</a></li>
+    <li><a href="#outputs">What you get</a></li>
+    <li><a href="#v1">v1 layers (shipped)</a></li>
+    <li><a href="#v2">v2 enhancements (shipped)</a></li>
+    <li><a href="#benefits">Benefits summary</a></li>
+    <li><a href="#expect">What to expect as a user</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ul>
+</div>
+
+<!-- ─── Why this exists ──────────────────────────────────────────── -->
+
+<h2 id="why">Why this exists</h2>
+
+<p>
+  Operational logs contain the ground truth of how a system actually
+  behaves — every login, every retry, every failure mode — but that
+  truth is buried in millions of free-text lines. Two existing
+  approaches both fall short:
+</p>
+
+<ul>
+  <li><b>Hand-written regexes / dashboards.</b> Catch what someone
+      already thought to look for. Miss everything else. Drift the
+      moment the log format changes.</li>
+  <li><b>End-to-end neural models.</b> Catch more, but produce
+      embeddings that engineers can't read, audit, or argue with.
+      Hard to act on a 768-dimensional vector.</li>
+</ul>
+
+<p>
+  Log Discovery takes the middle path: <b>statistical inference an
+  engineer can read</b>. Each candidate it surfaces has an explicit
+  reason — "templates X and Y share an upstream cause", "this
+  trajectory's per-step log-likelihood is in the bottom 5 %" — that
+  you can challenge, accept, or reject.
+</p>
+
+<!-- ─── Pipeline at a glance ─────────────────────────────────────── -->
+
+<h2 id="flow">The pipeline at a glance</h2>
+
+<div class="pipeline">
+  <div class="step"><b>Mine</b>Drain templates · typed slots · entity graph</div>
+  <div class="step"><b>Sequence</b>Per-service HMM trajectories</div>
+  <div class="step"><b>Causality</b>Granger + PC algorithm DAG</div>
+  <div class="step"><b>Review</b>Confidence-ranked queue</div>
+</div>
+
+<pre>python toolkit.py --phase mine     --log-path /path/to/logs/
+python toolkit.py --phase sequence --log-path /path/to/logs/
+# ...then open Step 5 in the wizard to review.</pre>
+
+<div class="callout">
+  <b>The contract:</b> nothing flows into your ontology automatically.
+  Every event class, entity property, relationship, and causal rule
+  starts as a <b>proposal</b> that you approve, edit, reject, or
+  merge. The pipeline ranks them by <em>confidence × consequence</em>
+  so the highest-leverage decisions sit at the top of the queue.
+</div>
+
+<!-- ─── What you get ──────────────────────────────────────────────── -->
+
+<h2 id="outputs">What you get</h2>
+
+<p>
+  Four kinds of proposals, all rendered on Step 5 of this wizard:
+</p>
+
+<ul>
+  <li><b>Events</b> — candidate <code>owl:Class</code> definitions
+      derived from repeating log templates (e.g. <code>:UserLoggedIn</code>,
+      <code>:PaymentRefunded</code>). Each carries a sample log line
+      so you can confirm the meaning before approving.</li>
+  <li><b>Entities</b> — candidate identifier properties (e.g.
+      <code>:hasUserId</code>, <code>:hasOrderId</code>) discovered
+      from typed slots in the templates. The slot's value
+      distribution determines whether it's an IRI, UUID, or enum.</li>
+  <li><b>Relationships</b> — undirected co-occurrence edges between
+      entities, weighted by PMI (point-wise mutual information).
+      Become <code>owl:ObjectProperty</code> candidates.</li>
+  <li><b>Causal edges</b> — directed edges that pass a triangulation
+      gate (PMI + temporal lead + statistical causality test). These
+      become rule candidates of the form
+      <code>:X :causes :Y</code>.</li>
+</ul>
+
+<!-- ─── v1 layers ─────────────────────────────────────────────────── -->
+
+<h2 id="v1">v1 layers <span class="badge v1">shipped</span></h2>
+
+<p>
+  The original seven layers of the pipeline. Each one is a
+  small, independently-testable PRML-grounded step.
+</p>
+
+<div class="card">
+  <h3>L1 — Template clustering <span class="badge v1">PRML §9</span></h3>
+  <div class="what">cluster every log line into a small set of
+    templates with wildcards like <code>&lt;*&gt;</code> for the
+    variable parts. <em>"User u-123 logged in"</em> and <em>"User
+    u-456 logged in"</em> collapse to one template.</div>
+  <div class="algo"><b>Drain3</b> tree-based online clustering,
+    refined by a small EM merge pass for near-duplicates.</div>
+  <div class="why">templates are the atomic unit downstream. If you
+    over-merge, distinct events become invisible; if you over-split,
+    review is exhausting.</div>
+  <div class="expect">a <code>log_templates</code> table; one row per
+    pattern with a sample line and a hit count.</div>
+</div>
+
+<div class="card">
+  <h3>L1.5 — Slot typing</h3>
+  <div class="what">classify each <code>&lt;*&gt;</code> position by
+    the distribution of values it takes — IRI, UUID, enum, numeric,
+    free text — and flag possible PII.</div>
+  <div class="algo">regex ladder over the value sample + Shannon
+    entropy of the distinct-value distribution.</div>
+  <div class="why">drives entity proposals. <em>"slot 2 of template
+    #7 is a UUID with 4 130 distinct values"</em> tells you it's a
+    candidate identifier property.</div>
+  <div class="expect">a <code>log_template_slots</code> table.</div>
+</div>
+
+<div class="card">
+  <h3>L1.5 — Entity graph <span class="badge v1">PRML §8</span></h3>
+  <div class="what">build an undirected co-occurrence graph over slot
+    values that appear together inside a short time window. Weight
+    edges by PMI; direct them when one value reliably appears before
+    the other.</div>
+  <div class="algo">point-wise mutual information +
+    temporal-lead ratio.</div>
+  <div class="why">the relationship and causal-edge proposals both
+    start here.</div>
+  <div class="expect"><code>log_entity_edges</code> rows.</div>
+</div>
+
+<div class="card">
+  <h3>L2 — Trajectory model <span class="badge v1">PRML §13</span></h3>
+  <div class="what">group log lines by service, treat the sequence of
+    template IDs as a state path, and fit a Hidden Markov Model per
+    service. State count selected by BIC.</div>
+  <div class="algo">CategoricalHMM (hmmlearn).</div>
+  <div class="why">individual log lines look fine but their
+    <em>sequence</em> tells the story. The HMM learns the normal
+    rhythm of each service so we can detect when a trajectory
+    deviates.</div>
+  <div class="expect">one row per service in <code>log_hmm_models</code>;
+    the wizard never shows the HMM directly.</div>
+</div>
+
+<div class="card">
+  <h3>L2 — Anomaly score</h3>
+  <div class="what">score each trajectory under its service's HMM.
+    Trajectories in the bottom 5 % of per-step log-likelihood, or
+    that miss the service's "mode" template set, are flagged.</div>
+  <div class="algo">HMM log-likelihood + cluster-bag novelty
+    (heuristic in v1; replaced by L10 in v2).</div>
+  <div class="why">each anomaly becomes a candidate
+    <code>:AnomalousEvent_*</code> class — the engineer decides
+    whether it deserves to be in the ontology.</div>
+  <div class="expect">LOG_EVENT proposals at the top of the
+    review queue.</div>
+</div>
+
+<div class="card">
+  <h3>L3 — Causality gate <span class="badge v1">PRML §11, §14</span></h3>
+  <div class="what">for each directed entity edge, test whether the
+    history of <em>src</em> actually informs the future of
+    <em>dst</em> beyond <em>dst</em>'s own history.</div>
+  <div class="algo">Granger F-test on time-binned rate series, with
+    transfer-entropy z-score as a backup.</div>
+  <div class="why">temporal-lead is necessary but not sufficient for
+    causality. Without this gate, every "occurs before" pair looks
+    like a cause.</div>
+  <div class="expect">LOG_CAUSAL_EDGE proposals; directed edges that
+    failed the gate become LOG_RELATIONSHIP instead.</div>
+</div>
+
+<div class="card">
+  <h3>L4 — Review surface <span class="badge v1">PRML §1</span></h3>
+  <div class="what">load every proposal into the wizard's Step 5
+    queue, sorted by <code>confidence × consequence</code>. Engineer
+    approves, rejects, edits, or merges.</div>
+  <div class="algo">decision-theoretic ordering by expected
+    information value.</div>
+  <div class="why">your time is the bottleneck. The highest-leverage
+    decisions sit at the top so you can stop reading after the most
+    important N.</div>
+  <div class="expect">this wizard panel.</div>
+</div>
+
+<!-- ─── v2 enhancements ─────────────────────────────────────────── -->
+
+<h2 id="v2">v2 enhancements <span class="badge v2">shipped</span></h2>
+
+<p>
+  Six additive enhancements landed on top of v1. Each one targets
+  a specific shallow spot that became obvious in real use:
+</p>
+
+<div class="card">
+  <h3>L9 — Active-learning ranker <span class="badge v2">PRML §1, §4.3</span></h3>
+  <div class="what">a logistic-regression model trained on your
+    past approve / reject decisions reorders the queue so the
+    things <em>you</em> tend to approve rise to the top.</div>
+  <div class="algo">scikit-learn LogisticRegression on per-proposal
+    features (kind, confidence, evidence volume, slot-PII flag, age,
+    regime tag, …) with median-imputation and class balancing.</div>
+  <div class="why">without it, engineers re-reject the same noise
+    template every session. With it, the queue learns from each
+    decision and saves you that work next time.</div>
+  <div class="expect">a "↻ Re-rank with feedback" button on Step 5;
+    a small badge under the controls shows
+    <em>"ranker · N decisions · AUC 0.83"</em>.
+    Cold-start: model only fits after ≥ 20 decisions.</div>
+</div>
+
+<div class="card">
+  <h3>L8 — Switching SSM regimes <span class="badge v2">PRML §9, §13.3.3</span></h3>
+  <div class="what">replace v1's single per-service HMM with a
+    <em>mixture</em> of HMMs. A per-trajectory regime indicator
+    selects which HMM applies — separating business-hours from
+    weekend-maintenance from incident-response patterns.</div>
+  <div class="algo">VB-EM with Dirichlet prior on regime mixing
+    weights; K selected by ELBO over 3 random restarts; K ≤ 5.</div>
+  <div class="why">v1's single HMM averages over all regimes and
+    flags normal-but-rare patterns (e.g. weekend maintenance) as
+    anomalies. This is the largest single source of false positives
+    in the review queue.</div>
+  <div class="expect">each LOG_EVENT proposal carries an amber
+    chip — <em>"Regime 2 of 3"</em> — so you know which operating
+    mode produced it.</div>
+</div>
+
+<div class="card">
+  <h3>L10 — Calibrated confidence (VB) <span class="badge v2">PRML §10</span></h3>
+  <div class="what">replace v1's heuristic <code>max(c, 0.6)</code>
+    confidence floor with a real posterior probability. The
+    confidence becomes <em>"P(per-step logL &lt; anomaly threshold)"</em>
+    under a Variational Bayesian HMM.</div>
+  <div class="algo">VB-HMM with Dirichlet priors on π, A, B;
+    mean-field VB-EM via log-space forward-backward; Bayesian model
+    averaging across K. Confidence via Monte-Carlo posterior
+    predictive.</div>
+  <div class="why">an audit-ready confidence. Comparable across
+    proposal kinds, defensible to a reviewer or regulator. ECE
+    (Expected Calibration Error) &lt; 0.05 on synthetic data.</div>
+  <div class="expect">confidence scores on Step 5 stop clustering at
+    0.6 / 0.7 / 0.8 (the v1 floors) — they spread smoothly across
+    the full [0, 1] range.</div>
+</div>
+
+<div class="card">
+  <h3>L11 — PC algorithm causal DAG <span class="badge v2">PRML §8.2, §8.4.5</span></h3>
+  <div class="what">replace pairwise Granger with a structural
+    causal graph. The PC algorithm tests conditional independence
+    under expanding conditioning sets, so shared upstream causes
+    eliminate spurious "B causes C" edges.</div>
+  <div class="algo">partial Pearson correlation +
+    Fisher z-transform for the CI test; skeleton phase with
+    conditioning sets up to size 3; v-structure orientation; Meek
+    rules R1–R4.</div>
+  <div class="why">v1's pairwise tests can't tell "A causes both B
+    and C" from "B causes C". PC can. The hero example: if
+    <em>NetworkPartition</em> drives both <em>ServiceADown</em> and
+    <em>ServiceBDown</em>, v1 reports a spurious
+    <em>ServiceADown → ServiceBDown</em> edge. v2 finds the shared
+    cause and drops the spurious edge.</div>
+  <div class="expect">causal-edge titles gain a suffix like
+    <em>"— shared upstream cause: template #41"</em> when the PDAG
+    identifies a confounder.</div>
+</div>
+
+<div class="card">
+  <h3>L12 — pPCA template similarity <span class="badge v2">PRML §12.2</span></h3>
+  <div class="what">a 2-D PCA scatter of all active templates,
+    with merge candidates highlighted in amber when their distance
+    in the full-dim embedding falls below a threshold.</div>
+  <div class="algo">bag-of-tokens vectoriser + probabilistic PCA;
+    L2-normalised chord distance for the merge-candidate test.</div>
+  <div class="why">Drain's <code>sim_th=0.4</code> is a hard knob.
+    Some near-duplicates always slip through. The scatter lets you
+    spot them visually and merge with one click.</div>
+  <div class="expect">a "Template similarity" card above the
+    candidates list on Step 5; close pairs are connected by faint
+    amber lines.</div>
+</div>
+
+<div class="card">
+  <h3>L13 — GP rate-shape anomalies <span class="badge v2">PRML §6.4</span></h3>
+  <div class="what">per template, fit a Gaussian Process over
+    hour-of-day rate and flag observations outside the 99 %
+    posterior interval — catching the <em>burst-of-normal-templates</em>
+    pattern v1's HMM misses entirely.</div>
+  <div class="algo">periodic (24 h) + RBF + white-noise kernel;
+    per-hour-median aggregation for robustness; MAD-based residual
+    z-score against the smooth baseline.</div>
+  <div class="why">when a deploy goes bad and a normally-quiet
+    endpoint floods the queue with success logs, v1's HMM sees
+    nothing wrong (the templates are fine — there are just too
+    many of them). The GP sees the rate spike.</div>
+  <div class="expect">LOG_EVENT rows tagged with a green "GP rate"
+    chip and an inline sparkline; a "↻ GP rate scan" button in
+    the toolbar.</div>
+</div>
+
+<!-- ─── Benefits ────────────────────────────────────────────────── -->
+
+<h2 id="benefits">Benefits summary</h2>
+
+<table class="compare">
+  <tr>
+    <th>Without Log Discovery</th>
+    <th>With Log Discovery</th>
+  </tr>
+  <tr>
+    <td>Hand-write regexes for every event type you can think of.
+        Miss the ones you can't.</td>
+    <td>Drain proposes the templates. The scatter shows you what
+        you'd otherwise miss.</td>
+  </tr>
+  <tr>
+    <td>Spot anomalies via dashboards / alerts that fire on
+        thresholds you tuned by guessing.</td>
+    <td>HMM finds anomalies via probabilistic reasoning over
+        trajectories. GP catches the rate spikes the HMM misses.</td>
+  </tr>
+  <tr>
+    <td>Root-cause analysis = chasing temporal-correlation pairs.</td>
+    <td>PC algorithm produces a real causal DAG with shared causes
+        flagged.</td>
+  </tr>
+  <tr>
+    <td>Review queue = a flat list. You re-reject the same noise
+        every week.</td>
+    <td>Active-learning ranker reorders by what <em>you</em> approve.
+        The same noise stops surfacing.</td>
+  </tr>
+  <tr>
+    <td>"Confidence: 0.8." What does that mean?</td>
+    <td>Confidence is a real posterior probability with ECE &lt; 0.05.
+        You can defend it in an audit.</td>
+  </tr>
+</table>
+
+<!-- ─── What to expect ───────────────────────────────────────────── -->
+
+<h2 id="expect">What to expect as a user</h2>
+
+<h3>1. Point at a log folder</h3>
+<p>
+  Run <code>python toolkit.py --phase mine --log-path /your/logs/</code>
+  followed by <code>--phase sequence</code>. The full pipeline
+  finishes in seconds for a typical 10 k–50 k line corpus.
+</p>
+
+<h3>2. Open Step 5</h3>
+<p>
+  The Log Discovery panel lights up. You'll see four kinds of
+  proposals — events, entities, relationships, causal edges — each
+  with a sample log line, a confidence score, and (when applicable)
+  a regime tag, a "GP rate" chip, or a "shared cause" hint.
+</p>
+
+<h3>3. Review top-down</h3>
+<p>
+  Work the kinds in this order:
+</p>
+<ol>
+  <li><b>Events</b> first — they define your domain vocabulary.</li>
+  <li><b>Entities</b> next — they're the identifiers that thread
+      events together.</li>
+  <li><b>Relationships</b> and <b>Causal edges</b> last — they
+      depend on the classes above being approved.</li>
+</ol>
+
+<h3>4. Re-rank periodically</h3>
+<p>
+  After your first 20+ decisions, click "↻ Re-rank with feedback".
+  The logistic-regression ranker refits and the queue reorders so
+  the things you've been approving rise to the top.
+</p>
+
+<h3>5. Approved proposals flow into your session</h3>
+<p>
+  Click ✓ Approve and the candidate joins
+  <code>session.entities</code> / <code>session.events</code> /
+  <code>session.relationships</code> / <code>session.causal_rules</code>.
+  When you hit <em>Generate</em>, they emerge as OWL classes,
+  properties, and SHACL rules in your final ontology.
+</p>
+
+<div class="callout warn">
+  <b>You stay in the loop.</b> Nothing is added to your ontology
+  without an explicit approve click. Reject and merge are equally
+  fast. The pipeline is opinionated about <em>what to surface</em>,
+  not <em>what to keep</em>.
+</div>
+
+<!-- ─── Glossary ─────────────────────────────────────────────────── -->
+
+<h2 id="glossary">Glossary</h2>
+
+<ul>
+  <li><b>Drain</b> — a tree-based online algorithm that clusters log
+      lines into templates by prefix similarity.</li>
+  <li><b>PMI</b> (point-wise mutual information) — log-ratio of
+      observed co-occurrence vs the marginal product. High PMI means
+      "occurs together more than chance".</li>
+  <li><b>HMM</b> (Hidden Markov Model) — a sequence model with
+      discrete latent states. We use it over template-id
+      sequences.</li>
+  <li><b>BIC</b> (Bayesian Information Criterion) — a model-selection
+      score that penalises complexity. Used to pick HMM state
+      count.</li>
+  <li><b>Granger causality</b> — F-test on whether
+      <em>past(X)</em> predicts <em>future(Y)</em> beyond
+      <em>past(Y)</em> alone.</li>
+  <li><b>VB</b> (Variational Bayes) — approximate Bayesian inference
+      by minimising KL divergence to a simpler family. Used in L8
+      and L10.</li>
+  <li><b>ELBO</b> (Evidence Lower Bound) — the objective VB
+      maximises. Difference between ELBO at K and K+1 selects
+      regime count.</li>
+  <li><b>PC algorithm</b> — Peter-Clark structural-learning method.
+      Skeleton phase, v-structure orientation, Meek rules.</li>
+  <li><b>ECE</b> (Expected Calibration Error) — average gap between
+      predicted confidence and observed accuracy. Lower is
+      better.</li>
+  <li><b>PDAG</b> — partially-directed acyclic graph; PC's output.
+      Some edges are oriented, some remain undirected (Markov-
+      equivalence ambiguity).</li>
+  <li><b>MAD</b> (Median Absolute Deviation) — robust scale
+      estimator. We use it in L13 so a single outlier can't hide
+      itself.</li>
+  <li><b>pPCA</b> (probabilistic PCA) — PCA with a Gaussian noise
+      model. Bishop §12.2.</li>
+</ul>
+
+<div style="margin-top: 48px; font-size: 13px; color: var(--muted); text-align: center;">
+  Built on Bishop's <em>Pattern Recognition and Machine Learning</em>
+  (Chs. 1, 4, 6, 8, 9, 10, 11, 12, 13, 14).
+  &nbsp;·&nbsp;
+  <a href="/" style="color: var(--accent); text-decoration: none;">Back to Studio</a>
+</div>
+
+</div>
+</body>
+</html>
