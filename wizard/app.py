@@ -454,6 +454,180 @@ def import_commit():
                     "stats": result.stats})
 
 
+# ── /api/db — database-direct import + connection profiles ───────────────
+#
+# Sister to /api/import (which handles file uploads). Two roles:
+#   1. Vendor catalogue + profile CRUD so the wizard's "Connect to
+#      database" tab can render dynamic forms and remember credentials.
+#   2. Schema introspection that lifts a live DB into the same
+#      ImportResult shape the JSON-file path produces, so the existing
+#      review modal handles both paths identically.
+
+
+def _db_conn():
+    import sqlite3 as _sqlite3
+    return _sqlite3.connect(ONTOLOGIES_DB)
+
+
+def _load_db_profiles_module():
+    """Lazy + path-tolerant import of wizard.db_profiles."""
+    try:
+        from . import db_profiles as _dp
+    except ImportError:
+        sys.path.insert(0, HERE)
+        import db_profiles as _dp                    # type: ignore[no-redef]
+    return _dp
+
+
+@app.route("/api/db/vendors", methods=["GET"])
+def db_vendors():
+    """Vendor catalogue — id, label, icon, field schema. The browser
+    renders forms straight from this; adding a vendor in
+    wizard/db_profiles.py surfaces it here without UI changes."""
+    dp = _load_db_profiles_module()
+    return jsonify({"vendors": dp.vendor_list()})
+
+
+@app.route("/api/db/profiles", methods=["GET"])
+def db_profiles_list():
+    dp = _load_db_profiles_module()
+    conn = _db_conn()
+    try:
+        profiles = dp.list_profiles(conn)
+    finally:
+        conn.close()
+    return jsonify({"profiles": [p.to_dict(mask_secrets=True) for p in profiles]})
+
+
+@app.route("/api/db/profiles", methods=["POST"])
+def db_profile_save():
+    """Create or update. Body:
+        {id?, name, vendor, config: {...}}
+    Returns the saved profile with secrets masked."""
+    dp = _load_db_profiles_module()
+    body = request.get_json(force=True) or {}
+    name = (body.get("name") or "").strip()
+    vendor = (body.get("vendor") or "").strip()
+    config = body.get("config") or {}
+    if not (name and vendor):
+        return jsonify({"error": "name and vendor are required"}), 400
+    if not isinstance(config, dict):
+        return jsonify({"error": "config must be an object"}), 400
+    pid = body.get("id")
+    conn = _db_conn()
+    try:
+        profile = dp.save_profile(
+            conn, name=name, vendor=vendor, config=config,
+            profile_id=int(pid) if pid else None,
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception as exc:                          # noqa: BLE001
+        return jsonify({"error": f"save failed: {exc}"}), 500
+    finally:
+        conn.close()
+    return jsonify({"ok": True, "profile": profile.to_dict(mask_secrets=True)})
+
+
+@app.route("/api/db/profiles/<int:profile_id>", methods=["DELETE"])
+def db_profile_delete(profile_id: int):
+    dp = _load_db_profiles_module()
+    conn = _db_conn()
+    try:
+        ok = dp.delete_profile(conn, profile_id)
+    finally:
+        conn.close()
+    if not ok:
+        return jsonify({"error": "profile not found"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/db/test", methods=["POST"])
+def db_test_connection():
+    """Test a connection. Body either:
+        {vendor, config}            — try the supplied creds
+        {profile_id}                — try a stored profile
+    Returns {ok, tables, sample_tables, duration_ms, error?}."""
+    dp = _load_db_profiles_module()
+    body = request.get_json(force=True) or {}
+    vendor = (body.get("vendor") or "").strip()
+    config = body.get("config") or {}
+    profile_id = body.get("profile_id")
+    if profile_id is not None:
+        conn = _db_conn()
+        try:
+            profile = dp.get_profile(conn, int(profile_id))
+        finally:
+            conn.close()
+        if not profile:
+            return jsonify({"ok": False, "error": "profile not found"}), 404
+        vendor = profile.vendor
+        config = profile.config
+    if not vendor:
+        return jsonify({"error": "vendor is required"}), 400
+    res = dp.probe_connection(vendor, config)
+    return jsonify(res.to_dict())
+
+
+@app.route("/api/db/import", methods=["POST"])
+def db_import():
+    """Introspect a live DB into a wizard session — does not persist.
+    The browser's review modal then commits via /api/import/commit so
+    file and DB imports share the same final-guard path.
+
+    Body either:
+        {vendor, config, domain_name?, base_iri?}
+        {profile_id, domain_name?, base_iri?}
+    """
+    dp = _load_db_profiles_module()
+    body = request.get_json(force=True) or {}
+    vendor = (body.get("vendor") or "").strip()
+    config = body.get("config") or {}
+    profile_id = body.get("profile_id")
+    if profile_id is not None:
+        conn = _db_conn()
+        try:
+            profile = dp.get_profile(conn, int(profile_id))
+        finally:
+            conn.close()
+        if not profile:
+            return jsonify({"error": "profile not found"}), 404
+        vendor = profile.vendor
+        config = profile.config
+    if not vendor:
+        return jsonify({"error": "vendor is required"}), 400
+
+    try:
+        session = dp.introspect_to_session(
+            vendor, config,
+            domain_name=(body.get("domain_name") or "").strip(),
+            base_iri=(body.get("base_iri") or "").strip(),
+        )
+    except RuntimeError as exc:
+        return jsonify({
+            "ok": False, "format": "database",
+            "errors": [{"code": "DB_INTROSPECT_FAILED", "severity": "error",
+                        "message": str(exc),
+                        "fix_hint": "Verify host, port, credentials, and that "
+                                    "the user can list tables."}],
+            "warnings": [], "stats": {}, "session": None,
+        })
+
+    # Shape-compatible with /api/import so the review modal can
+    # consume it without branching.
+    stats = {
+        "entities": len(session.get("entities") or []),
+        "relationships": len(session.get("relationships") or []),
+        "events": len(session.get("events") or []),
+    }
+    return jsonify({
+        "ok": True, "format": "database",
+        "errors": [], "warnings": [],
+        "stats": stats,
+        "session": session,
+    })
+
+
 @app.route("/api/generate", methods=["POST"])
 def generate():
     global _pipeline_running, _pipeline_log
