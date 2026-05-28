@@ -784,6 +784,61 @@ def insights_providers():
     return jsonify({"providers": [p.to_dict() for p in provider_status()]})
 
 
+@app.route("/api/insights/rca-presets", methods=["GET"])
+def insights_rca_presets():
+    """List RCA prompt presets — keyed by name with the template
+    string. The wizard renders them in the Ask Insights panel."""
+    from runtime.insights import list_rca_presets
+    return jsonify({"presets": list_rca_presets()})
+
+
+@app.route("/api/insights/rca", methods=["POST"])
+def insights_rca():
+    """Run an RCA preset against the materialised graph. Body:
+
+        { "preset": "root-cause" | "similar-incidents",
+          "event_iri": "https://ontology.example.com/enterprise/dr_a",
+          "provider": "openai" (optional),
+          "model": "..." (optional) }
+
+    Materialised triples are sent regardless of the toggle since RCA
+    only makes sense with the inferred graph. The residency warning
+    from :class:`Insights.ask` still fires for public-cloud providers.
+    """
+    from runtime.insights import Insights, expand_rca_preset
+    body = request.get_json(force=True) or {}
+    preset = (body.get("preset") or "").strip()
+    event_iri = (body.get("event_iri") or "").strip()
+    if not (preset and event_iri):
+        return jsonify({"error": "preset and event_iri are required"}), 400
+    try:
+        question = expand_rca_preset(preset, event_iri=event_iri)
+    except KeyError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    ontology_path = os.path.join(OUTPUT_DIR, "ontology", "enterprise.ttl")
+    materialised_path = os.path.join(OUTPUT_DIR, "ontology", "materialised.ttl")
+    if not os.path.isfile(ontology_path):
+        return jsonify({"error": "no ontology — run --phase 2 first"}), 400
+    insights = Insights(
+        ontology_path,
+        materialised_path if os.path.isfile(materialised_path) else None,
+    )
+    try:
+        result = insights.ask(
+            question,
+            provider=body.get("provider"),
+            model=body.get("model"),
+            include_materialised=True,    # RCA needs the inferred graph
+        )
+    except Exception as exc:                # noqa: BLE001
+        return jsonify({"error": str(exc)}), 502
+    out = result.to_dict()
+    out["preset"] = preset
+    out["event_iri"] = event_iri
+    return jsonify(out)
+
+
 @app.route("/api/insights/ask", methods=["POST"])
 def insights_ask():
     """Answer a question grounded in the active ontology. Body:
