@@ -129,11 +129,47 @@ def seed_from_mining(conn: sqlite3.Connection,
                 _os.path.abspath(__file__))), "src")
             if _src not in _sys.path:
                 _sys.path.insert(0, _src)
-            from causality_miner import find_causality_candidates  # noqa: E402
+            from causality_miner import (                                     # noqa: E402
+                find_causality_candidates, build_rate_series,
+                _slot_value_to_cluster_ids,
+            )
             cands = find_causality_candidates(extractions, conn)
             for c in cands:
                 causal_pairs.add((c.src, c.dst))
                 causal_meta[(c.src, c.dst)] = c.to_dict()
+
+            # L11 — run PC over the cluster-id rate series so each
+            # causal edge can carry the shared-cause hint the roadmap
+            # asks for ("Shared upstream cause: X (confounds A→B and
+            # A→C)"). PDAG is purely additive at this stage: it never
+            # vetoes an edge that find_causality_candidates already
+            # accepted, only enriches the meta with parents of the
+            # dst cluster.
+            try:
+                from causality_dag import learn_pdag                          # noqa: E402
+                series, _bs, n_bins = build_rate_series(extractions)
+                if n_bins >= 30 and len(series) >= 2:
+                    pdag = learn_pdag(series)
+                    value_to_cids = _slot_value_to_cluster_ids(extractions)
+                    for c in cands:
+                        # Approximate cluster id for each entity: most-
+                        # frequent cluster it appears in.
+                        from collections import Counter as _Counter
+                        s_cids = _Counter(value_to_cids.get(c.src, []))
+                        d_cids = _Counter(value_to_cids.get(c.dst, []))
+                        if not s_cids or not d_cids:
+                            continue
+                        s_cid = s_cids.most_common(1)[0][0]
+                        d_cid = d_cids.most_common(1)[0][0]
+                        # Confounders we care about: other directed
+                        # parents of dst_cluster in the PDAG (i.e.
+                        # shared upstream causes that also point to
+                        # the dst).
+                        parents = sorted(pdag.parents(d_cid) - {s_cid})
+                        if parents:
+                            causal_meta[(c.src, c.dst)]["shared_causes"] = parents
+            except Exception:                                      # noqa: BLE001
+                pass
         except Exception:                       # noqa: BLE001 — never break seed
             pass
 
@@ -232,8 +268,20 @@ def seed_from_mining(conn: sqlite3.Connection,
             if gated_causal:
                 ptype = "LOG_CAUSAL_EDGE"
                 kind_key = "log_causal_edge"
+                # L11 — append the shared-cause hint when the PDAG
+                # identified other directed parents of dst. The roadmap
+                # asks for this phrasing in the UI surface.
+                shared = (cmeta or {}).get("shared_causes") or []
+                shared_suffix = ""
+                if shared:
+                    shared_suffix = (
+                        f" — shared upstream cause: "
+                        f"template #{shared[0]}"
+                        + (f" (+{len(shared) - 1} more)"
+                           if len(shared) > 1 else "")
+                    )
                 title = (f"Causal candidate: {src[:30]} → {dst[:30]} "
-                         f"(PMI {pmi:.1f}, via {cmeta['via']})")
+                         f"(PMI {pmi:.1f}, via {cmeta['via']}){shared_suffix}")
                 strategy = "GRANGER_CAUSALITY"
                 # Use the triangulated confidence — it blends all three signals.
                 confidence = cmeta["confidence"]
@@ -254,11 +302,16 @@ def seed_from_mining(conn: sqlite3.Connection,
                 strategy = "PMI_TEMPORAL_ORDERING"
                 confidence = min(1.0, 0.4 + (pmi - 3.0) / 10.0)
             pid = _stable_id(f"{ptype.lower()}:{src}::{dst}")
+            shared_line = ""
+            if cmeta and cmeta.get("shared_causes"):
+                shared_line = (f"# pc_shared_causes="
+                               f"{','.join(str(s) for s in cmeta['shared_causes'])}\n")
             candidate_turtle = (
                 f"# {ptype}\n# src={src}\n# dst={dst}\n"
                 f"# PMI={pmi:.2f}  lead_ratio={lead}\n"
                 + (f"# granger_p={cmeta['granger_p']:.4f} lag={cmeta['granger_lag']}\n"
                    f"# te_z={cmeta['te_z']:.2f}\n" if cmeta else "")
+                + shared_line
             )
             evidence_sparql = (
                 f"PREFIX : <https://ontology.example.com/enterprise/>\n"
