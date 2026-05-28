@@ -1214,6 +1214,58 @@ def log_discovery_merge(proposal_id):
     return jsonify(result)
 
 
+@app.route("/api/log-discovery/rate-anomalies", methods=["POST"])
+def log_discovery_rate_anomalies():
+    """L13 — run the GP rate-anomaly detector against the current
+    enterprise.db corpus and persist any hits as LOG_EVENT proposals
+    with detection_strategy='GP_RATE_DEVIATION'.
+
+    Body (optional): ``{"log_path": "/path/to/logs"}``. When supplied
+    we re-extract from the corpus; otherwise we replay the cached
+    extractions from log_templates (sample lines only — coarse but
+    free)."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    try:
+        import sys as _sys
+        _src = os.path.join(ROOT, "src")
+        if _src not in _sys.path:
+            _sys.path.insert(0, _src)
+        from log_rate_anomalies import mine_rate_anomalies          # noqa: E402
+    except Exception as exc:                                        # noqa: BLE001
+        return jsonify({"error": f"module unavailable: {exc}"}), 500
+
+    body = request.get_json(silent=True) or {}
+    log_path = (body.get("log_path") or "").strip()
+    extractions = []
+    if log_path:
+        try:
+            from log_corpus import LogCorpus                        # noqa: E402
+            from log_templates import LogTemplateMiner              # noqa: E402
+            miner = LogTemplateMiner(_log_review_conn())
+            for rec in LogCorpus(log_path).iter():
+                miner.consume(rec.message, timestamp=rec.timestamp,
+                              severity=rec.severity,
+                              service=rec.fields.get("service") if rec.fields else None,
+                              trace_id=rec.fields.get("trace_id") if rec.fields else None)
+            miner.flush()
+            extractions = list(miner.extractions or [])
+        except Exception:                                           # noqa: BLE001
+            extractions = []
+
+    conn = _log_review_conn()
+    try:
+        report = mine_rate_anomalies(extractions, conn) if extractions \
+                 else type("R", (), {"as_dict": lambda self: {
+                     "templates_examined": 0, "templates_fit": 0,
+                     "anomalies": 0, "proposals_persisted": 0,
+                     "duration_s": 0.0,
+                 }})()
+    finally:
+        conn.close()
+    return jsonify({"ok": True, "report": report.as_dict()})
+
+
 @app.route("/api/log-discovery/template-embedding", methods=["GET"])
 def log_discovery_template_embedding():
     """L12 — return the pPCA viz payload for the Step 5 scatter.
