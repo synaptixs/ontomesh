@@ -33,6 +33,7 @@ What each output file is for: [docs/artifacts.md](docs/artifacts.md) · How to d
 
 | Group | What it adds | Read |
 |---|---|---|
+| **Log-Driven RCA** *(new in v3.2)* | Folder-pointer log ingest, Drain template clustering, PMI entity graph, HMM trajectory anomalies, Granger-gated causal edges, Studio Step 2.5 engineer review, RCA-shaped ontology with `:CausalEvent / :hasCause / :rootCause`, drift template loop | [docs/release-notes.md](docs/release-notes.md) · [docs/log-rca-roadmap.md](docs/log-rca-roadmap.md) · [docs/log-rca-dev-plan.md](docs/log-rca-dev-plan.md) |
 | **Rules & Reasoning** *(new in v3.1)* | OWL axioms from wizard inputs, materialised inference (`--phase reason`), per-triple lineage (`prov:wasDerivedFrom`), Studio rule editor with slot-fill / NL drafting / test-fire / premise tree, rule-impact heat map, provider-agnostic LLM Insights | [docs/release-notes.md](docs/release-notes.md) · [docs/reasoning-roadmap.md](docs/reasoning-roadmap.md) |
 | Runtime layer — connect ontology to LLMs | SHACL input/output gates, OWL grounding, prompt assembly, 5 LLM adapters | [docs/runtime.md](docs/runtime.md) |
 | Drift monitoring — production-grade | OWL hierarchy + SHACL shapes drive `drift_monitor` (infodrift) | [examples/infodrift/](examples/infodrift/) · [docs/advanced.md §Drift](docs/advanced.md) |

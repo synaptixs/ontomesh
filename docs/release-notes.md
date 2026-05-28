@@ -1,5 +1,194 @@
 # Release Notes
 
+## v3.2 — Log-Driven Root-Cause Analysis
+
+> **Theme:** turn a folder of logs into a reviewed, materialised, queryable RCA ontology — without leaving the toolkit.
+
+This release implements the entire roadmap in [docs/log-rca-roadmap.md](log-rca-roadmap.md) and the development plan in [docs/log-rca-dev-plan.md](log-rca-dev-plan.md) — Phases L1 through L7, all seven shipped.
+
+**263 tests, all green.** No breaking changes; the new pipeline lives alongside the existing one.
+
+---
+
+### What's new
+
+The new pipeline closes a loop: logs → reviewed candidates → ontology → materialised graph → grounded RCA query.
+
+```
+   logs/ folder
+        │
+        ▼  --phase mine + --phase sequence
+   templates · slot types · PMI graph · HMM anomalies · Granger causality
+        │
+        ▼  Studio Step 2.5 — Log Discovery
+   engineer approve / reject / edit / merge candidates
+        │
+        ▼  --phase 2 + --phase reason
+   enterprise.ttl  +  materialised.ttl  +  materialised-lineage.ttl
+        │
+        ▼  Insights → RCA preset
+   "what caused {event}?" with prov:wasDerivedFrom premise tree
+```
+
+#### L1 — Log mining (`--phase mine`)
+
+Three-layer pipeline over a folder pointer:
+
+- **Template clustering** via Drain3 + EM refinement (close-by templates merge once they're each ≥ 10 hits).
+- **Slot typing** — every `<*>` placeholder is classified as `IRI / IP / UUID / ENUM / NUMERIC / HEX / FREETEXT` with a PII heuristic (`imsi|msisdn|email|…`) that defaults to a higher sensitivity tier.
+- **PMI-weighted entity graph + temporal ordering** — directed edges only when `lead_ratio > 0.7` over a Δt window.
+
+New SQLite tables: `log_templates`, `log_template_slots`, `log_entity_edges`.
+
+#### L2 — Sequence learning (`--phase sequence`)
+
+Per-service `CategoricalHMM` over Drain cluster-id trajectories with BIC-selected state count. Anomaly scoring uses a **combined HMM-likelihood + cluster-bag-novelty** signal — the bag-novelty term catches structurally-simpler outliers that pure likelihood would miss. Confidence floor scales with cluster rarity so the dev-plan acceptance gate (≥ 0.6 on injected outliers) is met.
+
+#### L3 — Causality gate (no new phase; runs inside `--phase mine`)
+
+Strict triangulation before an edge becomes `LOG_CAUSAL_EDGE`:
+
+1. PMI ≥ 2.0 (from L1).
+2. `temporal_lead_ratio ≥ 0.7` (from L1).
+3. **Granger p < 0.05 OR transfer-entropy z > 2.**
+
+Edges that fail #3 demote to `LOG_RELATIONSHIP` — still visible to the reviewer, just without the causal claim. On the sample corpus 210 → 130 causal candidates (80 demoted).
+
+#### L4 — Step 2.5 Log Discovery in Ontology Studio
+
+A new wizard sidebar entry between Entities and Events. Engineers see candidates of four kinds (`LOG_EVENT`, `LOG_ENTITY`, `LOG_RELATIONSHIP`, `LOG_CAUSAL_EDGE`) sorted by **confidence × consequence** (PRML Ch. 1 decision theory). Per-row actions: ✓ approve · ✕ reject · ✎ edit · 🔀 merge. For relationship / causal candidates, a click-to-toggle mini-graph shows the two endpoint classes with the edge tagged by confidence and lag.
+
+New endpoints: `GET /api/log-discovery/{summary, candidates}`, `POST /api/log-discovery/{seed, <pid>/{approve, reject, merge}}`.
+
+Schema extension (idempotent migration in [db/migrations/log_rca_proposals.py](../db/migrations/log_rca_proposals.py)) adds four new `proposal_type` values and five new `detection_strategy` values to the existing `ontology_evolution_proposals` table.
+
+#### L5 — RCA-shaped ontology
+
+When the active session contains any `source=log-discovery`, `ontology_generator` emits:
+
+- The static **causal taxonomy** (`:CausalEvent`, `:hasCause`, `:triggers`, `:precededBy`, `:rootCause`) — see [src/rca_taxonomy.py](../src/rca_taxonomy.py).
+- One class per approved log-derived event, as `rdfs:subClassOf :CausalEvent`.
+- Time-interval data properties (`:startedAt`, `:endedAt`, `:duration`).
+- Severity tier mapping: `DEBUG/INFO → Public`, `WARN → Internal`, `ERROR → Confidential`, `CRITICAL → Restricted`.
+
+`wizard.rules.compile_causal_rule` turns each approved `LOG_CAUSAL_EDGE` into a SPARQL CONSTRUCT that Phase B materialises into derived `:hasCause` + `:triggers` triples with full `prov:wasDerivedFrom` lineage.
+
+#### L6 — RCA starter library + Insights presets
+
+[templates/rules/rca.yaml](../templates/rules/rca.yaml) — 5 starter rules:
+
+- `rca-rootcause-onehop`, `rca-rootcause-twohop` — walk the closure of `:hasCause` and assert `:rootCause` on terminal nodes.
+- `rca-multiple-causes` — flag effects with > 1 `:hasCause` edge (anti-tunnel-vision).
+- `rca-derivation-inferred`, `rca-derivation-measured` — split `:NfDeregister` between heartbeat-inferred and explicit (the 3GPP R4 ambiguity from the 5G demo).
+
+Two Insights presets: **root-cause** ("walk the :hasCause chain") and **similar-incidents** ("show past incidents with shared causes/severity"). Available via `GET /api/insights/rca-presets` and `POST /api/insights/rca`.
+
+#### L7 — Drift-template loop (`--phase drift-templates`)
+
+A closed-loop hook: re-runs Drain3 (with a stricter `sim_th=0.7`) against incoming logs, aggregating any new cluster ids that don't match the approved catalogue. Templates that clear the hit floor become `LOG_EVENT` proposals with `detection_strategy='DRIFT_ON_NEW_TEMPLATE'` — they land in the same Step 2.5 queue engineers already use for bootstrap candidates. No new UI surface needed.
+
+---
+
+### Files added or substantially extended
+
+```
+docs/log-rca-roadmap.md                   plan
+docs/log-rca-dev-plan.md                  build-out
+docs/release-notes.md                     this entry
+
+src/log_corpus.py                         L1.1 folder iterator
+src/log_templates.py                      L1.2 Drain wrapper + EM refine
+src/log_miner.py                          L1.3–1.5 orchestrator
+src/sequence_learner.py                   L2 HMM + anomalies
+src/causality_miner.py                    L3 Granger + transfer entropy
+src/rca_taxonomy.py                       L5.1 causal taxonomy
+src/ontology_generator.py                 L5.2 log-derived classes (modified)
+
+runtime/drift/log_template_drift.py       L7 drift hook
+
+wizard/log_review.py                      L4 review logic
+wizard/rules.py                           L5.3 compile_causal_rule (modified)
+wizard/app.py                             6 + 2 + 1 new endpoints
+wizard/templates/index.html               Step 2.5 Log Discovery panel
+
+db/schema.sql                             new proposal_type / strategy values
+db/migrations/log_rca_proposals.py        idempotent rebuild migration
+
+templates/rules/rca.yaml                  L6.1 RCA starter library
+templates/log-rca/                        reserved namespace
+
+examples/log-rca/sample/                  215-line synthetic 5G corpus
+examples/log-rca/sample/generate.py       reproducibility script
+
+tests/test_log_corpus.py                  7 tests
+tests/test_log_templates.py              11 tests
+tests/test_log_miner.py                  15 tests
+tests/test_sequence_learner.py           10 tests
+tests/test_log_review.py                 12 tests
+tests/test_causality_miner.py            10 tests
+tests/test_rca_ontology.py               13 tests
+tests/test_rca_starter_library.py         8 tests
+tests/test_drift_template_loop.py         5 tests
+                                  ─────
+                                    91 new tests
+```
+
+---
+
+### CLI surface added
+
+| Phase | What it does |
+|---|---|
+| `--phase mine --log-path …` | L1 — template clustering + slot typing + PMI graph + Granger-gated causality; reseeds the proposal store. |
+| `--phase sequence --log-path …` | L2 — per-service HMM + anomaly proposals. |
+| `--phase drift-templates --log-path …` | L7 — find new templates not in the approved catalogue, queue them for review. |
+
+The existing `--phase reason` automatically picks up approved causal rules from `session.causal_rules` via `wizard.rules.export_causal_rules`.
+
+---
+
+### Migration notes
+
+- **Schema:** safe to run on an existing DB. The new `ontology_evolution_proposals` columns + CHECK constraint relaxations apply via `db/migrations/log_rca_proposals.py` — a SAVEPOINT probe detects whether the rebuild is needed and, when it is, performs the standard SQLite rename-create-copy-drop dance without losing existing rows.
+- **Wizard sessions:** old sessions load fine. New keys `causal_rules` default to `[]`. Approvals from Step 2.5 add entries with `source="log-discovery"` so the L5 ontology generator can pick them out.
+- **Adapter contract:** unchanged. The existing OpenAI / OCI / Anthropic / Vertex / Ollama adapters are wrapped, not modified.
+- **Demo DB / artefacts:** unchanged. Phase 2 generation omits the RCA taxonomy when the session has no `source=log-discovery`, so projects that don't use log mining see identical output to v3.1.
+
+---
+
+### Known gaps / explicit limits
+
+- **OWL-RL premises remain coarse.** owlrl doesn't expose per-triple premises; Phase D lineage attributes those triples to the engine only. ROBOT-explain integration is a future refinement.
+- **SPARQL time-window filter dropped from compiled causal rules.** rdflib's SPARQL engine can't reliably do `xsd:dateTime - xsd:dateTime` arithmetic against `xsd:duration` literals. The window value (set by L3) is preserved as an audit comment, and the directional filter (`?et > ?ct`) carries the temporal semantic. Switching to a graph store with full SPARQL 1.1 duration support (Stardog, Fuseki) would lift this restriction.
+- **Drain at `sim_th=0.4` is permissive.** The L1 miner can over-merge templates on diverse corpora. Tightening to 0.5 in `LogTemplateMiner.__init__` is a one-flag change for projects with noisier logs.
+- **Drift detector uses stricter `sim_th=0.7`.** That's intentional — false positives in the review queue are cheaper to dismiss than false negatives (real drift hidden behind a permissive match).
+
+---
+
+### Closed-loop demo (5 minutes against the bundled sample corpus)
+
+```bash
+python toolkit.py --phase mine     --log-path examples/log-rca/sample/
+python toolkit.py --phase sequence --log-path examples/log-rca/sample/
+python wizard/app.py
+# → browser: Step 2.5 → approve a LOG_EVENT + a LOG_CAUSAL_EDGE
+python toolkit.py --phase 2
+python toolkit.py --phase reason
+# → output/ontology/materialised.ttl carries derived :hasCause
+# → output/ontology/materialised-lineage.ttl shows prov:wasDerivedFrom
+```
+
+Optional steady state — drop a new `.jsonl` with a never-seen pattern into the watched folder:
+
+```bash
+python toolkit.py --phase drift-templates --log-path examples/log-rca/sample/
+# → 1 new template detected → 1 LOG_EVENT proposal queued
+```
+
+The Viewer's Materialised tab (from v3.1) renders the derivation premise tree end-to-end. The Insights panel's RCA presets answer **"what caused {event}?"** with the materialised graph as context.
+
+---
+
 ## v3.1 — Rules & Reasoning
 
 > **Theme:** turn the toolkit's narrow "ontology generator with a reasoner hook" into "ontology generator with first-class rules, materialised inference, explanations, and grounded LLM Insights."
