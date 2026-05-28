@@ -169,10 +169,12 @@
                 justify-content: center; font-size: 12px; font-weight: 600;
                 flex-shrink: 0; color: var(--muted-2);
                 transition: background .12s, color .12s; }
-    /* Section divider in the sidebar nav — separates the linear "build"
-       steps (1–6) from the post-generation tools (7–9). Not interactive,
-       no hover, no click target. Continuous numbering avoids the
-       letter-vs-number mismatch users found confusing. */
+    /* Section divider in the sidebar nav — labels the three phases of
+       the build journey (Define · Enrich · Build) and separates them
+       from the post-generation tools. Integer step numbers reset
+       inside each phase via the markup ordering, so adding a step
+       later only renumbers within its own phase. Not interactive, no
+       hover, no click target. */
     .step-nav li.step-divider {
       cursor: default; padding: 14px 14px 6px 14px;
       font-size: 11px; font-weight: 500; color: var(--muted-2);
@@ -474,19 +476,21 @@
     </div>
     <ul class="step-nav" id="step-nav">
       <li data-step="library"><span class="step-num">📚</span> Library</li>
-      <li class="step-divider" aria-hidden="true">Build</li>
+      <li class="step-divider" aria-hidden="true">Define</li>
       <li class="active" data-step="domain"><span class="step-num">1</span> Domain Identity</li>
       <li data-step="entities"><span class="step-num">2</span> Entities</li>
-      <li data-step="log-discovery"><span class="step-num">2.5</span> Log Discovery</li>
       <li data-step="events"><span class="step-num">3</span> Events</li>
       <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
-      <li data-step="cqs"><span class="step-num">5</span> Competency Questions</li>
-      <li data-step="rules"><span class="step-num">5.5</span> Rules &amp; Reasoning</li>
-      <li data-step="generate"><span class="step-num">6</span> Generate</li>
+      <li class="step-divider" aria-hidden="true">Enrich</li>
+      <li data-step="log-discovery"><span class="step-num">5</span> Log Discovery</li>
+      <li data-step="cqs"><span class="step-num">6</span> Competency Questions</li>
+      <li data-step="rules"><span class="step-num">7</span> Rules &amp; Reasoning</li>
+      <li class="step-divider" aria-hidden="true">Build</li>
+      <li data-step="generate"><span class="step-num">8</span> Generate</li>
       <li class="step-divider" aria-hidden="true">After generation</li>
-      <li data-step="evolve"><span class="step-num">7</span> Evolution Review</li>
-      <li data-step="comply"><span class="step-num">8</span> Compliance Dashboard</li>
-      <li data-step="retrieve"><span class="step-num">9</span> Vector Retrieval</li>
+      <li data-step="evolve"><span class="step-num">9</span> Evolution Review</li>
+      <li data-step="comply"><span class="step-num">10</span> Compliance Dashboard</li>
+      <li data-step="retrieve"><span class="step-num">11</span> Vector Retrieval</li>
       <li class="step-divider" aria-hidden="true">Configuration</li>
       <li data-step="settings"><span class="step-num">⚙</span> Settings</li>
     </ul>
@@ -530,27 +534,115 @@
       </div>
 
       <div class="card">
-        <h3>Import from file</h3>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
-          Drop a <code>.json</code> session file (wizard or onboard.py format) or a
-          <code>.json</code> schema. SQL DDL import lands in a follow-up step (#16).
-        </p>
-        <label id="import-drop"
-               style="display:flex;flex-direction:column;align-items:center;gap:8px;
-                      padding:24px;border:2px dashed var(--border);border-radius:8px;
-                      cursor:pointer;background:rgba(91,138,247,.04);
-                      transition:border-color .15s,background .15s">
-          <span style="font-size:24px;opacity:.55">⤓</span>
-          <span style="font-size:13px;color:var(--muted)">
-            Drag &amp; drop, or <span style="color:var(--accent);font-weight:600">click to browse</span>
-          </span>
-          <span id="import-filename" style="font-size:11px;color:var(--muted-2)"></span>
-          <input type="file" id="import-file" accept=".json,.sql" style="display:none"
-                 onchange="onImportPicked(event)" />
-        </label>
-        <div id="import-error" style="display:none;color:var(--danger);font-size:12px;
-                                       margin-top:8px;padding:8px 12px;
-                                       background:rgba(247,107,107,.08);border-radius:4px"></div>
+        <h3 style="margin-bottom:8px">Import an existing schema</h3>
+        <ul class="tabs" role="tablist" style="margin-bottom:10px">
+          <li><button type="button" class="tab-btn active" data-imp-tab="file"
+                      onclick="switchImportTab('file')">📄 From file</button></li>
+          <li><button type="button" class="tab-btn" data-imp-tab="db"
+                      onclick="switchImportTab('db')">🗄️ Connect to database</button></li>
+        </ul>
+
+        <!-- File-import tab ─────────────────────────────────────────────── -->
+        <div id="imp-tab-file" class="tab-panel active">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
+            Drop a <code>.json</code> session file (wizard or onboard.py format) or a
+            <code>.json</code> schema. SQL DDL import lands in a follow-up step (#16).
+          </p>
+          <label id="import-drop"
+                 style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                        padding:24px;border:2px dashed var(--border);border-radius:8px;
+                        cursor:pointer;background:rgba(91,138,247,.04);
+                        transition:border-color .15s,background .15s">
+            <span style="font-size:24px;opacity:.55">⤓</span>
+            <span style="font-size:13px;color:var(--muted)">
+              Drag &amp; drop, or <span style="color:var(--accent);font-weight:600">click to browse</span>
+            </span>
+            <span id="import-filename" style="font-size:11px;color:var(--muted-2)"></span>
+            <input type="file" id="import-file" accept=".json,.sql" style="display:none"
+                   onchange="onImportPicked(event)" />
+          </label>
+          <div id="import-error" style="display:none;color:var(--danger);font-size:12px;
+                                         margin-top:8px;padding:8px 12px;
+                                         background:rgba(247,107,107,.08);border-radius:4px"></div>
+        </div>
+
+        <!-- Database-direct tab ────────────────────────────────────────── -->
+        <div id="imp-tab-db" class="tab-panel">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:16px">
+            Connect directly to your operational database. Tables, columns, and foreign
+            keys are read into the same review modal as the file path — no upload required.
+          </p>
+
+          <!-- ── Vendor + profile header row ────────────────────────────── -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="field" style="margin:0">
+              <label for="db-vendor-select"
+                     style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">Database vendor</label>
+              <select id="db-vendor-select" onchange="selectDbVendor(this.value)"
+                      style="width:100%;background:var(--bg);border:1px solid var(--border);
+                             border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px">
+                <option value="">— Select a vendor —</option>
+              </select>
+              <div id="db-vendor-help" style="font-size:11px;color:var(--muted);margin-top:4px;min-height:14px"></div>
+            </div>
+
+            <div class="field" style="margin:0">
+              <label for="db-profile-select"
+                     style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">
+                Saved profile
+                <span id="db-profile-count" style="color:var(--muted-2);font-weight:normal"></span>
+              </label>
+              <div style="display:flex;gap:6px">
+                <select id="db-profile-select" onchange="useDbProfile(this.value)"
+                        style="flex:1;background:var(--bg);border:1px solid var(--border);
+                               border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px">
+                  <option value="">— New connection —</option>
+                </select>
+                <button class="btn btn-ghost" id="db-profile-delete-btn" onclick="deleteCurrentDbProfile()"
+                        title="Delete the selected profile" disabled
+                        style="padding:6px 10px;font-size:12px">Delete</button>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;min-height:14px">
+                Pick an existing profile to pre-fill the form, or leave on
+                <i>— New connection —</i> to enter fresh credentials.
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Config form ────────────────────────────────────────────── -->
+          <fieldset id="db-form-fieldset" disabled
+                    style="border:1px solid var(--border);border-radius:6px;padding:14px 16px 16px;
+                           margin:0 0 16px;background:var(--surface);min-width:0">
+            <legend style="padding:0 6px;font-size:12px;font-weight:600;color:var(--text)">Connection details</legend>
+            <div id="db-form-fields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px"></div>
+          </fieldset>
+
+          <!-- ── Action row ────────────────────────────────────────────── -->
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="db-import-btn" onclick="importFromDatabase()"
+                    style="padding:8px 18px;font-size:13px" disabled>Generate from database</button>
+            <button class="btn btn-ghost" id="db-test-btn" onclick="testDbConnection()"
+                    style="padding:8px 14px;font-size:13px" disabled>Test connection</button>
+            <button class="btn btn-ghost" id="db-save-btn" onclick="saveDbProfile()"
+                    style="padding:8px 14px;font-size:13px" disabled>Save as profile…</button>
+            <span style="flex:1"></span>
+            <span id="db-action-hint" style="font-size:11px;color:var(--muted)">Select a vendor to enable these actions.</span>
+          </div>
+
+          <!-- Inline status (small, single-line; expands for sample tables) -->
+          <div id="db-test-result" style="font-size:12px;min-height:14px"></div>
+
+          <!-- Subtle privacy footnote -->
+          <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);
+                      font-size:11px;color:var(--muted);line-height:1.5">
+            <b style="color:var(--text);font-weight:600">Credential handling.</b>
+            Passwords are stored locally in <code>db/ontologies.db</code> with base64
+            obfuscation — a defence against casual inspection, not encryption. Profiles
+            never leave your machine. For production credentials, prefer secrets
+            provided via your organisation's key store at runtime.
+          </div>
+
+        </div>
       </div>
 
       <div class="card">
@@ -583,7 +675,7 @@
             <option value="custom">Custom</option>
           </select></div>
         <div class="step-nav-footer">
-          <span class="nav-hint">Step 1 of 6 · You can skip ahead and come back any time.</span>
+          <span class="nav-hint">Phase 1 of 3 · Define · You can skip ahead and come back any time.</span>
           <div class="nav-right">
             <button class="btn btn-ghost"   onclick="goStep('entities')">Skip →</button>
             <button class="btn btn-primary" onclick="saveDomain()">Save &amp; Continue →</button>
@@ -614,15 +706,15 @@
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('domain')">← Back</button>
-        <span class="nav-hint">Step 2 of 6 · Entities are optional but recommended.</span>
+        <span class="nav-hint">Phase 1 of 3 · Define · Entities are optional but recommended.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('log-discovery')">Skip →</button>
-          <button class="btn btn-primary" onclick="goStep('log-discovery')">Continue →</button>
+          <button class="btn btn-ghost"   onclick="goStep('events')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('events')">Continue →</button>
         </div>
       </div>
     </div>
 
-    <!-- Step 2.5 — Log Discovery (L4) -->
+    <!-- Step 5 — Log Discovery (L4 · first step in the Enrich phase) -->
     <div class="step-panel" id="step-log-discovery">
       <div class="step-title">Log Discovery <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span></div>
       <div class="step-subtitle">Convert a folder of raw logs into ontology candidates an engineer reviews one at a time. Approved candidates flow into the regular Wizard steps (Entities · Events · Relationships · Rules) and end up as classes, properties, and SPARQL rules in your generated ontology.</div>
@@ -652,7 +744,7 @@
             <div style="font-size:20px;line-height:1">👁️</div>
             <div style="font-size:11px;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Review</div>
             <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35"><b>You are here.</b> Approve / reject / edit / merge proposals so they flow into your session</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">Step 2.5 (this screen)</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">Step 5 (this screen)</div>
           </div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px">
@@ -727,7 +819,7 @@
             </div>
             <div style="font-size:12px;line-height:1.5;color:var(--text)">A directed edge that <b>passed all three gates</b>: PMI, temporal ordering, and Granger or transfer-entropy.</div>
             <div style="margin-top:8px;font-size:11px;color:var(--muted-2)">
-              <b>Approval lands in:</b> Step 5.5 — Rules<br>
+              <b>Approval lands in:</b> Step 7 — Rules<br>
               <b>Becomes:</b> SPARQL CONSTRUCT for <code style="font-size:10px">:hasCause</code><br>
               <b>Materialised in:</b> <code style="font-size:10px">--phase reason</code>
             </div>
@@ -743,7 +835,7 @@
             <span style="background:#16a34a;color:white;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">✓</span>
             <div>
               <div style="font-size:12px;font-weight:600;color:var(--text)">Approve</div>
-              <div style="font-size:11px;color:var(--muted);line-height:1.45">Marks <code>APPROVED</code> and pushes into the matching session bucket. Visible on Steps 2 / 3 / 4 / 5.5 right away.</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.45">Marks <code>APPROVED</code> and pushes into the matching session bucket. Visible on Steps 2 / 3 / 4 / 7 right away.</div>
             </div>
           </div>
           <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start">
@@ -841,10 +933,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
 
       <div class="step-nav-footer">
-        <button class="btn btn-ghost" onclick="goStep('entities')">← Back</button>
-        <span class="nav-hint">Step 2.5 of 6 · Optional. Engineers run this after pointing the toolkit at a log folder.</span>
+        <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
+        <span class="nav-hint">Phase 2 of 3 · Enrich · Optional. Engineers run this after pointing the toolkit at a log folder.</span>
         <div class="nav-right">
-          <button class="btn btn-primary" onclick="goStep('events')">Continue →</button>
+          <button class="btn btn-primary" onclick="goStep('cqs')">Continue →</button>
         </div>
       </div>
     </div>
@@ -871,7 +963,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('entities')">← Back</button>
-        <span class="nav-hint">Step 3 of 6 · Skip if your domain has no time-stamped events.</span>
+        <span class="nav-hint">Phase 1 of 3 · Define · Skip if your domain has no time-stamped events.</span>
         <div class="nav-right">
           <button class="btn btn-ghost"   onclick="goStep('relationships')">Skip →</button>
           <button class="btn btn-primary" onclick="goStep('relationships')">Continue →</button>
@@ -939,10 +1031,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('events')">← Back</button>
-        <span class="nav-hint">Step 4 of 6 · Even one or two relationships make the graph more useful.</span>
+        <span class="nav-hint">Phase 1 of 3 · Define · Even one or two relationships make the graph more useful.</span>
         <div class="nav-right">
-          <button class="btn btn-ghost"   onclick="goStep('cqs')">Skip →</button>
-          <button class="btn btn-primary" onclick="goStep('cqs')">Continue →</button>
+          <button class="btn btn-ghost"   onclick="goStep('log-discovery')">Skip →</button>
+          <button class="btn btn-primary" onclick="goStep('log-discovery')">Continue →</button>
         </div>
       </div>
     </div>
@@ -973,8 +1065,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         </div>
       </div>
       <div class="step-nav-footer">
-        <button class="btn btn-ghost" onclick="goStep('relationships')">← Back</button>
-        <span class="nav-hint">Step 5 of 6 · CQs drive the governance scorecard. Optional but recommended.</span>
+        <button class="btn btn-ghost" onclick="goStep('log-discovery')">← Back</button>
+        <span class="nav-hint">Phase 2 of 3 · Enrich · CQs drive the governance scorecard. Optional but recommended.</span>
         <div class="nav-right">
           <button class="btn btn-ghost"   onclick="goStep('rules')">Skip →</button>
           <button class="btn btn-primary" onclick="goStep('rules')">Continue →</button>
@@ -982,7 +1074,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
     </div>
 
-    <!-- Step 5.5: Rules & Reasoning -->
+    <!-- Step 7 — Rules & Reasoning (third step in the Enrich phase) -->
     <div class="step-panel" id="step-rules">
       <div class="step-title">Rules &amp; Reasoning</div>
       <div class="step-subtitle">Author SHACL, SPARQL CONSTRUCT, and OWL-axiom rules. Saved rules are validated, persisted to <code>session.rules</code>, and consumed by <code>--phase reason</code> at materialisation time.</div>
@@ -1018,7 +1110,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
-        <span class="nav-hint">Step 5.5 of 6 · Optional. Rules feed the materialisation phase.</span>
+        <span class="nav-hint">Phase 2 of 3 · Enrich · Optional. Rules feed the materialisation phase.</span>
         <div class="nav-right">
           <button class="btn btn-primary" onclick="goStep('generate')">Continue →</button>
         </div>
@@ -1127,8 +1219,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         </div>
       </div>
       <div class="step-nav-footer">
-        <button class="btn btn-ghost" onclick="goStep('cqs')">← Back</button>
-        <span class="nav-hint">Step 6 of 6 · Last step. Run the pipeline above, then save to the Library.</span>
+        <button class="btn btn-ghost" onclick="goStep('rules')">← Back</button>
+        <span class="nav-hint">Phase 3 of 3 · Build · Last step. Run the pipeline above, then save to the Library.</span>
         <div class="nav-right">
           <button class="btn btn-ghost" onclick="goStep('library')">View Library →</button>
         </div>
@@ -1986,6 +2078,356 @@ function _imSetupDropZone() {
   });
 }
 
+// ── Tabbed import (file vs database) ────────────────────────────────────
+function switchImportTab(name) {
+  document.querySelectorAll('[data-imp-tab]').forEach(b =>
+    b.classList.toggle('active', b.dataset.impTab === name));
+  ['file', 'db'].forEach(k =>
+    document.getElementById('imp-tab-' + k).classList.toggle('active', k === name));
+  if (name === 'db') {
+    loadDbVendors();
+    loadDbProfiles();
+  }
+}
+
+// ── Vendor + form rendering ─────────────────────────────────────────────
+let _dbVendors = {};       // {vendor_id → spec}
+let _dbCurrentVendor = null;
+let _dbCurrentProfileId = null;   // when reusing a saved profile
+
+async function loadDbVendors() {
+  const select = document.getElementById('db-vendor-select');
+  if (!select) return;
+  if (!Object.keys(_dbVendors).length) {
+    try {
+      const res = await fetch('/api/db/vendors');
+      const out = await res.json();
+      for (const v of (out.vendors || [])) _dbVendors[v.id] = v;
+    } catch (_) { /* offline; the placeholder option stays */ }
+  }
+  // Populate options. Keep the leading placeholder so the form sits
+  // disabled until the user has explicitly chosen a driver.
+  while (select.options.length > 1) select.remove(1);
+  for (const v of Object.values(_dbVendors)) {
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.label;
+    select.appendChild(opt);
+  }
+  _updateDbActionState();
+}
+
+function selectDbVendor(vid) {
+  _dbCurrentVendor = vid || null;
+  const select = document.getElementById('db-vendor-select');
+  if (select && select.value !== (vid || '')) select.value = vid || '';
+  const help = document.getElementById('db-vendor-help');
+  if (help) {
+    const v = _dbVendors[vid];
+    help.textContent = v ? (v.description || '') : '';
+  }
+  _renderDbForm();
+  _updateDbActionState();
+}
+
+// Action buttons stay disabled until the user picks a vendor. The
+// hint text under the action row mirrors the current state so the
+// reason is always visible.
+function _updateDbActionState() {
+  const enabled = !!_dbCurrentVendor;
+  const fset = document.getElementById('db-form-fieldset');
+  if (fset) fset.disabled = !enabled;
+  ['db-import-btn', 'db-test-btn', 'db-save-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = !enabled;
+  });
+  const hint = document.getElementById('db-action-hint');
+  if (hint) {
+    hint.textContent = enabled
+      ? 'Test the connection before generating, or save as a profile to reuse later.'
+      : 'Select a vendor to enable these actions.';
+  }
+  const delBtn = document.getElementById('db-profile-delete-btn');
+  if (delBtn) delBtn.disabled = !_dbCurrentProfileId;
+}
+
+function _renderDbForm() {
+  const vendor = _dbVendors[_dbCurrentVendor];
+  const fields = document.getElementById('db-form-fields');
+  if (!fields) return;
+  if (!vendor) { fields.innerHTML = ''; return; }
+
+  // Single, ordered grid — required fields first, optional after.
+  // Standard form rendering: label above input, micro-hint below.
+  // No inline icons; no per-vendor colour theming. The aim is "looks
+  // like every other admin tool" rather than "looks decorated".
+  const ordered = [
+    ...(vendor.fields || []).filter(f => f.required),
+    ...(vendor.fields || []).filter(f => !f.required),
+  ];
+
+  fields.innerHTML = ordered.map(f => {
+    const id = `db-field-${f.name}`;
+    const inputType = f.secret ? 'password' : (f.kind === 'number' ? 'number' : 'text');
+    const reqMark = f.required
+      ? '<span style="color:#dc2626;margin-left:2px" title="Required">*</span>'
+      : '';
+    const optMark = !f.required
+      ? '<span style="color:var(--muted-2);font-weight:normal;font-size:10px;margin-left:6px;text-transform:none;letter-spacing:0">(optional)</span>'
+      : '';
+    const defaultStr = (f.default !== undefined && f.default !== null)
+      ? String(f.default).replace(/"/g, '&quot;') : '';
+    const placeholder = (f.hint || '').replace(/"/g, '&quot;');
+    const inputAttrs = `id="${id}" data-field="${f.name}" value="${defaultStr}"
+                        placeholder="${placeholder}"
+                        autocomplete="${f.secret ? 'off' : 'on'}"
+                        ${f.secret ? 'autocomplete="new-password" spellcheck="false"' : ''}
+                        style="width:100%;background:var(--bg);border:1px solid var(--border);
+                               border-radius:6px;color:var(--text);padding:7px 10px;font-size:13px"`;
+    const ctl = (f.kind === 'select')
+      ? `<input type="text" ${inputAttrs} list="${id}-list"/>
+         <datalist id="${id}-list"></datalist>`
+      : `<input type="${inputType}" ${inputAttrs}/>`;
+    const hint = f.hint
+      ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4">${f.hint}</div>`
+      : '';
+    return `
+      <div class="field" style="margin:0">
+        <label for="${id}" style="display:block;font-size:12px;color:var(--text);
+                                   font-weight:500;margin-bottom:4px">
+          ${f.label}${reqMark}${optMark}
+        </label>
+        ${ctl}
+        ${hint}
+      </div>`;
+  }).join('');
+}
+
+function _readDbForm() {
+  const config = {};
+  document.querySelectorAll('#db-form-fields [data-field]').forEach(el => {
+    const v = el.value;
+    if (v !== '' && v !== null && v !== undefined) {
+      config[el.dataset.field] = (el.type === 'number' && v !== '') ? Number(v) : v;
+    }
+  });
+  return { vendor: _dbCurrentVendor, config };
+}
+
+// ── Saved profiles dropdown ─────────────────────────────────────────────
+// Holds the full list with deobfuscated config so useDbProfile can fill
+// the form without an extra round-trip per pick.
+let _dbProfilesCache = [];
+
+async function loadDbProfiles() {
+  const select = document.getElementById('db-profile-select');
+  const count = document.getElementById('db-profile-count');
+  if (!select) return;
+  try {
+    const res = await fetch('/api/db/profiles');
+    const out = await res.json();
+    _dbProfilesCache = out.profiles || [];
+  } catch (_) {
+    _dbProfilesCache = [];
+  }
+  while (select.options.length > 1) select.remove(1);
+  for (const p of _dbProfilesCache) {
+    const opt = document.createElement('option');
+    opt.value = String(p.id);
+    const venLabel = (_dbVendors[p.vendor] && _dbVendors[p.vendor].label) || p.vendor;
+    const host = p.config && (p.config.host || p.config.db_path || '');
+    opt.textContent = host
+      ? `${p.name}  —  ${venLabel} · ${host}`
+      : `${p.name}  —  ${venLabel}`;
+    select.appendChild(opt);
+  }
+  if (count) {
+    count.textContent = _dbProfilesCache.length
+      ? `(${_dbProfilesCache.length})` : '';
+  }
+  _updateDbActionState();
+}
+
+function useDbProfile(idStr) {
+  const id = idStr ? Number(idStr) : null;
+  if (!id) {
+    _dbCurrentProfileId = null;
+    _updateDbActionState();
+    return;
+  }
+  const p = _dbProfilesCache.find(x => x.id === id);
+  if (!p) { showToast('Profile vanished'); return; }
+  _dbCurrentProfileId = p.id;
+  selectDbVendor(p.vendor);
+  // Wait one tick for the form to render, then fill values. Passwords
+  // come back masked; the user re-enters them only if they want to
+  // override — otherwise the server uses the stored value via
+  // profile_id in the request body.
+  setTimeout(() => {
+    for (const [k, v] of Object.entries(p.config || {})) {
+      const el = document.querySelector(`#db-form-fields [data-field="${k}"]`);
+      if (el && v !== '●●●●●●' && v !== null && v !== undefined) {
+        el.value = v;
+      }
+    }
+    _updateDbActionState();
+  }, 30);
+}
+
+async function deleteCurrentDbProfile() {
+  if (!_dbCurrentProfileId) return;
+  const p = _dbProfilesCache.find(x => x.id === _dbCurrentProfileId);
+  if (!p) return;
+  if (!confirm(`Delete profile "${p.name}"?`)) return;
+  try {
+    const res = await fetch(`/api/db/profiles/${p.id}`, { method: 'DELETE' });
+    if (!res.ok) { showToast('Delete failed'); return; }
+    _dbCurrentProfileId = null;
+    const select = document.getElementById('db-profile-select');
+    if (select) select.value = '';
+    showToast(`Deleted profile: ${p.name}`);
+    loadDbProfiles();
+  } catch (e) { showToast('Delete error: ' + e); }
+}
+
+async function saveDbProfile() {
+  const { vendor, config } = _readDbForm();
+  if (!vendor) { showToast('Pick a vendor first'); return; }
+  const existingName = _dbCurrentProfileId
+    ? (_dbProfilesCache.find(p => p.id === _dbCurrentProfileId) || {}).name
+    : '';
+  const name = prompt(
+    'Profile name', existingName || ''
+  );
+  if (!name) return;
+  try {
+    const res = await fetch('/api/db/profiles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: _dbCurrentProfileId, name, vendor, config }),
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Save failed: ' + (out.error || 'unknown')); return; }
+    _dbCurrentProfileId = out.profile && out.profile.id;
+    showToast('Saved profile: ' + out.profile.name);
+    await loadDbProfiles();
+    const select = document.getElementById('db-profile-select');
+    if (select && _dbCurrentProfileId) select.value = String(_dbCurrentProfileId);
+    _updateDbActionState();
+  } catch (e) { showToast('Save error: ' + e); }
+}
+
+// ── Test + Import ───────────────────────────────────────────────────────
+// Inline status row for test/import results. Subtle: a single line of
+// coloured text with an optional sample-tables chip row below. Matches
+// the rest of the wizard's chrome — no banner gradients.
+function _renderDbResultCard(state, opts) {
+  const out = document.getElementById('db-test-result');
+  if (!out) return;
+  if (!state) { out.innerHTML = ''; return; }
+  const palette = {
+    pending: { tx:'var(--muted)',  icon:'…' },
+    ok:      { tx:'#059669',       icon:'✓' },
+    err:     { tx:'#b91c1c',       icon:'✗' },
+  }[state] || { tx:'var(--text)', icon:'·' };
+  const meta = opts.meta
+    ? `<span style="color:var(--muted);margin-left:8px">${opts.meta}</span>` : '';
+  const samples = (opts.samples || []).length
+    ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+         <span style="font-size:11px;color:var(--muted);margin-right:2px">Sample tables:</span>
+         ${opts.samples.map(t => `<code style="font-size:11px;background:var(--surface-2);padding:1px 6px;border-radius:3px;color:var(--text)">${t}</code>`).join('')}
+         ${opts.totalExtra ? `<span style="font-size:11px;color:var(--muted)">+ ${opts.totalExtra} more</span>` : ''}
+       </div>` : '';
+  out.innerHTML = `
+    <div style="font-size:12px;line-height:1.5">
+      <span style="color:${palette.tx};font-weight:600">${palette.icon} ${opts.title || ''}</span>
+      ${meta}
+    </div>
+    ${samples}`;
+}
+
+async function testDbConnection() {
+  _renderDbResultCard('pending', { title: 'Connecting…', meta: 'Opening a connection and listing tables' });
+  const { vendor, config } = _readDbForm();
+  if (!vendor) {
+    _renderDbResultCard('err', { title: 'Pick a vendor first' });
+    return;
+  }
+  const body = _dbCurrentProfileId
+    ? { profile_id: _dbCurrentProfileId, vendor, config }   // server uses stored secrets
+    : { vendor, config };
+  try {
+    const res = await fetch('/api/db/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const r = await res.json();
+    if (r.ok) {
+      const sampleAll = r.sample_tables || [];
+      const samples = sampleAll.slice(0, 8);
+      _renderDbResultCard('ok', {
+        title: `Connected · ${r.tables} table${r.tables===1?'':'s'} discovered`,
+        meta:  `Round-trip ${r.duration_ms} ms · vendor ${r.vendor}`,
+        samples,
+        totalExtra: Math.max(0, r.tables - samples.length),
+      });
+    } else {
+      _renderDbResultCard('err', {
+        title: 'Could not connect',
+        meta:  r.error || 'No error detail returned.',
+      });
+    }
+  } catch (e) {
+    _renderDbResultCard('err', { title: 'Network error', meta: String(e) });
+  }
+}
+
+async function importFromDatabase() {
+  _renderDbResultCard('pending', {
+    title: 'Introspecting tables…',
+    meta:  'Walking the schema and lifting foreign keys into relationships',
+  });
+  const { vendor, config } = _readDbForm();
+  if (!vendor) {
+    _renderDbResultCard('err', { title: 'Pick a vendor first' });
+    return;
+  }
+  const body = _dbCurrentProfileId
+    ? { profile_id: _dbCurrentProfileId,
+        domain_name: document.getElementById('d-name')?.value,
+        base_iri:    document.getElementById('d-iri')?.value }
+    : { vendor, config,
+        domain_name: document.getElementById('d-name')?.value,
+        base_iri:    document.getElementById('d-iri')?.value };
+  try {
+    const res = await fetch('/api/db/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const result = await res.json();
+    if (!result.ok) {
+      const msg = (result.errors && result.errors[0] && result.errors[0].message) || 'introspection failed';
+      _renderDbResultCard('err', { title: 'Import failed', meta: msg });
+      return;
+    }
+    _renderDbResultCard('ok', {
+      title: `Found ${result.stats.entities} table${result.stats.entities===1?'':'s'}`,
+      meta:  `${result.stats.relationships} foreign-key relationship${result.stats.relationships===1?'':'s'} · opening review modal…`,
+    });
+    // Reuse the existing file-import review modal so file + DB paths
+    // share their final-guard validation and commit code path.
+    if (typeof openImportReview === 'function') {
+      openImportReview(result);
+    } else {
+      showToast('Review modal not wired — session not committed.');
+    }
+  } catch (e) {
+    _renderDbResultCard('err', { title: 'Network error', meta: String(e) });
+  }
+}
+
 function onImportPicked(ev) {
   const f = ev.target.files && ev.target.files[0];
   if (f) _imUploadFile(f);
@@ -2013,6 +2455,13 @@ async function _imUploadFile(file) {
     errBox.style.display = '';
     return;
   }
+  openImportReview(res);
+}
+
+// Shared between file-import and database-import paths. Both end up
+// at the same review modal so the final-guard commit code is one
+// implementation.
+function openImportReview(res) {
   _importResult = res;
   _imRenderModal(res);
   document.getElementById('import-modal').style.display = 'flex';
@@ -2788,7 +3237,7 @@ function _renderHeatLegend(cov) {
   const covered = (cov.summary && cov.summary.covered_classes) || 0;
   const total = (cov.summary && cov.summary.all_classes) || 0;
   if (!max) {
-    host.innerHTML = `<span>Rule-impact overlay: no rules touch any class yet. Add rules in <a href="#" onclick="goStep('rules');return false">Step 5.5</a> to see the heat map.</span>`;
+    host.innerHTML = `<span>Rule-impact overlay: no rules touch any class yet. Add rules in <a href="#" onclick="goStep('rules');return false">Step 7 · Rules &amp; Reasoning</a> to see the heat map.</span>`;
     return;
   }
   host.innerHTML = `
@@ -2904,7 +3353,7 @@ function renderCQs() {
 
 document.getElementById('new-cq').addEventListener('keydown', e => { if (e.key==='Enter') addCQ(); });
 
-// ── Rules & Reasoning (Step 5.5) ──────────────────────────────────────────
+// ── Rules & Reasoning (Step 7 — Enrich phase) ─────────────────────────────
 function _ensureRules() {
   if (!Array.isArray(session.rules)) session.rules = [];
   return session.rules;
@@ -5408,7 +5857,7 @@ async function _runPreflight(name) {
   banner.innerHTML =
     `<span class="pf-icon">${icon}</span>` +
     `<span class="pf-text">${result.message}</span>` +
-    (result.ready ? '' : `<button onclick="goStep('generate')">Open Step 6 →</button>`);
+    (result.ready ? '' : `<button onclick="goStep('generate')">Open Step 8 · Generate →</button>`);
 }
 
 // ── Evolution strategy explanations ─────────────────────────────────────
