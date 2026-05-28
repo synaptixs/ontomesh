@@ -907,7 +907,7 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       <div class="card" id="log-disco-content" style="display:none">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
           <h3 style="margin:0">Candidates <span id="log-disco-counts" class="badge"></span></h3>
-          <div style="display:flex; gap:8px; align-items:center">
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end">
             <label style="font-size:12px; color:var(--muted)">Kind</label>
             <select id="log-disco-kind" onchange="loadLogDiscovery()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px">
               <option value="">All</option>
@@ -924,6 +924,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
               <option value="ALL">All</option>
             </select>
             <button class="btn btn-ghost" onclick="reseedLogDiscovery()" title="Re-build proposals from the latest mining outputs">↻ Re-seed</button>
+            <button class="btn btn-ghost" onclick="rerankLogDiscovery()" title="Refit the active-learning ranker on your approve/reject history (L9)">↻ Re-rank with feedback</button>
+            <span id="log-disco-ranker-badge" class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px"></span>
           </div>
         </div>
         <div class="box-help" style="margin-bottom:8px">
@@ -3537,6 +3539,7 @@ async function loadLogDiscovery() {
       `${k.replace('LOG_','').toLowerCase()}: ${Object.values(sc).reduce((s,n)=>s+n,0)}`
     ).join(' · ');
     document.getElementById('log-disco-counts').textContent = `(${headline})`;
+    refreshRankerBadge();
   } catch (_) {
     empty.style.display = '';
     content.style.display = 'none';
@@ -3660,6 +3663,47 @@ async function reseedLogDiscovery() {
     showToast(`Re-seeded ${Object.values(out.counts).reduce((s,n)=>s+n,0)} candidate(s)`);
     loadLogDiscovery();
   } catch (e) { showToast('Re-seed error: ' + e); }
+}
+
+// L9 — active-learning ranker. Refit the logistic-regression model on
+// the current approve/reject decisions, then reload the queue so the
+// new ordering shows up.
+async function rerankLogDiscovery() {
+  try {
+    const res = await fetch('/api/log-discovery/rerank', {method: 'POST'});
+    const out = await res.json();
+    if (!res.ok) { showToast('Re-rank failed: ' + (out.error || '')); return; }
+    if (!out.fitted) {
+      const n = out.n_decisions || 0;
+      showToast(`Need ≥ 20 decisions to fit (have ${n}). Falling back to default sort.`);
+    } else {
+      const auc = (out.auc != null) ? ` · AUC ${out.auc.toFixed(2)}` : '';
+      showToast(`Ranker fitted on ${out.n_decisions} decisions${auc}`);
+    }
+    await refreshRankerBadge();
+    loadLogDiscovery();
+  } catch (e) { showToast('Re-rank error: ' + e); }
+}
+
+async function refreshRankerBadge() {
+  const badge = document.getElementById('log-disco-ranker-badge');
+  if (!badge) return;
+  try {
+    const res = await fetch('/api/log-discovery/ranker-status');
+    const out = await res.json();
+    if (!out.fitted) {
+      const n = out.latest_meta ? out.latest_meta.n_decisions : 0;
+      badge.textContent = n ? `ranker idle · ${n} decisions` : 'no ranker yet';
+      badge.style.background = '#f3f4f6';
+      badge.style.color = '#6b7280';
+      return;
+    }
+    const m = out.latest_meta || {};
+    const auc = (m.auc != null) ? ` · AUC ${Number(m.auc).toFixed(2)}` : '';
+    badge.textContent = `ranker · ${m.n_decisions} decisions${auc}`;
+    badge.style.background = '#eef2ff';
+    badge.style.color = '#4338ca';
+  } catch (e) { /* badge stays empty */ }
 }
 
 // L4.5 — mini graph for relationship / causal-edge candidates. We
