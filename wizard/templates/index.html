@@ -244,6 +244,12 @@
     .box-help li { margin-bottom: 3px; }
     .box-help li b { color: var(--text); }
 
+    /* L4 — collapsible candidate groups. Collapsed by default; the
+       chevron rotates 90° when the section is opened. */
+    details.ld-group summary::-webkit-details-marker { display: none; }
+    details.ld-group[open] .ld-chev { transform: rotate(90deg); display: inline-block; }
+    details.ld-group summary:hover { filter: brightness(0.97); }
+
     /* ── Form fields ───────────────────────────────────────────────────── */
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 11px; font-weight: 500;
@@ -716,7 +722,13 @@
 
     <!-- Step 5 — Log Discovery (L4 · first step in the Enrich phase) -->
     <div class="step-panel" id="step-log-discovery">
-      <div class="step-title">Log Discovery <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span></div>
+      <div class="step-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span>Log Discovery</span>
+        <span class="badge" style="background:#eef2ff;color:#4338ca">L4 · Preview</span>
+        <a href="/log-discovery/help" target="_blank" rel="noopener" title="What does Log Discovery do? Algorithms, benefits, workflow." style="margin-left:auto;font-size:11px;color:#4338ca;text-decoration:none;border:1px solid #c7d2fe;padding:3px 9px;border-radius:14px;background:#eef2ff;white-space:nowrap;font-weight:600">
+          ⓘ How it works
+        </a>
+      </div>
       <div class="step-subtitle">Convert a folder of raw logs into ontology candidates an engineer reviews one at a time. Approved candidates flow into the regular Wizard steps (Entities · Events · Relationships · Rules) and end up as classes, properties, and SPARQL rules in your generated ontology.</div>
 
       <!-- ── Visual overview — pipeline · candidate kinds · actions ────────── -->
@@ -903,11 +915,27 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         <button class="btn btn-ghost" onclick="loadLogDiscovery()" style="margin-top:8px">↻ Re-check for results</button>
       </div>
 
+      <!-- ── L12 — Template similarity (pPCA scatter) ──────────────────── -->
+      <div class="card" id="log-disco-embed" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="margin:0">Template similarity <span class="badge" style="background:#eef2ff;color:#4338ca;font-size:10px">L12 · pPCA</span></h3>
+          <span id="log-disco-embed-meta" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+        <div class="box-help" style="margin-bottom:8px;font-size:12px;line-height:1.55">
+          <b>What this is.</b> Every log template (from Drain) is turned into a bag-of-tokens vector and projected to 2D via probabilistic PCA. Templates that share most words land close together.
+          <br>
+          <b>Each dot = one template.</b> Hover for the template text. <span style="color:#4338ca">Purple</span> dots are standalone. <span style="color:#b45309">Amber</span> dots are flagged as near-duplicates of some other template — the faint amber lines connect each candidate merge pair. <b>Click a dot</b> to see its top-5 nearest neighbours and decide whether to merge them.
+        </div>
+        <svg id="log-disco-embed-svg" width="100%" height="220" style="background:var(--bg);border-radius:6px;cursor:pointer"></svg>
+        <div id="log-disco-embed-inspect" style="display:none;margin-top:8px;padding:10px 12px;background:#eef2ff;border-left:3px solid #4338ca;border-radius:0 6px 6px 0;font-size:12px"></div>
+        <div id="log-disco-merges" style="margin-top:8px;font-size:12px;color:var(--text)"></div>
+      </div>
+
       <!-- ── Candidate list ─────────────────────────────────────────────── -->
       <div class="card" id="log-disco-content" style="display:none">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
           <h3 style="margin:0">Candidates <span id="log-disco-counts" class="badge"></span></h3>
-          <div style="display:flex; gap:8px; align-items:center">
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end">
             <label style="font-size:12px; color:var(--muted)">Kind</label>
             <select id="log-disco-kind" onchange="loadLogDiscovery()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px">
               <option value="">All</option>
@@ -924,6 +952,9 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
               <option value="ALL">All</option>
             </select>
             <button class="btn btn-ghost" onclick="reseedLogDiscovery()" title="Re-build proposals from the latest mining outputs">↻ Re-seed</button>
+            <button class="btn btn-ghost" onclick="rerankLogDiscovery()" title="Refit the active-learning ranker on your approve/reject history (L9)">↻ Re-rank with feedback</button>
+            <button class="btn btn-ghost" onclick="mineRateAnomalies()" title="Run the GP rate-deviation detector (L13)">↻ GP rate scan</button>
+            <span id="log-disco-ranker-badge" class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px"></span>
           </div>
         </div>
         <div class="box-help" style="margin-bottom:8px">
@@ -3537,6 +3568,8 @@ async function loadLogDiscovery() {
       `${k.replace('LOG_','').toLowerCase()}: ${Object.values(sc).reduce((s,n)=>s+n,0)}`
     ).join(' · ');
     document.getElementById('log-disco-counts').textContent = `(${headline})`;
+    refreshRankerBadge();
+    loadTemplateEmbedding();
   } catch (_) {
     empty.style.display = '';
     content.style.display = 'none';
@@ -3558,10 +3591,71 @@ async function loadLogDiscovery() {
       list.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:8px">No candidates match the current filter.</div>`;
       return;
     }
-    list.innerHTML = cands.map(c => _renderLogDiscoveryRow(c)).join('');
+    // Group by kind when no kind filter is active — gives the queue
+    // a natural top-to-bottom structure (Events → Entities →
+    // Relationships → Causal edges) the engineer can scan quickly.
+    if (!kind) {
+      list.innerHTML = _renderGroupedCandidates(cands);
+    } else {
+      list.innerHTML = cands.map(c => _renderLogDiscoveryRow(c)).join('');
+    }
   } catch (e) {
     list.innerHTML = `<div style="color:#e08383;font-size:12px;padding:8px">${e}</div>`;
   }
+}
+
+// Group candidates by proposal_type and render each group with a
+// labelled, collapsible header. Confidence ordering is preserved
+// within each group (the API already returns them sorted).
+function _renderGroupedCandidates(cands) {
+  const groups = {
+    'LOG_EVENT':        { label: 'Events',        color: '#4338ca', help: 'Repeating log templates — candidates for OWL classes that capture what happens in your system.' },
+    'LOG_ENTITY':       { label: 'Entities',      color: '#0e7490', help: 'Typed identifier slots (UUID / IRI / ENUM). Become identifier properties on event classes.' },
+    'LOG_RELATIONSHIP': { label: 'Relationships', color: '#0f766e', help: 'Undirected co-occurrence between entity slot values — found via PMI within a short time window.' },
+    'LOG_CAUSAL_EDGE':  { label: 'Causal edges',  color: '#9333ea', help: 'Directed edges past the triangulation gate (PMI + temporal lead + Granger / transfer entropy).' },
+  };
+  const buckets = { LOG_EVENT: [], LOG_ENTITY: [], LOG_RELATIONSHIP: [], LOG_CAUSAL_EDGE: [] };
+  cands.forEach(c => { if (buckets[c.kind]) buckets[c.kind].push(c); });
+
+  const totalEntities = buckets.LOG_ENTITY.length;
+  const totalRels     = buckets.LOG_RELATIONSHIP.length;
+
+  let html = '';
+  ['LOG_EVENT', 'LOG_ENTITY', 'LOG_RELATIONSHIP', 'LOG_CAUSAL_EDGE'].forEach(kind => {
+    const rows = buckets[kind];
+    if (!rows.length) return;
+    const meta = groups[kind];
+
+    // Group-specific contextual hint. The relationships hint
+    // addresses the "why are there so few?" question by explaining
+    // the entity-co-occurrence floor inherent in PMI.
+    let extraNote = '';
+    if (kind === 'LOG_RELATIONSHIP') {
+      const ratio = totalEntities > 0 ? rows.length / totalEntities : 0;
+      if (rows.length < 5 || ratio < 0.4) {
+        extraNote = `<div style="margin-top:4px;padding:8px 10px;background:#fef3c7;border-left:3px solid #b45309;border-radius:0 6px 6px 0;font-size:11.5px;line-height:1.55"><b>Why only ${rows.length} relationships from ${totalEntities} entities?</b> Relationships need <em>two</em> entities to appear in the same log line (or within a few seconds of each other) often enough for their PMI to exceed the threshold. Many real-world identifiers — say, <code>region_id</code> and <code>retry_count</code> — never share a log line directly, so no edge is proposed. This is expected. The strongest co-occurrences are kept; transient ones are dropped to avoid review noise.</div>`;
+      }
+    }
+
+    html += `
+      <details class="ld-group" style="margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <summary style="cursor:pointer;padding:8px 12px;background:${meta.color}15;list-style:none;display:flex;align-items:center;gap:8px">
+          <span style="background:${meta.color};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.04em">${meta.label.toUpperCase()}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text)">${rows.length} candidate${rows.length === 1 ? '' : 's'}</span>
+          <span style="font-size:11px;color:var(--muted);flex:1">${meta.help}</span>
+          <span class="ld-chev" style="font-size:11px;color:var(--muted);transition:transform .15s">▸</span>
+        </summary>
+        <div style="padding:10px 8px 4px;border-top:1px solid var(--border)">
+          ${extraNote}
+          ${rows.map(c => _renderLogDiscoveryRow(c)).join('')}
+        </div>
+      </details>
+    `;
+  });
+  if (!html) {
+    return '<div style="color:var(--muted);font-size:12px;padding:8px">No candidates match the current filter.</div>';
+  }
+  return html;
 }
 
 function _renderLogDiscoveryRow(c) {
@@ -3579,7 +3673,10 @@ function _renderLogDiscoveryRow(c) {
     <div class="card" style="padding:10px;margin-bottom:8px" id="log-disco-row-${c.proposal_id}">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
         <span style="background:${kindBadge[1]};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${kindBadge[0]}</span>
+        ${c.regime_tag ? `<span title="L8 — regime-aware HMM" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${c.regime_tag}</span>` : ''}
+        ${c.detection_strategy === 'GP_RATE_DEVIATION' ? `<span title="L13 — GP rate anomaly" style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">GP rate</span>` : ''}
         <span style="flex:1;font-size:13px;color:var(--text);font-weight:500">${(c.title || '').replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</span>
+        ${c.rate_sparkline ? _renderSparkline(c.rate_sparkline) : ''}
         <div style="display:flex;align-items:center;gap:6px;min-width:140px">
           <div style="background:var(--bg);border-radius:4px;height:6px;width:80px;overflow:hidden">
             <div style="background:#5ec27a;height:100%;width:${conf}%"></div>
@@ -3652,6 +3749,149 @@ async function mergeLogCandidate(pid) {
   } catch (e) { showToast('Merge error: ' + e); }
 }
 
+// L12 — pPCA template scatter. Fetches the embedding payload from
+// /api/log-discovery/template-embedding, renders an SVG scatter
+// inline, and lists merge candidates. Degrades silently when the
+// endpoint reports unavailable (corpus too small, sklearn absent).
+async function loadTemplateEmbedding() {
+  const card = document.getElementById('log-disco-embed');
+  if (!card) return;
+  try {
+    const res = await fetch('/api/log-discovery/template-embedding');
+    const out = await res.json();
+    if (!out.available) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = '';
+    document.getElementById('log-disco-embed-meta').textContent =
+      `${out.n_templates} templates · ${out.vocab_size} tokens · ` +
+      `${(out.explained_variance_ratio || []).slice(0, 2).map(v => (v*100).toFixed(0)+'%').join(' / ') || '-'} variance in first 2 PCs`;
+    _renderEmbeddingScatter(out);
+  } catch (_) { card.style.display = 'none'; }
+}
+
+// Cached embedding payload — kept in module scope so the click
+// handler on each dot can look up template metadata without a refetch.
+let _embeddingPayload = null;
+
+function _renderEmbeddingScatter(payload) {
+  _embeddingPayload = payload;
+  const svg = document.getElementById('log-disco-embed-svg');
+  if (!svg || !payload.points || !payload.points.length) return;
+  const W = svg.clientWidth || 600;
+  const H = 220;
+  const pad = 16;
+  const xs = payload.points.map(p => p.x);
+  const ys = payload.points.map(p => p.y);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+  const sx = v => pad + (xmax > xmin ? (v - xmin) / (xmax - xmin) : 0.5) * (W - 2*pad);
+  const sy = v => pad + (ymax > ymin ? (ymax - v) / (ymax - ymin) : 0.5) * (H - 2*pad);
+  const mergeSet = new Set();
+  (payload.merges || []).forEach(m => {
+    mergeSet.add(m.template_id_a); mergeSet.add(m.template_id_b);
+  });
+  // Connect close pairs FIRST so the lines render behind the dots.
+  let html = '';
+  (payload.merges || []).slice(0, 12).forEach(m => {
+    const a = payload.points.find(p => p.template_id === m.template_id_a);
+    const b = payload.points.find(p => p.template_id === m.template_id_b);
+    if (!a || !b) return;
+    html += `<line x1="${sx(a.x).toFixed(1)}" y1="${sy(a.y).toFixed(1)}" x2="${sx(b.x).toFixed(1)}" y2="${sy(b.y).toFixed(1)}" stroke="#f59e0b" stroke-opacity="0.45" stroke-width="1"/>`;
+  });
+  payload.points.forEach(p => {
+    const r = mergeSet.has(p.template_id) ? 6 : 4;
+    const fill = mergeSet.has(p.template_id) ? '#f59e0b' : '#4338ca';
+    html += `<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="${r}" fill="${fill}" opacity="0.85" data-tid="${p.template_id}" style="cursor:pointer"><title>#${p.cluster_id}: ${(p.label||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}\n\n(click to inspect)</title></circle>`;
+  });
+  svg.innerHTML = html;
+
+  // Wire click handler on each dot — opens the inspector below the scatter.
+  svg.querySelectorAll('circle[data-tid]').forEach(c => {
+    c.addEventListener('click', (ev) => {
+      const tid = parseInt(ev.currentTarget.getAttribute('data-tid'), 10);
+      _renderTemplateInspector(tid);
+    });
+  });
+
+  // Merge candidate summary line under the scatter.
+  const list = document.getElementById('log-disco-merges');
+  const merges = payload.merges || [];
+  if (!merges.length) {
+    list.innerHTML = '<span style="color:var(--muted)">No merge candidates at the default threshold.</span>';
+  } else {
+    const top = merges.slice(0, 5);
+    list.innerHTML = '<b>Merge candidates:</b> ' + top.map(m =>
+      `<span title="distance ${m.distance.toFixed(3)}" style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:11px;margin-right:4px">#${m.cluster_id_a} ≈ #${m.cluster_id_b}</span>`
+    ).join('') + (merges.length > 5 ? ` <span style="color:var(--muted)">+ ${merges.length - 5} more</span>` : '');
+  }
+}
+
+// L12 — inspector pane that opens when an SVG dot is clicked. Shows
+// the template's text + cluster_id + its merge-candidate partners
+// (drawn from the same payload). No backend call required.
+function _renderTemplateInspector(templateId) {
+  const host = document.getElementById('log-disco-embed-inspect');
+  if (!host || !_embeddingPayload) return;
+  const p = _embeddingPayload.points.find(x => x.template_id === templateId);
+  if (!p) return;
+  const merges = (_embeddingPayload.merges || []).filter(m =>
+    m.template_id_a === templateId || m.template_id_b === templateId
+  ).sort((a, b) => a.distance - b.distance).slice(0, 5);
+
+  let mergesHtml;
+  if (!merges.length) {
+    mergesHtml = '<span style="color:var(--muted)">No merge candidates at the default threshold — this template is structurally distinct.</span>';
+  } else {
+    mergesHtml = '<div style="margin-top:6px"><b>Nearest neighbours (lower distance = more similar):</b><ul style="margin:4px 0 0 18px;padding:0">' +
+      merges.map(m => {
+        const otherId = m.template_id_a === templateId ? m.template_id_b : m.template_id_a;
+        const otherCid = m.template_id_a === templateId ? m.cluster_id_b : m.cluster_id_a;
+        const otherText = m.template_id_a === templateId ? m.text_b : m.text_a;
+        return `<li><code style="background:#fef3c7;color:#92400e;padding:0 4px;border-radius:3px">#${otherCid}</code> <span style="color:var(--muted);font-size:11px">d=${m.distance.toFixed(3)}</span><br><span style="font-family:monospace;font-size:11px;color:var(--muted)">${(otherText||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').slice(0,120)}</span></li>`;
+      }).join('') + '</ul></div>';
+  }
+  host.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+      <div style="flex:1">
+        <b>Template #${p.cluster_id}</b>
+        <div style="font-family:monospace;font-size:11.5px;color:var(--text);margin-top:2px;word-break:break-word">${(p.label||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+        ${mergesHtml}
+      </div>
+      <button onclick="document.getElementById('log-disco-embed-inspect').style.display='none'" style="background:none;border:none;font-size:14px;color:var(--muted);cursor:pointer;line-height:1">✕</button>
+    </div>
+  `;
+  host.style.display = '';
+}
+
+// L13 — inline sparkline for GP_RATE_DEVIATION proposals.
+// `raw` is a JSON-encoded list of per-bin counts (capped at 64).
+function _renderSparkline(raw) {
+  let arr;
+  try { arr = typeof raw === 'string' ? JSON.parse(raw) : raw; }
+  catch (_) { return ''; }
+  if (!Array.isArray(arr) || !arr.length) return '';
+  const w = 80, h = 20;
+  const max = Math.max(...arr) || 1;
+  const dx = w / Math.max(1, arr.length - 1);
+  const pts = arr.map((v, i) => `${(i * dx).toFixed(1)},${(h - (v / max) * h).toFixed(1)}`).join(' ');
+  return `<svg width="${w}" height="${h}" style="margin-left:6px" title="GP rate sparkline (${arr.length} bins)"><polyline points="${pts}" fill="none" stroke="#16a34a" stroke-width="1.2"/></svg>`;
+}
+
+async function mineRateAnomalies() {
+  try {
+    const res = await fetch('/api/log-discovery/rate-anomalies', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('Rate-anomaly mining failed: ' + (out.error || '')); return; }
+    const r = out.report || {};
+    showToast(`GP rate anomalies: ${r.anomalies || 0} flagged in ${r.duration_s || 0}s`);
+    loadLogDiscovery();
+  } catch (e) { showToast('Rate-anomaly error: ' + e); }
+}
+
 async function reseedLogDiscovery() {
   try {
     const res = await fetch('/api/log-discovery/seed', {method: 'POST'});
@@ -3660,6 +3900,47 @@ async function reseedLogDiscovery() {
     showToast(`Re-seeded ${Object.values(out.counts).reduce((s,n)=>s+n,0)} candidate(s)`);
     loadLogDiscovery();
   } catch (e) { showToast('Re-seed error: ' + e); }
+}
+
+// L9 — active-learning ranker. Refit the logistic-regression model on
+// the current approve/reject decisions, then reload the queue so the
+// new ordering shows up.
+async function rerankLogDiscovery() {
+  try {
+    const res = await fetch('/api/log-discovery/rerank', {method: 'POST'});
+    const out = await res.json();
+    if (!res.ok) { showToast('Re-rank failed: ' + (out.error || '')); return; }
+    if (!out.fitted) {
+      const n = out.n_decisions || 0;
+      showToast(`Need ≥ 20 decisions to fit (have ${n}). Falling back to default sort.`);
+    } else {
+      const auc = (out.auc != null) ? ` · AUC ${out.auc.toFixed(2)}` : '';
+      showToast(`Ranker fitted on ${out.n_decisions} decisions${auc}`);
+    }
+    await refreshRankerBadge();
+    loadLogDiscovery();
+  } catch (e) { showToast('Re-rank error: ' + e); }
+}
+
+async function refreshRankerBadge() {
+  const badge = document.getElementById('log-disco-ranker-badge');
+  if (!badge) return;
+  try {
+    const res = await fetch('/api/log-discovery/ranker-status');
+    const out = await res.json();
+    if (!out.fitted) {
+      const n = out.latest_meta ? out.latest_meta.n_decisions : 0;
+      badge.textContent = n ? `ranker idle · ${n} decisions` : 'no ranker yet';
+      badge.style.background = '#f3f4f6';
+      badge.style.color = '#6b7280';
+      return;
+    }
+    const m = out.latest_meta || {};
+    const auc = (m.auc != null) ? ` · AUC ${Number(m.auc).toFixed(2)}` : '';
+    badge.textContent = `ranker · ${m.n_decisions} decisions${auc}`;
+    badge.style.background = '#eef2ff';
+    badge.style.color = '#4338ca';
+  } catch (e) { /* badge stays empty */ }
 }
 
 // L4.5 — mini graph for relationship / causal-edge candidates. We

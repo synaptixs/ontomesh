@@ -123,6 +123,16 @@ def health():
     return jsonify({"ok": True, "timestamp": _now()})
 
 
+@app.route("/log-discovery/help")
+def log_discovery_help():
+    """Serve the Log Discovery help page — capabilities, algorithms,
+    benefits, and the user-facing workflow. Linked from the Step 5
+    panel header."""
+    return send_from_directory(
+        os.path.join(HERE, "templates"), "log_discovery_help.html",
+    )
+
+
 @app.route("/api/session", methods=["GET"])
 def get_session():
     return jsonify(_load_session())
@@ -1054,11 +1064,30 @@ def insights_ask():
 
 
 _ENTERPRISE_DB = os.path.join(ROOT, "db", "enterprise.db")
+_REVIEW_RANKER_PATH = os.path.join(ROOT, "db", "review_ranker.pkl")
 
 
 def _log_review_conn():
     import sqlite3 as _sqlite3
-    return _sqlite3.connect(_ENTERPRISE_DB)
+    conn = _sqlite3.connect(_ENTERPRISE_DB)
+    # Ensure L9 (and reserved L8) tables exist whenever the wizard
+    # opens the proposal store. Cheap — idempotent IF NOT EXISTS.
+    try:
+        from db.migrations.log_discovery_v2 import migrate as _v2_migrate
+        _v2_migrate(conn)
+    except Exception:                                      # noqa: BLE001
+        pass
+    return conn
+
+
+def _load_review_ranker():
+    """Forgiving loader for the L9 ranker. Returns None if absent or
+    unloadable — callers degrade to SQL-default ordering."""
+    try:
+        from wizard.review_ranker import ReviewRanker
+        return ReviewRanker.load_or_none(_REVIEW_RANKER_PATH)
+    except Exception:                                      # noqa: BLE001
+        return None
 
 
 @app.route("/api/log-discovery/summary", methods=["GET"])
@@ -1091,12 +1120,17 @@ def log_discovery_candidates():
     except ValueError:
         limit = 50
     conn = _log_review_conn()
+    ranker = _load_review_ranker()
     try:
         cands = log_review.list_candidates(
-            conn, kind=kind, status=status, limit=limit)
+            conn, kind=kind, status=status, limit=limit, ranker=ranker)
     finally:
         conn.close()
-    return jsonify({"candidates": cands, "available": True})
+    return jsonify({
+        "candidates": cands,
+        "available": True,
+        "ranked": bool(ranker and ranker.is_fitted()),
+    })
 
 
 @app.route("/api/log-discovery/seed", methods=["POST"])
@@ -1188,6 +1222,132 @@ def log_discovery_merge(proposal_id):
         conn.close()
     _save_session(session)
     return jsonify(result)
+
+
+@app.route("/api/log-discovery/rate-anomalies", methods=["POST"])
+def log_discovery_rate_anomalies():
+    """L13 — run the GP rate-anomaly detector against the current
+    enterprise.db corpus and persist any hits as LOG_EVENT proposals
+    with detection_strategy='GP_RATE_DEVIATION'.
+
+    Body (optional): ``{"log_path": "/path/to/logs"}``. When supplied
+    we re-extract from the corpus; otherwise we replay the cached
+    extractions from log_templates (sample lines only — coarse but
+    free)."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    try:
+        import sys as _sys
+        _src = os.path.join(ROOT, "src")
+        if _src not in _sys.path:
+            _sys.path.insert(0, _src)
+        from log_rate_anomalies import mine_rate_anomalies          # noqa: E402
+    except Exception as exc:                                        # noqa: BLE001
+        return jsonify({"error": f"module unavailable: {exc}"}), 500
+
+    body = request.get_json(silent=True) or {}
+    log_path = (body.get("log_path") or "").strip()
+    extractions = []
+    if log_path:
+        try:
+            from log_corpus import LogCorpus                        # noqa: E402
+            from log_templates import LogTemplateMiner              # noqa: E402
+            miner = LogTemplateMiner(_log_review_conn())
+            for rec in LogCorpus(log_path).iter():
+                miner.consume(rec.message, timestamp=rec.timestamp,
+                              severity=rec.severity,
+                              service=rec.fields.get("service") if rec.fields else None,
+                              trace_id=rec.fields.get("trace_id") if rec.fields else None)
+            miner.flush()
+            extractions = list(miner.extractions or [])
+        except Exception:                                           # noqa: BLE001
+            extractions = []
+
+    conn = _log_review_conn()
+    try:
+        report = mine_rate_anomalies(extractions, conn) if extractions \
+                 else type("R", (), {"as_dict": lambda self: {
+                     "templates_examined": 0, "templates_fit": 0,
+                     "anomalies": 0, "proposals_persisted": 0,
+                     "duration_s": 0.0,
+                 }})()
+    finally:
+        conn.close()
+    return jsonify({"ok": True, "report": report.as_dict()})
+
+
+@app.route("/api/log-discovery/template-embedding", methods=["GET"])
+def log_discovery_template_embedding():
+    """L12 — return the pPCA viz payload for the Step 5 scatter.
+
+    Body shape (success):
+        {"available": true, "points": [...], "merges": [...],
+         "n_templates": N, "explained_variance_ratio": [...], ...}
+    On any failure (no log_templates table, too few templates,
+    sklearn missing) returns ``{'available': False, 'reason': '...'}``
+    so the UI degrades gracefully — no scatter, no merge list."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"available": False,
+                        "reason": "no enterprise.db — run --phase mine first"})
+    try:
+        import sys as _sys
+        _src = os.path.join(ROOT, "src")
+        if _src not in _sys.path:
+            _sys.path.insert(0, _src)
+        from log_templates_embed import TemplateEmbedder         # noqa: E402
+    except Exception as exc:                                     # noqa: BLE001
+        return jsonify({"available": False, "reason": f"import: {exc}"})
+    conn = _log_review_conn()
+    try:
+        try:
+            e = TemplateEmbedder().fit(conn)
+        except RuntimeError as exc:
+            return jsonify({"available": False, "reason": str(exc)})
+        payload = e.viz_payload()
+    finally:
+        conn.close()
+    payload["available"] = True
+    return jsonify(payload)
+
+
+@app.route("/api/log-discovery/rerank", methods=["POST"])
+def log_discovery_rerank():
+    """L9 — refit the active-learning ranker on the current set of
+    APPROVED/REJECTED proposals and persist it to disk. The next
+    ``/candidates`` call automatically picks the new model up via
+    ``_load_review_ranker``."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    try:
+        from wizard.review_ranker import fit_from_conn
+    except Exception as exc:                               # noqa: BLE001
+        return jsonify({"error": f"ranker module unavailable: {exc}"}), 500
+    conn = _log_review_conn()
+    try:
+        summary = fit_from_conn(conn, _REVIEW_RANKER_PATH)
+    finally:
+        conn.close()
+    return jsonify({"ok": True, **summary})
+
+
+@app.route("/api/log-discovery/ranker-status", methods=["GET"])
+def log_discovery_ranker_status():
+    """Tiny GET for the UI badge. Returns the most recent fit metadata
+    if a model exists; otherwise ``{'fitted': false}``."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"fitted": False, "reason": "no enterprise.db"})
+    try:
+        from wizard.review_ranker import latest_meta
+    except Exception:                                      # noqa: BLE001
+        return jsonify({"fitted": False, "reason": "ranker module unavailable"})
+    conn = _log_review_conn()
+    try:
+        meta = latest_meta(conn)
+    finally:
+        conn.close()
+    ranker = _load_review_ranker()
+    fitted = bool(ranker and ranker.is_fitted())
+    return jsonify({"fitted": fitted, "latest_meta": meta})
 
 
 @app.route("/api/pipeline/status", methods=["GET"])
