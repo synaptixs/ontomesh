@@ -129,11 +129,47 @@ def seed_from_mining(conn: sqlite3.Connection,
                 _os.path.abspath(__file__))), "src")
             if _src not in _sys.path:
                 _sys.path.insert(0, _src)
-            from causality_miner import find_causality_candidates  # noqa: E402
+            from causality_miner import (                                     # noqa: E402
+                find_causality_candidates, build_rate_series,
+                _slot_value_to_cluster_ids,
+            )
             cands = find_causality_candidates(extractions, conn)
             for c in cands:
                 causal_pairs.add((c.src, c.dst))
                 causal_meta[(c.src, c.dst)] = c.to_dict()
+
+            # L11 — run PC over the cluster-id rate series so each
+            # causal edge can carry the shared-cause hint the roadmap
+            # asks for ("Shared upstream cause: X (confounds A→B and
+            # A→C)"). PDAG is purely additive at this stage: it never
+            # vetoes an edge that find_causality_candidates already
+            # accepted, only enriches the meta with parents of the
+            # dst cluster.
+            try:
+                from causality_dag import learn_pdag                          # noqa: E402
+                series, _bs, n_bins = build_rate_series(extractions)
+                if n_bins >= 30 and len(series) >= 2:
+                    pdag = learn_pdag(series)
+                    value_to_cids = _slot_value_to_cluster_ids(extractions)
+                    for c in cands:
+                        # Approximate cluster id for each entity: most-
+                        # frequent cluster it appears in.
+                        from collections import Counter as _Counter
+                        s_cids = _Counter(value_to_cids.get(c.src, []))
+                        d_cids = _Counter(value_to_cids.get(c.dst, []))
+                        if not s_cids or not d_cids:
+                            continue
+                        s_cid = s_cids.most_common(1)[0][0]
+                        d_cid = d_cids.most_common(1)[0][0]
+                        # Confounders we care about: other directed
+                        # parents of dst_cluster in the PDAG (i.e.
+                        # shared upstream causes that also point to
+                        # the dst).
+                        parents = sorted(pdag.parents(d_cid) - {s_cid})
+                        if parents:
+                            causal_meta[(c.src, c.dst)]["shared_causes"] = parents
+            except Exception:                                      # noqa: BLE001
+                pass
         except Exception:                       # noqa: BLE001 — never break seed
             pass
 
@@ -232,8 +268,20 @@ def seed_from_mining(conn: sqlite3.Connection,
             if gated_causal:
                 ptype = "LOG_CAUSAL_EDGE"
                 kind_key = "log_causal_edge"
+                # L11 — append the shared-cause hint when the PDAG
+                # identified other directed parents of dst. The roadmap
+                # asks for this phrasing in the UI surface.
+                shared = (cmeta or {}).get("shared_causes") or []
+                shared_suffix = ""
+                if shared:
+                    shared_suffix = (
+                        f" — shared upstream cause: "
+                        f"template #{shared[0]}"
+                        + (f" (+{len(shared) - 1} more)"
+                           if len(shared) > 1 else "")
+                    )
                 title = (f"Causal candidate: {src[:30]} → {dst[:30]} "
-                         f"(PMI {pmi:.1f}, via {cmeta['via']})")
+                         f"(PMI {pmi:.1f}, via {cmeta['via']}){shared_suffix}")
                 strategy = "GRANGER_CAUSALITY"
                 # Use the triangulated confidence — it blends all three signals.
                 confidence = cmeta["confidence"]
@@ -254,11 +302,16 @@ def seed_from_mining(conn: sqlite3.Connection,
                 strategy = "PMI_TEMPORAL_ORDERING"
                 confidence = min(1.0, 0.4 + (pmi - 3.0) / 10.0)
             pid = _stable_id(f"{ptype.lower()}:{src}::{dst}")
+            shared_line = ""
+            if cmeta and cmeta.get("shared_causes"):
+                shared_line = (f"# pc_shared_causes="
+                               f"{','.join(str(s) for s in cmeta['shared_causes'])}\n")
             candidate_turtle = (
                 f"# {ptype}\n# src={src}\n# dst={dst}\n"
                 f"# PMI={pmi:.2f}  lead_ratio={lead}\n"
                 + (f"# granger_p={cmeta['granger_p']:.4f} lag={cmeta['granger_lag']}\n"
                    f"# te_z={cmeta['te_z']:.2f}\n" if cmeta else "")
+                + shared_line
             )
             evidence_sparql = (
                 f"PREFIX : <https://ontology.example.com/enterprise/>\n"
@@ -340,11 +393,17 @@ _LOG_KINDS = ("LOG_ENTITY", "LOG_RELATIONSHIP", "LOG_EVENT", "LOG_CAUSAL_EDGE")
 def list_candidates(conn: sqlite3.Connection, *,
                     kind: Optional[str] = None,
                     status: str = "PENDING",
-                    limit: int = 50) -> List[dict]:
+                    limit: int = 50,
+                    ranker: Any = None) -> List[dict]:
     """Return candidates sorted by (confidence_score × consequence).
 
     Consequence pulled from `dim_evidence_recency` which carries the
     severity-weight from `seed_from_mining`.
+
+    If `ranker` is a fitted ``wizard.review_ranker.ReviewRanker``, the
+    SQL-default order is replaced by the ranker's posterior. An
+    unfitted or `None` ranker is a no-op — the L9 ordering only takes
+    effect once a model has been trained.
     """
     if not _table_exists(conn, "ontology_evolution_proposals"):
         return []
@@ -357,12 +416,24 @@ def list_candidates(conn: sqlite3.Connection, *,
     if status and status != "ALL":
         where.append("status = ?")
         params.append(status)
+    # L8 + L13 columns are pulled via tolerant subselects so the
+    # query still works against a DB whose v2 migration hasn't run.
+    col_names = {
+        r[1] for r in conn.execute(
+            "PRAGMA table_info(ontology_evolution_proposals)"
+        )
+    }
+    extra_cols = (", regime_tag, regime_posterior" if "regime_tag" in col_names
+                  else ", NULL AS regime_tag, NULL AS regime_posterior")
+    extra_cols += (", rate_sparkline" if "rate_sparkline" in col_names
+                   else ", NULL AS rate_sparkline")
     sql = (
         "SELECT id, proposal_id, proposal_type, title, candidate_turtle, "
         "       evidence_sparql, detection_strategy, confidence_score, "
         "       dim_evidence_volume, dim_evidence_recency, dim_cross_domain, "
         "       dim_consistency_risk, status, evidence_template_id, "
-        "       evidence_sample, created_at, updated_at "
+        "       evidence_sample, created_at, updated_at"
+        f"      {extra_cols} "
         "FROM ontology_evolution_proposals "
         f"WHERE {' AND '.join(where)} "
         "ORDER BY (confidence_score * (1.0 + dim_evidence_recency)) DESC "
@@ -380,7 +451,12 @@ def list_candidates(conn: sqlite3.Connection, *,
             "status": r[12], "evidence_template_id": r[13],
             "evidence_sample": r[14], "created_at": r[15],
             "updated_at": r[16],
+            "regime_tag": r[17] if len(r) > 17 else None,
+            "regime_posterior": r[18] if len(r) > 18 else None,
+            "rate_sparkline": r[19] if len(r) > 19 else None,
         })
+    if ranker is not None and getattr(ranker, "is_fitted", lambda: False)():
+        out = ranker.rerank(out)
     return out
 
 

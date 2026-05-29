@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Log Discovery — Help</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #fafbfc;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --border-soft: #f1f5f9;
+    --text: #0f172a;
+    --text-soft: #334155;
+    --muted: #64748b;
+
+    --indigo:      #4338ca;
+    --indigo-soft: #eef2ff;
+    --emerald:     #047857;
+    --emerald-soft:#d1fae5;
+    --amber:       #b45309;
+    --amber-soft:  #fef3c7;
+    --rose:        #be123c;
+    --rose-soft:   #ffe4e6;
+    --cyan:        #0e7490;
+    --cyan-soft:   #cffafe;
+    --violet:      #7c3aed;
+    --violet-soft: #ede9fe;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
+                 Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--border-soft);
+    padding: 1px 6px; border-radius: 4px; color: var(--text-soft);
+  }
+
+  /* ── Layout ───────────────────────────────────────────────────── */
+  .wrap {
+    max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px;
+    display: grid; grid-template-columns: 220px 1fr; gap: 40px;
+  }
+  /* The TOC is a sidebar on wide screens (desktop) and collapses to
+     an accessible <details> on narrow ones (tablet / mobile) so the
+     main content starts immediately without scrolling through an
+     index. */
+  details.toc-mobile { display: none; }
+  @media (max-width: 760px) {
+    .wrap { grid-template-columns: 1fr; gap: 16px; }
+    nav.toc { display: none; }
+    details.toc-mobile {
+      display: block; margin-bottom: 20px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--card);
+    }
+    details.toc-mobile summary {
+      padding: 10px 14px; cursor: pointer; font-size: 13px;
+      font-weight: 600; color: var(--muted);
+      list-style: none;
+    }
+    details.toc-mobile summary::-webkit-details-marker { display: none; }
+    details.toc-mobile summary::after {
+      content: " ▾"; color: var(--indigo); font-weight: 700;
+    }
+    details.toc-mobile[open] summary::after { content: " ▴"; }
+    details.toc-mobile .toc-inner {
+      padding: 0 14px 14px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px;
+      font-size: 12.5px;
+    }
+    details.toc-mobile a {
+      color: var(--text-soft); text-decoration: none;
+      padding: 2px 0; display: block;
+    }
+    details.toc-mobile a:hover { color: var(--indigo); }
+    details.toc-mobile .group {
+      font-size: 10.5px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin: 6px 0 2px; font-weight: 700;
+      grid-column: 1 / -1;
+    }
+  }
+  nav.toc {
+    position: sticky; top: 24px; align-self: start;
+    border-left: 2px solid var(--border);
+    padding: 4px 0 4px 14px; font-size: 13px;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+  }
+  nav.toc a {
+    display: block; color: var(--muted); text-decoration: none;
+    padding: 4px 0; transition: color .15s;
+  }
+  nav.toc a:hover, nav.toc a.active { color: var(--indigo); }
+  nav.toc .group {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin: 14px 0 4px; font-weight: 600;
+  }
+  nav.toc .group:first-child { margin-top: 0; }
+  main { min-width: 0; }
+
+  /* ── Breadcrumb / hero ────────────────────────────────────────── */
+  .crumb {
+    font-size: 13px; color: var(--muted); margin-bottom: 20px;
+  }
+  .crumb a {
+    color: var(--indigo); text-decoration: none;
+    border-bottom: 1px dashed transparent;
+  }
+  .crumb a:hover { border-bottom-color: var(--indigo); }
+  h1 {
+    font-size: 38px; line-height: 1.15; margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  .lead {
+    font-size: 17px; color: var(--text-soft); margin: 0 0 32px;
+    max-width: 64ch;
+  }
+  .lead em {
+    background: linear-gradient(180deg, transparent 65%, var(--amber-soft) 65%);
+    font-style: normal;
+  }
+
+  /* ── Section / cards ──────────────────────────────────────────── */
+  section { margin-bottom: 56px; }
+  h2 {
+    font-size: 24px; margin: 0 0 6px; letter-spacing: -0.01em;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  h2 .h-tag {
+    font-size: 11px; color: var(--muted); font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  h2::before {
+    content: ""; width: 26px; height: 3px; background: var(--indigo);
+    border-radius: 2px; display: inline-block; margin-right: 2px;
+  }
+  h3 {
+    font-size: 17px; margin: 0 0 4px; letter-spacing: -0.005em;
+  }
+  p { margin: 8px 0; }
+
+  /* ── Pipeline hero diagram ────────────────────────────────────── */
+  .hero-diagram {
+    background: linear-gradient(135deg, #fafbfc 0%, var(--indigo-soft) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin: 8px 0 12px;
+  }
+  .hero-diagram svg { display: block; width: 100%; height: auto; }
+
+  /* ── Layer cards ──────────────────────────────────────────────── */
+  .layer {
+    border: 1px solid var(--border);
+    border-radius: 10px; background: var(--card);
+    padding: 18px 20px; margin: 14px 0;
+    display: grid; grid-template-columns: 1fr 220px; gap: 22px;
+    align-items: start;
+  }
+  @media (max-width: 700px) {
+    .layer { grid-template-columns: 1fr; }
+    .layer .viz { order: -1; }
+  }
+  .layer .head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .layer .head .id-pill {
+    font-family: ui-monospace, "SF Mono", monospace; font-size: 11px;
+    font-weight: 600; letter-spacing: .04em;
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .layer.v1 .id-pill { background: var(--indigo-soft); color: var(--indigo); }
+  .layer.v2 .id-pill { background: var(--emerald-soft); color: var(--emerald); }
+  .layer .head .bk-tag {
+    font-size: 11px; color: var(--muted);
+    border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px;
+  }
+  .layer .body p { margin: 6px 0; font-size: 14px; color: var(--text-soft); }
+  .layer .body .label {
+    display: inline-block; font-weight: 600; font-size: 11.5px;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--indigo); margin-right: 4px;
+  }
+  .layer.v2 .label { color: var(--emerald); }
+  .layer .viz {
+    border-left: 1px solid var(--border-soft);
+    padding-left: 22px;
+  }
+  @media (max-width: 700px) {
+    .layer .viz { border-left: none; padding-left: 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
+  }
+  .layer .viz svg {
+    display: block; width: 100%; max-width: 260px;
+    height: auto; margin: 0 auto;
+  }
+  .viz-caption {
+    font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.4;
+  }
+
+  /* ── Outputs row ──────────────────────────────────────────────── */
+  .outputs {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin: 16px 0;
+  }
+  @media (max-width: 700px) { .outputs { grid-template-columns: repeat(2, 1fr); } }
+  .out {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; background: var(--card);
+  }
+  .out .icon {
+    display: inline-flex; width: 30px; height: 30px; border-radius: 8px;
+    align-items: center; justify-content: center; font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .out h4 { margin: 0 0 4px; font-size: 14px; }
+  .out p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ── Workflow steps ───────────────────────────────────────────── */
+  .workflow {
+    display: grid; grid-template-columns: auto 1fr; gap: 14px 18px;
+    align-items: start; margin: 16px 0;
+  }
+  .workflow .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--indigo); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .workflow .text h4 { margin: 4px 0 4px; font-size: 15px; }
+  .workflow .text p { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+  /* ── Benefits table ───────────────────────────────────────────── */
+  .benefits {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin: 12px 0;
+  }
+  @media (max-width: 700px) { .benefits { grid-template-columns: 1fr; } }
+  .benefits .col {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; background: var(--card);
+  }
+  .benefits .col.bad { border-color: var(--rose-soft); }
+  .benefits .col.good { border-color: var(--emerald-soft); }
+  .benefits .col h4 {
+    margin: 0 0 8px; font-size: 13px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .benefits .col.bad h4 { color: var(--rose); }
+  .benefits .col.good h4 { color: var(--emerald); }
+  .benefits ul { margin: 0; padding-left: 18px; }
+  .benefits li { margin: 6px 0; font-size: 13.5px; }
+
+  /* ── Glossary ─────────────────────────────────────────────────── */
+  .glossary {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin: 12px 0;
+  }
+  @media (max-width: 700px) { .glossary { grid-template-columns: 1fr; } }
+  .glossary dt {
+    font-weight: 600; font-size: 13.5px;
+    border-left: 2px solid var(--indigo); padding-left: 8px;
+  }
+  .glossary dd {
+    margin: 4px 0 0 10px; font-size: 13px;
+    color: var(--text-soft); line-height: 1.5;
+  }
+  .glossary > div { margin-bottom: 6px; }
+
+  .footer {
+    margin-top: 56px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--muted); text-align: center;
+  }
+  .footer a { color: var(--indigo); text-decoration: none; border-bottom: 1px dashed transparent; }
+  .footer a:hover { border-bottom-color: var(--indigo); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ─── Sticky TOC ──────────────────────────────────────────── -->
+  <nav class="toc" aria-label="On this page">
+    <div class="group">Overview</div>
+    <a href="#why">Why this exists</a>
+    <a href="#pipeline">Pipeline at a glance</a>
+    <a href="#outputs">What you get</a>
+
+    <div class="group">v1 layers · shipped</div>
+    <a href="#l1">L1 · Templates</a>
+    <a href="#l15">L1.5 · Slots &amp; graph</a>
+    <a href="#l2">L2 · HMM &amp; anomalies</a>
+    <a href="#l3">L3 · Causality gate</a>
+    <a href="#l4">L4 · Review surface</a>
+
+    <div class="group">v2 enhancements · shipped</div>
+    <a href="#l9">L9 · Active ranker</a>
+    <a href="#l8">L8 · Regimes</a>
+    <a href="#l10">L10 · VB confidence</a>
+    <a href="#l11">L11 · PC DAG</a>
+    <a href="#l12">L12 · pPCA viz</a>
+    <a href="#l13">L13 · GP rate</a>
+
+    <div class="group">Practice</div>
+    <a href="#benefits">Benefits</a>
+    <a href="#expect">What to expect</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+
+  <!-- ─── Main column ────────────────────────────────────────── -->
+  <main>
+
+  <div class="crumb">
+    <a href="/">← Back to Studio</a>  ·  Step 5 · Log Discovery · Help
+  </div>
+
+  <!-- ─── Mobile / narrow-viewport TOC (collapsed by default) ── -->
+  <details class="toc-mobile">
+    <summary>On this page</summary>
+    <div class="toc-inner">
+      <div class="group">Overview</div>
+      <a href="#why">Why this exists</a>
+      <a href="#pipeline">Pipeline at a glance</a>
+      <a href="#outputs">What you get</a>
+
+      <div class="group">v1 layers · shipped</div>
+      <a href="#l1">L1 · Templates</a>
+      <a href="#l15">L1.5 · Slots &amp; graph</a>
+      <a href="#l2">L2 · HMM &amp; anomalies</a>
+      <a href="#l3">L3 · Causality gate</a>
+      <a href="#l4">L4 · Review surface</a>
+
+      <div class="group">v2 enhancements · shipped</div>
+      <a href="#l9">L9 · Active ranker</a>
+      <a href="#l8">L8 · Regimes</a>
+      <a href="#l10">L10 · VB confidence</a>
+      <a href="#l11">L11 · PC DAG</a>
+      <a href="#l12">L12 · pPCA viz</a>
+      <a href="#l13">L13 · GP rate</a>
+
+      <div class="group">Practice</div>
+      <a href="#benefits">Benefits</a>
+      <a href="#expect">What to expect</a>
+      <a href="#glossary">Glossary</a>
+    </div>
+  </details>
+
+  <h1>Log Discovery</h1>
+  <p class="lead">
+    Turn a folder of raw operational logs into reviewable ontology
+    candidates — <em>events, entities, relationships, and causal rules</em>
+    — using a chain of statistical and Bayesian methods.
+    No labels. No hand-written regexes. No neural fine-tuning.
+    You stay in the loop on every decision.
+  </p>
+
+  <!-- ─── Why ─────────────────────────────────────────────── -->
+
+  <section id="why">
+    <h2>Why this exists <span class="h-tag">the gap</span></h2>
+    <div class="benefits">
+      <div class="col bad">
+        <h4>✕ Regexes &amp; dashboards</h4>
+        <ul>
+          <li>Catch only what someone already thought to look for.</li>
+          <li>Miss every other failure mode.</li>
+          <li>Drift the moment the log format changes.</li>
+        </ul>
+      </div>
+      <div class="col bad">
+        <h4>✕ End-to-end neural</h4>
+        <ul>
+          <li>Catch more — but produce embeddings engineers can't read.</li>
+          <li>Hard to audit, hard to defend in review.</li>
+          <li>Hard to act on a 768-dimensional vector.</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:18px;">
+      <b>Log Discovery takes the middle path: statistical inference an
+      engineer can read.</b> Every candidate it surfaces has an explicit
+      reason — <em>"templates X and Y share an upstream cause"</em>,
+      <em>"this trajectory's per-step log-likelihood is in the bottom 5 %"</em>
+      — that you can challenge, accept, or reject.
+    </p>
+  </section>
+
+  <!-- ─── Pipeline diagram ───────────────────────────────── -->
+
+  <section id="pipeline">
+    <h2>Pipeline at a glance <span class="h-tag">four phases</span></h2>
+
+    <div class="hero-diagram">
+      <svg viewBox="0 0 760 200" role="img" aria-label="Log Discovery pipeline">
+        <!-- Phase boxes -->
+        <g font-family="-apple-system, sans-serif" font-size="11">
+          <!-- Phase 1: Mine -->
+          <g transform="translate(20, 50)">
+            <rect width="150" height="100" rx="10" fill="#eef2ff" stroke="#4338ca" stroke-width="1.5"/>
+            <text x="75" y="22" text-anchor="middle" font-weight="700" fill="#4338ca" font-size="10" letter-spacing="0.5">MINE</text>
+            <text x="75" y="44" text-anchor="middle" font-weight="600" fill="#0f172a" font-size="12">Drain templates</text>
+            <text x="75" y="62" text-anchor="middle" fill="#334155" font-size="11">Slot typing</text>
+            <text x="75" y="78" text-anchor="middle" fill="#334155" font-size="11">PMI entity graph</text>
+            <text x="75" y="94" text-anchor="middle" fill="#64748b" font-size="10" font-style="italic">L1, L1.5</text>
+          </g>
+          <!-- arrow -->
+          <path d="M175 100 L195 100" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+
+          <!-- Phase 2: Sequence -->
+          <g transform="translate(200, 50)">
+            <rect width="150" height="100" rx="10" fill="#cffafe" stroke="#0e7490" stroke-width="1.5"/>
+            <text x="75" y="22" text-anchor="middle" font-weight="700" fill="#0e7490" font-size="10" letter-spacing="0.5">SEQUENCE</text>
+            <text x="75" y="44" text-anchor="middle" font-weight="600" fill="#0f172a" font-size="12">HMM per service</text>
+            <text x="75" y="62" text-anchor="middle" fill="#334155" font-size="11">Trajectory anomalies</text>
+            <text x="75" y="78" text-anchor="middle" fill="#334155" font-size="11">GP rate spikes</text>
+            <text x="75" y="94" text-anchor="middle" fill="#64748b" font-size="10" font-style="italic">L2, L8, L10, L13</text>
+          </g>
+          <path d="M355 100 L375 100" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+
+          <!-- Phase 3: Causality -->
+          <g transform="translate(380, 50)">
+            <rect width="150" height="100" rx="10" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+            <text x="75" y="22" text-anchor="middle" font-weight="700" fill="#b45309" font-size="10" letter-spacing="0.5">CAUSALITY</text>
+            <text x="75" y="44" text-anchor="middle" font-weight="600" fill="#0f172a" font-size="12">Granger + TE gate</text>
+            <text x="75" y="62" text-anchor="middle" fill="#334155" font-size="11">PC algorithm DAG</text>
+            <text x="75" y="78" text-anchor="middle" fill="#334155" font-size="11">Shared causes</text>
+            <text x="75" y="94" text-anchor="middle" fill="#64748b" font-size="10" font-style="italic">L3, L11</text>
+          </g>
+          <path d="M535 100 L555 100" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+
+          <!-- Phase 4: Review -->
+          <g transform="translate(560, 50)">
+            <rect width="180" height="100" rx="10" fill="#d1fae5" stroke="#047857" stroke-width="1.5"/>
+            <text x="90" y="22" text-anchor="middle" font-weight="700" fill="#047857" font-size="10" letter-spacing="0.5">REVIEW</text>
+            <text x="90" y="44" text-anchor="middle" font-weight="600" fill="#0f172a" font-size="12">Confidence × value sort</text>
+            <text x="90" y="62" text-anchor="middle" fill="#334155" font-size="11">Active-learning re-rank</text>
+            <text x="90" y="78" text-anchor="middle" fill="#334155" font-size="11">pPCA merge candidates</text>
+            <text x="90" y="94" text-anchor="middle" fill="#64748b" font-size="10" font-style="italic">L4, L9, L12</text>
+          </g>
+
+          <!-- Top label -->
+          <text x="380" y="22" text-anchor="middle" font-size="11" fill="#64748b" letter-spacing="0.5">DATA FLOWS LEFT-TO-RIGHT · YOU REVIEW AT THE END</text>
+          <!-- Bottom: input/output -->
+          <text x="20" y="180" font-size="11" fill="#64748b">📂 Raw log files</text>
+          <text x="740" y="180" text-anchor="end" font-size="11" fill="#64748b">📋 Reviewed ontology candidates</text>
+        </g>
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L6,4 L0,8 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <p style="font-size:13.5px;color:var(--muted)">
+      The pipeline runs as two CLI phases:
+      <code>python toolkit.py --phase mine --log-path …</code> then
+      <code>--phase sequence --log-path …</code>. Both finish in
+      seconds for a typical 10 k–50 k line corpus. Then you open
+      this wizard's Step 5 to review.
+    </p>
+  </section>
+
+  <!-- ─── Outputs ────────────────────────────────────────── -->
+
+  <section id="outputs">
+    <h2>What you get <span class="h-tag">four kinds of proposals</span></h2>
+    <div class="outputs">
+      <div class="out">
+        <div class="icon" style="background:var(--indigo-soft);color:var(--indigo)">🎯</div>
+        <h4>Events</h4>
+        <p>OWL classes derived from repeating log templates. e.g. <code>:UserLoggedIn</code>.</p>
+      </div>
+      <div class="out">
+        <div class="icon" style="background:var(--cyan-soft);color:var(--cyan)">🔑</div>
+        <h4>Entities</h4>
+        <p>Identifier properties from typed slots. e.g. <code>:hasUserId</code> as UUID.</p>
+      </div>
+      <div class="out">
+        <div class="icon" style="background:var(--violet-soft);color:var(--violet)">↔</div>
+        <h4>Relationships</h4>
+        <p>Undirected PMI-weighted edges → <code>owl:ObjectProperty</code> candidates.</p>
+      </div>
+      <div class="out">
+        <div class="icon" style="background:var(--amber-soft);color:var(--amber)">→</div>
+        <h4>Causal edges</h4>
+        <p>Directed edges past the triangulation gate. <code>:X :causes :Y</code>.</p>
+      </div>
+    </div>
+    <p style="margin-top:14px; font-size:13.5px; color:var(--muted);">
+      <b>The contract:</b> nothing flows into your ontology
+      automatically. Every proposal starts as PENDING. You approve,
+      edit, reject, or merge — and the pipeline ranks by
+      <em>confidence × consequence</em> so the highest-leverage
+      decisions sit at the top.
+    </p>
+  </section>
+
+  <!-- ───────────────────────────────────────────────────────
+       v1 LAYERS
+       ─────────────────────────────────────────────────────── -->
+
+  <section>
+    <h2>v1 layers <span class="h-tag">L1 — L4 · shipped</span></h2>
+    <p style="font-size:14px;color:var(--text-soft);margin-bottom:10px">
+      The original seven layers. Each is a small, independently-testable
+      PRML-grounded step.
+    </p>
+
+    <!-- L1 -->
+    <article class="layer v1" id="l1">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L1</span>
+          <h3>Template clustering</h3>
+          <span class="bk-tag">Bishop §9</span>
+        </div>
+        <p><span class="label">What</span>
+        Cluster every log line into a small set of templates with
+        wildcards <code>&lt;*&gt;</code> for variable parts.
+        <em>"User u-123 logged in"</em> and <em>"User u-456 logged in"</em>
+        collapse to one template.</p>
+        <p><span class="label">Algorithm</span>
+        <b>Drain3</b> tree-based online clustering, refined by a small
+        EM merge pass for near-duplicates.</p>
+        <p><span class="label">Why it matters</span>
+        Templates are the atomic unit downstream. Over-merge and
+        distinct events vanish; over-split and review is exhausting.</p>
+        <p><span class="label">In Studio</span>
+        Each row in <code>log_templates</code> becomes a candidate
+        <code>:Event_N</code> class with a sample log line attached.</p>
+      </div>
+      <div class="viz">
+        <!-- Drain template viz -->
+        <svg viewBox="0 0 200 130" role="img" aria-label="Drain clustering example">
+          <g font-family="ui-monospace, monospace" font-size="8">
+            <text x="0" y="14" fill="#64748b">User u-123 logged in</text>
+            <text x="0" y="28" fill="#64748b">User u-456 logged in</text>
+            <text x="0" y="42" fill="#64748b">User u-789 logged in</text>
+          </g>
+          <path d="M100 50 Q100 60 100 70" stroke="#94a3b8" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+          <rect x="20" y="74" width="160" height="40" rx="6" fill="#eef2ff" stroke="#4338ca" stroke-width="1.2"/>
+          <text x="100" y="90" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" fill="#4338ca">User &lt;*&gt; logged in</text>
+          <text x="100" y="104" text-anchor="middle" font-size="9" fill="#64748b">template · hits=3</text>
+          <defs>
+            <marker id="arr2" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+              <path d="M0,0 L4,3 L0,6 z" fill="#94a3b8"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="viz-caption">3 raw lines collapse into 1 template with a wildcard slot.</div>
+      </div>
+    </article>
+
+    <!-- L1.5 -->
+    <article class="layer v1" id="l15">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L1.5</span>
+          <h3>Slot typing &amp; entity graph</h3>
+          <span class="bk-tag">Bishop §8</span>
+        </div>
+        <p><span class="label">What</span>
+        Classify each <code>&lt;*&gt;</code> position by the values it
+        takes (IRI, UUID, enum, numeric, free text) and flag possible
+        PII. Build an undirected graph over slot values that
+        co-occur within a short time window.</p>
+        <p><span class="label">Algorithm</span>
+        Regex ladder + Shannon entropy for typing. Pointwise mutual
+        information (PMI) + temporal-lead ratio for the graph.</p>
+        <p><span class="label">Why it matters</span>
+        Entity proposals start here. <em>"slot 2 of template #7 is a
+        UUID with 4 130 distinct values"</em> tells you it's an
+        identifier property worth keeping.</p>
+        <p><span class="label">In Studio</span>
+        <code>log_template_slots</code> + <code>log_entity_edges</code>
+        rows; visible as Entity and Relationship proposals.</p>
+      </div>
+      <div class="viz">
+        <!-- PMI graph viz -->
+        <svg viewBox="0 0 200 130" role="img" aria-label="PMI entity graph">
+          <g>
+            <circle cx="40" cy="40" r="18" fill="#cffafe" stroke="#0e7490" stroke-width="1.5"/>
+            <text x="40" y="44" text-anchor="middle" font-size="10" font-family="ui-monospace, monospace" fill="#0e7490">userId</text>
+
+            <circle cx="160" cy="40" r="18" fill="#cffafe" stroke="#0e7490" stroke-width="1.5"/>
+            <text x="160" y="44" text-anchor="middle" font-size="10" font-family="ui-monospace, monospace" fill="#0e7490">orderId</text>
+
+            <circle cx="100" cy="100" r="18" fill="#cffafe" stroke="#0e7490" stroke-width="1.5"/>
+            <text x="100" y="104" text-anchor="middle" font-size="10" font-family="ui-monospace, monospace" fill="#0e7490">cartId</text>
+
+            <line x1="58" y1="40" x2="142" y2="40" stroke="#7c3aed" stroke-width="2"/>
+            <text x="100" y="34" text-anchor="middle" font-size="9" fill="#7c3aed">PMI 6.2</text>
+
+            <line x1="50" y1="56" x2="90" y2="92" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="58" y="80" font-size="8" fill="#7c3aed">PMI 4.1</text>
+
+            <line x1="150" y1="56" x2="110" y2="92" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="143" y="80" font-size="8" fill="#7c3aed">PMI 3.8</text>
+          </g>
+        </svg>
+        <div class="viz-caption">High-PMI edges between slot values become relationship candidates.</div>
+      </div>
+    </article>
+
+    <!-- L2 -->
+    <article class="layer v1" id="l2">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L2</span>
+          <h3>HMM trajectories &amp; anomalies</h3>
+          <span class="bk-tag">Bishop §13</span>
+        </div>
+        <p><span class="label">What</span>
+        Group log lines by service into time-ordered sequences of
+        template IDs. Fit a per-service Hidden Markov Model. Flag
+        sequences in the bottom 5 % of per-step log-likelihood.</p>
+        <p><span class="label">Algorithm</span>
+        CategoricalHMM (hmmlearn). State count by BIC. Combined with
+        cluster-bag novelty for trajectories that miss the service's
+        mode templates.</p>
+        <p><span class="label">Why it matters</span>
+        Individual log lines look fine; the <em>sequence</em> tells
+        the story. The HMM learns the normal rhythm of each service so
+        deviations surface.</p>
+        <p><span class="label">In Studio</span>
+        LOG_EVENT proposals at the top of the queue, each linked back
+        to the anomalous trajectory.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="HMM anomaly trajectory">
+          <!-- Normal trajectory -->
+          <polyline points="10,80 30,70 50,75 70,72 90,68 110,72 130,70 150,75 170,72 190,70" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+          <text x="10" y="20" font-size="9" fill="#64748b">log-likelihood</text>
+          <!-- Threshold line -->
+          <line x1="10" y1="95" x2="190" y2="95" stroke="#be123c" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="190" y="92" text-anchor="end" font-size="8" fill="#be123c">5th pct threshold</text>
+          <!-- Anomalous trajectory -->
+          <polyline points="10,82 30,90 50,100 70,110 90,108 110,112 130,108 150,110" fill="none" stroke="#be123c" stroke-width="2"/>
+          <circle cx="110" cy="112" r="3.5" fill="#be123c"/>
+          <text x="120" y="120" font-size="8" fill="#be123c">anomaly</text>
+          <text x="10" y="120" font-size="8" fill="#64748b">time →</text>
+        </svg>
+        <div class="viz-caption">Anomalous trajectory (red) falls below the 5th-percentile likelihood threshold.</div>
+      </div>
+    </article>
+
+    <!-- L3 -->
+    <article class="layer v1" id="l3">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L3</span>
+          <h3>Causality gate</h3>
+          <span class="bk-tag">Bishop §11, §14</span>
+        </div>
+        <p><span class="label">What</span>
+        For each directed entity edge, test whether the history of
+        <em>src</em> actually informs the future of <em>dst</em>
+        beyond <em>dst</em>'s own history.</p>
+        <p><span class="label">Algorithm</span>
+        Granger F-test on time-binned rate series; transfer entropy
+        z-score as fallback. Triangulation: PMI + lead + statistical
+        causality must all agree.</p>
+        <p><span class="label">Why it matters</span>
+        Temporal-lead is necessary but not sufficient for causality.
+        Without this gate, every "occurs before" pair looks like a
+        cause.</p>
+        <p><span class="label">In Studio</span>
+        Directed edges that pass become LOG_CAUSAL_EDGE; those that
+        fail become LOG_RELATIONSHIP instead.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="Granger causality">
+          <g font-family="-apple-system, sans-serif" font-size="9">
+            <!-- A series -->
+            <text x="10" y="22" fill="#0e7490" font-weight="600">A(t)</text>
+            <polyline points="40,20 55,28 70,15 85,25 100,18 115,28 130,18 145,28 160,20 175,22" fill="none" stroke="#0e7490" stroke-width="1.3"/>
+            <!-- B series (lags A) -->
+            <text x="10" y="62" fill="#7c3aed" font-weight="600">B(t)</text>
+            <polyline points="40,60 55,68 70,55 85,65 100,58 115,68 130,58 145,68 160,60 175,62" fill="none" stroke="#7c3aed" stroke-width="1.3"/>
+            <!-- B lagged behind A by ~5 -->
+            <text x="100" y="92" text-anchor="middle" font-size="10" fill="#0f172a">B(t) ← A(t−1)</text>
+            <text x="100" y="106" text-anchor="middle" font-size="9" fill="#047857">p &lt; 0.01 ✓ Granger-causal</text>
+          </g>
+        </svg>
+        <div class="viz-caption">B's rises track A's with a small lag. Granger says A causes B.</div>
+      </div>
+    </article>
+
+    <!-- L4 -->
+    <article class="layer v1" id="l4">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L4</span>
+          <h3>Review surface</h3>
+          <span class="bk-tag">Bishop §1</span>
+        </div>
+        <p><span class="label">What</span>
+        Load every proposal into the wizard's Step 5 queue, sorted
+        by <code>confidence × consequence</code>. Engineer approves,
+        rejects, edits, or merges.</p>
+        <p><span class="label">Algorithm</span>
+        Decision-theoretic ordering by expected information value.</p>
+        <p><span class="label">Why it matters</span>
+        Your time is the bottleneck. The highest-leverage decisions
+        sit at the top so you can stop reading after the most
+        important N.</p>
+        <p><span class="label">In Studio</span>
+        This panel.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="Review queue ordering">
+          <g font-family="-apple-system, sans-serif" font-size="9">
+            <rect x="10" y="14" width="180" height="22" rx="4" fill="#ffe4e6" stroke="#be123c" stroke-width="0.8"/>
+            <text x="20" y="29" fill="#be123c" font-weight="600">95% — :NFDeregister</text>
+            <rect x="10" y="42" width="180" height="22" rx="4" fill="#fef3c7" stroke="#b45309" stroke-width="0.8"/>
+            <text x="20" y="57" fill="#b45309" font-weight="600">82% — :PaymentRetry</text>
+            <rect x="10" y="70" width="180" height="22" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="0.8"/>
+            <text x="20" y="85" fill="#7c3aed">61% — :CacheHit</text>
+            <rect x="10" y="98" width="180" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="0.8"/>
+            <text x="20" y="113" fill="#64748b">23% — :Heartbeat</text>
+          </g>
+        </svg>
+        <div class="viz-caption">Top of queue = highest leverage. Confidence × severity decides.</div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ───────────────────────────────────────────────────────
+       v2 ENHANCEMENTS
+       ─────────────────────────────────────────────────────── -->
+
+  <section>
+    <h2>v2 enhancements <span class="h-tag">L9 — L13 · shipped</span></h2>
+    <p style="font-size:14px; color:var(--text-soft); margin-bottom:10px">
+      Six additive enhancements landed on top of v1. Each targets a
+      specific shallow spot that became obvious in real use.
+    </p>
+
+    <!-- L9 -->
+    <article class="layer v2" id="l9">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L9</span>
+          <h3>Active-learning review-queue ranker</h3>
+          <span class="bk-tag">Bishop §1, §4.3</span>
+        </div>
+        <p><span class="label">What</span>
+        A logistic-regression model trained on your past approve/
+        reject decisions reorders the queue so the things <em>you</em>
+        tend to approve rise to the top.</p>
+        <p><span class="label">Algorithm</span>
+        scikit-learn LogisticRegression on per-proposal features
+        (kind, confidence, evidence volume, slot-PII flag, age,
+        regime tag, …) with median imputation + class balancing.</p>
+        <p><span class="label">Why it matters</span>
+        Without it, engineers re-reject the same noise template every
+        session. With it, the queue learns from each decision.</p>
+        <p><span class="label">In Studio</span>
+        <em>"↻ Re-rank with feedback"</em> button on Step 5; a small
+        badge under the controls shows
+        <em>"ranker · 47 decisions · AUC 0.83"</em>.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="Ranker learning">
+          <g font-family="-apple-system, sans-serif" font-size="9">
+            <text x="100" y="14" text-anchor="middle" font-size="10" fill="#64748b">before</text>
+            <rect x="10" y="20" width="14" height="20" rx="2" fill="#fef3c7"/>
+            <rect x="28" y="20" width="14" height="20" rx="2" fill="#ffe4e6"/>
+            <rect x="46" y="20" width="14" height="20" rx="2" fill="#d1fae5"/>
+            <rect x="64" y="20" width="14" height="20" rx="2" fill="#ffe4e6"/>
+            <rect x="82" y="20" width="14" height="20" rx="2" fill="#d1fae5"/>
+
+            <text x="100" y="62" text-anchor="middle" font-size="10" fill="#047857">after re-rank</text>
+            <rect x="10" y="68" width="14" height="20" rx="2" fill="#d1fae5"/>
+            <rect x="28" y="68" width="14" height="20" rx="2" fill="#d1fae5"/>
+            <rect x="46" y="68" width="14" height="20" rx="2" fill="#d1fae5"/>
+            <rect x="64" y="68" width="14" height="20" rx="2" fill="#fef3c7"/>
+            <rect x="82" y="68" width="14" height="20" rx="2" fill="#ffe4e6"/>
+            <text x="120" y="83" font-size="9" fill="#64748b">approvals first;</text>
+            <text x="120" y="95" font-size="9" fill="#64748b">noise sinks.</text>
+
+            <path d="M55 45 L55 60" stroke="#047857" stroke-width="1.5" fill="none" marker-end="url(#arr3)"/>
+            <defs><marker id="arr3" markerWidth="5" markerHeight="5" refX="3" refY="2.5" orient="auto"><path d="M0,0 L3,2.5 L0,5 z" fill="#047857"/></marker></defs>
+          </g>
+        </svg>
+        <div class="viz-caption">Approved (green) rise; rejected (red) sink. Same data, smarter order.</div>
+      </div>
+    </article>
+
+    <!-- L8 -->
+    <article class="layer v2" id="l8">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L8</span>
+          <h3>Switching state-space regimes</h3>
+          <span class="bk-tag">Bishop §9, §13.3.3</span>
+        </div>
+        <p><span class="label">What</span>
+        Replace v1's single per-service HMM with a <em>mixture</em>
+        of HMMs. A per-trajectory regime indicator selects which HMM
+        applies — separating business hours from weekend maintenance
+        from incident response.</p>
+        <p><span class="label">Algorithm</span>
+        VB-EM with Dirichlet prior on regime mixing weights; K
+        selected by ELBO over 3 random restarts; K ≤ 5.</p>
+        <p><span class="label">Why it matters</span>
+        v1's single HMM averages across regimes and flags
+        normal-but-rare patterns (e.g. weekend maintenance) as
+        anomalies. <b>The largest single source of false positives.</b></p>
+        <p><span class="label">In Studio</span>
+        Each LOG_EVENT proposal carries an amber chip —
+        <em>"Regime 2 of 3"</em> — so you know which operating mode
+        produced it.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="Regime rate curves">
+          <g font-family="-apple-system, sans-serif" font-size="9">
+            <text x="10" y="14" fill="#64748b">two distinct regimes</text>
+            <!-- Regime 1: business hours pattern -->
+            <polyline points="10,80 25,55 40,35 55,30 70,28 85,30 100,38 115,55 130,75 145,80 160,82 175,80 190,82" fill="none" stroke="#4338ca" stroke-width="1.5"/>
+            <text x="65" y="50" font-size="9" fill="#4338ca">Regime 1: weekday</text>
+            <!-- Regime 2: maintenance burst at night -->
+            <polyline points="10,98 25,98 40,95 55,90 70,80 85,65 100,55 115,65 130,80 145,95 160,98 175,98 190,98" fill="none" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="80" y="118" font-size="9" fill="#b45309">Regime 2: maintenance</text>
+            <line x1="10" y1="100" x2="190" y2="100" stroke="#cbd5e1"/>
+          </g>
+        </svg>
+        <div class="viz-caption">A single HMM would flag Regime 2 as anomalous. L8's mixture keeps it as &ldquo;normal for that regime&rdquo;.</div>
+      </div>
+    </article>
+
+    <!-- L10 -->
+    <article class="layer v2" id="l10">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L10</span>
+          <h3>Calibrated confidence via VB</h3>
+          <span class="bk-tag">Bishop §10</span>
+        </div>
+        <p><span class="label">What</span>
+        Replace v1's heuristic <code>max(c, 0.6)</code> floor with a
+        real posterior probability. Confidence becomes
+        <em>"P(per-step logL &lt; anomaly threshold)"</em> under a
+        Variational Bayesian HMM.</p>
+        <p><span class="label">Algorithm</span>
+        VB-HMM with Dirichlet priors on π, A, B; mean-field VB-EM via
+        log-space forward-backward; Bayesian model averaging across
+        K. Confidence via Monte-Carlo posterior predictive.</p>
+        <p><span class="label">Why it matters</span>
+        An audit-ready confidence. Comparable across proposal kinds,
+        defensible to a reviewer. ECE &lt; 0.05 on synthetic data.</p>
+        <p><span class="label">In Studio</span>
+        Confidence scores stop clustering at 0.6 / 0.7 / 0.8 (the v1
+        floors) — they spread smoothly across [0, 1].</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="Calibration reliability diagram">
+          <g font-family="-apple-system, sans-serif" font-size="8">
+            <!-- Axis -->
+            <line x1="20" y1="110" x2="190" y2="110" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="20" y1="20" x2="20" y2="110" stroke="#94a3b8" stroke-width="1"/>
+            <text x="105" y="124" text-anchor="middle" fill="#64748b">predicted</text>
+            <text x="10" y="65" text-anchor="middle" fill="#64748b" transform="rotate(-90 10 65)">actual</text>
+            <!-- ideal line -->
+            <line x1="20" y1="110" x2="190" y2="20" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="170" y="32" font-size="8" fill="#94a3b8">ideal</text>
+            <!-- v1: clumps at 0.6/0.7/0.8 -->
+            <circle cx="115" cy="80" r="4" fill="#be123c" opacity="0.6"/>
+            <circle cx="135" cy="65" r="4" fill="#be123c" opacity="0.6"/>
+            <circle cx="155" cy="45" r="4" fill="#be123c" opacity="0.6"/>
+            <text x="118" y="98" font-size="8" fill="#be123c">v1 floors</text>
+            <!-- v2: spread along diagonal -->
+            <circle cx="40" cy="98" r="3" fill="#047857"/>
+            <circle cx="60" cy="84" r="3" fill="#047857"/>
+            <circle cx="80" cy="70" r="3" fill="#047857"/>
+            <circle cx="100" cy="55" r="3" fill="#047857"/>
+            <circle cx="125" cy="42" r="3" fill="#047857"/>
+            <circle cx="150" cy="33" r="3" fill="#047857"/>
+            <circle cx="175" cy="24" r="3" fill="#047857"/>
+            <text x="55" y="70" font-size="8" fill="#047857">v2 spread</text>
+          </g>
+        </svg>
+        <div class="viz-caption">v1 confidences clump at heuristic floors; v2 tracks the diagonal — true posterior.</div>
+      </div>
+    </article>
+
+    <!-- L11 -->
+    <article class="layer v2" id="l11">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L11</span>
+          <h3>PC algorithm causal DAG</h3>
+          <span class="bk-tag">Bishop §8.2, §8.4.5</span>
+        </div>
+        <p><span class="label">What</span>
+        Replace pairwise Granger with a structural causal graph. The
+        PC algorithm tests conditional independence under expanding
+        conditioning sets, so shared upstream causes eliminate
+        spurious <em>"B causes C"</em> edges.</p>
+        <p><span class="label">Algorithm</span>
+        Partial Pearson correlation + Fisher z-transform CI test.
+        Skeleton phase with conditioning sets ≤ 3. V-structure
+        orientation. Meek rules R1–R4.</p>
+        <p><span class="label">Why it matters</span>
+        Pairwise tests can't tell <em>"A causes both B and C"</em>
+        from <em>"B causes C"</em>. PC can.</p>
+        <p><span class="label">In Studio</span>
+        Causal-edge titles gain a suffix like <em>"— shared upstream
+        cause: template #41"</em> when the PDAG identifies a
+        confounder.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="PC algorithm before/after">
+          <g font-family="-apple-system, sans-serif" font-size="9">
+            <text x="50" y="14" text-anchor="middle" font-size="10" fill="#be123c">v1 Granger</text>
+            <circle cx="50" cy="32" r="8" fill="#ffe4e6" stroke="#be123c"/>
+            <text x="50" y="35" text-anchor="middle" font-size="9" fill="#be123c">A</text>
+            <circle cx="22" cy="68" r="8" fill="#ffe4e6" stroke="#be123c"/>
+            <text x="22" y="71" text-anchor="middle" font-size="9" fill="#be123c">B</text>
+            <circle cx="78" cy="68" r="8" fill="#ffe4e6" stroke="#be123c"/>
+            <text x="78" y="71" text-anchor="middle" font-size="9" fill="#be123c">C</text>
+            <line x1="44" y1="40" x2="28" y2="60" stroke="#be123c" stroke-width="1.5" marker-end="url(#arrR)"/>
+            <line x1="56" y1="40" x2="72" y2="60" stroke="#be123c" stroke-width="1.5" marker-end="url(#arrR)"/>
+            <line x1="30" y1="68" x2="70" y2="68" stroke="#be123c" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="50" y="86" text-anchor="middle" font-size="8" fill="#be123c">spurious B↔C</text>
+
+            <text x="155" y="14" text-anchor="middle" font-size="10" fill="#047857">v2 PC</text>
+            <circle cx="155" cy="32" r="8" fill="#d1fae5" stroke="#047857"/>
+            <text x="155" y="35" text-anchor="middle" font-size="9" fill="#047857">A</text>
+            <circle cx="127" cy="68" r="8" fill="#d1fae5" stroke="#047857"/>
+            <text x="127" y="71" text-anchor="middle" font-size="9" fill="#047857">B</text>
+            <circle cx="183" cy="68" r="8" fill="#d1fae5" stroke="#047857"/>
+            <text x="183" y="71" text-anchor="middle" font-size="9" fill="#047857">C</text>
+            <line x1="149" y1="40" x2="133" y2="60" stroke="#047857" stroke-width="1.5" marker-end="url(#arrG)"/>
+            <line x1="161" y1="40" x2="177" y2="60" stroke="#047857" stroke-width="1.5" marker-end="url(#arrG)"/>
+            <text x="155" y="100" text-anchor="middle" font-size="8" fill="#047857">B ⊥ C | A — edge dropped</text>
+            <defs>
+              <marker id="arrR" markerWidth="5" markerHeight="5" refX="3" refY="2.5" orient="auto"><path d="M0,0 L3,2.5 L0,5 z" fill="#be123c"/></marker>
+              <marker id="arrG" markerWidth="5" markerHeight="5" refX="3" refY="2.5" orient="auto"><path d="M0,0 L3,2.5 L0,5 z" fill="#047857"/></marker>
+            </defs>
+          </g>
+        </svg>
+        <div class="viz-caption">Same data, two graphs. PC drops the spurious B↔C once conditioned on A.</div>
+      </div>
+    </article>
+
+    <!-- L12 -->
+    <article class="layer v2" id="l12">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L12</span>
+          <h3>pPCA template similarity</h3>
+          <span class="bk-tag">Bishop §12.2</span>
+        </div>
+        <p><span class="label">What</span>
+        A 2-D PCA scatter of all active templates, with merge
+        candidates highlighted in amber when their distance in the
+        full-dim embedding falls below a threshold.</p>
+        <p><span class="label">Algorithm</span>
+        Bag-of-tokens vectoriser + probabilistic PCA; L2-normalised
+        chord distance for the merge-candidate test.</p>
+        <p><span class="label">Why it matters</span>
+        Drain's <code>sim_th=0.4</code> is a hard knob. Some
+        near-duplicates always slip through. The scatter lets you
+        spot them visually and merge with one click.</p>
+        <p><span class="label">In Studio</span>
+        The "Template similarity" card on Step 5; close pairs are
+        connected by faint amber lines.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="pPCA template scatter">
+          <g>
+            <circle cx="40" cy="60" r="2.5" fill="#4338ca"/>
+            <circle cx="60" cy="55" r="2.5" fill="#4338ca"/>
+            <circle cx="75" cy="80" r="2.5" fill="#4338ca"/>
+            <circle cx="115" cy="40" r="2.5" fill="#4338ca"/>
+            <circle cx="160" cy="70" r="2.5" fill="#4338ca"/>
+            <!-- Merge candidates -->
+            <circle cx="130" cy="95" r="4" fill="#b45309"/>
+            <circle cx="138" cy="100" r="4" fill="#b45309"/>
+            <line x1="130" y1="95" x2="138" y2="100" stroke="#b45309" stroke-width="1.2" opacity="0.5"/>
+            <circle cx="95" cy="25" r="4" fill="#b45309"/>
+            <circle cx="102" cy="20" r="4" fill="#b45309"/>
+            <line x1="95" y1="25" x2="102" y2="20" stroke="#b45309" stroke-width="1.2" opacity="0.5"/>
+            <text x="100" y="120" text-anchor="middle" font-size="9" font-family="-apple-system, sans-serif" fill="#b45309">amber pairs ≈ likely duplicates</text>
+          </g>
+        </svg>
+        <div class="viz-caption">Templates as 2-D points. Close pairs are merge candidates.</div>
+      </div>
+    </article>
+
+    <!-- L13 -->
+    <article class="layer v2" id="l13">
+      <div class="body">
+        <div class="head">
+          <span class="id-pill">L13</span>
+          <h3>GP rate-shape anomalies</h3>
+          <span class="bk-tag">Bishop §6.4</span>
+        </div>
+        <p><span class="label">What</span>
+        Per template, fit a Gaussian Process over hour-of-day rate
+        and flag observations outside the 99 % posterior interval —
+        catching the <em>burst-of-normal-templates</em> pattern v1's
+        HMM misses entirely.</p>
+        <p><span class="label">Algorithm</span>
+        Periodic (24 h) + RBF + white-noise kernel; per-hour-median
+        aggregation for robustness; MAD-based residual z-score
+        against the smooth baseline.</p>
+        <p><span class="label">Why it matters</span>
+        When a deploy goes bad and a normally-quiet endpoint floods
+        the queue with success logs, v1's HMM sees nothing wrong —
+        the templates are fine, there are just too many of them. The
+        GP sees the rate spike.</p>
+        <p><span class="label">In Studio</span>
+        Rows tagged with a green <em>"GP rate"</em> chip and an
+        inline sparkline. <em>"↻ GP rate scan"</em> button on the
+        toolbar.</p>
+      </div>
+      <div class="viz">
+        <svg viewBox="0 0 200 130" role="img" aria-label="GP rate anomaly">
+          <!-- 99% band -->
+          <path d="M10,80 L40,75 L70,70 L100,72 L130,75 L160,78 L190,80 L190,95 L160,93 L130,90 L100,87 L70,85 L40,90 L10,95 Z"
+                fill="#d1fae5" opacity="0.6"/>
+          <!-- baseline GP curve -->
+          <polyline points="10,87 40,82 70,77 100,79 130,82 160,85 190,87" fill="none" stroke="#047857" stroke-width="1.5"/>
+          <!-- normal samples -->
+          <circle cx="20" cy="90" r="2" fill="#047857"/>
+          <circle cx="40" cy="86" r="2" fill="#047857"/>
+          <circle cx="60" cy="80" r="2" fill="#047857"/>
+          <circle cx="80" cy="78" r="2" fill="#047857"/>
+          <circle cx="100" cy="82" r="2" fill="#047857"/>
+          <circle cx="120" cy="84" r="2" fill="#047857"/>
+          <circle cx="140" cy="86" r="2" fill="#047857"/>
+          <circle cx="160" cy="88" r="2" fill="#047857"/>
+          <circle cx="180" cy="90" r="2" fill="#047857"/>
+          <!-- spike -->
+          <circle cx="70" cy="25" r="4" fill="#be123c"/>
+          <text x="80" y="28" font-size="9" fill="#be123c" font-family="-apple-system, sans-serif">3am spike</text>
+          <line x1="70" y1="29" x2="70" y2="77" stroke="#be123c" stroke-width="1" stroke-dasharray="2,2"/>
+          <text x="100" y="118" text-anchor="middle" font-size="9" fill="#64748b" font-family="-apple-system, sans-serif">hour of day →</text>
+        </svg>
+        <div class="viz-caption">Green band = 99 % GP posterior. Single red spike at 3 am falls outside → flagged.</div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ─── Benefits ──────────────────────────────────────── -->
+
+  <section id="benefits">
+    <h2>Benefits <span class="h-tag">before vs after</span></h2>
+    <div class="benefits">
+      <div class="col bad">
+        <h4>Without Log Discovery</h4>
+        <ul>
+          <li>Regexes catch only what you thought of.</li>
+          <li>Dashboards fire on guessed thresholds.</li>
+          <li>RCA = chasing temporal-correlation pairs.</li>
+          <li>Same noise rejected every week.</li>
+          <li>“Confidence 0.8.” What does that mean?</li>
+        </ul>
+      </div>
+      <div class="col good">
+        <h4>With Log Discovery</h4>
+        <ul>
+          <li>Drain proposes templates; pPCA flags the duplicates.</li>
+          <li>HMM + GP catch sequence and rate anomalies.</li>
+          <li>PC algorithm builds a real causal DAG with shared causes.</li>
+          <li>Ranker learns what you approve; noise sinks.</li>
+          <li>Confidence is a real posterior. ECE &lt; 0.05.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── What to expect ───────────────────────────────── -->
+
+  <section id="expect">
+    <h2>What to expect <span class="h-tag">5-step workflow</span></h2>
+    <div class="workflow">
+      <div class="num">1</div>
+      <div class="text">
+        <h4>Point at a log folder</h4>
+        <p><code>python toolkit.py --phase mine --log-path /your/logs/</code> then <code>--phase sequence</code>. Both finish in seconds for a 10 k–50 k line corpus.</p>
+      </div>
+      <div class="num">2</div>
+      <div class="text">
+        <h4>Open Step 5</h4>
+        <p>The Log Discovery panel lights up. Four kinds of proposals — events, entities, relationships, causal edges — with sample log lines, confidence scores, and (when applicable) regime tags, GP chips, or shared-cause hints.</p>
+      </div>
+      <div class="num">3</div>
+      <div class="text">
+        <h4>Review top-down</h4>
+        <p>Events first (they define your vocabulary). Then entities (the identifiers). Then relationships and causal edges (they depend on the classes above).</p>
+      </div>
+      <div class="num">4</div>
+      <div class="text">
+        <h4>Re-rank periodically</h4>
+        <p>After 20+ decisions, click <em>"↻ Re-rank with feedback"</em>. The logistic-regression ranker refits and the queue reorders.</p>
+      </div>
+      <div class="num">5</div>
+      <div class="text">
+        <h4>Approved proposals flow into your ontology</h4>
+        <p>Click ✓ Approve → the candidate joins <code>session.events</code> / <code>.entities</code> / <code>.relationships</code> / <code>.causal_rules</code>. When you hit <em>Generate</em>, they emerge as OWL classes, properties, and SHACL rules.</p>
+      </div>
+    </div>
+    <div style="margin-top:20px; padding:14px 18px; border-radius:8px; background:var(--amber-soft); border-left:4px solid var(--amber); font-size:14px; color:var(--text);">
+      <b>You stay in the loop.</b> Nothing is added to your ontology
+      without an explicit approve click. Reject and merge are equally
+      fast. The pipeline is opinionated about <em>what to surface</em>,
+      not <em>what to keep</em>.
+    </div>
+  </section>
+
+  <!-- ─── Glossary ────────────────────────────────────── -->
+
+  <section id="glossary">
+    <h2>Glossary <span class="h-tag">terms used above</span></h2>
+    <div class="glossary">
+      <div><dt>Drain</dt><dd>Tree-based online clustering that groups log lines into templates by prefix similarity.</dd></div>
+      <div><dt>PMI</dt><dd>Pointwise mutual information — log-ratio of co-occurrence vs marginal product. High PMI ⇒ "more often together than chance".</dd></div>
+      <div><dt>HMM</dt><dd>Hidden Markov Model — discrete-state sequence model. Used over template-id trajectories.</dd></div>
+      <div><dt>BIC</dt><dd>Bayesian Information Criterion. Penalises complexity. Used to pick HMM state count.</dd></div>
+      <div><dt>Granger</dt><dd>F-test on whether past(X) predicts future(Y) beyond past(Y) alone.</dd></div>
+      <div><dt>VB</dt><dd>Variational Bayes — approximate inference by KL-minimisation over a simpler family. Used in L8, L10.</dd></div>
+      <div><dt>ELBO</dt><dd>Evidence Lower Bound. VB's objective. Differences in ELBO across K select regime count.</dd></div>
+      <div><dt>PC algorithm</dt><dd>Peter–Clark causal structure learner. Skeleton phase, v-structures, Meek rules.</dd></div>
+      <div><dt>ECE</dt><dd>Expected Calibration Error. Average gap between predicted confidence and observed accuracy.</dd></div>
+      <div><dt>PDAG</dt><dd>Partially-directed acyclic graph. PC's output. Some edges oriented, some undirected.</dd></div>
+      <div><dt>MAD</dt><dd>Median Absolute Deviation. Robust scale estimator. L13 uses it so a single spike can't hide itself.</dd></div>
+      <div><dt>pPCA</dt><dd>Probabilistic PCA. PCA with a Gaussian noise model. Bishop §12.2.</dd></div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Built on Bishop's <em>Pattern Recognition and Machine Learning</em>
+    (Chapters 1, 4, 6, 8, 9, 10, 11, 12, 13, 14).
+    &nbsp;·&nbsp;
+    <a href="/">Back to Studio</a>
+  </div>
+
+  </main>
+</div>
+
+<script>
+  // Light TOC highlighting as you scroll.
+  (function () {
+    const links = document.querySelectorAll('nav.toc a');
+    const targets = Array.from(links)
+      .map(a => document.querySelector(a.getAttribute('href')))
+      .filter(Boolean);
+    if (!('IntersectionObserver' in window) || !targets.length) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          links.forEach(a => a.classList.toggle(
+            'active',
+            a.getAttribute('href') === '#' + en.target.id
+          ));
+        }
+      });
+    }, { rootMargin: '-30% 0% -65% 0%' });
+    targets.forEach(t => io.observe(t));
+  })();
+</script>
+
+</body>
+</html>
