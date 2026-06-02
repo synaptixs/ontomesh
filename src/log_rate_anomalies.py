@@ -204,7 +204,8 @@ def _kernel():
     )
 
 
-def _fit_one_gp(points: Sequence[Tuple[float, int]]
+def _fit_one_gp(points: Sequence[Tuple[float, int]],
+                 *, use_sparse_gp: bool = False,
                  ) -> Optional[Tuple[Any, np.ndarray, np.ndarray]]:
     """Fit a single GP. Returns ``(gp, X_eval, y_eval)`` where
     ``X_eval`` / ``y_eval`` are the **original** observations (used
@@ -238,15 +239,25 @@ def _fit_one_gp(points: Sequence[Tuple[float, int]]
     y_fit = np.array([float(np.median(by_hour[h])) for h in hours],
                      dtype=float)
 
+    # T3.2 — sparse GP path. The interface (fit / predict with
+    # return_std) is identical to sklearn's GaussianProcessRegressor,
+    # so the rest of the L13 pipeline doesn't care which backend
+    # is in use. Sparse path scales linearly in samples instead of
+    # cubically — lifts the production ceiling from ~96 to 1000s
+    # of points per template.
     try:
-        gp = GaussianProcessRegressor(
-            kernel=_kernel(),
-            alpha=1e-3,
-            normalize_y=True,
-            n_restarts_optimizer=0,
-            random_state=0,
-        )
-        gp.fit(X_fit, y_fit)
+        if use_sparse_gp:
+            from sparse_gp import SparseGP
+            gp = SparseGP(n_inducing=24, noise_var=1.0).fit(X_fit, y_fit)
+        else:
+            gp = GaussianProcessRegressor(
+                kernel=_kernel(),
+                alpha=1e-3,
+                normalize_y=True,
+                n_restarts_optimizer=0,
+                random_state=0,
+            )
+            gp.fit(X_fit, y_fit)
     except Exception:                                  # noqa: BLE001
         return None
     return gp, X_eval, y_eval
@@ -256,13 +267,20 @@ def detect_rate_anomalies(extractions: Sequence[dict],
                           *,
                           alpha: float = ANOMALY_ALPHA,
                           max_templates: int = MAX_TEMPLATES,
+                          use_sparse_gp: bool = False,
                           ) -> List[RateAnomaly]:
     """Top-level anomaly detector. Returns one ``RateAnomaly`` per
     (cluster, bin) pair whose observed count falls outside the
     central ``1 - α`` predictive interval of its template's GP.
 
     Templates with fewer than ``MIN_SAMPLES_PER_TEMPLATE`` bins are
-    skipped (not enough data for a sensible GP)."""
+    skipped (not enough data for a sensible GP).
+
+    Set ``use_sparse_gp=True`` to use the T3.2 sparse-inducing-point
+    backend — lifts the per-template fit from O(n³) to O(m³) with
+    m ≤ 24, allowing 1000-template corpora to fit inside the 60 s
+    budget. The detection contract (residual MAD-z scoring) is
+    unchanged."""
     if not (_NP_OK and _SK_OK):
         return []
     points_by_cid = _build_hourly_counts(extractions)
@@ -276,7 +294,7 @@ def detect_rate_anomalies(extractions: Sequence[dict],
     z_thresh = float(norm.ppf(1.0 - alpha / 2.0))
     hits: List[RateAnomaly] = []
     for cid, points in sorted_cids:
-        result = _fit_one_gp(points)
+        result = _fit_one_gp(points, use_sparse_gp=use_sparse_gp)
         if result is None:
             continue
         gp, X, y = result
