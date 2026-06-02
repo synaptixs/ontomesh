@@ -954,6 +954,8 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
             <button class="btn btn-ghost" onclick="reseedLogDiscovery()" title="Re-build proposals from the latest mining outputs">↻ Re-seed</button>
             <button class="btn btn-ghost" onclick="rerankLogDiscovery()" title="Refit the active-learning ranker on your approve/reject history (L9)">↻ Re-rank with feedback</button>
             <button class="btn btn-ghost" onclick="mineRateAnomalies()" title="Run the GP rate-deviation detector (L13)">↻ GP rate scan</button>
+            <button class="btn btn-ghost" onclick="llmRenameProposals()" title="Use an LLM to give proposals human-readable names + descriptions (T1.1)">✨ LLM rename</button>
+            <span id="log-disco-llm-badge" class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px"></span>
             <span id="log-disco-ranker-badge" class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px"></span>
           </div>
         </div>
@@ -3569,6 +3571,7 @@ async function loadLogDiscovery() {
     ).join(' · ');
     document.getElementById('log-disco-counts').textContent = `(${headline})`;
     refreshRankerBadge();
+    refreshLLMBadge();
     loadTemplateEmbedding();
   } catch (_) {
     empty.style.display = '';
@@ -3877,6 +3880,52 @@ function _renderSparkline(raw) {
   const dx = w / Math.max(1, arr.length - 1);
   const pts = arr.map((v, i) => `${(i * dx).toFixed(1)},${(h - (v / max) * h).toFixed(1)}`).join(' ');
   return `<svg width="${w}" height="${h}" style="margin-left:6px" title="GP rate sparkline (${arr.length} bins)"><polyline points="${pts}" fill="none" stroke="#16a34a" stroke-width="1.2"/></svg>`;
+}
+
+// T1.1 — LLM-assisted proposal naming. Calls the rename endpoint;
+// shows the resulting "renamed N / provider X" summary.
+async function llmRenameProposals() {
+  try {
+    const res = await fetch('/api/log-discovery/llm-rename', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({force: false, limit: 50}),
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast('LLM rename failed: ' + (out.error || '')); return; }
+    if (out.skipped) {
+      showToast('LLM rename skipped — ' + (out.reason || 'no provider'));
+    } else {
+      showToast(`Renamed ${out.renamed} proposal(s) via ${out.provider} in ${out.duration_s}s`);
+    }
+    refreshLLMBadge();
+    loadLogDiscovery();
+  } catch (e) { showToast('LLM rename error: ' + e); }
+}
+
+async function refreshLLMBadge() {
+  const badge = document.getElementById('log-disco-llm-badge');
+  if (!badge) return;
+  try {
+    const res = await fetch('/api/log-discovery/llm-rename-status');
+    const out = await res.json();
+    if (!out.available) {
+      badge.textContent = '';
+      return;
+    }
+    if (out.provider === 'none') {
+      badge.textContent = `LLM idle · set PROPOSAL_NAMER_PROVIDER`;
+      badge.style.background = '#f3f4f6';
+      badge.style.color = '#6b7280';
+    } else if (out.auto_pending > 0) {
+      badge.textContent = `${out.auto_pending} unrenamed · ${out.provider} ready`;
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+    } else {
+      badge.textContent = `${out.llm_named} LLM-named · ${out.provider}`;
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#166534';
+    }
+  } catch (e) { /* leave empty */ }
 }
 
 async function mineRateAnomalies() {
