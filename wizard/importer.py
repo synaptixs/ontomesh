@@ -205,6 +205,10 @@ class ImportResult:
     stats: Dict[str, Any] = field(default_factory=dict)
     diff: Dict[str, Any] = field(default_factory=dict)
     format: str = "unknown"
+    # T1.4 — counters from the semantic-enhancement pass
+    # (junctions_collapsed, fk_chains_found, cardinalities_added,
+    # derived_classes). Empty when semantic enhancement didn't run.
+    semantic_report: Dict[str, int] = field(default_factory=dict)
 
     @property
     def ok(self) -> bool:
@@ -220,7 +224,24 @@ class ImportResult:
             "diff":        self.diff,
             "format":      self.format,
             "ok":          self.ok,
+            "semantic_report": self.semantic_report,
         }
+
+
+def _apply_semantic_enhancement(session: Dict[str, Any],
+                                schema_doc: Dict[str, Any],
+                                result: "ImportResult") -> Dict[str, Any]:
+    """T1.4 — run :func:`wizard.importer_semantic.enhance_schema`
+    when the input carries enough structure (tables + foreign keys).
+    Failure is silent: the structural session is returned unchanged
+    and the result's semantic_report stays empty."""
+    try:
+        from wizard.importer_semantic import enhance_schema      # noqa: E402
+        enhanced, report = enhance_schema(session, schema_doc)
+        result.semantic_report = report.as_dict()
+        return enhanced
+    except Exception:                                            # noqa: BLE001
+        return session
 
 
 # ── JSON Schema structural validation ────────────────────────────────────
@@ -1302,6 +1323,9 @@ def _parse_sql(
         "tables":   tables,
     }
     session = _norm_schema(schema_doc)
+    # T1.4 — layer the semantic enhancements (junctions, FK chains,
+    # cardinality, derived classes) on top of the structural pass.
+    session = _apply_semantic_enhancement(session, schema_doc, result)
     result.session = session
 
     errors, warnings, suggestions = _validate_session(session)
@@ -1417,6 +1441,10 @@ def parse_and_validate(
         session = _norm_cli(doc)
     elif shape == "json-schema":
         session = _norm_schema(doc)
+        # T1.4 — semantic enhancements are only available for the
+        # json-schema shape (the wizard/cli shapes don't carry raw
+        # FK / view metadata).
+        session = _apply_semantic_enhancement(session, doc, result)
     else:
         session = _empty_wizard_session()
 

@@ -192,6 +192,87 @@ def phase2_ontology(db_path: str, out_path: str):
     run_and_report(ontology_path, os.path.join(out_path, "ontology"), profile)
 
 
+def phase_targets(db_path: str, out_path: str, targets_arg: str):
+    """T1.5 — multi-target generation. Builds a GenerationContext from
+    the introspected schema + the wizard session + the APPROVED log-
+    discovery proposals, then renders every requested target under
+    ``out_path``.
+
+    ``targets_arg`` is the raw ``--targets`` string from argparse —
+    comma-separated names. Unknown names produce warnings, not errors.
+    """
+    step("T1.5", "Multi-target generation")
+    from db_introspector import DBIntrospector
+    from targets import (
+        AVAILABLE_TARGETS, GenerationContext, render_targets,
+    )
+    from targets.registry import write_target_outputs
+
+    if not targets_arg:
+        print(f"  no --targets specified; available: "
+              f"{', '.join(AVAILABLE_TARGETS)}")
+        return
+
+    names = [n.strip() for n in (targets_arg or "").split(",") if n.strip()]
+
+    # Wizard session
+    session = None
+    session_path = os.path.join(HERE, ".wizard_session.json")
+    if os.path.isfile(session_path):
+        try:
+            with open(session_path) as f:
+                session = json.load(f)
+        except Exception:
+            session = None
+
+    # APPROVED proposals — the rule of thumb: generate from approved
+    # truth, not pending guesses. Targets see only what reviewers
+    # have endorsed.
+    proposals: list = []
+    enterprise_db = os.path.join(HERE, "db", "enterprise.db")
+    if os.path.isfile(enterprise_db):
+        try:
+            import sqlite3
+            conn = sqlite3.connect(enterprise_db)
+            cur = conn.execute(
+                "SELECT proposal_id, proposal_type, title, "
+                "       evidence_sample, confidence_score "
+                "FROM ontology_evolution_proposals "
+                "WHERE status = 'APPROVED'"
+            )
+            cols = [c[0] for c in cur.description]
+            for row in cur.fetchall():
+                rd = dict(zip(cols, row))
+                rd["kind"] = rd.get("proposal_type")
+                proposals.append(rd)
+            conn.close()
+        except Exception:
+            proposals = []
+
+    try:
+        intro = DBIntrospector(db_path) if os.path.isfile(db_path) else None
+    except Exception:
+        intro = None
+    ctx = GenerationContext.from_introspector(
+        intro, session=session, proposals=proposals,
+    )
+    if intro is not None:
+        intro.close()
+
+    results = render_targets(ctx, names=names)
+    written = write_target_outputs(results, out_path)
+
+    for name, res in results.items():
+        if res.warnings:
+            for w in res.warnings:
+                print(f"  ⚠  {name}: {w}")
+        if res.stats:
+            stats_str = ", ".join(f"{k}={v}" for k, v in res.stats.items())
+            print(f"  • {name}: {len(res.files)} file(s) — {stats_str}")
+    if written:
+        print(f"  ✓ {len(written)} target files written under {out_path}")
+
+
 def phase_reason(db_path: str, out_path: str):
     """Phase B — materialisation. Runs OWL-RL, SHACL sh:rule, and SPARQL
     CONSTRUCT engines over `enterprise.ttl` and writes the four derived
@@ -633,8 +714,15 @@ def main():
     parser.add_argument("--phase",    default="all",
                         choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","sequence","drift-templates","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
-                                 "embed","retrieve"],
+                                 "embed","retrieve","targets"],
                         help="Run a specific phase only")
+    # ── T1.5 — Multi-target generation ─────────────────────────────────
+    parser.add_argument("--targets", default=None,
+                        help=("Comma-separated list of additional generation "
+                              "targets to emit alongside OWL/SHACL — e.g. "
+                              "'cypher,graphql,detection_rules'. Use --phase "
+                              "targets to run targets without re-generating "
+                              "the OWL/SHACL artefacts."))
     # ── Workstream 2 (evolve) flags ────────────────────────────────────
     parser.add_argument("--review", action="store_true",
                         help="Enter interactive review mode for pending evolution proposals (--phase evolve)")
@@ -1491,6 +1579,7 @@ def main():
         "1":       [(phase1_foundation, [args.db, args.out])],
         "2":       [(phase2_ontology,   [args.db, args.out])],
         "3":       [(phase3_shacl,      [args.db, args.out])],
+        "targets": [(phase_targets,     [args.db, args.out, args.targets])],
         "4":       [(phase4_mapping,    [args.db, args.out])],
         "5":       [(phase5_exchange,   [args.db, args.out])],
         "reason":  [(phase_reason,      [args.db, args.out])],

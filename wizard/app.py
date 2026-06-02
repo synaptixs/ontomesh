@@ -1077,6 +1077,13 @@ def _log_review_conn():
         _v2_migrate(conn)
     except Exception:                                      # noqa: BLE001
         pass
+    # T1.1 — name_source / name_generated_at columns for the LLM
+    # naming pass. Additive nullable, no-op on re-run.
+    try:
+        from db.migrations.v3_proposal_namer import migrate as _v3_migrate
+        _v3_migrate(conn)
+    except Exception:                                      # noqa: BLE001
+        pass
     return conn
 
 
@@ -1222,6 +1229,89 @@ def log_discovery_merge(proposal_id):
         conn.close()
     _save_session(session)
     return jsonify(result)
+
+
+@app.route("/api/log-discovery/llm-rename", methods=["POST"])
+def log_discovery_llm_rename():
+    """T1.1 — run the LLM proposal namer over PENDING proposals
+    whose ``name_source`` is still ``'auto'``. Provider is selected
+    by the ``PROPOSAL_NAMER_PROVIDER`` env var; falls back to no-op
+    when no provider is configured.
+
+    Body (optional):
+        {"force": false, "limit": 50}
+
+    ``force`` re-runs the namer on rows already marked ``llm`` but
+    never touches rows that are ``human``."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"error": "no enterprise.db — run --phase mine first"}), 400
+    try:
+        from wizard.proposal_namer import (
+            get_provider, rename_pending_proposals,
+        )
+    except Exception as exc:                                       # noqa: BLE001
+        return jsonify({"error": f"namer module unavailable: {exc}"}), 500
+    provider = get_provider()
+    if provider is None:
+        return jsonify({
+            "ok": True,
+            "skipped": True,
+            "reason": (
+                "no provider configured — set PROPOSAL_NAMER_PROVIDER "
+                "(mock|anthropic|openai) and the matching API key"
+            ),
+        })
+    body = request.get_json(silent=True) or {}
+    force = bool(body.get("force", False))
+    try:
+        limit = max(1, min(500, int(body.get("limit", 50))))
+    except (TypeError, ValueError):
+        limit = 50
+    conn = _log_review_conn()
+    try:
+        stats = rename_pending_proposals(
+            conn, provider=provider, force=force, limit=limit,
+        )
+    finally:
+        conn.close()
+    return jsonify({"ok": True, **stats})
+
+
+@app.route("/api/log-discovery/llm-rename-status", methods=["GET"])
+def log_discovery_llm_rename_status():
+    """Lightweight GET for the UI to decide whether to enable the
+    'LLM rename' button. Reports which provider is configured and
+    how many proposals are still 'auto' (eligible for renaming)."""
+    if not os.path.isfile(_ENTERPRISE_DB):
+        return jsonify({"available": False, "reason": "no enterprise.db"})
+    try:
+        from wizard.proposal_namer import get_provider
+    except Exception:                                              # noqa: BLE001
+        return jsonify({"available": False, "reason": "import"})
+    provider = get_provider()
+    conn = _log_review_conn()
+    try:
+        cols = {r[1] for r in conn.execute(
+            "PRAGMA table_info(ontology_evolution_proposals)"
+        )}
+        if "name_source" not in cols:
+            return jsonify({"available": False, "reason": "v3 migration"})
+        auto_count = conn.execute(
+            "SELECT COUNT(*) FROM ontology_evolution_proposals "
+            "WHERE name_source = 'auto' AND status = 'PENDING'"
+        ).fetchone()[0]
+        llm_count = conn.execute(
+            "SELECT COUNT(*) FROM ontology_evolution_proposals "
+            "WHERE name_source = 'llm'"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    return jsonify({
+        "available": True,
+        "provider":  provider.name if provider else "none",
+        "auto_pending": int(auto_count),
+        "llm_named":    int(llm_count),
+    })
 
 
 @app.route("/api/log-discovery/rate-anomalies", methods=["POST"])
