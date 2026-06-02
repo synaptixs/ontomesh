@@ -115,7 +115,12 @@ def _save_session(data: dict) -> None:
 
 @app.route("/")
 def index():
-    return send_from_directory(os.path.join(HERE, "templates"), "index.html")
+    # render_template so {{ url_for('static', ...) }} in the
+    # template resolves to the Flask-served static path for the
+    # extracted CSS / JS modules. The previous send_from_directory
+    # would have returned the URL placeholders verbatim.
+    from flask import render_template
+    return render_template("index.html")
 
 
 @app.route("/health")
