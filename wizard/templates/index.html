@@ -46,9 +46,27 @@
       const msg = `Drift: ${e.metric} — ${e.message || 'threshold exceeded'}`;
       if (typeof showToast === 'function') showToast(msg);
     });
+    // P1.5 — surface the live state and event count in the sidebar
+    // footer pill so a user can see "the wizard is alive" at a glance.
+    const STATE_LABELS = { idle: 'offline', connecting: 'connecting',
+                           open: 'live', closed: 'reconnecting' };
+    function updateLivePill() {
+      const pill = document.getElementById('live-pill');
+      if (!pill) return;
+      pill.setAttribute('data-state', live.state);
+      const labelEl = pill.querySelector('.label');
+      if (labelEl) labelEl.textContent = STATE_LABELS[live.state] || live.state;
+      const statEl  = pill.querySelector('.stat strong');
+      if (statEl)  statEl.textContent = String(live.eventsReceived);
+    }
+    live.onStateChange(updateLivePill);
+    ['hello','metric','drift','status'].forEach(k => live.on(k, updateLivePill));
     // Defer start until after the rest of the page settles so the
     // hello packet doesn't race the toast helper's bootstrap.
-    window.addEventListener('DOMContentLoaded', () => live.start());
+    window.addEventListener('DOMContentLoaded', () => {
+      live.start();
+      updateLivePill();
+    });
   </script>
   <!-- P1.3 — first-run onboarding.  Shows a sample-project picker
        when the wizard loads with an empty session.  Bound to
@@ -106,6 +124,15 @@
     </ul>
     </nav>
     <div class="sidebar-footer">
+      <!-- P1.5 — Live SSE status pill.  Updated by the LiveEvents
+           component (P0.3) via onStateChange + per-kind handlers. -->
+      <div id="live-pill" class="live-pill" data-state="idle"
+           role="status" aria-live="polite"
+           title="Live event stream status">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="label">offline</span>
+        <span class="stat"><strong>0</strong> events</span>
+      </div>
       <div class="theme-picker" role="radiogroup" aria-label="Theme">
         <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
           <span class="theme-icon">☀</span><span>Light</span>
@@ -2573,11 +2600,59 @@ function removeEntity(i) {
   renderEntities();
 }
 
+// ── P1.5 — empty-state helper ────────────────────────────────────────
+// Renders an inviting empty-state card (icon · headline · description ·
+// 1-3 action buttons) used by renderEntities / renderEvents /
+// renderRelationships when their respective arrays are empty.  Bare
+// "No X yet." strings are PoC; this is a product affordance.
+const ENTITY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="3" width="7" height="7" rx="1"/>
+  <rect x="14" y="3" width="7" height="7" rx="1"/>
+  <rect x="3" y="14" width="7" height="7" rx="1"/>
+  <rect x="14" y="14" width="7" height="7" rx="1"/>
+</svg>`;
+const EVENT_ICON  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="9"/>
+  <path d="M12 7v5l3 2"/>
+</svg>`;
+const REL_ICON    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="5" cy="12" r="2.5"/>
+  <circle cx="19" cy="12" r="2.5"/>
+  <path d="M7.5 12h9"/>
+  <path d="M13 8.5l3.5 3.5-3.5 3.5"/>
+</svg>`;
+
+function renderEmptyState({icon, title, desc, actions = []}) {
+  const buttons = actions.map(a =>
+    `<button class="${a.primary ? 'primary' : ''}"
+             onclick="${a.onclick}">${a.label}</button>`).join('');
+  return `<div class="empty-state" role="status">
+            <div class="empty-state-icon" aria-hidden="true">${icon}</div>
+            <div>
+              <h4>${title}</h4>
+              <p>${desc}</p>
+              <div class="empty-state-actions">${buttons}</div>
+            </div>
+          </div>`;
+}
+
 function renderEntities() {
   const list = document.getElementById('entity-list');
   document.getElementById('entity-count').textContent = `(${session.entities.length})`;
   if (!session.entities.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No entities yet. Click + Add Entity.</div>';
+    list.innerHTML = renderEmptyState({
+      icon: ENTITY_ICON,
+      title: 'No entities yet.',
+      desc:  'Entities are the nouns of your ontology — Customer, Order, Payment. Pick a starter template, import a JSON Schema or SQL DDL, or add your first manually.',
+      actions: [
+        { label: '+ Add entity',     onclick: 'openEntityModal()', primary: true },
+        { label: 'Import a schema',  onclick: 'document.querySelector(\'#im-drop\')?.scrollIntoView({behavior:\'smooth\'})' },
+        { label: 'Browse templates', onclick: 'window.Onboarding && window.Onboarding.showNow({onTemplatePicked: async (name) => { const r = await fetch(\'/api/template/\'+encodeURIComponent(name)); session = await r.json(); await reloadSessionAndRender(); goStep(\'entities\'); }})' },
+      ],
+    });
     return;
   }
   list.innerHTML = session.entities.map((e,i) => `
@@ -2628,7 +2703,15 @@ function renderEvents() {
   const list = document.getElementById('event-list');
   document.getElementById('event-count').textContent = `(${session.events.length})`;
   if (!session.events.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No events yet.</div>';
+    list.innerHTML = renderEmptyState({
+      icon: EVENT_ICON,
+      title: 'No events yet.',
+      desc:  'Events are the verbs of your ontology — orders placed, sessions started, alarms tripped. Modelling them as named events unlocks causal DAGs and rate-anomaly detection downstream.',
+      actions: [
+        { label: '+ Add event',     onclick: 'openEventModal()', primary: true },
+        { label: 'Import from logs', onclick: 'goStep(\'log-discovery\')' },
+      ],
+    });
     return;
   }
   list.innerHTML = session.events.map((e,i) => `
@@ -2666,7 +2749,14 @@ function renderRelationships() {
   const list = document.getElementById('rel-list');
   document.getElementById('rel-count').textContent = `(${session.relationships.length})`;
   if (!session.relationships.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No relationships yet.</div>';
+    list.innerHTML = renderEmptyState({
+      icon: REL_ICON,
+      title: 'No relationships yet.',
+      desc:  'Relationships are typed edges between entities — hasCustomer, placedBy, owns. They turn a flat list of classes into a graph and drive every SPARQL query downstream.',
+      actions: [
+        { label: '+ Add relationship', onclick: 'addRelationship()', primary: true },
+      ],
+    });
   } else {
     list.innerHTML = session.relationships.map((r,i) => {
       const display = (typeof r === 'string') ? r
