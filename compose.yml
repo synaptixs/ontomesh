@@ -61,7 +61,7 @@ services:
     # depends_on with the `service_healthy` condition is what lets
     # Caddy hold off forwarding until the wizard is actually ready.
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:5051/health"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:5051/live"]
       interval: 30s
       timeout: 5s
       start_period: 20s
@@ -95,6 +95,25 @@ services:
     depends_on:
       wizard:
         condition: service_healthy
+
+  # ── Redis (opt-in via `redis` profile) ────────────────────────────
+  # P3.2 — only needed when ONTOMESH_WORKERS > 1 or you're scaling
+  # horizontally.  Single-worker dev runs can skip this and let the
+  # in-memory bus handle SSE.
+  redis:
+    image: redis:7-alpine
+    container_name: ontomesh-redis
+    restart: unless-stopped
+    profiles: ["redis"]
+    # No host port mapping — Redis stays on the internal compose
+    # network.  ONTOMESH_REDIS_URL on the wizard points at redis:6379.
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis-data:/data
 
   # ── Postgres (opt-in via `pg` profile) ────────────────────────────
   # Default `docker compose up` SKIPS this service so the SQLite path
@@ -131,6 +150,8 @@ volumes:
   ontomesh-data:
   # Postgres data volume (only created when the `pg` profile is active).
   postgres-data:
+  # Redis data volume (only created when the `redis` profile is active).
+  redis-data:
   # Caddy's auto-managed cert + ACME state.  Don't delete unless you
   # want to re-issue.
   caddy-data:
