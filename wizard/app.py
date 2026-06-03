@@ -128,6 +128,73 @@ def health():
     return jsonify({"ok": True, "timestamp": _now()})
 
 
+@app.route("/api/events/stream")
+def events_stream():
+    """P0.3 — Server-Sent Events endpoint.
+
+    Subscribes a new client to the in-memory event bus and streams
+    events as ``text/event-stream``. The client uses ``EventSource``
+    on this URL; each event arrives as a typed message
+    (``metric`` / ``drift`` / ``status`` / ``hello`` / ``ping``).
+
+    A 20-second idle timeout emits a ``: ping`` comment so proxies
+    (nginx, gunicorn) don't close the connection.
+    """
+    from flask import Response, stream_with_context
+    try:
+        import sys as _sys
+        _src = os.path.join(ROOT, "src")
+        if _src not in _sys.path:
+            _sys.path.insert(0, _src)
+        from events_bus import get_bus                              # noqa: E402
+    except Exception as exc:                                        # noqa: BLE001
+        return jsonify({"error": f"bus unavailable: {exc}"}), 500
+
+    bus = get_bus()
+    sub = bus.subscribe()
+
+    def _generate():
+        # Hello packet so the client knows the connection is live
+        # and which subscriber id it's bound to (useful in dev tools).
+        yield (f"event: hello\n"
+               f"data: {json.dumps({'subscriber_id': sub.id})}\n\n")
+        try:
+            while True:
+                event = sub.get(timeout=20.0)
+                if event is None:
+                    # Keep-alive comment — no event name, just a ping.
+                    yield ": ping\n\n"
+                    continue
+                kind = event.get("kind", "message")
+                yield (f"event: {kind}\n"
+                       f"data: {json.dumps(event)}\n\n")
+        except GeneratorExit:
+            pass
+        finally:
+            bus.unsubscribe(sub)
+
+    response = Response(stream_with_context(_generate()),
+                        mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"      # nginx hint
+    return response
+
+
+@app.route("/api/events/stats", methods=["GET"])
+def events_stats():
+    """Tiny GET used by the wizard's dev panel to confirm the bus
+    is alive and how many subscribers / events have flowed."""
+    try:
+        import sys as _sys
+        _src = os.path.join(ROOT, "src")
+        if _src not in _sys.path:
+            _sys.path.insert(0, _src)
+        from events_bus import get_bus                              # noqa: E402
+    except Exception:                                               # noqa: BLE001
+        return jsonify({"available": False})
+    return jsonify({"available": True, **get_bus().stats})
+
+
 @app.route("/log-discovery/help")
 def log_discovery_help():
     """Serve the Log Discovery help page — capabilities, algorithms,

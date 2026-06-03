@@ -205,6 +205,15 @@ class DriftAlerter:
         alerts += self._check_auc()
         alerts += self._check_jaccard()
         alerts += self._check_merge_distance()
+        # P0.3 — push every alert to the SSE bus so the wizard's
+        # toast layer surfaces it without polling.
+        if alerts:
+            try:
+                from events_bus import publish
+                for a in alerts:
+                    publish("drift", a.as_dict())
+            except Exception:                                  # noqa: BLE001
+                pass
         return alerts
 
     def _check_ece(self) -> List[DriftAlert]:
@@ -333,12 +342,29 @@ def record_metric(conn: sqlite3.Connection, phase: str, name: str,
                   value: float, *, tags: Optional[Dict[str, str]] = None,
                   run_id: Optional[str] = None) -> None:
     """One-call helper for phase code that wants to emit a metric
-    without instantiating a MetricStore explicitly."""
+    without instantiating a MetricStore explicitly.
+
+    P0.3 — also publishes a ``metric`` event on the in-memory bus
+    so the wizard's drift dashboard ticks live. Bus publish is
+    non-blocking and silently no-ops if the bus module isn't on
+    the import path (keeps this module safe to import in CI envs
+    that don't have the Flask runtime available)."""
     store = MetricStore(conn)
     store.record(MetricSnapshot(
         phase=phase, name=name, value=float(value),
         tags=tags or {}, run_id=run_id,
     ))
+    try:
+        from events_bus import publish
+        publish("metric", {
+            "phase":  phase,
+            "name":   name,
+            "value":  float(value),
+            "tags":   dict(tags or {}),
+            "run_id": run_id,
+        })
+    except Exception:                                          # noqa: BLE001
+        pass
 
 
 __all__ = [

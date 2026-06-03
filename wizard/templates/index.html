@@ -21,6 +21,22 @@
     window.renderProposalCard = renderProposalCard;
     window.renderSparkline = renderSparkline;
   </script>
+  <!-- P0.3 — live event stream. One EventSource per browser tab;
+       drift alerts surface as toasts and metric events refresh
+       the badges that opted in via window.LiveBus.on('metric'). -->
+  <script type="module">
+    import { LiveEvents }
+      from "{{ url_for('static', filename='js/components/live_events.js') }}";
+    const live = new LiveEvents();
+    window.LiveBus = live;
+    live.on('drift', e => {
+      const msg = `Drift: ${e.metric} — ${e.message || 'threshold exceeded'}`;
+      if (typeof showToast === 'function') showToast(msg);
+    });
+    // Defer start until after the rest of the page settles so the
+    // hello packet doesn't race the toast helper's bootstrap.
+    window.addEventListener('DOMContentLoaded', () => live.start());
+  </script>
   <!-- vis-network: force-directed graph rendering for the Relationships > Graph tab.
        MIT-licensed, ~150 KB minified. Loaded from unpkg. If offline / CDN-blocked,
        the Graph tab falls back to a friendly "couldn't load" message. -->
