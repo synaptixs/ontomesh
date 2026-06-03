@@ -949,18 +949,21 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
 
       <div class="card">
-        <h3>Domain tiles on Step 1</h3>
+        <h3>Domains to show on Step 1</h3>
         <div class="box-help">
-          Uncheck a domain to hide it from the <b>Step 1 · Domain Identity</b>
-          template grid. (This <em>does not</em> affect the marketing landing
-          page at <code>/</code>, which is brand chrome only.)  Hidden
-          domains stay loadable via the Switch-starting-point picker above
-          and via <code>GET /api/template/&lt;name&gt;</code>.
+          <b>Tick the domains you want</b> on the <b>Step 1 · Domain Identity</b>
+          template grid.  By default nothing is ticked — Step 1 stays clean
+          until you pick.  Unticked domains stay loadable any time via the
+          Switch-starting-point picker above and via
+          <code>GET /api/template/&lt;name&gt;</code>.  (This <em>does not</em>
+          affect the marketing landing page at <code>/</code>, which is brand
+          chrome only.)
         </div>
         <div id="settings-domains" style="display:flex; flex-direction:column; gap:6px; font-size:13px; margin-top:10px">Loading…</div>
         <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
           <button class="btn btn-primary" onclick="saveDomainVisibility()">Save</button>
-          <button class="btn btn-ghost" onclick="resetDomainVisibility()" title="Re-check every domain so all 10 show on Step 1">Show all</button>
+          <button class="btn btn-ghost" onclick="pickAllDomains()" title="Tick every domain so all 10 show on Step 1">Pick all</button>
+          <button class="btn btn-ghost" onclick="clearDomainPicks()" title="Untick every domain so Step 1 stays clean">Clear</button>
           <span id="settings-status" style="margin-left:6px;font-size:12px;color:var(--muted)"></span>
         </div>
       </div>
@@ -1801,6 +1804,37 @@ async function loadTemplateList() {
     const r = await fetch('/api/templates');
     const data = await r.json();
     const grid = document.getElementById('template-grid');
+    // P1.5.2 — Whitelist model: if the user hasn't ticked any
+    // domains in Settings, the grid stays clean but invites them
+    // to either (a) ping Settings to pick what shows on Step 1, or
+    // (b) open the full catalogue via the welcome picker.
+    if (!data.templates || !data.templates.length) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1" role="status">
+          <div class="empty-state-icon" aria-hidden="true">📋</div>
+          <div>
+            <h4>No starter templates picked yet.</h4>
+            <p>
+              Step 1 shows whatever you tick in
+              <a href="#" onclick="goStep('settings');return false">
+                Settings &middot; Domains to show on Step 1
+              </a>.
+              Or open the full catalogue right now &mdash; it lists every
+              built-in industry and lets you load one in a click.
+            </p>
+            <div class="empty-state-actions">
+              <button class="primary"
+                      onclick="window.Onboarding && window.Onboarding.reset(); window.Onboarding && window.Onboarding.showNow({ onTemplatePicked: async (name) => { const r = await fetch('/api/template/'+encodeURIComponent(name)); session = await r.json(); await reloadSessionAndRender(); goStep('entities'); } });">
+                Open the welcome picker
+              </button>
+              <button onclick="goStep('settings')">
+                Configure Step 1 in Settings
+              </button>
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
     grid.innerHTML = data.templates.map(t => `
       <div class="template-card" onclick="loadTemplate('${t}')">
         <div class="t-icon">${TEMPLATE_ICONS[t]||'📋'}</div>
@@ -5790,10 +5824,12 @@ async function refreshSettings() {
   const tmpl = await tmplRes.json();
   const prefs = await prefRes.json();
   const all = tmpl.all || tmpl.templates || [];
-  const hidden = new Set(prefs['landing.hidden_domains'] || []);
+  // P1.5.2 — Whitelist model. Boxes are *unchecked* by default;
+  // the user ticks the ones they want to see on Step 1.
+  const visible = new Set(prefs['landing.visible_domains'] || []);
   el.innerHTML = all.map(name => `
     <label style="display:flex;align-items:center;gap:8px">
-      <input type="checkbox" data-domain="${name}" ${hidden.has(name) ? '' : 'checked'}>
+      <input type="checkbox" data-domain="${name}" ${visible.has(name) ? 'checked' : ''}>
       <span>${name.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
       <span style="color:var(--muted);font-size:11px">(${name})</span>
     </label>`).join('');
@@ -5801,11 +5837,17 @@ async function refreshSettings() {
 
 async function saveDomainVisibility() {
   const boxes = document.querySelectorAll('#settings-domains input[type=checkbox]');
-  const hidden = Array.from(boxes).filter(b => !b.checked).map(b => b.dataset.domain);
+  // P1.5.2 — Whitelist: persist the names the user *ticked*.
+  const visible = Array.from(boxes).filter(b => b.checked).map(b => b.dataset.domain);
   const r = await fetch('/api/preferences', {
     method:'PUT',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ 'landing.hidden_domains': hidden }),
+    body: JSON.stringify({
+      'landing.visible_domains': visible,
+      // Clear the legacy blacklist so it can never override the
+      // whitelist on subsequent reads (back-compat is one-way).
+      'landing.hidden_domains':  [],
+    }),
   });
   if (r.ok) {
     document.getElementById('settings-status').textContent = '✓ Saved';
@@ -5816,14 +5858,23 @@ async function saveDomainVisibility() {
   }
 }
 
-// P1.5.1 — one-click "show every domain on Step 1" reset.  Useful
-// when a previous session ended up with most templates hidden and
-// the user can't find the picker.
-async function resetDomainVisibility() {
+// P1.5.2 — Whitelist convenience: tick every domain.
+async function pickAllDomains() {
   document.querySelectorAll('#settings-domains input[type=checkbox]')
           .forEach(cb => { cb.checked = true; });
   await saveDomainVisibility();
-  document.getElementById('settings-status').textContent = '✓ All 10 domains visible on Step 1';
+  document.getElementById('settings-status').textContent = '✓ All 10 domains will show on Step 1';
+  setTimeout(() => document.getElementById('settings-status').textContent = '', 3000);
+}
+
+// P1.5.2 — Whitelist convenience: untick every domain so Step 1
+// stays clean and only the Switch-starting-point picker shows the
+// catalogue.
+async function clearDomainPicks() {
+  document.querySelectorAll('#settings-domains input[type=checkbox]')
+          .forEach(cb => { cb.checked = false; });
+  await saveDomainVisibility();
+  document.getElementById('settings-status').textContent = '✓ Step 1 grid cleared';
   setTimeout(() => document.getElementById('settings-status').textContent = '', 3000);
 }
 

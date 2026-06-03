@@ -532,11 +532,34 @@ def list_templates():
         if n not in seen:
             out.append(n)
             seen.add(n)
-    # Apply user's landing-page visibility filter.
+    # P1.5.2 — Whitelist model.  Step 1's template grid now shows
+    # ONLY the domains the user has explicitly opted into via Settings,
+    # not "everything minus a hidden list."  Default = empty whitelist =
+    # nothing on Step 1 until the user picks.
+    #
+    # The legacy ``landing.hidden_domains`` key is still accepted on
+    # writes (for back-compat with older session DBs) but is no longer
+    # the source of truth on reads.
     prefs = _store.get_preferences(ONTOLOGIES_DB)
-    hidden = set(prefs.get("landing.hidden_domains") or [])
-    visible = [n for n in out if n not in hidden]
-    return jsonify({"templates": visible, "hidden": sorted(hidden), "all": out})
+    raw_visible = prefs.get("landing.visible_domains")
+    if raw_visible is None:
+        # No explicit whitelist yet — return an empty visible list so
+        # the wizard's Step 1 grid shows its "pick in Settings" empty
+        # state.  Brand-new sessions land here.
+        visible_set: set[str] = set()
+    else:
+        visible_set = set(raw_visible)
+    visible = [n for n in out if n in visible_set]
+    # We still echo the hidden list (= every template NOT in the
+    # whitelist) so existing UI code that reads it keeps working
+    # until it's migrated.
+    hidden = [n for n in out if n not in visible_set]
+    return jsonify({
+        "templates": visible,
+        "visible":   visible,           # canonical key going forward
+        "hidden":    sorted(hidden),    # legacy key
+        "all":       out,
+    })
 
 
 @app.route("/api/template/<name>", methods=["GET"])

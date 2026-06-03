@@ -91,54 +91,28 @@ def test_settings_subtitle_describes_real_actions(client):
 # ── "Show all" reset ──────────────────────────────────────────────────
 
 
-def test_settings_has_show_all_reset(client):
+def test_settings_has_pick_all_and_clear(client):
+    """P1.5.2 — whitelist convenience buttons.  'Pick all' ticks every
+    box and saves; 'Clear' unticks every box and saves."""
     body = client.get("/wizard").get_data(as_text=True)
     seg = body.split('id="step-settings"', 1)[1].split('id="step-evolve"', 1)[0]
-    assert 'onclick="resetDomainVisibility()"' in seg
-    assert "Show all" in seg
+    assert 'onclick="pickAllDomains()"' in seg
+    assert 'onclick="clearDomainPicks()"' in seg
+    assert "Pick all" in seg
+    assert "Clear"    in seg
 
 
-def test_reset_visibility_fn_unchecks_and_saves(client):
+def test_pick_all_fn_checks_everything_and_saves(client):
     body = client.get("/wizard").get_data(as_text=True)
-    assert "function resetDomainVisibility()" in body
-    seg = body.split("function resetDomainVisibility()", 1)[1].split("\n}\n", 1)[0]
-    # Sets every checkbox to checked.
+    assert "function pickAllDomains()" in body
+    seg = body.split("function pickAllDomains()", 1)[1].split("\n}\n", 1)[0]
     assert "cb.checked = true" in seg
-    # Then re-uses saveDomainVisibility (so we don't duplicate the
-    # POST logic in two places).
     assert "saveDomainVisibility()" in seg
 
 
-# ── Backend endpoints still work for the new actions ──────────────────
-
-
-def test_preferences_endpoint_round_trips(client):
-    """/api/preferences must accept the wipe (empty array) so the
-    'Show all' reset can clear hidden_domains."""
-    rv = client.put(
-        "/api/preferences",
-        json={"landing.hidden_domains": []},
-    )
-    assert rv.status_code == 200
-    rv = client.get("/api/preferences")
-    assert rv.status_code == 200
-    data = rv.get_json()
-    assert data.get("landing.hidden_domains") == []
-
-
-def test_all_ten_industries_loadable_post_reset(client):
-    """After a 'Show all' reset, every one of the ten templates must
-    be visible in /api/templates."""
-    client.put(
-        "/api/preferences",
-        json={"landing.hidden_domains": []},
-    )
-    rv = client.get("/api/templates")
-    data = rv.get_json()
-    visible = set(data["templates"])
-    # The five canonical built-ins plus the five YAML templates.
-    for name in ("telecom", "healthcare", "finance", "manufacturing",
-                 "retail", "energy_utilities", "government", "insurance",
-                 "logistics_supply_chain", "pharmaceuticals"):
-        assert name in visible, \
-            f"{name} not visible on Step 1 after Show-all reset"
+def test_clear_picks_fn_unchecks_everything_and_saves(client):
+    body = client.get("/wizard").get_data(as_text=True)
+    assert "function clearDomainPicks()" in body
+    seg = body.split("function clearDomainPicks()", 1)[1].split("\n}\n", 1)[0]
+    assert "cb.checked = false" in seg
+    assert "saveDomainVisibility()" in seg
