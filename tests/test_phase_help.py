@@ -134,7 +134,8 @@ def test_help_pages_link_back_to_wizard(client):
     """The 'Back to wizard' link sends the user to the right step."""
     rv = client.get("/help/entities")
     body = rv.get_data(as_text=True)
-    assert "/?step=entities" in body
+    # P1.2 moved the wizard from / to /wizard; the back-link follows.
+    assert "/wizard?step=entities" in body
 
 
 # ── Cross-link from wizard ─────────────────────────────────────────────
