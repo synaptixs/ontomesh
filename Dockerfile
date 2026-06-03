@@ -1,47 +1,109 @@
-# Ontology Engineering Toolkit — multi-stage Docker image
-# Stage 1: build deps; Stage 2: slim runtime
+# syntax=docker/dockerfile:1.6
+#
+# Ontomesh — single-container production image (P2.1).
+#
+# Multi-stage build:
+#   • builder  installs build-time deps + the project in editable mode,
+#                producing a populated /opt/venv we can copy to runtime.
+#   • runtime  is python:3.12-slim with only the runtime venv, the
+#                application source, and a non-root user.  The image
+#                runs `ontomesh-wizard` and serves on $ONTOMESH_PORT
+#                (default 5051).
+#
+# Build:
+#   docker build -t ontomesh:3.6.0-dev .
+#
+# Run (development — SQLite in an anonymous volume):
+#   docker run --rm -p 5051:5051 ontomesh:3.6.0-dev
+#
+# Run (production — persistent named volume for session + outputs):
+#   docker volume create ontomesh-data
+#   docker run -d --name ontomesh \
+#     -p 5051:5051 \
+#     -v ontomesh-data:/data \
+#     -e ONTOMESH_DATA_DIR=/data \
+#     ontomesh:3.6.0-dev
+#
+# Healthcheck:
+#   The image declares a HEALTHCHECK that hits /health every 30 s.
+#   Docker, Compose, and most orchestrators read it directly.
 
-FROM python:3.12-slim AS base
 
-LABEL maintainer="Ontology Toolkit Team"
-LABEL description="Domain-Agnostic Ontology Engineering Toolkit v2.0 (Phase 3)"
+# ── Stage 1: builder ───────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Build deps for any wheels that need to compile.  Most of our wheels
+# (rdflib, flask, etc.) are pure-Python; this is here so optional DB
+# extras (psycopg2-binary, mysql-connector-python) work without rebuild.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential \
+ && rm -rf /var/lib/apt/lists/*
+
+# Create the runtime virtualenv at a stable path so the runtime stage
+# can copy it as-is.
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
-# System deps for optional DB drivers and NLP
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ libpq-dev curl git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first for layer caching
-COPY requirements.txt .
-
-# Install core Python deps (skip heavy optional drivers unless needed)
-RUN pip install --no-cache-dir \
-    rdflib>=7.0.0 \
-    pyshacl>=0.26.0 \
-    sparqlwrapper>=2.0.0 \
-    requests>=2.32.3 \
-    pyyaml>=6.0.2 \
-    flask>=3.0.3 \
-    flask-cors>=4.0.1 \
-    spacy>=3.7.4 \
-    && python -m spacy download en_core_web_sm \
-    && pip install --no-cache-dir anthropic>=0.34.0 openai>=1.40.0
-
-# Copy project source
+# Copy the full source.  We don't pre-split metadata-only because the
+# project's pyproject.toml needs README + the ontomesh/ package present
+# during `pip install`.
 COPY . .
 
-# Create output directory
-RUN mkdir -p output/ontology output/shapes output/vocab output/jsonld \
-             output/mapping output/reports output/security db
+# Install core + wizard extra in one shot.  Editable so console scripts
+# (ontomesh, ontomesh-wizard, ontomesh-onboard) land on PATH and the
+# python files stay readable for debugging.
+RUN pip install --upgrade pip \
+ && pip install -e ".[wizard]"
 
-# Pre-seed database
-RUN python toolkit.py --phase 1 || true
 
-EXPOSE 5000
+# ── Stage 2: runtime ───────────────────────────────────────────────────
+FROM python:3.12-slim AS runtime
 
-ENV FLASK_ENV=production
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    ONTOMESH_HOST=0.0.0.0 \
+    ONTOMESH_PORT=5051 \
+    ONTOMESH_DATA_DIR=/data
 
-CMD ["python", "toolkit.py"]
+# curl powers the HEALTHCHECK; everything else ships in the venv.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# Non-root runtime user.  uid 10001 is well above any LDAP-mapped range
+# and matches the common k8s securityContext convention.
+RUN groupadd --system --gid 10001 ontomesh \
+ && useradd  --system --uid 10001 --gid ontomesh \
+             --home-dir /app --no-create-home ontomesh
+
+WORKDIR /app
+
+# Pull in the populated venv + the application source from the builder.
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app      /app
+
+# Persistent data dir.  Mount a volume here in production.
+RUN mkdir -p "${ONTOMESH_DATA_DIR}" \
+ && chown -R ontomesh:ontomesh /app "${ONTOMESH_DATA_DIR}"
+
+USER ontomesh
+
+EXPOSE 5051
+
+# Hit /health every 30 s; consider the container unhealthy after 3
+# consecutive failures.  start-period gives Flask room to boot.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS "http://localhost:${ONTOMESH_PORT}/health" || exit 1
+
+# Single-process entrypoint.  Wizard's main() reads --host / --port;
+# we pass them via env-var-expanded args so `docker run -e
+# ONTOMESH_PORT=8080` works without rebuilding.
+ENTRYPOINT ["sh", "-c", "exec ontomesh-wizard --host \"${ONTOMESH_HOST}\" --port \"${ONTOMESH_PORT}\""]
