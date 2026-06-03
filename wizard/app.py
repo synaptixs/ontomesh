@@ -2010,16 +2010,33 @@ def serve_output(subdir: str, filename: str):
 # ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Ontology Toolkit — Ontology Studio (v3.0)")
+    # Read version + branding from the canonical source (ontomesh
+    # package) so the boot banner can't drift from pyproject.toml again.
+    try:
+        if HERE not in sys.path:
+            sys.path.insert(0, HERE)
+        from ontomesh import __version__ as _version
+    except Exception:                                                 # noqa: BLE001
+        _version = "unknown"
+
+    parser = argparse.ArgumentParser(
+        description=f"Ontomesh — the ontology mesh for GraphRAG (v{_version})",
+    )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=5000)
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    print(f"\n  Ontology Toolkit — Ontology Studio (v3.0)")
-    print(f"  ────────────────────────────────────────────")
-    print(f"  URL: http://{args.host}:{args.port}")
-    print(f"  Session file: {SESSION_FILE}")
+    print()
+    print(f"  Ontomesh — the ontology mesh for GraphRAG  ·  v{_version}")
+    print(f"  ──────────────────────────────────────────────────────────────")
+    print(f"  Landing:     http://{args.host}:{args.port}/")
+    print(f"  Wizard:      http://{args.host}:{args.port}/wizard")
+    print(f"  Projects:    http://{args.host}:{args.port}/projects")
+    print(f"  Docs:        http://{args.host}:{args.port}/help")
+    print(f"  Health:      http://{args.host}:{args.port}/health")
+    print(f"  Session DB:  {ONTOLOGIES_DB}")
+    print(f"  Session JSON:{SESSION_FILE}")
     print()
 
     app.run(host=args.host, port=args.port, debug=args.debug)
