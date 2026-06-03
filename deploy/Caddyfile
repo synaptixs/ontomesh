@@ -1,0 +1,55 @@
+# Ontomesh — Caddy reverse-proxy config (P2.2).
+#
+# Reads $ONTOMESH_DOMAIN from the environment:
+#
+#   • Default (":80") — local development, HTTP only on port 80.
+#   • A real hostname (e.g. ontomesh.example.com) — Caddy auto-issues
+#     a Let's Encrypt cert and serves HTTPS on 443.  HTTP→HTTPS
+#     redirect is automatic.
+#
+# SSE notes
+#   The wizard's /api/events/stream uses Server-Sent Events.  Caddy's
+#   default reverse_proxy handles this correctly out of the box —
+#   chunked transfer, no buffering — because it streams the
+#   response.  No special flush_interval / proxy_buffering knob
+#   needed (unlike nginx).
+
+{$ONTOMESH_DOMAIN} {
+
+    # Encoding & compression — gzip + zstd for static assets, NOT for
+    # text/event-stream (Caddy already excludes streaming responses).
+    encode gzip zstd
+
+    # Single backend.  In a multi-replica future this becomes
+    # a `lb_policy` block.
+    reverse_proxy wizard:5051 {
+        # Forward client IP and original protocol so the wizard can
+        # log them and so any future auth layer sees the real client.
+        header_up X-Real-IP        {http.request.remote.host}
+        header_up X-Forwarded-For  {http.request.remote.host}
+        header_up X-Forwarded-Proto {http.request.scheme}
+        # Long-lived SSE connections need a generous timeout.
+        transport http {
+            read_timeout  24h
+            write_timeout 24h
+        }
+    }
+
+    # Sensible security headers.  Loose enough for the wizard's
+    # current inline-script and module loaders; tighten in P2.3+.
+    header {
+        Strict-Transport-Security  "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options     "nosniff"
+        X-Frame-Options            "DENY"
+        Referrer-Policy            "strict-origin-when-cross-origin"
+        # Caddy adds Server: Caddy; strip it for a touch less
+        # information disclosure.
+        -Server
+    }
+
+    # Access logs to stdout — `docker compose logs caddy` shows them.
+    log {
+        output stdout
+        format console
+    }
+}

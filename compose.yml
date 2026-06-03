@@ -1,0 +1,100 @@
+# Ontomesh — production-ish Compose stack (P2.2).
+#
+# Brings up the wizard image from P2.1 behind Caddy, which auto-issues
+# Let's Encrypt certificates for whichever domain you set in
+# ONTOMESH_DOMAIN.  For local development, leave the env var unset and
+# Caddy will serve over HTTP on :80.
+#
+# This stack stays SINGLE-REPLICA on purpose — the SSE bus from P0.3 is
+# in-memory and would split-brain across replicas.  Postgres + a
+# multi-replica setup lands in P2.3 and P2.5 respectively.
+#
+# ── Quickstart ────────────────────────────────────────────────────────
+#
+#   # Local (HTTP only):
+#   docker compose up -d
+#   # → wizard on http://localhost:5051, also reverse-proxied at http://localhost
+#
+#   # Public (TLS via Let's Encrypt — DNS must point at this host):
+#   ONTOMESH_DOMAIN=ontomesh.example.com docker compose up -d
+#
+#   # Stop and remove (volumes preserved):
+#   docker compose down
+#
+#   # Stop and wipe everything including the data volume:
+#   docker compose down -v
+#
+# ── Overriding for development ────────────────────────────────────────
+#
+# Drop a compose.override.yml next to this file with the changes you
+# want (extra port exposure, image rebuild on save, etc.).  Compose
+# merges both automatically.
+
+services:
+
+  # ── Wizard ────────────────────────────────────────────────────────
+  wizard:
+    image: ontomesh:${ONTOMESH_VERSION:-3.6.0-dev}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ontomesh-wizard
+    restart: unless-stopped
+    environment:
+      ONTOMESH_HOST: "0.0.0.0"
+      ONTOMESH_PORT: "5051"
+      ONTOMESH_DATA_DIR: "/data"
+    volumes:
+      - ontomesh-data:/data
+    # Direct host-port exposure for development / debugging.  In
+    # production you typically remove this and let Caddy be the only
+    # path in.
+    ports:
+      - "5051:5051"
+    # The image already declares HEALTHCHECK; Compose reuses it.
+    # depends_on with the `service_healthy` condition is what lets
+    # Caddy hold off forwarding until the wizard is actually ready.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5051/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    # Don't run as root inside the network either.  uid 10001 matches
+    # the Dockerfile's `ontomesh` user.
+    user: "10001:10001"
+    # Sensible resource caps so a runaway pipeline doesn't take down
+    # the host.  Tune to taste.
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: "1.5"
+
+  # ── Caddy reverse proxy + auto-TLS ────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: ontomesh-caddy
+    restart: unless-stopped
+    environment:
+      # Caddy reads $ONTOMESH_DOMAIN from the Caddyfile via env expansion.
+      ONTOMESH_DOMAIN: "${ONTOMESH_DOMAIN:-:80}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data        # cert storage — wipe = re-issue
+      - caddy-config:/config
+    depends_on:
+      wizard:
+        condition: service_healthy
+
+volumes:
+  # Stateful data: SQLite session DB, saved ontologies, generated outputs.
+  # Back this up the same way you back up any other named volume.
+  ontomesh-data:
+  # Caddy's auto-managed cert + ACME state.  Don't delete unless you
+  # want to re-issue.
+  caddy-data:
+  caddy-config:
