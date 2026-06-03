@@ -1,0 +1,118 @@
+name: Tester feedback
+description: Bug, friction, or idea from an internal tester running the Ontomesh container.
+title: "[tester] "
+labels: ["tester-feedback"]
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying Ontomesh.  Three flavours of feedback are useful — pick the one that fits and we'll triage from there.  Everything below is optional except the **kind** and **summary** fields.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      description: What kind of feedback is this?
+      options:
+        - 🐞 Bug — something doesn't work
+        - 💭 Friction — it works, but it's harder than it should be
+        - 💡 Idea — something you wish it did
+        - 📖 Docs — README / help page is wrong or missing something
+    validations:
+      required: true
+
+  - type: input
+    id: summary
+    attributes:
+      label: One-line summary
+      description: What's the headline?  (We'll use this as the issue title once you save.)
+      placeholder: "Wizard step 4 crashes when relationship name has spaces"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce (bug / friction only)
+      description: Walk us through what you clicked / typed.  Numbered list is great.
+      placeholder: |
+        1. Open the wizard
+        2. Pick the "telecom" template from the welcome modal
+        3. Navigate to Step 4 · Relationships
+        4. Click "+ Add relationship"
+        5. Type "owns devices" in the predicate field — and …
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+      description: What did you think would happen, and what actually did?
+      placeholder: |
+        **Expected:** the relationship saves and shows up in the list.
+        **Actual:** the page reloads and the list is empty; browser console shows a 500.
+    validations:
+      required: false
+
+  - type: input
+    id: image-tag
+    attributes:
+      label: Image tag
+      description: Which Ontomesh tag are you running?  Run `docker inspect ontomesh-wizard --format='{{.Config.Image}}'` if you're not sure.
+      placeholder: "ghcr.io/nrohilla-fibonacci/ontomesh:3.6.0-dev"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Where are you running the container?
+      options:
+        - Docker Desktop · macOS (Apple Silicon)
+        - Docker Desktop · macOS (Intel)
+        - Docker Desktop · Windows
+        - Docker · Linux
+        - Rancher Desktop
+        - Podman
+        - Hosted internal instance (URL in body)
+        - Other (describe in body)
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Browser + version, if the issue is in the wizard UI.
+      placeholder: "Chrome 142 / Firefox 138 / Safari 19"
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Container logs (last ~30 lines)
+      description: If the bug is a crash or 500, paste the tail of `docker logs ontomesh-wizard` here.  Triple-backtick wraps appreciated.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, screen-recordings, "by the way," context that didn't fit anywhere above.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      description: We're internal — but accidents happen.  Confirm the stuff below before you submit.
+      options:
+        - label: I checked that nothing in this issue (logs, screenshots, repro data) leaks customer data or anything beyond the internal team.
+          required: true

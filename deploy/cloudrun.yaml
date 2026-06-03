@@ -72,16 +72,21 @@ spec:
           limits:
             cpu: "1"
             memory: "1Gi"
+        # P3.3 — Cheap liveness (process alive) on /live.  Cloud
+        # Run doesn't expose a readiness probe directly; the gates
+        # are "container started" + "liveness passes" + every
+        # request returns 2xx within timeoutSeconds.  For deeper
+        # readiness checks, monitor /ready from Cloud Monitoring.
         startupProbe:
           httpGet:
-            path: /health
+            path: /live
             port: 5051
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 6                  # 30 s grace
         livenessProbe:
           httpGet:
-            path: /health
+            path: /live
             port: 5051
           periodSeconds: 30
           timeoutSeconds: 5
