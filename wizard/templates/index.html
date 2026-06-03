@@ -10,462 +10,33 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    /* ── Reset & Variables ─────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* Three themes ship out of the box. Picker lives in the sidebar
-       footer; choice persists to localStorage; system preference seeds
-       the first visit. All component CSS uses tokens only — to add a
-       theme, add another [data-theme="..."] block below. */
-    :root {
-      /* ────────── LIGHT (default) ── Linear / Vercel feel ────────── */
-      --bg:            #f6f7f9;
-      --surface:       #ffffff;
-      --surface-2:     #f3f4f6;
-      --surface-hover: #fafbfc;
-      --border:        rgba(15,23,42,0.07);
-      --border-strong: rgba(15,23,42,0.14);
-      --accent:        #4f46e5;
-      --accent-hover:  #4338ca;
-      --accent-soft:   rgba(79,70,229,0.08);
-      --accent-2:      #a855f7;
-      --success:       #16a34a;
-      --success-soft:  rgba(22,163,74,0.10);
-      --warn:          #d97706;
-      --warn-soft:     rgba(217,119,6,0.10);
-      --danger:        #dc2626;
-      --danger-soft:   rgba(220,38,38,0.10);
-      --text:          #0f172a;
-      --text-2:        #1f2937;
-      --muted:         #4b5563;
-      --muted-2:       #6b7280;
-      --on-accent:     #ffffff;       /* text colour drawn on solid accent fills */
-
-      /* Shared across all themes. */
-      --radius:    10px;
-      --radius-sm: 7px;
-      --shadow-1: 0 1px 2px rgba(15,23,42,0.04),
-                  0 1px 3px rgba(15,23,42,0.04);
-      --shadow-2: 0 1px 2px rgba(15,23,42,0.04),
-                  0 6px 16px rgba(15,23,42,0.06);
-      --shadow-modal: 0 24px 60px rgba(15,23,42,0.18),
-                      0 1px 0 rgba(15,23,42,0.04);
-      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-              system-ui, sans-serif;
-      --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-    }
-
-    /* ────────── DARK ── Tokyo-night-ish, indigo accent on near-black ────────── */
-    [data-theme="dark"] {
-      --bg:            #0a0c10;
-      --surface:       #11141a;
-      --surface-2:     #181b22;
-      --surface-hover: #1c2029;
-      --border:        rgba(255,255,255,0.06);
-      --border-strong: rgba(255,255,255,0.14);
-      --accent:        #818cf8;
-      --accent-hover:  #a5b0fb;
-      --accent-soft:   rgba(129,140,248,0.14);
-      --accent-2:      #c084fc;
-      --success:       #4ade80;
-      --success-soft:  rgba(74,222,128,0.12);
-      --warn:          #fbbf24;
-      --warn-soft:     rgba(251,191,36,0.12);
-      --danger:        #f87171;
-      --danger-soft:   rgba(248,113,113,0.12);
-      --text:          #e6e8ee;
-      --text-2:        #c5cad4;
-      --muted:         #9aa3b6;
-      --muted-2:       #6b7388;
-      --on-accent:     #0a0c10;
-      --shadow-1:  0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
-      --shadow-2:  0 1px 2px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.32);
-      --shadow-modal: 0 24px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04);
-    }
-
-    /* ────────── MONO ── high-contrast monochrome, status-only colour ────────── */
-    [data-theme="mono"] {
-      --bg:            #ffffff;
-      --surface:       #ffffff;
-      --surface-2:     #f5f5f5;
-      --surface-hover: #fafafa;
-      --border:        rgba(0,0,0,0.10);
-      --border-strong: rgba(0,0,0,0.24);
-      --accent:        #0f172a;     /* near-black accent — Notion / Apple feel */
-      --accent-hover:  #000000;
-      --accent-soft:   rgba(15,23,42,0.06);
-      --accent-2:      #475569;     /* slate for the secondary node colour */
-      --success:       #15803d;
-      --success-soft:  rgba(21,128,61,0.10);
-      --warn:          #b45309;
-      --warn-soft:     rgba(180,83,9,0.10);
-      --danger:        #b91c1c;
-      --danger-soft:   rgba(185,28,28,0.10);
-      --text:          #0a0a0a;
-      --text-2:        #262626;
-      --muted:         #525252;
-      --muted-2:       #737373;
-      --on-accent:     #ffffff;
-    }
-
-    /* ─────── Theme picker (sidebar footer) ─────── */
-    .theme-picker { display: grid; grid-template-columns: repeat(3, 1fr);
-                    gap: 4px; padding: 4px; margin-bottom: 10px;
-                    background: var(--surface-2);
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius-sm); }
-    .theme-btn { background: transparent; border: 1px solid transparent;
-                 border-radius: 5px; padding: 6px 4px; cursor: pointer;
-                 font-size: 11px; font-weight: 500;
-                 color: var(--muted); font-family: inherit;
-                 letter-spacing: -0.005em;
-                 display: flex; flex-direction: column; align-items: center;
-                 gap: 2px; transition: background .12s, color .12s; }
-    .theme-btn:hover         { color: var(--text); background: var(--surface); }
-    .theme-btn.active        { color: var(--accent); background: var(--surface);
-                               border-color: var(--border); }
-    .theme-btn .theme-icon   { font-size: 13px; line-height: 1; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font);
-           font-size: 14px; line-height: 1.55;
-           -webkit-font-smoothing: antialiased;
-           text-rendering: optimizeLegibility; }
-    a    { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; text-underline-offset: 2px; }
-    h2   { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px;
-           letter-spacing: -0.01em; }
-    h3   { font-size: 0.875rem; font-weight: 600; color: var(--text);
-           margin-bottom: 10px; letter-spacing: -0.005em; }
-    code { font-family: var(--mono); font-size: 0.86em; padding: 1px 6px;
-           background: var(--surface-2); border-radius: 4px;
-           color: var(--text); }
-
-    /* ── Layout ─────────────────────────────────────────────────────────── */
-    .app   { display: flex; height: 100vh; overflow: hidden; }
-    .sidebar { width: 240px; min-width: 240px; background: var(--surface);
-               border-right: 1px solid var(--border);
-               padding: 22px 0; display: flex; flex-direction: column; }
-    .main  { flex: 1; overflow-y: auto; padding: 36px 40px; background: var(--bg); }
-
-    /* ── Sidebar ─────────────────────────────────────────────────────────── */
-    .sidebar-logo { padding: 0 22px 18px; margin-bottom: 14px;
-                    border-bottom: 1px solid var(--border); }
-    .sidebar-logo span { font-size: 11px; color: var(--muted-2); display: block;
-                         margin-top: 2px; letter-spacing: 0.04em;
-                         text-transform: uppercase; font-weight: 500; }
-    .sidebar-logo strong { font-size: 15px; color: var(--text);
-                           letter-spacing: -0.015em; }
-    .step-nav  { list-style: none; padding: 0 10px; }
-    .step-nav li { padding: 9px 12px; border-radius: var(--radius-sm);
-                   cursor: pointer; color: var(--muted); font-size: 14px;
-                   display: flex; align-items: center; gap: 11px;
-                   transition: background .12s, color .12s; margin-bottom: 1px;
-                   letter-spacing: -0.005em; }
-    .step-nav li:hover  { background: var(--surface-2); color: var(--text); }
-    .step-nav li.active { background: var(--accent-soft); color: var(--accent);
-                          font-weight: 500; }
-    .step-num { width: 24px; height: 24px; border-radius: 50%;
-                background: var(--surface-2); display: flex; align-items: center;
-                justify-content: center; font-size: 12px; font-weight: 600;
-                flex-shrink: 0; color: var(--muted-2);
-                transition: background .12s, color .12s; }
-    /* Section divider in the sidebar nav — labels the three phases of
-       the build journey (Define · Enrich · Build) and separates them
-       from the post-generation tools. Integer step numbers reset
-       inside each phase via the markup ordering, so adding a step
-       later only renumbers within its own phase. Not interactive, no
-       hover, no click target. */
-    .step-nav li.step-divider {
-      cursor: default; padding: 14px 14px 6px 14px;
-      font-size: 11px; font-weight: 500; color: var(--muted-2);
-      text-transform: uppercase; letter-spacing: 0.06em;
-      pointer-events: none; margin-top: 6px;
-      border-top: 1px solid var(--border);
-    }
-    .step-nav li.step-divider:hover { background: transparent; color: var(--muted-2); }
-    .step-nav li.active .step-num { background: var(--accent); color: #fff; }
-    .step-nav li.done .step-num   { background: var(--success); color: #fff; }
-    .sidebar-footer { margin-top: auto; padding: 14px 20px;
-                      border-top: 1px solid var(--border); }
-    .btn-run { width: 100%; padding: 10px 12px; border: none;
-               border-radius: var(--radius-sm); background: var(--accent);
-               color: #fff; font-weight: 600; font-size: 13px;
-               cursor: pointer; letter-spacing: -0.005em;
-               box-shadow: var(--shadow-1);
-               transition: background .12s, box-shadow .15s, transform .1s; }
-    .btn-run:hover { background: var(--accent-hover); box-shadow: var(--shadow-2); }
-    .btn-run:active { transform: translateY(1px); }
-    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
-
-    /* ── Cards & Inputs ─────────────────────────────────────────────────── */
-    .card { background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
-            box-shadow: var(--shadow-1);
-            transition: box-shadow .2s, border-color .15s, transform .15s; }
-    .card:hover { box-shadow: var(--shadow-2); }
-    .card:focus-within { border-color: var(--accent); box-shadow: var(--shadow-2); }
-
-    /* ── Tabs (e.g. Relationships List/Graph) ──────────────────────────── */
-    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border);
-            margin: 0 0 16px 0; padding: 0; list-style: none; }
-    .tab-btn { background: transparent; border: none; color: var(--muted);
-               padding: 8px 14px; font-size: 13px; font-weight: 500;
-               cursor: pointer; border-bottom: 1.5px solid transparent;
-               transition: color .12s, border-color .12s; letter-spacing: -0.005em; }
-    .tab-btn:hover  { color: var(--text); }
-    .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
-    .tab-panel      { display: none; }
-    .tab-panel.active { display: block; }
-
-    /* ── Relationship graph ────────────────────────────────────────────── */
-    .rel-graph-wrap { background: var(--surface); border: 1px solid var(--border);
-                      border-radius: var(--radius); padding: 0; overflow: hidden;
-                      box-shadow: var(--shadow-1); }
-    .rel-graph-toolbar { display: flex; gap: 12px; align-items: center;
-                         padding: 10px 14px;
-                         border-bottom: 1px solid var(--border);
-                         background: var(--surface-2);
-                         font-size: 12px; color: var(--muted); }
-    .rel-graph-toolbar .legend-dot { width: 8px; height: 8px; border-radius: 50%;
-                                     display: inline-block; margin-right: 6px;
-                                     vertical-align: 0; }
-    .rel-graph-empty { padding: 48px 20px; text-align: center; color: var(--muted-2);
-                       font-size: 13px; }
-    #rel-graph { height: 480px; width: 100%; background: var(--surface); }
-
-    /* ── Per-box help text ─────────────────────────────────────────────── */
-    .box-help { background: var(--accent-soft);
-                border-left: 2px solid var(--accent);
-                border-radius: var(--radius-sm); padding: 11px 14px;
-                margin: 0 0 16px 0; font-size: 12.5px; color: var(--muted);
-                line-height: 1.55; }
-    .box-help b { color: var(--text); font-weight: 600; }
-    .box-help ul { margin: 6px 0 0 0; padding-left: 18px; }
-    .box-help li { margin-bottom: 3px; }
-    .box-help li b { color: var(--text); }
-
-    /* L4 — collapsible candidate groups. Collapsed by default; the
-       chevron rotates 90° when the section is opened. */
-    details.ld-group summary::-webkit-details-marker { display: none; }
-    details.ld-group[open] .ld-chev { transform: rotate(90deg); display: inline-block; }
-    details.ld-group summary:hover { filter: brightness(0.97); }
-
-    /* ── Form fields ───────────────────────────────────────────────────── */
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 11px; font-weight: 500;
-                   text-transform: uppercase; letter-spacing: .06em;
-                   color: var(--muted); margin-bottom: 6px; }
-    .field input, .field textarea, .field select {
-      width: 100%; background: var(--surface-2);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      color: var(--text); padding: 9px 12px; font-size: 13.5px;
-      font-family: inherit; outline: none;
-      transition: border-color .12s, box-shadow .12s; }
-    .field input:hover, .field textarea:hover, .field select:hover {
-      border-color: var(--border-strong); }
-    .field input:focus, .field textarea:focus, .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-soft); }
-    .field textarea { resize: vertical; min-height: 72px; }
-
-    /* ── Buttons ─────────────────────────────────────────────────────────── */
-    .btn { padding: 7px 14px; border-radius: var(--radius-sm); border: none;
-           cursor: pointer; font-size: 13px; font-weight: 500;
-           font-family: inherit; letter-spacing: -0.005em;
-           transition: background .12s, border-color .12s, color .12s,
-                       box-shadow .15s, transform .1s; }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary  { background: var(--accent); color: #fff; font-weight: 600;
-                    box-shadow: var(--shadow-1); }
-    .btn-primary:hover  { background: var(--accent-hover);
-                          box-shadow: var(--shadow-2); }
-    .btn-danger   { background: var(--danger);  color: #fff; font-weight: 600;
-                    box-shadow: var(--shadow-1); }
-    .btn-danger:hover   { filter: brightness(0.95); box-shadow: var(--shadow-2); }
-    .btn-ghost    { background: var(--surface); border: 1px solid var(--border);
-                    color: var(--muted); }
-    .btn-ghost:hover    { color: var(--text); border-color: var(--border-strong);
-                          background: var(--surface-2); }
-    .btn-success  { background: var(--success); color: #fff; font-weight: 600;
-                    box-shadow: var(--shadow-1); }
-    .btn-success:hover  { filter: brightness(0.95); box-shadow: var(--shadow-2); }
-
-    /* ── Entity/Event chips ─────────────────────────────────────────────── */
-    .item-list { display: flex; flex-direction: column; gap: 8px; }
-    .item-card { background: var(--surface);
-                 border: 1px solid var(--border); border-radius: var(--radius);
-                 padding: 12px 14px; display: flex; align-items: flex-start;
-                 gap: 12px;
-                 transition: border-color .12s, box-shadow .15s, background .12s; }
-    .item-card:hover    { border-color: var(--border-strong);
-                          background: var(--surface-hover);
-                          box-shadow: var(--shadow-1); }
-    .item-card.dragging { opacity: 0.5; }
-    .item-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; opacity: .85; }
-    .item-body { flex: 1; min-width: 0; }
-    .item-name { font-weight: 600; font-size: 13.5px; letter-spacing: -0.005em; }
-    .item-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
-    .item-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-    .tag  { font-size: 11px; padding: 2px 8px; border-radius: 999px;
-            background: var(--accent-soft); color: var(--accent); font-weight: 500; }
-    .tag.restricted   { background: var(--danger-soft); color: var(--danger); }
-    .tag.confidential { background: var(--warn-soft);   color: var(--warn);   }
-    .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-    /* ── Property sub-table ─────────────────────────────────────────────── */
-    .props-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
-    .props-table th { text-align: left; padding: 6px 8px; color: var(--muted-2);
-                      font-weight: 500; text-transform: uppercase; letter-spacing: .05em;
-                      font-size: 11px; border-bottom: 1px solid var(--border); }
-    .props-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
-
-    /* ── CQ list ─────────────────────────────────────────────────────────── */
-    .cq-item { background: var(--surface);
-               border: 1px solid var(--border); border-radius: var(--radius-sm);
-               padding: 10px 14px; margin-bottom: 8px;
-               display: flex; gap: 10px; align-items: flex-start;
-               transition: border-color .12s, box-shadow .15s; }
-    .cq-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-1); }
-    .cq-id   { font-size: 10.5px; color: var(--accent); font-weight: 600;
-               background: var(--accent-soft); padding: 2px 8px;
-               border-radius: 999px; flex-shrink: 0; margin-top: 2px;
-               letter-spacing: .02em; font-family: var(--mono); }
-
-    /* ── Relationship chips ─────────────────────────────────────────────── */
-    .rel-item { background: var(--surface);
-                border: 1px solid var(--border); border-radius: var(--radius-sm);
-                padding: 9px 12px; margin-bottom: 6px;
-                display: flex; gap: 10px; align-items: center;
-                transition: border-color .12s, box-shadow .15s; }
-    .rel-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-1); }
-    .rel-arrow { color: var(--accent); font-weight: 600; opacity: .7; }
-
-    /* ── Template picker ─────────────────────────────────────────────────── */
-    .template-grid { display: grid;
-                     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                     gap: 10px; }
-    .template-card { background: var(--surface);
-                     border: 1px solid var(--border); border-radius: var(--radius);
-                     padding: 16px 12px; cursor: pointer; text-align: center;
-                     transition: border-color .12s, box-shadow .15s, transform .1s; }
-    .template-card:hover  { border-color: var(--accent); box-shadow: var(--shadow-2); }
-    .template-card:active { transform: translateY(1px); }
-    .template-card .t-icon { font-size: 24px; margin-bottom: 8px; opacity: .9; }
-    .template-card .t-name { font-size: 12.5px; font-weight: 500;
-                             letter-spacing: -0.005em; }
-
-    /* ── Pipeline log ─────────────────────────────────────────────────────── */
-    /* GitHub-style code surface — light theme keeps the log readable
-       without flipping to a dark island. */
-    #pipeline-log { background: var(--surface-2); border: 1px solid var(--border);
-                    border-radius: var(--radius); padding: 16px;
-                    font-family: var(--mono); font-size: 12px; line-height: 1.55;
-                    height: 320px; overflow-y: auto; color: var(--text-2); }
-    .log-ok   { color: var(--success); }
-    .log-warn { color: var(--warn); }
-    .log-err  { color: var(--danger); }
-
-    /* ── Modal ─────────────────────────────────────────────────────────────── */
-    .modal-backdrop { position: fixed; inset: 0;
-                      background: rgba(15,23,42,0.45);
-                      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-                      display: flex; align-items: center; justify-content: center;
-                      z-index: 100; }
-    .modal { background: var(--surface);
-             border: 1px solid var(--border);
-             border-radius: var(--radius); padding: 26px;
-             min-width: 480px; max-width: 640px; width: 90%;
-             box-shadow: var(--shadow-modal); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center;
-                    margin-bottom: 18px; }
-    .modal-footer { margin-top: 18px; display: flex; justify-content: flex-end; gap: 8px; }
-
-    /* ── Step panels ─────────────────────────────────────────────────────── */
-    .step-panel { display: none; }
-    .step-panel.active { display: block; }
-    .step-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 6px;
-                  letter-spacing: -0.02em; }
-    .step-subtitle { color: var(--muted); font-size: 13.5px; margin-bottom: 26px;
-                     line-height: 1.55; max-width: 760px; }
-    /* Uniform Back / Skip / Continue strip at the bottom of each build step. */
-    .step-nav-footer { display: flex; justify-content: space-between; align-items: center;
-                       gap: 10px; margin-top: 22px; padding-top: 16px;
-                       border-top: 1px solid var(--border); }
-    .step-nav-footer .nav-hint { color: var(--muted); font-size: 12px; }
-    .step-nav-footer .nav-right { display: flex; gap: 8px; }
-
-    /* Peer-tool pills shown at the top of post-generation tools (7/8/9). */
-    .peer-strip { display: flex; gap: 6px; margin: -6px 0 16px 0; flex-wrap: wrap; }
-    .peer-pill { background: transparent; border: 1px solid var(--border);
-                 color: var(--muted); padding: 6px 12px; border-radius: 999px;
-                 font-size: 12px; cursor: pointer; transition: all .15s ease; }
-    .peer-pill:hover { color: var(--text); border-color: var(--accent); }
-    .peer-pill.active { background: var(--accent-soft); color: var(--accent);
-                        border-color: var(--accent); cursor: default; }
-
-    /* Pre-flight readiness banner. Two visual states: ready (green) and
-       waiting (amber). Sits between the step subtitle and the peer strip. */
-    .preflight-banner { display: flex; align-items: center; gap: 10px;
-                        padding: 10px 14px; border-radius: 8px;
-                        font-size: 12.5px; margin: 0 0 14px 0; line-height: 1.4; }
-    .preflight-banner.ready   { background: rgba(34,197,94,0.10);
-                                color: #15803d;  border: 1px solid rgba(34,197,94,0.25); }
-    .preflight-banner.waiting { background: rgba(234,179,8,0.10);
-                                color: #a16207;  border: 1px solid rgba(234,179,8,0.30); }
-    .preflight-banner .pf-icon { font-weight: 700; font-size: 14px; }
-    .preflight-banner .pf-text { flex: 1; }
-    .preflight-banner button { background: transparent; border: 1px solid currentColor;
-                               color: inherit; padding: 4px 10px; border-radius: 6px;
-                               font-size: 11.5px; cursor: pointer; }
-
-    /* Domain pill — solid accent tint, no gradient. */
-    .domain-pill { display: inline-block; margin-left: 12px; padding: 3px 10px;
-                   font-size: 0.62em; font-weight: 600; vertical-align: middle;
-                   background: var(--accent-soft); color: var(--accent);
-                   border: 1px solid rgba(79,70,229,0.18);
-                   border-radius: 999px; letter-spacing: .02em;
-                   text-transform: lowercase; }
-
-    /* Generic chip-badge for inline metadata (counts, statuses). */
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px;
-             background: var(--surface-2); border: 1px solid var(--border);
-             color: var(--muted); font-size: 11px; font-weight: 500;
-             letter-spacing: .01em; }
-
-    /* Vector-retrieval example chips — clickable, prefill the query form. */
-    .vec-examples { display: grid; gap: 10px; margin-top: 12px; }
-    .vec-example  { background: var(--surface);
-                    border: 1px solid var(--border); border-radius: var(--radius);
-                    padding: 12px 14px; cursor: pointer;
-                    transition: border-color .12s, box-shadow .15s, transform .1s; }
-    .vec-example:hover   { border-color: var(--accent); box-shadow: var(--shadow-2); }
-    .vec-example:active  { transform: translateY(1px); }
-    .vec-example-q { font-size: 13.5px; color: var(--text); font-weight: 500;
-                     letter-spacing: -0.005em; }
-    .vec-example-cls { font-family: var(--mono); font-size: 11px;
-                       color: var(--accent); margin-top: 4px; }
-    .vec-example-why { font-size: 12px; color: var(--muted); margin-top: 6px;
-                       line-height: 1.5; }
-
-    /* ── Custom scrollbars (subtle, light) ───────────────────────────── */
-    *::-webkit-scrollbar         { width: 10px; height: 10px; }
-    *::-webkit-scrollbar-track   { background: transparent; }
-    *::-webkit-scrollbar-thumb   { background: rgba(15,23,42,0.10);
-                                   border-radius: 999px;
-                                   border: 2px solid var(--bg); }
-    *::-webkit-scrollbar-thumb:hover { background: rgba(15,23,42,0.18); }
-
-    /* ── Misc ─────────────────────────────────────────────────────────────── */
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
-             border-radius: 12px; font-size: 11px; font-weight: 700; }
-    .badge.running { background: rgba(247,201,72,.15); color: var(--warn); }
-    .badge.done    { background: rgba(61,220,132,.15); color: var(--success); }
-    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface);
-             border: 1px solid var(--border); border-radius: var(--radius);
-             padding: 12px 18px; font-size: 13px; z-index: 200;
-             animation: fadeIn .3s; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/wizard.css') }}">
+  <!-- P0.1 — reusable proposal-card module. Bound to window.* so
+       legacy callers (_renderLogDiscoveryRow etc.) keep working
+       during the transition. -->
+  <script type="module">
+    import { renderProposalCard, renderSparkline }
+      from "{{ url_for('static', filename='js/components/proposal_card.js') }}";
+    window.renderProposalCard = renderProposalCard;
+    window.renderSparkline = renderSparkline;
+  </script>
+  <!-- P0.3 — live event stream. One EventSource per browser tab;
+       drift alerts surface as toasts and metric events refresh
+       the badges that opted in via window.LiveBus.on('metric'). -->
+  <script type="module">
+    import { LiveEvents }
+      from "{{ url_for('static', filename='js/components/live_events.js') }}";
+    const live = new LiveEvents();
+    window.LiveBus = live;
+    live.on('drift', e => {
+      const msg = `Drift: ${e.metric} — ${e.message || 'threshold exceeded'}`;
+      if (typeof showToast === 'function') showToast(msg);
+    });
+    // Defer start until after the rest of the page settles so the
+    // hello packet doesn't race the toast helper's bootstrap.
+    window.addEventListener('DOMContentLoaded', () => live.start());
+  </script>
   <!-- vis-network: force-directed graph rendering for the Relationships > Graph tab.
        MIT-licensed, ~150 KB minified. Loaded from unpkg. If offline / CDN-blocked,
        the Graph tab falls back to a friendly "couldn't load" message. -->
@@ -473,33 +44,40 @@
   <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
+<!-- P0.2 — skip link. Visually hidden until focused (via .skip-link
+     in wizard.css). The first focusable element on the page, so
+     tab-from-cold-start lands here and lets a keyboard user
+     bypass the long sidebar straight into the main content. -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="app">
   <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
-  <aside class="sidebar">
+  <aside class="sidebar" aria-label="Pipeline phases">
     <div class="sidebar-logo">
       <strong>Ontology Toolkit</strong>
       <span>Ontology Studio · v3.0</span>
     </div>
-    <ul class="step-nav" id="step-nav">
-      <li data-step="library"><span class="step-num">📚</span> Library</li>
-      <li class="step-divider" aria-hidden="true">Define</li>
-      <li class="active" data-step="domain"><span class="step-num">1</span> Domain Identity</li>
-      <li data-step="entities"><span class="step-num">2</span> Entities</li>
-      <li data-step="events"><span class="step-num">3</span> Events</li>
-      <li data-step="relationships"><span class="step-num">4</span> Relationships</li>
-      <li class="step-divider" aria-hidden="true">Enrich</li>
-      <li data-step="log-discovery"><span class="step-num">5</span> Log Discovery</li>
-      <li data-step="cqs"><span class="step-num">6</span> Competency Questions</li>
-      <li data-step="rules"><span class="step-num">7</span> Rules &amp; Reasoning</li>
-      <li class="step-divider" aria-hidden="true">Build</li>
-      <li data-step="generate"><span class="step-num">8</span> Generate</li>
-      <li class="step-divider" aria-hidden="true">After generation</li>
-      <li data-step="evolve"><span class="step-num">9</span> Evolution Review</li>
-      <li data-step="comply"><span class="step-num">10</span> Compliance Dashboard</li>
-      <li data-step="retrieve"><span class="step-num">11</span> Vector Retrieval</li>
-      <li class="step-divider" aria-hidden="true">Configuration</li>
-      <li data-step="settings"><span class="step-num">⚙</span> Settings</li>
+    <nav aria-label="Pipeline steps">
+    <ul class="step-nav" id="step-nav" role="list">
+      <li data-step="library" tabindex="0" role="link"><span class="step-num">📚</span> Library</li>
+      <li class="step-divider" role="presentation" aria-hidden="true">Define</li>
+      <li class="active" data-step="domain" tabindex="0" role="link" aria-current="page"><span class="step-num">1</span> Domain Identity</li>
+      <li data-step="entities" tabindex="0" role="link"><span class="step-num">2</span> Entities</li>
+      <li data-step="events" tabindex="0" role="link"><span class="step-num">3</span> Events</li>
+      <li data-step="relationships" tabindex="0" role="link"><span class="step-num">4</span> Relationships</li>
+      <li class="step-divider" role="presentation" aria-hidden="true">Enrich</li>
+      <li data-step="log-discovery" tabindex="0" role="link"><span class="step-num">5</span> Log Discovery</li>
+      <li data-step="cqs" tabindex="0" role="link"><span class="step-num">6</span> Competency Questions</li>
+      <li data-step="rules" tabindex="0" role="link"><span class="step-num">7</span> Rules &amp; Reasoning</li>
+      <li class="step-divider" role="presentation" aria-hidden="true">Build</li>
+      <li data-step="generate" tabindex="0" role="link"><span class="step-num">8</span> Generate</li>
+      <li class="step-divider" role="presentation" aria-hidden="true">After generation</li>
+      <li data-step="evolve" tabindex="0" role="link"><span class="step-num">9</span> Evolution Review</li>
+      <li data-step="comply" tabindex="0" role="link"><span class="step-num">10</span> Compliance Dashboard</li>
+      <li data-step="retrieve" tabindex="0" role="link"><span class="step-num">11</span> Vector Retrieval</li>
+      <li class="step-divider" role="presentation" aria-hidden="true">Configuration</li>
+      <li data-step="settings" tabindex="0" role="link"><span class="step-num">⚙</span> Settings</li>
     </ul>
+    </nav>
     <div class="sidebar-footer">
       <div class="theme-picker" role="radiogroup" aria-label="Theme">
         <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
@@ -517,11 +95,14 @@
   </aside>
 
   <!-- ── Main content ──────────────────────────────────────────────── -->
-  <main class="main">
+  <main class="main" id="main-content" role="main" tabindex="-1" aria-label="Current pipeline step">
 
     <!-- Step 1: Domain -->
     <div class="step-panel active" id="step-domain">
-      <div class="step-title">Domain Identity</div>
+      <div class="step-title">Domain Identity
+        <a class="help-pill" href="/help/domain" target="_blank"
+           rel="noopener" title="What is Domain Identity?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Define the scope of your ontology. All generated IRIs and documentation will use these values.</div>
 
       <div class="card">
@@ -692,7 +273,10 @@
 
     <!-- Step 2: Entities -->
     <div class="step-panel" id="step-entities">
-      <div class="step-title">Entities</div>
+      <div class="step-title">Entities
+        <a class="help-pill" href="/help/entities" target="_blank"
+           rel="noopener" title="What does the Entities phase do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">The main things in your domain — assets, customers, resources, orders. Each becomes an OWL class.</div>
 
       <div class="card">
@@ -976,7 +560,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 3: Events -->
     <div class="step-panel" id="step-events">
-      <div class="step-title">Events</div>
+      <div class="step-title">Events
+        <a class="help-pill" href="/help/events" target="_blank"
+           rel="noopener" title="What does the Events phase do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Things that happen — incidents, alerts, orders. Events become OWL subclasses of a base Event class.</div>
 
       <div class="card">
@@ -1006,7 +593,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 4: Relationships -->
     <div class="step-panel" id="step-relationships">
-      <div class="step-title">Relationships</div>
+      <div class="step-title">Relationships
+        <a class="help-pill" href="/help/relationships" target="_blank"
+           rel="noopener" title="What does the Relationships phase do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Describe how entities connect. Write plain sentences — e.g. "A Customer places one or more Orders."</div>
 
       <div class="card">
@@ -1074,7 +664,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 5: CQs -->
     <div class="step-panel" id="step-cqs">
-      <div class="step-title">Competency Questions</div>
+      <div class="step-title">Competency Questions
+        <a class="help-pill" href="/help/cqs" target="_blank"
+           rel="noopener" title="What are Competency Questions?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Questions your ontology must be able to answer. These drive the governance scorecard and SPARQL test suite.</div>
 
       <div class="card">
@@ -1109,7 +702,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 7 — Rules & Reasoning (third step in the Enrich phase) -->
     <div class="step-panel" id="step-rules">
-      <div class="step-title">Rules &amp; Reasoning</div>
+      <div class="step-title">Rules &amp; Reasoning
+        <a class="help-pill" href="/help/rules" target="_blank"
+           rel="noopener" title="What does Rules &amp; Reasoning do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Author SHACL, SPARQL CONSTRUCT, and OWL-axiom rules. Saved rules are validated, persisted to <code>session.rules</code>, and consumed by <code>--phase reason</code> at materialisation time.</div>
 
       <div class="card">
@@ -1152,7 +748,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 6: Generate -->
     <div class="step-panel" id="step-generate">
-      <div class="step-title">Generate Ontology</div>
+      <div class="step-title">Generate Ontology
+        <a class="help-pill" href="/help/generate" target="_blank"
+           rel="noopener" title="What does Generate do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Review your session and run the toolkit pipeline to generate OWL, SHACL, JSON-LD, SKOS, and the governance report.</div>
 
       <!-- Pre-flight + run CTA. Surfaces prereqs first so the user knows
@@ -1333,7 +932,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Evolution Review (Workstream 2) -->
     <div class="step-panel" id="step-evolve">
-      <div class="step-title">Ontology Evolution Review</div>
+      <div class="step-title">Ontology Evolution Review
+        <a class="help-pill" href="/help/evolve" target="_blank"
+           rel="noopener" title="What does Evolution Review do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Workstream 2 — Review ontology-evolution proposals surfaced from production observations. Approve, reject, or defer each candidate. Approved proposals flow through the reasoner + SPARQL CQ gate before auto-bumping the ontology version.</div>
 
       <div class="preflight-banner" id="preflight-evolve" style="display:none"></div>
@@ -1412,7 +1014,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Compliance Dashboard (Workstream 4) -->
     <div class="step-panel" id="step-comply">
-      <div class="step-title">Regulatory Compliance Dashboard</div>
+      <div class="step-title">Regulatory Compliance Dashboard
+        <a class="help-pill" href="/help/comply" target="_blank"
+           rel="noopener" title="What does the Compliance Dashboard do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Workstream 4 — Assemble signed, machine-verifiable evidence bundles for named regulatory frameworks. Monitor per-regulation coverage, traffic-light status per requirement, and gap analysis.</div>
 
       <div class="preflight-banner" id="preflight-comply" style="display:none"></div>
@@ -1508,7 +1113,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Vector Retrieval (Workstream 5) -->
     <div class="step-panel" id="step-retrieve">
-      <div class="step-title">Ontology-Bounded Vector Retrieval</div>
+      <div class="step-title">Ontology-Bounded Vector Retrieval
+        <a class="help-pill" href="/help/retrieve" target="_blank"
+           rel="noopener" title="What does Vector Retrieval do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Workstream 5 — The OWL class hierarchy becomes a hard semantic filter on vector similarity search. Inspect embedding indexes, query with class-scoped semantics, and compare retrieval strategies.</div>
 
       <div class="preflight-banner" id="preflight-retrieve" style="display:none"></div>
@@ -2021,9 +1629,17 @@ async function saveSession() {
 // ── Navigation ────────────────────────────────────────────────────────────
 function goStep(name) {
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.step-nav li').forEach(li => li.classList.remove('active'));
+  // P0.2 — clear .active AND aria-current on every step item.
+  document.querySelectorAll('.step-nav li').forEach(li => {
+    li.classList.remove('active');
+    li.removeAttribute('aria-current');
+  });
   document.getElementById('step-'+name).classList.add('active');
-  document.querySelector(`[data-step="${name}"]`).classList.add('active');
+  const newNavItem = document.querySelector(`[data-step="${name}"]`);
+  if (newNavItem) {
+    newNavItem.classList.add('active');
+    newNavItem.setAttribute('aria-current', 'page');
+  }
   currentStep = name;
   if (name === 'generate') {
     renderSummary();
@@ -2044,11 +1660,39 @@ function goStep(name) {
   if (main) main.scrollTop = 0;
 }
 
-document.querySelectorAll('.step-nav li').forEach(li => {
-  // Section dividers carry no data-step and shouldn't navigate.
-  if (!li.dataset.step) return;
-  li.addEventListener('click', () => goStep(li.dataset.step));
-});
+// P0.2 — keyboard + click navigation on the sidebar step list.
+//
+// Click  → goStep
+// Enter / Space → goStep on the focused item (role="link" with tabindex
+//                 needs explicit activation handling).
+// ↑ / ↓  → move focus to the previous / next focusable step item,
+//          skipping section dividers.
+// Home   → first step
+// End    → last step
+(() => {
+  const items = Array.from(document.querySelectorAll('.step-nav li'))
+    .filter(li => li.dataset.step);
+  items.forEach((li, idx) => {
+    li.addEventListener('click', () => goStep(li.dataset.step));
+    li.addEventListener('keydown', ev => {
+      const key = ev.key;
+      if (key === 'Enter' || key === ' ') {
+        ev.preventDefault();
+        goStep(li.dataset.step);
+        return;
+      }
+      let target = null;
+      if (key === 'ArrowDown') target = items[idx + 1];
+      else if (key === 'ArrowUp') target = items[idx - 1];
+      else if (key === 'Home') target = items[0];
+      else if (key === 'End') target = items[items.length - 1];
+      if (target) {
+        ev.preventDefault();
+        target.focus();
+      }
+    });
+  });
+})();
 
 // ── Templates ─────────────────────────────────────────────────────────────
 async function loadTemplateList() {
@@ -3661,44 +3305,18 @@ function _renderGroupedCandidates(cands) {
   return html;
 }
 
+// P0.1 — proposal card extracted to wizard/static/js/components/proposal_card.js
+// (loaded as an ES module in <head>; bound to window.renderProposalCard).
+// This shim preserves the legacy global name so existing call sites
+// (_renderGroupedCandidates, the cands.map(...) renderer) keep working
+// without touching the surrounding loops.
 function _renderLogDiscoveryRow(c) {
-  const kindBadge = {
-    'LOG_EVENT': ['Event', '#4338ca'],
-    'LOG_ENTITY': ['Entity', '#0e7490'],
-    'LOG_RELATIONSHIP': ['Relationship', '#0f766e'],
-    'LOG_CAUSAL_EDGE': ['Causal edge', '#9333ea'],
-  }[c.kind] || [c.kind, 'var(--muted)'];
-  const conf = Math.round((c.confidence_score || 0) * 100);
-  const sample = (c.evidence_sample || '').toString().slice(0, 120);
-  const showMiniGraph = (c.kind === 'LOG_RELATIONSHIP' || c.kind === 'LOG_CAUSAL_EDGE');
-  const isPending = (c.status === 'PENDING');
-  return `
-    <div class="card" style="padding:10px;margin-bottom:8px" id="log-disco-row-${c.proposal_id}">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
-        <span style="background:${kindBadge[1]};color:white;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${kindBadge[0]}</span>
-        ${c.regime_tag ? `<span title="L8 — regime-aware HMM" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${c.regime_tag}</span>` : ''}
-        ${c.detection_strategy === 'GP_RATE_DEVIATION' ? `<span title="L13 — GP rate anomaly" style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">GP rate</span>` : ''}
-        <span style="flex:1;font-size:13px;color:var(--text);font-weight:500">${(c.title || '').replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</span>
-        ${c.rate_sparkline ? _renderSparkline(c.rate_sparkline) : ''}
-        <div style="display:flex;align-items:center;gap:6px;min-width:140px">
-          <div style="background:var(--bg);border-radius:4px;height:6px;width:80px;overflow:hidden">
-            <div style="background:#5ec27a;height:100%;width:${conf}%"></div>
-          </div>
-          <span style="font-size:11px;color:var(--muted);font-family:monospace">${conf}%</span>
-        </div>
-      </div>
-      ${sample ? `<div style="font-size:11px;color:var(--muted);font-family:monospace;padding:4px 8px;background:var(--bg);border-radius:4px;margin:4px 0">${sample.replace(/[<>&]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))}</div>` : ''}
-      ${showMiniGraph && isPending ? `<div id="log-disco-mini-${c.proposal_id}" style="margin-top:6px"></div>` : ''}
-      <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-        ${isPending ? `
-          <button class="btn btn-primary" style="padding:3px 10px;font-size:11px" onclick="approveLogCandidate('${c.proposal_id}')">✓ Approve</button>
-          <button class="btn btn-ghost"   style="padding:3px 10px;font-size:11px" onclick="rejectLogCandidate('${c.proposal_id}')">✕ Reject</button>
-          <button class="btn btn-ghost"   style="padding:3px 10px;font-size:11px" onclick="editLogCandidate('${c.proposal_id}')">✎ Edit</button>
-          <button class="btn btn-ghost"   style="padding:3px 10px;font-size:11px" onclick="mergeLogCandidate('${c.proposal_id}')">🔀 Merge</button>
-        ` : `<span style="color:var(--muted);font-size:11px">${c.status} — ${(c.detection_strategy||'').replace(/_/g, ' ').toLowerCase()}</span>`}
-        ${showMiniGraph && isPending ? `<button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;margin-left:auto" onclick="renderLogMiniGraph('${c.proposal_id}')">👁 Show endpoints</button>` : ''}
-      </div>
-    </div>`;
+  if (typeof window.renderProposalCard !== 'function') {
+    // Module not loaded yet (cold-start race) — fall back to a
+    // minimal inline render so the page never goes blank.
+    return `<div class="card card-proposal" id="log-disco-row-${c.proposal_id}">${c.title || ''}</div>`;
+  }
+  return window.renderProposalCard(c);
 }
 
 async function approveLogCandidate(pid, edits) {
@@ -3870,16 +3488,14 @@ function _renderTemplateInspector(templateId) {
 
 // L13 — inline sparkline for GP_RATE_DEVIATION proposals.
 // `raw` is a JSON-encoded list of per-bin counts (capped at 64).
+// P0.1 — sparkline extracted to proposal_card.js. Same delegate
+// pattern as _renderLogDiscoveryRow so any inline caller keeps
+// working.
 function _renderSparkline(raw) {
-  let arr;
-  try { arr = typeof raw === 'string' ? JSON.parse(raw) : raw; }
-  catch (_) { return ''; }
-  if (!Array.isArray(arr) || !arr.length) return '';
-  const w = 80, h = 20;
-  const max = Math.max(...arr) || 1;
-  const dx = w / Math.max(1, arr.length - 1);
-  const pts = arr.map((v, i) => `${(i * dx).toFixed(1)},${(h - (v / max) * h).toFixed(1)}`).join(' ');
-  return `<svg width="${w}" height="${h}" style="margin-left:6px" title="GP rate sparkline (${arr.length} bins)"><polyline points="${pts}" fill="none" stroke="#16a34a" stroke-width="1.2"/></svg>`;
+  if (typeof window.renderSparkline === 'function') {
+    return window.renderSparkline(raw);
+  }
+  return '';
 }
 
 // T1.1 — LLM-assisted proposal naming. Calls the rename endpoint;
@@ -4848,10 +4464,24 @@ function renderSummary() {
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function showToast(msg) {
+  // P0.2 — reuse a single persistent live-region container so
+  // screen readers don't lose announcements when the toast
+  // <div> is destroyed mid-read. Each call rewrites textContent;
+  // the container's aria-live="polite" + role="status" make the
+  // assistive layer re-read the new value.
+  let host = document.getElementById('toast-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'toast-host';
+    host.setAttribute('role', 'status');
+    host.setAttribute('aria-live', 'polite');
+    host.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(host);
+  }
   const t = document.createElement('div');
   t.className = 'toast';
   t.textContent = msg;
-  document.body.appendChild(t);
+  host.appendChild(t);
   setTimeout(() => t.remove(), 3000);
 }
 
