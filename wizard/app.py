@@ -122,11 +122,37 @@ def landing():
     CTA) and the wizard lives at ``/wizard``.  Bookmarks that
     deep-linked via ``/?step=X`` are forwarded to the wizard so
     external docs and saved links don't break.
+
+    P1.2.5 — the card stats on the landing read from the actual
+    benchmark output at render time.  If ``benchmarks/last-run.json``
+    is missing or stale, the landing falls back to a "see how it
+    works" tagline instead of inventing numbers.
     """
     from flask import render_template, redirect, request
     if request.args.get("step"):
         return redirect("/wizard?" + request.query_string.decode("utf-8"), code=301)
-    return render_template("landing.html")
+    bench = _load_benchmark()
+    return render_template("landing.html", bench=bench)
+
+
+def _load_benchmark() -> dict:
+    """Read ``benchmarks/last-run.json`` if present so the landing's
+    card stats stay grounded in real numbers.  Returns ``None`` when
+    no benchmark has been run yet — the template treats that as the
+    "show capability statements instead of numbers" case."""
+    path = os.path.join(ROOT, "benchmarks", "last-run.json")
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+        if not data.get("ok"):
+            return None
+        # Pretty-print 1429 -> "1,429".
+        data["owl_properties_human"] = f"{data.get('owl_properties', 0):,}"
+        return data
+    except (OSError, ValueError):
+        return None
 
 
 @app.route("/wizard")
