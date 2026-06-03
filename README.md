@@ -1,8 +1,10 @@
-# Ontology Engineering Toolkit — v3.2
+# Ontomesh — the ontology mesh for GraphRAG
 
-**Domain-agnostic · Rules & Reasoning · Log-Driven RCA**
+**v3.5 · Mine ontologies from your logs · Validate with SHACL · Ship a hybrid retriever**
 
-A complete end-to-end implementation of the [Domain-Agnostic Ontology Engineering Framework v1.1](docs/framework-whitepaper.md). Takes a relational database schema **or a folder of logs** and produces a production-ready OWL 2 ontology, SHACL validation shapes, JSON-LD agent payloads, SKOS vocabulary, materialised inference + lineage, and a scored governance report — for any domain, any industry, any major relational database.
+Ontomesh (formerly *Ontology Engineering Toolkit*) is the production toolkit for data and ML engineers building GraphRAG. Point it at a relational schema or a folder of logs; get back a production-ready OWL 2 ontology, SHACL validation shapes, JSON-LD agent payloads, SKOS vocabulary, materialised inference + lineage, a hybrid (vector + graph) retriever, and a scored governance report — for any domain, any industry, any major relational database.
+
+> **The rename, in one line.** *Ontology Engineering Toolkit* described what we built; **Ontomesh** describes what you ship: a graph-aware ontology mesh underneath your RAG stack. Package on PyPI: `pip install ontomesh` (alias `ontology-toolkit` kept for one release). API and CLI are unchanged.
 
 > **What's new in v3.2:** log-driven RCA pipeline — point at a folder of logs, the toolkit mines templates + an entity graph (PMI), fits per-service HMMs for anomalies, gates causal edges with Granger / transfer-entropy, and surfaces every candidate to the engineer in a new Studio Step 2.5 Log Discovery review queue. Approved candidates flow into an RCA-shaped ontology with `:CausalEvent / :hasCause / :rootCause` taxonomy; Phase B materialises derived `:hasCause` triples with full `prov:wasDerivedFrom` lineage; Insights ships two RCA prompt presets. See [docs/release-notes.md](docs/release-notes.md).
 

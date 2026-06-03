@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{{ page.title }} — Help</title>
+  <title>{{ page.title }} — Ontomesh Help</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ page.tagline }}">
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/tokens.css') }}">
   <style>
@@ -145,14 +148,14 @@
   <div class="wrap">
     <header class="page">
       <div class="crumb">
-        <a href="/">Wizard</a> · Help · Step {{ page.step_num }}
+        <a href="/">Ontomesh</a> · <a href="/wizard">Wizard</a> · Help · Step {{ page.step_num }}
       </div>
       <h1>
         <span class="step-num" aria-hidden="true">{{ page.step_num }}</span>
         {{ page.title }}
       </h1>
       <p class="tagline">{{ page.tagline }}</p>
-      <a href="/?step={{ page.slug }}" class="back-to-wizard">
+      <a href="/wizard?step={{ page.slug }}" class="back-to-wizard">
         ← Back to wizard
       </a>
     </header>

@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Projects — Ontomesh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Every ontology you've built with Ontomesh — resume any one with a click.">
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/tokens.css') }}">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); background: var(--bg);
+           color: var(--text); font-size: 15px; }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover, a:focus-visible { text-decoration: underline; }
+    code { font-family: var(--mono); font-size: 12.5px;
+           background: var(--surface-2); padding: 1px 6px;
+           border-radius: 4px; color: var(--text); }
+
+    .skip-link {
+      position: absolute; top: 6px; left: 6px;
+      background: var(--brand); color: var(--on-brand);
+      padding: 8px 14px; transform: translateY(-150%);
+      transition: transform .15s ease-out;
+      z-index: 100; font-weight: 600; border-radius: 4px;
+    }
+    .skip-link:focus, .skip-link:focus-visible {
+      transform: translateY(0);
+      outline: 2px solid var(--brand-mesh);
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    .nav { display: flex; align-items: center; justify-content: space-between;
+           max-width: 1200px; margin: 0 auto; padding: 22px 40px; }
+    .brand-link { display: flex; align-items: center; }
+    .brand-wordmark { height: 32px; }
+    .nav-links { display: flex; align-items: center; gap: 28px;
+                 list-style: none; padding: 0; margin: 0; }
+    .nav-links a { color: var(--text); font-weight: 500; font-size: 14px; }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--brand); text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; gap: 8px;
+           padding: 9px 16px; border-radius: var(--radius-sm);
+           font-weight: 600; font-size: 14px; border: 1px solid transparent;
+           cursor: pointer; font-family: inherit;
+           transition: background .12s, transform .12s; }
+    .btn-primary { background: var(--brand); color: var(--on-brand); }
+    .btn-primary:hover, .btn-primary:focus-visible {
+      background: var(--brand-deep);
+      outline: 2px solid var(--brand-mesh); outline-offset: 2px;
+    }
+    .btn-ghost { background: transparent; color: var(--text);
+                 border-color: var(--border); }
+    .btn-ghost:hover, .btn-ghost:focus-visible {
+      border-color: var(--brand); color: var(--brand);
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px 80px; }
+    .head { margin-bottom: 28px; display: flex; align-items: flex-end;
+            justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .crumb { font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+    .head h1 { font-family: 'Inter Tight', var(--font);
+               font-size: 36px; font-weight: 800; letter-spacing: -0.025em;
+               margin: 0; line-height: 1.1; }
+    .head p { color: var(--muted); margin: 6px 0 0; font-size: 15px; }
+    .head .actions { display: flex; gap: 10px; align-items: center; }
+
+    /* ── KPI strip ───────────────────────────────────────────── */
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 14px; margin-bottom: 28px; }
+    @media (max-width: 800px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+    .kpi { background: var(--surface); border: 1px solid var(--border);
+           border-radius: 10px; padding: 18px; }
+    .kpi .label { font-size: 11.5px; color: var(--muted);
+                  text-transform: uppercase; letter-spacing: 0.06em;
+                  margin: 0 0 8px; font-weight: 600; }
+    .kpi .num { font-family: 'Inter Tight', var(--font);
+                font-size: 30px; font-weight: 700; letter-spacing: -0.02em;
+                color: var(--text); line-height: 1; margin: 0; }
+    .kpi .sub { font-family: var(--mono); font-size: 11.5px;
+                color: var(--muted); margin-top: 6px; display: block; }
+
+    /* ── Filter bar ──────────────────────────────────────────── */
+    .filter-bar { display: flex; align-items: center; gap: 10px;
+                  margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-bar input {
+      flex: 1; min-width: 220px;
+      padding: 9px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); font-size: 14px; font-family: inherit;
+    }
+    .filter-bar input:focus-visible {
+      outline: 2px solid var(--brand); outline-offset: 0;
+      border-color: var(--brand);
+    }
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip { padding: 5px 12px; border-radius: 999px;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); font-size: 12.5px; font-weight: 500;
+            font-family: inherit; cursor: pointer;
+            transition: all .12s; }
+    .chip:hover, .chip:focus-visible { border-color: var(--brand);
+                                       color: var(--brand); outline: none; }
+    .chip.active { background: var(--brand); color: var(--on-brand);
+                   border-color: var(--brand); }
+    .chip .count { font-family: var(--mono); margin-left: 6px;
+                   opacity: 0.7; }
+
+    /* ── Project grid ────────────────────────────────────────── */
+    .project-grid { display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                    gap: 16px; }
+    .project { background: var(--surface); border: 1px solid var(--border);
+               border-radius: 12px; padding: 22px;
+               transition: border-color .15s, transform .15s, box-shadow .15s;
+               display: flex; flex-direction: column; gap: 12px;
+               cursor: pointer; }
+    .project:hover, .project:focus-visible {
+      border-color: var(--brand); transform: translateY(-2px);
+      box-shadow: var(--shadow-2); outline: none;
+    }
+    .project-head { display: flex; align-items: flex-start; gap: 12px; }
+    .project-icon { width: 40px; height: 40px; border-radius: 8px;
+                    background: var(--brand-bg-soft); color: var(--brand);
+                    display: grid; place-items: center; font-size: 18px;
+                    flex-shrink: 0; }
+    .project-body { flex: 1; min-width: 0; }
+    .project-label {
+      font-family: 'Inter Tight', var(--font);
+      font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+      color: var(--text); margin: 0 0 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .project-sub { font-size: 13px; color: var(--muted); margin: 0;
+                   font-family: var(--mono); }
+    .project-slug { font-family: var(--mono); font-size: 11px;
+                    color: var(--muted-2); word-break: break-all;
+                    padding: 6px 0; border-top: 1px solid var(--border);
+                    border-bottom: 1px solid var(--border); }
+    .project-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+    .project-stat { font-size: 12px; color: var(--muted); }
+    .project-stat strong { font-family: var(--mono); color: var(--text);
+                            font-weight: 600; display: block;
+                            font-size: 14px; }
+    .project-actions { display: flex; gap: 6px; margin-top: 4px; }
+    .project-actions button {
+      flex: 1; padding: 7px 10px; border-radius: 6px;
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); font-size: 12.5px;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .project-actions button.primary {
+      background: var(--brand); color: var(--on-brand);
+      border-color: var(--brand);
+    }
+    .project-actions button:hover, .project-actions button:focus-visible {
+      border-color: var(--brand);
+      outline: none;
+    }
+    .project-actions button.primary:hover,
+    .project-actions button.primary:focus-visible {
+      background: var(--brand-deep);
+      outline: 2px solid var(--brand-mesh); outline-offset: 2px;
+    }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .empty {
+      grid-column: 1 / -1;
+      padding: 56px 32px;
+      background: linear-gradient(135deg,
+        var(--brand-bg-soft) 0%, var(--surface) 100%);
+      border: 1px solid var(--border); border-radius: 14px;
+      text-align: center;
+    }
+    .empty .icon { font-size: 36px; opacity: 0.6; margin-bottom: 12px; }
+    .empty h3 { font-family: 'Inter Tight', var(--font);
+                font-size: 22px; font-weight: 700; letter-spacing: -0.015em;
+                margin: 0 0 8px; }
+    .empty p { color: var(--muted); max-width: 480px; margin: 0 auto 22px;
+               font-size: 14.5px; }
+    .empty .empty-actions { display: flex; gap: 10px; justify-content: center;
+                             flex-wrap: wrap; }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    .footer { border-top: 1px solid var(--border);
+              padding: 24px 0; margin-top: 64px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto;
+                    padding: 0 40px; font-size: 13px;
+                    color: var(--muted); text-align: center; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <!-- ── Nav ──────────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Primary">
+    <a href="/" class="brand-link" aria-label="Ontomesh — home">
+      <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
+           alt="Ontomesh" class="brand-wordmark"
+           width="180" height="40">
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="/help">Docs</a></li>
+      <li><a href="/projects" aria-current="page">Projects</a></li>
+      <li><a href="/wizard" class="btn btn-primary">Open the wizard →</a></li>
+    </ul>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <div class="wrap">
+
+      <!-- ── Header ─────────────────────────────────────────── -->
+      <header class="head">
+        <div>
+          <p class="crumb"><a href="/">Ontomesh</a> · Projects</p>
+          <h1>Your projects.</h1>
+          <p>Every ontology you've saved with Ontomesh.  Resume one with
+          a click — or start a fresh project from a sample domain.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-ghost" href="/help">Docs</a>
+          <a class="btn btn-primary" href="/wizard"
+             onclick="newProjectFromWizard()">
+            + New project
+          </a>
+        </div>
+      </header>
+
+      <!-- ── KPIs ───────────────────────────────────────────── -->
+      <div class="kpis" id="kpi-row" aria-live="polite">
+        <div class="kpi">
+          <p class="label">Projects</p>
+          <p class="num" id="kpi-count">—</p>
+          <span class="sub" id="kpi-count-sub">loading…</span>
+        </div>
+        <div class="kpi">
+          <p class="label">Latest update</p>
+          <p class="num" id="kpi-latest">—</p>
+          <span class="sub" id="kpi-latest-sub">loading…</span>
+        </div>
+        <div class="kpi">
+          <p class="label">Domains used</p>
+          <p class="num" id="kpi-domains">—</p>
+          <span class="sub" id="kpi-domains-sub">loading…</span>
+        </div>
+        <div class="kpi">
+          <p class="label">Products</p>
+          <p class="num" id="kpi-products">—</p>
+          <span class="sub" id="kpi-products-sub">loading…</span>
+        </div>
+      </div>
+
+      <!-- ── Filter ─────────────────────────────────────────── -->
+      <div class="filter-bar">
+        <input id="filter-input" type="search"
+               placeholder="Filter by name, domain, product, or slug…"
+               aria-label="Filter projects">
+        <div class="chip-row" id="domain-chips" role="group" aria-label="Filter by domain">
+          <button class="chip active" data-domain="" type="button">
+            All <span class="count" id="chip-all-count">·</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Project grid ───────────────────────────────────── -->
+      <div class="project-grid" id="project-grid" aria-live="polite">
+        <div class="empty">
+          <div class="icon">⏳</div>
+          <h3>Loading your projects…</h3>
+          <p>Hold on — fetching saved ontologies from the local store.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="/">← Back to home</a> ·
+      <a href="/wizard">Wizard</a> ·
+      <a href="/help">Docs</a>
+    </div>
+  </footer>
+
+  <script>
+    // ── State ────────────────────────────────────────────────
+    let _projects   = [];
+    let _filterText = "";
+    let _filterDomain = "";
+
+    function newProjectFromWizard() {
+      // Reset the onboarding dismissed flag so the welcome modal
+      // pops on the next /wizard load.  We don't navigate ourselves;
+      // the anchor's href handles it.
+      try { localStorage.removeItem('ontomesh.onboarding.dismissed.v1'); }
+      catch (_) {}
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return "";
+      return String(s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function fmtRelative(iso) {
+      if (!iso) return "—";
+      const t = new Date(iso).getTime();
+      if (isNaN(t)) return iso;
+      const diff = Date.now() - t;
+      const m = 60 * 1000, h = 60 * m, d = 24 * h;
+      if (diff < m)    return "just now";
+      if (diff < h)    return Math.floor(diff/m) + " min ago";
+      if (diff < d)    return Math.floor(diff/h) + " h ago";
+      if (diff < 7*d)  return Math.floor(diff/d) + " d ago";
+      if (diff < 30*d) return Math.floor(diff/(7*d)) + " w ago";
+      if (diff < 365*d) return Math.floor(diff/(30*d)) + " mo ago";
+      return Math.floor(diff/(365*d)) + " y ago";
+    }
+
+    const DOMAIN_ICON = {
+      telecom: "📡", healthcare: "🏥", finance: "💸",
+      manufacturing: "🏭", retail: "🛒",
+      energy_utilities: "⚡", government: "🏛",
+      insurance: "📋", logistics_supply_chain: "🚚",
+      pharmaceuticals: "💊",
+    };
+
+    // ── Load + render ─────────────────────────────────────────
+    async function loadProjects() {
+      try {
+        const r = await fetch("/api/ontologies");
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        _projects = (data.ontologies || []).slice();
+        // Sort most-recent first.
+        _projects.sort((a, b) => (b.updated_at || "").localeCompare(a.updated_at || ""));
+        renderKPIs();
+        renderDomainChips();
+        renderGrid();
+      } catch (e) {
+        document.getElementById("project-grid").innerHTML = `
+          <div class="empty">
+            <div class="icon">⚠</div>
+            <h3>Couldn't load projects.</h3>
+            <p>${escapeHtml(e.message || String(e))}</p>
+            <div class="empty-actions">
+              <button class="btn btn-primary" onclick="loadProjects()">Try again</button>
+            </div>
+          </div>`;
+      }
+    }
+
+    function renderKPIs() {
+      const total = _projects.length;
+      document.getElementById("kpi-count").textContent = total;
+      document.getElementById("kpi-count-sub").textContent =
+        total === 1 ? "one ontology" : "saved ontologies";
+
+      const latest = _projects[0];
+      document.getElementById("kpi-latest").textContent =
+        latest ? fmtRelative(latest.updated_at) : "—";
+      document.getElementById("kpi-latest-sub").textContent =
+        latest ? latest.label : "no projects yet";
+
+      const domains = [...new Set(_projects.map(p => p.domain).filter(Boolean))];
+      document.getElementById("kpi-domains").textContent = domains.length;
+      document.getElementById("kpi-domains-sub").textContent =
+        domains.slice(0, 3).map(d => d.replace(/_/g," ")).join(", ") || "—";
+
+      const products = [...new Set(_projects.map(p => p.product).filter(Boolean))];
+      document.getElementById("kpi-products").textContent = products.length;
+      document.getElementById("kpi-products-sub").textContent =
+        products.length === 1 ? "one product" : "distinct products";
+    }
+
+    function renderDomainChips() {
+      const chips = document.getElementById("domain-chips");
+      const counts = {};
+      for (const p of _projects) {
+        if (p.domain) counts[p.domain] = (counts[p.domain] || 0) + 1;
+      }
+      document.getElementById("chip-all-count").textContent = _projects.length;
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      for (const [name, count] of sorted) {
+        const btn = document.createElement("button");
+        btn.className = "chip";
+        btn.type = "button";
+        btn.dataset.domain = name;
+        btn.innerHTML = `${DOMAIN_ICON[name] || "📦"} ${escapeHtml(name.replace(/_/g," "))}` +
+                        ` <span class="count">${count}</span>`;
+        chips.appendChild(btn);
+      }
+      chips.addEventListener("click", e => {
+        const target = e.target.closest(".chip");
+        if (!target) return;
+        _filterDomain = target.dataset.domain;
+        chips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        target.classList.add("active");
+        renderGrid();
+      });
+    }
+
+    function filtered() {
+      const t = _filterText.toLowerCase();
+      return _projects.filter(p => {
+        if (_filterDomain && p.domain !== _filterDomain) return false;
+        if (!t) return true;
+        return ["label", "product", "domain", "slug"]
+                 .some(k => (p[k] || "").toString().toLowerCase().includes(t));
+      });
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById("project-grid");
+      const list = filtered();
+      if (!list.length) {
+        if (!_projects.length) {
+          // True empty state — no saved projects at all.
+          grid.innerHTML = `
+            <div class="empty">
+              <div class="icon">📋</div>
+              <h3>No projects yet.</h3>
+              <p>You haven't saved any ontologies yet.  Start a fresh
+              session, build something, then save it to the Library to
+              see it here.</p>
+              <div class="empty-actions">
+                <a class="btn btn-primary" href="/wizard"
+                   onclick="newProjectFromWizard()">
+                  + New project
+                </a>
+                <a class="btn btn-ghost" href="/help">Read the docs →</a>
+              </div>
+            </div>`;
+          return;
+        }
+        // Filtered to empty — softer message.
+        grid.innerHTML = `
+          <div class="empty">
+            <div class="icon">🔍</div>
+            <h3>No matches.</h3>
+            <p>Nothing matches your filter.  Clear the search box or
+            switch the domain chip to see everything.</p>
+          </div>`;
+        return;
+      }
+      grid.innerHTML = list.map(p => {
+        const icon = DOMAIN_ICON[p.domain] || "📦";
+        const updated = fmtRelative(p.updated_at);
+        const created = fmtRelative(p.created_at);
+        return `
+          <article class="project" tabindex="0"
+                   onclick="resumeProject('${escapeHtml(p.slug)}')">
+            <div class="project-head">
+              <div class="project-icon" aria-hidden="true">${icon}</div>
+              <div class="project-body">
+                <h3 class="project-label">${escapeHtml(p.label)}</h3>
+                <p class="project-sub">${escapeHtml(p.product)} · ${escapeHtml(p.domain)}</p>
+              </div>
+            </div>
+            <div class="project-slug">${escapeHtml(p.slug)}</div>
+            <div class="project-stats">
+              <div class="project-stat">
+                <strong>${updated}</strong>
+                last update
+              </div>
+              <div class="project-stat">
+                <strong>${created}</strong>
+                created
+              </div>
+            </div>
+            <div class="project-actions">
+              <button class="primary" type="button"
+                      onclick="event.stopPropagation(); resumeProject('${escapeHtml(p.slug)}')">
+                Resume →
+              </button>
+              <button type="button"
+                      onclick="event.stopPropagation(); deleteProject('${escapeHtml(p.slug)}', '${escapeHtml(p.label)}')">
+                Delete
+              </button>
+            </div>
+          </article>`;
+      }).join("");
+    }
+
+    async function resumeProject(slug) {
+      try {
+        const r = await fetch("/api/ontologies/" + encodeURIComponent(slug) + "/load",
+                              {method: "POST"});
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        // Reset the onboarding-dismissed flag is NOT what we want here —
+        // the session is now populated, so the modal would no-op anyway.
+        window.location.href = "/wizard?step=domain";
+      } catch (e) {
+        alert("Couldn't load that project: " + (e.message || e));
+      }
+    }
+
+    async function deleteProject(slug, label) {
+      if (!confirm('Delete "' + label + '"?\nThis can\'t be undone.')) return;
+      try {
+        const r = await fetch("/api/ontologies/" + encodeURIComponent(slug),
+                              {method: "DELETE"});
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        await loadProjects();
+      } catch (e) {
+        alert("Couldn't delete: " + (e.message || e));
+      }
+    }
+
+    // ── Wire ────────────────────────────────────────────────
+    document.getElementById("filter-input").addEventListener("input", e => {
+      _filterText = e.target.value;
+      renderGrid();
+    });
+    loadProjects();
+  </script>
+</body>
+</html>

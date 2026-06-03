@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <title>Ontomesh — the ontology mesh for GraphRAG</title>
+  <!-- Background: soft brand wash + subtle mesh dots -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#eef2ff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="40" height="40"
+             patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#cbd5e1" opacity="0.4"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Centred mark + wordmark + tagline -->
+  <g transform="translate(80 200)">
+    <!-- Mark (96px) -->
+    <g transform="scale(2)">
+      <g fill="none" stroke-linecap="round" stroke-width="2.5">
+        <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#4f46e5"/>
+        <path d="M12 12 L36 36" stroke="#4f46e5"/>
+        <path d="M36 12 L12 36" stroke="#06b6d4"/>
+      </g>
+      <g fill="#4f46e5">
+        <circle cx="12" cy="12" r="3.2"/>
+        <circle cx="36" cy="12" r="3.2"/>
+        <circle cx="12" cy="36" r="3.2"/>
+        <circle cx="36" cy="36" r="3.2"/>
+      </g>
+    </g>
+
+    <!-- Wordmark -->
+    <text x="120" y="76"
+          font-family="'Inter Tight', Inter, system-ui, sans-serif"
+          font-weight="800" font-size="96" letter-spacing="-3"
+          fill="#0f172a">
+      <tspan>onto</tspan><tspan fill="#4f46e5">mesh</tspan>
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="80" y="360"
+        font-family="'Inter Tight', Inter, system-ui, sans-serif"
+        font-weight="700" font-size="56" letter-spacing="-1.5"
+        fill="#0f172a">
+    The ontology mesh for GraphRAG.
+  </text>
+
+  <!-- Subtitle -->
+  <text x="80" y="430"
+        font-family="Inter, system-ui, sans-serif"
+        font-weight="500" font-size="28"
+        fill="#475569">
+    <tspan x="80" dy="0">Mine ontologies from your logs. Validate with SHACL.</tspan>
+    <tspan x="80" dy="40">Ship a hybrid retriever — without hand-crafting Turtle.</tspan>
+  </text>
+
+  <!-- Footer pill -->
+  <g transform="translate(80 540)">
+    <rect width="220" height="44" rx="22" fill="#4f46e5"/>
+    <text x="110" y="29" text-anchor="middle"
+          font-family="Inter, system-ui, sans-serif"
+          font-weight="600" font-size="16" fill="#ffffff">
+      ontomesh.dev
+    </text>
+  </g>
+</svg>

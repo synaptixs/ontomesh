@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ontology-toolkit"
-version = "3.4.0-dev"
-description = "Ontology Engineering Toolkit — DB → OWL → SHACL pipeline with runtime gates, drift monitoring, federation, and compliance."
+name = "ontomesh"
+version = "3.5.0-dev"
+description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Proprietary" }
@@ -118,6 +118,13 @@ all = [
 ]
 
 [project.scripts]
+# Canonical Ontomesh console scripts.  These are the entry points the
+# landing page and README promise; pip install -e . wires them up.
+ontomesh         = "ontomesh.cli:main"
+ontomesh-wizard  = "ontomesh.wizard_entry:main"
+ontomesh-onboard = "ontomesh.onboard_entry:main"
+# Legacy aliases kept for one release so existing automation and
+# documentation snippets keep working.
 ontology-toolkit = "toolkit:main"
 ontology-onboard = "onboard:main"
 
@@ -131,6 +138,7 @@ py-modules = ["toolkit", "onboard"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
+    "ontomesh*",
     "runtime*",
     "compliance*",
     "federation*",

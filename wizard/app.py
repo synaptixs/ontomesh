@@ -114,18 +114,109 @@ def _save_session(data: dict) -> None:
 # ── Routes ─────────────────────────────────────────────────────────────────
 
 @app.route("/")
-def index():
-    # render_template so {{ url_for('static', ...) }} in the
-    # template resolves to the Flask-served static path for the
-    # extracted CSS / JS modules. The previous send_from_directory
-    # would have returned the URL placeholders verbatim.
+def landing():
+    """P1.2 — Marketing landing page.
+
+    Before v3.5 the wizard chrome was served from ``/``.  Now the
+    root is a marketing surface (hero, value prop, how-it-works,
+    CTA) and the wizard lives at ``/wizard``.  Bookmarks that
+    deep-linked via ``/?step=X`` are forwarded to the wizard so
+    external docs and saved links don't break.
+
+    P1.2.5 — the card stats on the landing read from the actual
+    benchmark output at render time.  If ``benchmarks/last-run.json``
+    is missing or stale, the landing falls back to a "see how it
+    works" tagline instead of inventing numbers.
+    """
+    from flask import render_template, redirect, request
+    if request.args.get("step"):
+        return redirect("/wizard?" + request.query_string.decode("utf-8"), code=301)
+    bench = _load_benchmark()
+    return render_template("landing.html", bench=bench)
+
+
+def _load_benchmark() -> dict:
+    """Read ``benchmarks/last-run.json`` if present so the landing's
+    card stats stay grounded in real numbers.  Returns ``None`` when
+    no benchmark has been run yet — the template treats that as the
+    "show capability statements instead of numbers" case."""
+    path = os.path.join(ROOT, "benchmarks", "last-run.json")
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+        if not data.get("ok"):
+            return None
+        # Pretty-print 1429 -> "1,429".
+        data["owl_properties_human"] = f"{data.get('owl_properties', 0):,}"
+        return data
+    except (OSError, ValueError):
+        return None
+
+
+@app.route("/wizard")
+def wizard():
+    """The interactive wizard — what used to live at ``/``."""
     from flask import render_template
     return render_template("index.html")
+
+
+# ── P1.4 — Project dashboard ──────────────────────────────────────────
+
+
+@app.route("/projects")
+def projects():
+    """Standalone dashboard that lists every saved ontology with one-
+    click resume.  Lives outside the wizard chrome so a returning user
+    can jump straight from the marketing landing to "their work."
+    """
+    from flask import render_template
+    return render_template("projects.html")
+
+
+@app.route("/index")
+def _legacy_index():
+    """Redirect for legacy bookmarks that hit /index or /?step=...
+    Send them to the wizard so deep-linking from external docs still
+    works after the route reshuffle."""
+    from flask import redirect, request
+    qs = request.query_string.decode("utf-8")
+    target = "/wizard" + ("?" + qs if qs else "")
+    return redirect(target, code=301)
 
 
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "timestamp": _now()})
+
+
+# ── P1.1 — Branded error pages ────────────────────────────────────────
+
+
+@app.errorhandler(404)
+def _not_found(e):                                                  # noqa: ARG001
+    from flask import render_template as _rt                        # noqa: E402
+    return _rt(
+        "error.html",
+        code="404",
+        title="Page not found",
+        message="That page isn't here. Maybe it moved during the rename "
+                "to Ontomesh, or you followed a stale link.",
+    ), 404
+
+
+@app.errorhandler(500)
+def _server_error(e):                                               # noqa: ARG001
+    from flask import render_template as _rt                        # noqa: E402
+    return _rt(
+        "error.html",
+        code="500",
+        title="Something broke",
+        message="An unexpected error stopped the request. Check the "
+                "server logs, then try again — your session data is "
+                "intact.",
+    ), 500
 
 
 @app.route("/api/events/stream")
@@ -454,11 +545,34 @@ def list_templates():
         if n not in seen:
             out.append(n)
             seen.add(n)
-    # Apply user's landing-page visibility filter.
+    # P1.5.2 — Whitelist model.  Step 1's template grid now shows
+    # ONLY the domains the user has explicitly opted into via Settings,
+    # not "everything minus a hidden list."  Default = empty whitelist =
+    # nothing on Step 1 until the user picks.
+    #
+    # The legacy ``landing.hidden_domains`` key is still accepted on
+    # writes (for back-compat with older session DBs) but is no longer
+    # the source of truth on reads.
     prefs = _store.get_preferences(ONTOLOGIES_DB)
-    hidden = set(prefs.get("landing.hidden_domains") or [])
-    visible = [n for n in out if n not in hidden]
-    return jsonify({"templates": visible, "hidden": sorted(hidden), "all": out})
+    raw_visible = prefs.get("landing.visible_domains")
+    if raw_visible is None:
+        # No explicit whitelist yet — return an empty visible list so
+        # the wizard's Step 1 grid shows its "pick in Settings" empty
+        # state.  Brand-new sessions land here.
+        visible_set: set[str] = set()
+    else:
+        visible_set = set(raw_visible)
+    visible = [n for n in out if n in visible_set]
+    # We still echo the hidden list (= every template NOT in the
+    # whitelist) so existing UI code that reads it keeps working
+    # until it's migrated.
+    hidden = [n for n in out if n not in visible_set]
+    return jsonify({
+        "templates": visible,
+        "visible":   visible,           # canonical key going forward
+        "hidden":    sorted(hidden),    # legacy key
+        "all":       out,
+    })
 
 
 @app.route("/api/template/<name>", methods=["GET"])

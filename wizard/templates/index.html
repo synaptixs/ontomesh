@@ -3,13 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ontology Toolkit — Ontology Studio</title>
+  <title>Ontomesh — the ontology mesh for GraphRAG</title>
+  <meta name="description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.">
+  <!-- P1.1 — Brand: favicon + social cards. SVG favicon is rendered
+       by all modern browsers; legacy clients fall back to default. -->
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Ontomesh — the ontology mesh for GraphRAG">
+  <meta property="og:description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever.">
+  <meta property="og:image"       content="{{ url_for('static', filename='brand/og-card.svg') }}">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="Ontomesh — the ontology mesh for GraphRAG">
+  <meta name="twitter:description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever.">
+  <meta name="twitter:image"      content="{{ url_for('static', filename='brand/twitter-card.svg') }}">
   <!-- Inter and JetBrains Mono — modern sans + mono pair. Falls back to
        system font stack if the CDN is blocked. preconnect first to keep
        cold-load latency tight. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/wizard.css') }}">
   <!-- P0.1 — reusable proposal-card module. Bound to window.* so
@@ -33,9 +46,36 @@
       const msg = `Drift: ${e.metric} — ${e.message || 'threshold exceeded'}`;
       if (typeof showToast === 'function') showToast(msg);
     });
+    // P1.5 — surface the live state and event count in the sidebar
+    // footer pill so a user can see "the wizard is alive" at a glance.
+    const STATE_LABELS = { idle: 'offline', connecting: 'connecting',
+                           open: 'live', closed: 'reconnecting' };
+    function updateLivePill() {
+      const pill = document.getElementById('live-pill');
+      if (!pill) return;
+      pill.setAttribute('data-state', live.state);
+      const labelEl = pill.querySelector('.label');
+      if (labelEl) labelEl.textContent = STATE_LABELS[live.state] || live.state;
+      const statEl  = pill.querySelector('.stat strong');
+      if (statEl)  statEl.textContent = String(live.eventsReceived);
+    }
+    live.onStateChange(updateLivePill);
+    ['hello','metric','drift','status'].forEach(k => live.on(k, updateLivePill));
     // Defer start until after the rest of the page settles so the
     // hello packet doesn't race the toast helper's bootstrap.
-    window.addEventListener('DOMContentLoaded', () => live.start());
+    window.addEventListener('DOMContentLoaded', () => {
+      live.start();
+      updateLivePill();
+    });
+  </script>
+  <!-- P1.3 — first-run onboarding.  Shows a sample-project picker
+       when the wizard loads with an empty session.  Bound to
+       window.Onboarding so devs can force-show with
+       `Onboarding.showNow(...)` or reset with `Onboarding.reset()`. -->
+  <script type="module">
+    import { Onboarding }
+      from "{{ url_for('static', filename='js/components/onboarding.js') }}";
+    window.Onboarding = Onboarding;
   </script>
   <!-- vis-network: force-directed graph rendering for the Relationships > Graph tab.
        MIT-licensed, ~150 KB minified. Loaded from unpkg. If offline / CDN-blocked,
@@ -53,8 +93,13 @@
   <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
   <aside class="sidebar" aria-label="Pipeline phases">
     <div class="sidebar-logo">
-      <strong>Ontology Toolkit</strong>
-      <span>Ontology Studio · v3.0</span>
+      <a href="/" aria-label="Ontomesh — home" class="brand-link">
+        <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
+             alt="Ontomesh"
+             class="brand-wordmark"
+             width="180" height="40">
+        <span class="brand-version">v3.5</span>
+      </a>
     </div>
     <nav aria-label="Pipeline steps">
     <ul class="step-nav" id="step-nav" role="list">
@@ -79,6 +124,15 @@
     </ul>
     </nav>
     <div class="sidebar-footer">
+      <!-- P1.5 — Live SSE status pill.  Updated by the LiveEvents
+           component (P0.3) via onStateChange + per-kind handlers. -->
+      <div id="live-pill" class="live-pill" data-state="idle"
+           role="status" aria-live="polite"
+           title="Live event stream status">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="label">offline</span>
+        <span class="stat"><strong>0</strong> events</span>
+      </div>
       <div class="theme-picker" role="radiogroup" aria-label="Theme">
         <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
           <span class="theme-icon">☀</span><span>Light</span>
@@ -875,18 +929,42 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
     <!-- Settings: domain visibility + other prefs -->
     <div class="step-panel" id="step-settings">
       <div class="step-title">Settings</div>
-      <div class="step-subtitle">Customise which domain templates appear on the landing page.</div>
+      <div class="step-subtitle">Switch starting points · pick which domain templates appear on Step 1 · configure LLM providers.</div>
+
+      <!-- P1.5.1 — Switch starting point.  Re-opens the P1.3
+           onboarding modal so the user can pick a different
+           industry template at any time, not just on first run. -->
       <div class="card">
-        <h3>Domain visibility</h3>
+        <h3>Switch starting point</h3>
         <div class="box-help">
-          Uncheck a domain to hide it from the landing-page template grid.
-          Hidden domains can still be loaded directly via the API; this only
-          affects what the wizard suggests up front.
+          Re-open the welcome picker to load a different industry template.
+          The current session (entities, events, relationships, CQs) will be
+          <b>replaced</b> by the template you pick — save to Library first if
+          you want to keep it.
         </div>
-        <div id="settings-domains" style="display:flex; flex-direction:column; gap:6px; font-size:13px">Loading…</div>
-        <div style="margin-top:14px">
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="reopenOnboarding()">Open the starting-point picker →</button>
+          <button class="btn btn-ghost"   onclick="goStep('library')">Or load a saved ontology →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Domains to show on Step 1</h3>
+        <div class="box-help">
+          <b>Tick the domains you want</b> on the <b>Step 1 · Domain Identity</b>
+          template grid.  By default nothing is ticked — Step 1 stays clean
+          until you pick.  Unticked domains stay loadable any time via the
+          Switch-starting-point picker above and via
+          <code>GET /api/template/&lt;name&gt;</code>.  (This <em>does not</em>
+          affect the marketing landing page at <code>/</code>, which is brand
+          chrome only.)
+        </div>
+        <div id="settings-domains" style="display:flex; flex-direction:column; gap:6px; font-size:13px; margin-top:10px">Loading…</div>
+        <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
           <button class="btn btn-primary" onclick="saveDomainVisibility()">Save</button>
-          <span id="settings-status" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+          <button class="btn btn-ghost" onclick="pickAllDomains()" title="Tick every domain so all 10 show on Step 1">Pick all</button>
+          <button class="btn btn-ghost" onclick="clearDomainPicks()" title="Untick every domain so Step 1 stays clean">Clear</button>
+          <span id="settings-status" style="margin-left:6px;font-size:12px;color:var(--muted)"></span>
         </div>
       </div>
 
@@ -1606,6 +1684,32 @@ async function init() {
   loadTemplateList();
   _imSetupDropZone();
   render();
+  // P1.3 — show the onboarding picker when the session is empty,
+  // so a first-time visitor lands on something inviting instead of
+  // a blank Step 1. `Onboarding.maybeShow` no-ops if a session is
+  // already populated OR the user previously dismissed it.
+  if (window.Onboarding) {
+    window.Onboarding.maybeShow({
+      session,
+      onTemplatePicked: async (name) => {
+        const r = await fetch('/api/template/' + encodeURIComponent(name));
+        if (!r.ok) throw new Error('template load failed');
+        session = await r.json();
+        await reloadSessionAndRender();
+        // Land the user on Step 2 (Entities) — the first step
+        // where the template payload becomes visible.
+        goStep('entities');
+        if (typeof showToast === 'function') {
+          showToast('Loaded the ' + name + ' starter — edit any entity to make it yours.');
+        }
+      },
+      onSkip: () => {
+        if (typeof showToast === 'function') {
+          showToast('Starting blank — visit Library any time for a template.');
+        }
+      },
+    });
+  }
 }
 
 async function loadSession() {
@@ -1700,6 +1804,37 @@ async function loadTemplateList() {
     const r = await fetch('/api/templates');
     const data = await r.json();
     const grid = document.getElementById('template-grid');
+    // P1.5.2 — Whitelist model: if the user hasn't ticked any
+    // domains in Settings, the grid stays clean but invites them
+    // to either (a) ping Settings to pick what shows on Step 1, or
+    // (b) open the full catalogue via the welcome picker.
+    if (!data.templates || !data.templates.length) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1" role="status">
+          <div class="empty-state-icon" aria-hidden="true">📋</div>
+          <div>
+            <h4>No starter templates picked yet.</h4>
+            <p>
+              Step 1 shows whatever you tick in
+              <a href="#" onclick="goStep('settings');return false">
+                Settings &middot; Domains to show on Step 1
+              </a>.
+              Or open the full catalogue right now &mdash; it lists every
+              built-in industry and lets you load one in a click.
+            </p>
+            <div class="empty-state-actions">
+              <button class="primary"
+                      onclick="window.Onboarding && window.Onboarding.reset(); window.Onboarding && window.Onboarding.showNow({ onTemplatePicked: async (name) => { const r = await fetch('/api/template/'+encodeURIComponent(name)); session = await r.json(); await reloadSessionAndRender(); goStep('entities'); } });">
+                Open the welcome picker
+              </button>
+              <button onclick="goStep('settings')">
+                Configure Step 1 in Settings
+              </button>
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
     grid.innerHTML = data.templates.map(t => `
       <div class="template-card" onclick="loadTemplate('${t}')">
         <div class="t-icon">${TEMPLATE_ICONS[t]||'📋'}</div>
@@ -2520,11 +2655,59 @@ function removeEntity(i) {
   renderEntities();
 }
 
+// ── P1.5 — empty-state helper ────────────────────────────────────────
+// Renders an inviting empty-state card (icon · headline · description ·
+// 1-3 action buttons) used by renderEntities / renderEvents /
+// renderRelationships when their respective arrays are empty.  Bare
+// "No X yet." strings are PoC; this is a product affordance.
+const ENTITY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="3" width="7" height="7" rx="1"/>
+  <rect x="14" y="3" width="7" height="7" rx="1"/>
+  <rect x="3" y="14" width="7" height="7" rx="1"/>
+  <rect x="14" y="14" width="7" height="7" rx="1"/>
+</svg>`;
+const EVENT_ICON  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="9"/>
+  <path d="M12 7v5l3 2"/>
+</svg>`;
+const REL_ICON    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="5" cy="12" r="2.5"/>
+  <circle cx="19" cy="12" r="2.5"/>
+  <path d="M7.5 12h9"/>
+  <path d="M13 8.5l3.5 3.5-3.5 3.5"/>
+</svg>`;
+
+function renderEmptyState({icon, title, desc, actions = []}) {
+  const buttons = actions.map(a =>
+    `<button class="${a.primary ? 'primary' : ''}"
+             onclick="${a.onclick}">${a.label}</button>`).join('');
+  return `<div class="empty-state" role="status">
+            <div class="empty-state-icon" aria-hidden="true">${icon}</div>
+            <div>
+              <h4>${title}</h4>
+              <p>${desc}</p>
+              <div class="empty-state-actions">${buttons}</div>
+            </div>
+          </div>`;
+}
+
 function renderEntities() {
   const list = document.getElementById('entity-list');
   document.getElementById('entity-count').textContent = `(${session.entities.length})`;
   if (!session.entities.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No entities yet. Click + Add Entity.</div>';
+    list.innerHTML = renderEmptyState({
+      icon: ENTITY_ICON,
+      title: 'No entities yet.',
+      desc:  'Entities are the nouns of your ontology — Customer, Order, Payment. Pick a starter template, import a JSON Schema or SQL DDL, or add your first manually.',
+      actions: [
+        { label: '+ Add entity',     onclick: 'openEntityModal()', primary: true },
+        { label: 'Import a schema',  onclick: 'document.querySelector(\'#im-drop\')?.scrollIntoView({behavior:\'smooth\'})' },
+        { label: 'Browse templates', onclick: 'window.Onboarding && window.Onboarding.showNow({onTemplatePicked: async (name) => { const r = await fetch(\'/api/template/\'+encodeURIComponent(name)); session = await r.json(); await reloadSessionAndRender(); goStep(\'entities\'); }})' },
+      ],
+    });
     return;
   }
   list.innerHTML = session.entities.map((e,i) => `
@@ -2575,7 +2758,15 @@ function renderEvents() {
   const list = document.getElementById('event-list');
   document.getElementById('event-count').textContent = `(${session.events.length})`;
   if (!session.events.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No events yet.</div>';
+    list.innerHTML = renderEmptyState({
+      icon: EVENT_ICON,
+      title: 'No events yet.',
+      desc:  'Events are the verbs of your ontology — orders placed, sessions started, alarms tripped. Modelling them as named events unlocks causal DAGs and rate-anomaly detection downstream.',
+      actions: [
+        { label: '+ Add event',     onclick: 'openEventModal()', primary: true },
+        { label: 'Import from logs', onclick: 'goStep(\'log-discovery\')' },
+      ],
+    });
     return;
   }
   list.innerHTML = session.events.map((e,i) => `
@@ -2613,7 +2804,14 @@ function renderRelationships() {
   const list = document.getElementById('rel-list');
   document.getElementById('rel-count').textContent = `(${session.relationships.length})`;
   if (!session.relationships.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0 4px">No relationships yet.</div>';
+    list.innerHTML = renderEmptyState({
+      icon: REL_ICON,
+      title: 'No relationships yet.',
+      desc:  'Relationships are typed edges between entities — hasCustomer, placedBy, owns. They turn a flat list of classes into a graph and drive every SPARQL query downstream.',
+      actions: [
+        { label: '+ Add relationship', onclick: 'addRelationship()', primary: true },
+      ],
+    });
   } else {
     list.innerHTML = session.relationships.map((r,i) => {
       const display = (typeof r === 'string') ? r
@@ -5626,10 +5824,12 @@ async function refreshSettings() {
   const tmpl = await tmplRes.json();
   const prefs = await prefRes.json();
   const all = tmpl.all || tmpl.templates || [];
-  const hidden = new Set(prefs['landing.hidden_domains'] || []);
+  // P1.5.2 — Whitelist model. Boxes are *unchecked* by default;
+  // the user ticks the ones they want to see on Step 1.
+  const visible = new Set(prefs['landing.visible_domains'] || []);
   el.innerHTML = all.map(name => `
     <label style="display:flex;align-items:center;gap:8px">
-      <input type="checkbox" data-domain="${name}" ${hidden.has(name) ? '' : 'checked'}>
+      <input type="checkbox" data-domain="${name}" ${visible.has(name) ? 'checked' : ''}>
       <span>${name.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
       <span style="color:var(--muted);font-size:11px">(${name})</span>
     </label>`).join('');
@@ -5637,19 +5837,67 @@ async function refreshSettings() {
 
 async function saveDomainVisibility() {
   const boxes = document.querySelectorAll('#settings-domains input[type=checkbox]');
-  const hidden = Array.from(boxes).filter(b => !b.checked).map(b => b.dataset.domain);
+  // P1.5.2 — Whitelist: persist the names the user *ticked*.
+  const visible = Array.from(boxes).filter(b => b.checked).map(b => b.dataset.domain);
   const r = await fetch('/api/preferences', {
     method:'PUT',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ 'landing.hidden_domains': hidden }),
+    body: JSON.stringify({
+      'landing.visible_domains': visible,
+      // Clear the legacy blacklist so it can never override the
+      // whitelist on subsequent reads (back-compat is one-way).
+      'landing.hidden_domains':  [],
+    }),
   });
   if (r.ok) {
     document.getElementById('settings-status').textContent = '✓ Saved';
     setTimeout(() => document.getElementById('settings-status').textContent = '', 2000);
-    loadTemplateList();   // landing grid reflects the change immediately
+    loadTemplateList();   // Step 1 grid reflects the change immediately
   } else {
     document.getElementById('settings-status').textContent = 'Save failed';
   }
+}
+
+// P1.5.2 — Whitelist convenience: tick every domain.
+async function pickAllDomains() {
+  document.querySelectorAll('#settings-domains input[type=checkbox]')
+          .forEach(cb => { cb.checked = true; });
+  await saveDomainVisibility();
+  document.getElementById('settings-status').textContent = '✓ All 10 domains will show on Step 1';
+  setTimeout(() => document.getElementById('settings-status').textContent = '', 3000);
+}
+
+// P1.5.2 — Whitelist convenience: untick every domain so Step 1
+// stays clean and only the Switch-starting-point picker shows the
+// catalogue.
+async function clearDomainPicks() {
+  document.querySelectorAll('#settings-domains input[type=checkbox]')
+          .forEach(cb => { cb.checked = false; });
+  await saveDomainVisibility();
+  document.getElementById('settings-status').textContent = '✓ Step 1 grid cleared';
+  setTimeout(() => document.getElementById('settings-status').textContent = '', 3000);
+}
+
+// P1.5.1 — re-open the P1.3 first-run picker on demand.  Clears the
+// "dismissed" flag, force-shows the modal, and on template-pick
+// applies it to the current session and lands the user on Entities.
+function reopenOnboarding() {
+  if (!window.Onboarding) {
+    showToast('Onboarding module not loaded — refresh and try again.');
+    return;
+  }
+  window.Onboarding.reset();
+  window.Onboarding.showNow({
+    onTemplatePicked: async (name) => {
+      const r = await fetch('/api/template/' + encodeURIComponent(name));
+      if (!r.ok) throw new Error('template load failed');
+      session = await r.json();
+      await reloadSessionAndRender();
+      goStep('entities');
+      showToast('Loaded the ' + name.replace(/_/g, ' ') + ' starter.');
+    },
+    onSkip: () => showToast('Cancelled — current session unchanged.'),
+  });
 }
 
 // ── Phase E — LLM Providers panel + Insights ask ─────────────────────────
