@@ -94,6 +94,8 @@ wizard   = [
     "sqlglot>=25.0",
     "jsonschema>=4.20",
     "gunicorn>=22.0.0",
+    # P3.4 — structured JSON logging + request-id correlation.
+    "python-json-logger>=3.2.0",
 ]
 discover = ["spacy>=3.7.4"]
 neptune  = ["boto3>=1.35.0"]
