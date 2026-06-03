@@ -77,11 +77,12 @@ def test_dockerfile_has_healthcheck(df_text):
     # any commentary that mentions the word.
     m = re.search(r"^HEALTHCHECK\b.*", df_text, re.MULTILINE)
     assert m, "no HEALTHCHECK directive"
-    # The directive continues onto the next CMD line via backslash;
-    # capture both.
     after = df_text[m.start():]
     head  = "\n".join(after.splitlines()[:4])
-    assert "/health" in head
+    # P3.3 — Dockerfile probe moved from /health to the cheaper /live;
+    # /health stays as a back-compat alias so older monitors don't
+    # break.  Either is acceptable here.
+    assert "/live" in head or "/health" in head
     assert "curl" in head
 
 
