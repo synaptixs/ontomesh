@@ -162,6 +162,19 @@ def wizard():
     return render_template("index.html")
 
 
+# ── P1.4 — Project dashboard ──────────────────────────────────────────
+
+
+@app.route("/projects")
+def projects():
+    """Standalone dashboard that lists every saved ontology with one-
+    click resume.  Lives outside the wizard chrome so a returning user
+    can jump straight from the marketing landing to "their work."
+    """
+    from flask import render_template
+    return render_template("projects.html")
+
+
 @app.route("/index")
 def _legacy_index():
     """Redirect for legacy bookmarks that hit /index or /?step=...
