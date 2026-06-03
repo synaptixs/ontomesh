@@ -1,0 +1,34 @@
+# CQ-EVO-05 — Does every proposal carry a non-empty evidence SPARQL query?
+# ─────────────────────────────────────────────────────────────────────────
+# Validates that every evolution proposal — no matter the detection
+# strategy or current status — carries an executable SPARQL query that
+# can, in principle, surface at least one row of evidence.  Proposals
+# without evidence cannot be reviewed and must never be APPROVED.
+#
+# Pass condition: every proposal row has a non-empty evidence_sparql and
+# a recognised detection_strategy.
+#
+# Priority: High
+# Validates: Workstream 2 — proposal-store integrity
+# Expected: may be empty
+# Bound variables: ?proposal ?strategy ?sparql
+
+PREFIX evo: <https://ontology.example.com/evolution/>
+
+SELECT ?proposal ?strategy ?sparql
+WHERE {
+    ?proposal a evo:EvolutionProposal ;
+              evo:detectionStrategy ?strategy ;
+              evo:evidenceSparql    ?sparql .
+
+    FILTER (
+        STRLEN(STR(?sparql)) < 10 ||
+        ?strategy NOT IN (
+            "SHACL_VIOLATION_ACCUMULATION",
+            "CARDINALITY_BREACH",
+            "CLASS_COOCCURRENCE",
+            "NLP_CANDIDATE_PROMOTION"
+        )
+    )
+}
+LIMIT 20

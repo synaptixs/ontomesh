@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ontomesh — the ontology mesh for GraphRAG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.">
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Ontomesh — the ontology mesh for GraphRAG">
+  <meta property="og:description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever.">
+  <meta property="og:image"       content="{{ url_for('static', filename='brand/og-card.svg') }}">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="Ontomesh — the ontology mesh for GraphRAG">
+  <meta name="twitter:description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever.">
+  <meta name="twitter:image"      content="{{ url_for('static', filename='brand/twitter-card.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body data-theme="light">
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Primary">
+    <a href="/" class="brand-link" aria-label="Ontomesh — home">
+      <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
+           alt="Ontomesh" class="brand-wordmark"
+           width="180" height="40">
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="/projects">Projects</a></li>
+      <li><a href="/help">Docs</a></li>
+      <li><a href="https://github.com/nrohilla-fibonacci/ontology"
+             rel="noopener" target="_blank">GitHub</a></li>
+      <li><a href="/wizard" class="btn btn-primary">Open the wizard →</a></li>
+    </ul>
+  </nav>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ── Hero ──────────────────────────────────────────────────── -->
+    <section class="hero" aria-labelledby="hero-h">
+      <div class="hero-inner">
+        <p class="kicker">
+          <span class="kicker-dot" aria-hidden="true"></span>
+          v3.6 · Ontology mining · SHACL · GraphRAG retrieval · Docker
+        </p>
+        <h1 id="hero-h">
+          The ontology mesh<br>
+          for <span class="grad">GraphRAG.</span>
+        </h1>
+        <p class="sub">
+          Generate production-ready OWL 2 ontologies + SHACL shapes
+          from your relational schema or your logs &mdash; with materialised
+          inference, full <code>prov:wasDerivedFrom</code> lineage, and
+          a wizard that puts every candidate in front of you for review.
+        </p>
+        <div class="cta-row">
+          <a href="/wizard" class="btn btn-primary btn-lg">
+            Open the wizard
+            <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14">
+              <path d="M5 3l5 5-5 5" stroke="currentColor" stroke-width="2"
+                    fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <code class="install">
+            <span class="prompt">$</span>
+            git clone … &amp;&amp; pip install -e .
+            <button class="copy" type="button"
+                    aria-label="Copy install command"
+                    onclick="navigator.clipboard.writeText('git clone https://github.com/nrohilla-fibonacci/ontology.git && cd ontology && pip install -e .')">
+              copy
+            </button>
+          </code>
+        </div>
+        <p class="install-note">
+          Currently source-install only.
+          <code>pip install ontomesh</code> from PyPI lands in v3.6.
+        </p>
+      </div>
+      <!-- Hero illustration: stylized mesh with floating nodes -->
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 400 400" width="100%" height="100%">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#4f46e5" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="200" cy="200" r="180" fill="url(#glow)"/>
+          <!-- A larger mesh: 7 nodes with crossing threads -->
+          <g fill="none" stroke-width="1.5" stroke-linecap="round">
+            <!-- Outer ring threads -->
+            <path d="M120 80 L280 80 L340 200 L280 320 L120 320 L60 200 Z"
+                  stroke="#4f46e5" stroke-opacity="0.45"/>
+            <!-- Cyan threads through the centre -->
+            <path d="M120 80 L280 320" stroke="#06b6d4" stroke-opacity="0.55" stroke-width="2"/>
+            <path d="M280 80 L120 320" stroke="#06b6d4" stroke-opacity="0.55" stroke-width="2"/>
+            <path d="M60 200 L340 200" stroke="#4f46e5" stroke-opacity="0.35"/>
+            <!-- Centre connections -->
+            <path d="M200 200 L120 80" stroke="#4f46e5" stroke-opacity="0.4"/>
+            <path d="M200 200 L280 80" stroke="#4f46e5" stroke-opacity="0.4"/>
+            <path d="M200 200 L340 200" stroke="#4f46e5" stroke-opacity="0.4"/>
+            <path d="M200 200 L280 320" stroke="#4f46e5" stroke-opacity="0.4"/>
+            <path d="M200 200 L120 320" stroke="#4f46e5" stroke-opacity="0.4"/>
+            <path d="M200 200 L60 200" stroke="#4f46e5" stroke-opacity="0.4"/>
+          </g>
+          <!-- Nodes -->
+          <g fill="#4f46e5">
+            <circle cx="120" cy="80"  r="7"/>
+            <circle cx="280" cy="80"  r="7"/>
+            <circle cx="340" cy="200" r="7"/>
+            <circle cx="280" cy="320" r="7"/>
+            <circle cx="120" cy="320" r="7"/>
+            <circle cx="60"  cy="200" r="7"/>
+          </g>
+          <!-- Center node -->
+          <circle cx="200" cy="200" r="11" fill="#06b6d4"/>
+          <circle cx="200" cy="200" r="20" fill="none"
+                  stroke="#06b6d4" stroke-opacity="0.35" stroke-width="2"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ── Logos / trust strip (lightweight social proof) ──────── -->
+    <section class="trust" aria-label="Stack">
+      <p class="trust-label">Built on open standards</p>
+      <ul class="trust-row" role="list">
+        <li><code>OWL 2</code></li>
+        <li><code>SHACL</code></li>
+        <li><code>SPARQL</code></li>
+        <li><code>JSON-LD</code></li>
+        <li><code>SKOS</code></li>
+        <li><code>Datalog (Rulewerk)</code></li>
+        <li><code>SQLite / Postgres / MySQL</code></li>
+      </ul>
+    </section>
+
+    <!-- ── What you can build ──────────────────────────────────── -->
+    <section class="cards" aria-labelledby="build-h">
+      <header class="section-head">
+        <p class="eyebrow">What you can build</p>
+        <h2 id="build-h">Three things you'd otherwise hand-craft for months.</h2>
+      </header>
+      <div class="card-grid">
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                 stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+              <path d="M3 12l9 4 9-4"/>
+              <path d="M3 17l9 4 9-4"/>
+            </svg>
+          </div>
+          <h3>Generate a full ontology from a database schema.</h3>
+          <p>Point Ontomesh at a relational database. The headless
+          pipeline introspects the schema, lifts it through OWL 2 /
+          SHACL / JSON-LD / SKOS, runs the reasoner, and produces a
+          materialised artifact bundle with full
+          <code>prov:wasDerivedFrom</code> lineage.</p>
+          <p class="stat" data-bench>
+            {% if bench %}
+            <span>{{ bench.db_size_human }} DB</span> ·
+            <span>{{ bench.elapsed_human }}</span> ·
+            <span>{{ bench.owl_classes }} classes,
+                  {{ bench.owl_properties_human }} properties</span>
+            {% else %}
+            <span>OWL 2</span> · <span>SHACL</span> ·
+            <span>JSON-LD</span> · <span>SKOS</span>
+            {% endif %}
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                 stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3 8-8"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <h3>Validate with SHACL. Reason with Datalog.</h3>
+          <p>Shapes catch data-quality issues before they hit
+          production. Datalog rules derive new facts with full
+          <code>prov:wasDerivedFrom</code> lineage. Every reasoner run
+          emits a materialisation report you can diff against the
+          last release.</p>
+          <p class="stat" data-bench>
+            {% if bench %}<span>{{ bench.shacl_shapes }} SHACL shapes</span>
+            {% else %}<span>SHACL 1.1</span>{% endif %} ·
+            <span>SWRL</span> ·
+            <span>Datalog (Rulewerk)</span>
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                 stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
+            </svg>
+          </div>
+          <h3>Mine candidates from raw logs.</h3>
+          <p>Log Discovery (phases L4&ndash;L13) mines templates with
+          online clustering, surfaces candidate entities / events /
+          relationships from co-occurrence (PMI), fits per-service
+          HMMs for anomalies, and gates causal edges with Granger /
+          transfer-entropy. You review one candidate at a time in
+          the wizard.</p>
+          <p class="stat">
+            <span>L4 templates</span> · <span>L8 regimes</span> ·
+            <span>L11 causal DAG</span> · <span>L13 rate anomalies</span>
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── How it works ────────────────────────────────────────── -->
+    <section class="howto" aria-labelledby="how-h">
+      <header class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2 id="how-h">From raw signal to graph-grounded RAG, in three steps.</h2>
+      </header>
+      <ol class="steps" role="list">
+        <li>
+          <span class="step-n">1</span>
+          <h3>Discover</h3>
+          <p>Point Ontomesh at logs or a database schema. The
+          discovery pipeline (phases L1–L13) surfaces entity /
+          event / relationship candidates with confidence,
+          provenance, and a one-click accept.</p>
+        </li>
+        <li class="arrow" aria-hidden="true">→</li>
+        <li>
+          <span class="step-n">2</span>
+          <h3>Model &amp; validate</h3>
+          <p>Add SHACL shapes and SWRL / Datalog rules. The
+          reasoner materialises derived triples with lineage; the
+          competency-question runner gives you regression coverage
+          as you iterate.</p>
+        </li>
+        <li class="arrow" aria-hidden="true">→</li>
+        <li>
+          <span class="step-n">3</span>
+          <h3>Generate &amp; ship</h3>
+          <p>One click emits an artifact bundle — OWL Turtle, SHACL,
+          JSON-LD, pydantic / TypeScript bindings — plus a hybrid
+          retriever ready to drop into your RAG stack.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ── Code snippet ────────────────────────────────────────── -->
+    <section class="snippet" aria-labelledby="snip-h">
+      <header class="section-head">
+        <p class="eyebrow">Get started</p>
+        <h2 id="snip-h">One command, a full ontology bundle.</h2>
+      </header>
+      <pre class="code"><span class="c"># 1. Install (PyPI publish lands in v3.6 — for now, source install)</span>
+git clone https://github.com/nrohilla-fibonacci/ontology.git
+<span class="kw">cd</span> ontology &amp;&amp; pip install -e .
+
+<span class="c"># 2. Generate the full OWL / SHACL / JSON-LD bundle from a SQLite DB</span>
+<span class="kw">ontomesh</span> --db db/demo.db --out ./output
+
+<span class="c"># 3. Or launch the interactive wizard at http://localhost:5051</span>
+<span class="kw">ontomesh-wizard</span> --port 5051
+
+<span class="c"># 4. Mine candidates from raw logs (phases L4–L13)</span>
+<span class="kw">ontomesh</span> --phase log --db db/demo.db --out ./output</pre>
+      <p class="alt-cta">
+        Prefer to point and click?
+        <a href="/wizard">Open the wizard →</a>
+      </p>
+    </section>
+
+    <!-- ── Final CTA ───────────────────────────────────────────── -->
+    <section class="end-cta" aria-labelledby="end-h">
+      <h2 id="end-h">Stop hand-crafting ontologies for your RAG stack.</h2>
+      <p>Open the wizard, load a sample domain (telecom, healthcare,
+      e-commerce), and watch a real ontology + retriever fall out the
+      other end in under a minute.</p>
+      <a href="/wizard" class="btn btn-primary btn-lg">
+        Open the wizard →
+      </a>
+    </section>
+  </main>
+
+  <!-- ── Footer ───────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <img src="{{ url_for('static', filename='brand/ontomesh-mark.svg') }}"
+           alt="" class="footer-mark" aria-hidden="true"
+           width="32" height="32">
+      <p>Ontomesh v3.6 · Built for data &amp; ML engineers building GraphRAG.</p>
+      <ul role="list">
+        <li><a href="/wizard">Wizard</a></li>
+        <li><a href="/help">Docs</a></li>
+        <li><a href="https://github.com/nrohilla-fibonacci/ontology"
+               rel="noopener" target="_blank">GitHub</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

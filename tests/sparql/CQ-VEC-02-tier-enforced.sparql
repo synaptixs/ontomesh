@@ -1,0 +1,33 @@
+# CQ-VEC-02 — Does any hybrid retrieval hit leak a Restricted-tier record
+#             to a flavor that is not authorised to read Restricted data?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 5 gate: the OWL class filter is mandatory, but the
+# sensitivity-tier filter is absolute.  A query log row that
+# returned Restricted-tier results for a flavor whose
+# ``max_readable_tier`` is less than Restricted is a boundary
+# violation and must escalate as a NEW_CONSTRAINT evolution
+# proposal (reuses the Workstream 3 boundary pattern).
+#
+# Pass condition: the result set is empty — no log entry shows a
+# Restricted-tier hit returned to a non-Restricted-capable flavor.
+#
+# Priority: Critical
+# Validates: Workstream 5 — sensitivity-tier enforcement at retrieval
+# Expected: empty
+# Bound variables: ?query ?flavor ?tier
+
+PREFIX vec: <https://ontology.example.com/vector/>
+
+SELECT ?query ?flavor ?tier
+WHERE {
+    ?query a vec:QueryLog ;
+           vec:flavor ?flavor ;
+           vec:returnedTier ?tier .
+
+    FILTER (?tier = "Restricted")
+
+    FILTER NOT EXISTS {
+        ?flavor vec:maxReadableTier "Restricted" .
+    }
+}
+LIMIT 20

@@ -1,0 +1,22 @@
+# Ontology Engineering Toolkit — Python dependencies (everything)
+#
+# This file pulls every dependency the toolkit can use, across all tiers.
+# For most projects you do NOT need this — install only the tiers you use:
+#
+#   pip install -r requirements-core.txt        # phases 1–5, tmf, test, report (~50 MB)
+#   pip install -r requirements-db.txt          # non-SQLite database drivers
+#   pip install -r requirements-runtime.txt     # LLM adapters (Anthropic / OpenAI / Vertex / OCI)
+#   pip install -r requirements-drift.txt       # drift_monitor (infodrift) integration
+#   pip install -r requirements-advanced.txt    # spaCy, Flask wizard, Neptune, sqlglot (#16)
+#
+# pip-install via wheel is also available — see install.md and pyproject.toml.
+
+-r requirements-core.txt
+-r requirements-db.txt
+-r requirements-runtime.txt
+-r requirements-drift.txt
+-r requirements-advanced.txt
+
+# CI / testing — kept here so a single `pip install -r requirements.txt`
+# in CI gets the test runner without an extras flag.
+pytest>=8.2.2

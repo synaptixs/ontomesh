@@ -25,5 +25,23 @@
   },
   "db_tables": ["tmf_alarm", "tmf_trouble_ticket", "tmf_service_quality_report"],
   "system_prompt_hint": "You are a fault management AI assistant. Focus on active alarms, open trouble tickets, SLA violation flags, and service quality degradation. Escalate Critical alarms and SLA-breaching tickets immediately. Use TMF642 and TMF621 terminology.",
-  "cq_ids": ["CQ-TMF10", "CQ-TMF11", "CQ-TMF12"]
+  "cq_ids": ["CQ-TMF10", "CQ-TMF11", "CQ-TMF12"],
+  "memory_sharing": {
+    "can_read_from": ["network-ops", "fault-management"],
+    "can_be_read_by": ["network-ops", "compliance", "fault-management"],
+    "max_readable_tier": "Internal",
+    "prov_influence_enabled": true,
+    "sharing_note": "Fault-management observations are shared with network-ops for resource correlation and with compliance for SLA evidence. Can read network-ops observations for alarm root-cause analysis."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://fault-management",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/Alarm",
+      "https://ontology.example.com/tmf/TroubleTicket",
+      "https://ontology.example.com/tmf/ServiceQualityReport"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Internal"
+  }
 }

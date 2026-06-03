@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ code }} {{ title }} — Ontomesh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/tokens.css') }}">
+  <style>
+    body {
+      margin: 0; min-height: 100vh;
+      display: grid; place-items: center;
+      font-family: var(--font);
+      background: var(--bg); color: var(--text);
+      line-height: 1.6;
+    }
+    .err {
+      max-width: 480px; padding: 40px 32px; text-align: center;
+    }
+    .err img { width: 64px; height: 64px; margin: 0 auto 24px; display: block; }
+    .err .code {
+      font-family: var(--mono);
+      font-size: 13px; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .err h1 {
+      font-family: 'Inter Tight', var(--font);
+      font-size: 32px; line-height: 1.2; margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+    .err p { color: var(--muted); margin: 0 0 28px; }
+    .err a.cta {
+      display: inline-block;
+      padding: 10px 18px; border-radius: var(--radius-sm);
+      background: var(--brand); color: var(--on-brand);
+      text-decoration: none; font-weight: 600; font-size: 14px;
+    }
+    .err a.cta:hover, .err a.cta:focus-visible {
+      background: var(--brand-deep);
+      outline: 2px solid var(--brand-mesh);
+      outline-offset: 2px;
+    }
+    .err .alt {
+      display: block; margin-top: 16px;
+      color: var(--muted-2); font-size: 13px;
+    }
+    .err .alt a { color: var(--brand); }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="err" role="alert" aria-live="polite">
+    <img src="{{ url_for('static', filename='brand/ontomesh-mark.svg') }}"
+         alt="" aria-hidden="true">
+    <div class="code">{{ code }}</div>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <a class="cta" href="/">Back to Ontomesh</a>
+    <span class="alt">
+      Or jump straight to <a href="/wizard">the wizard</a>
+      &middot; <a href="/help">help</a>
+    </span>
+  </div>
+</body>
+</html>

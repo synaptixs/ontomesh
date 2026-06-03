@@ -1,0 +1,52 @@
+# TQ-04 — Temporal diff between two agent observations on the same subject
+# ─────────────────────────────────────────────────────────────────────────
+# Finds observations made by two different agent flavors on the same entity
+# within a given time range, highlighting where they disagreed.
+# Emits prov:wasInfluencedBy links for the agent influence graph.
+#
+# Parameters:
+#   {{AGENT_A}}         — first agent flavor IRI fragment, e.g. "network-ops"
+#   {{AGENT_B}}         — second agent flavor IRI fragment, e.g. "fault-management"
+#   {{WINDOW_START}}    — ISO 8601 datetime
+#   {{WINDOW_END}}      — ISO 8601 datetime
+#
+# Returns: entity, agent_a record, agent_b record, and a disagreement flag.
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?entity
+       ?recA ?genA ?valA
+       ?recB ?genB ?valB
+       (IF(?valA != ?valB, "DISAGREE", "AGREE") AS ?verdict)
+WHERE {
+    # Agent A observation
+    ?recA a tmf:ObservationRecord ;
+          tmf:entity_iri       ?entity ;
+          tmf:value_text       ?valA ;
+          prov:generatedAtTime ?genA ;
+          tmf:source_ref       ?srcA .
+
+    # Agent B observation on the same entity
+    ?recB a tmf:ObservationRecord ;
+          tmf:entity_iri       ?entity ;
+          tmf:value_text       ?valB ;
+          prov:generatedAtTime ?genB ;
+          tmf:source_ref       ?srcB .
+
+    FILTER (?recA != ?recB)
+
+    FILTER (CONTAINS(STR(?srcA), "{{AGENT_A}}"))
+    FILTER (CONTAINS(STR(?srcB), "{{AGENT_B}}"))
+
+    # Time window
+    FILTER (?genA >= "{{WINDOW_START}}"^^xsd:dateTime)
+    FILTER (?genA <= "{{WINDOW_END}}"^^xsd:dateTime)
+    FILTER (?genB >= "{{WINDOW_START}}"^^xsd:dateTime)
+    FILTER (?genB <= "{{WINDOW_END}}"^^xsd:dateTime)
+
+    FILTER NOT EXISTS { ?recA prov:wasInvalidatedBy ?x }
+    FILTER NOT EXISTS { ?recB prov:wasInvalidatedBy ?y }
+}
+ORDER BY ?entity DESC(?genA)

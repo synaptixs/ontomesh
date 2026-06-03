@@ -1,0 +1,64 @@
+{
+  "regulation_id": "eu-ai-act",
+  "name": "EU AI Act \u2014 Article 13 (Transparency and Provision of Information)",
+  "short_name": "EU AI Act Art. 13",
+  "jurisdiction": "European Union",
+  "effective_date": "2026-08-02",
+  "last_verified_date": "2026-04-01",
+  "regulatory_source_url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+  "scope": "High-risk AI systems placed on the EU market",
+  "applies_to": [
+    "all"
+  ],
+  "summary": "High-risk AI systems must be designed so that their operation is sufficiently transparent to enable deployers to interpret and use the system output, including a complete description of model provenance, input data, decision logic, and confidence scoring.",
+  "requirements": [
+    {
+      "req_id": "EU-AIA-13-1",
+      "title": "Intended purpose and capability disclosure",
+      "description": "The AI system must carry machine-readable metadata declaring its intended purpose, capabilities, and known limitations.",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Exchange readiness",
+      "pass_expression": "score >= 3"
+    },
+    {
+      "req_id": "EU-AIA-13-2",
+      "title": "Provenance of training and operational data",
+      "description": "Every AI decision must be traceable to input data with full PROV-O provenance, including agent attribution and derivation method.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-004",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "EU-AIA-13-3",
+      "title": "Confidence scoring and derivation transparency",
+      "description": "Each AI output must carry a confidence score and derivation method that an auditor can read.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-005",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "EU-AIA-13-4",
+      "title": "Structural validation of AI outputs",
+      "description": "AI-generated observations must be validated against a SHACL acceptance shape before they enter the reasoning scope.",
+      "artefact_type": "SHACL_SHAPE",
+      "evidence_selector": "ObservationAcceptanceGate",
+      "pass_expression": "exists"
+    },
+    {
+      "req_id": "EU-AIA-13-5",
+      "title": "PROV-O decision chain for the specific decision under audit",
+      "description": "For the decision identified in the evidence query, the full PROV-O chain from source data to agent attribution must be retrievable.",
+      "artefact_type": "PROV_O_CHAIN",
+      "evidence_selector": "decision_iri",
+      "pass_expression": "chain_depth >= 2"
+    },
+    {
+      "req_id": "EU-AIA-13-6",
+      "title": "Low-confidence output flagging",
+      "description": "Decisions below 0.8 confidence must be discoverable via SPARQL so deployers can review before acting.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-008",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    }
+  ]
+}

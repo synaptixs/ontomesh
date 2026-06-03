@@ -1,0 +1,26 @@
+@prefix :    <https://ontology.example.com/enterprise/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://ontology.example.com/enterprise/master>
+  a owl:Ontology ;
+  owl:versionIRI <https://ontology.example.com/enterprise/master/1.0.0> ;
+  owl:versionInfo "1.0.0" ;
+  rdfs:label "Enterprise Ontology — Master Module" ;
+  rdfs:comment "Auto-generated master ontology that owl:imports all modules." ;
+  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:creator "Ontology Toolkit Phase 3 — modular_owl.py" ;
+  owl:imports <https://ontology.example.com/tmf/alignment/> ;
+  owl:imports <https://ontology.example.com/enterprise/drift/> ;
+  owl:imports <https://ontology.example.com/energy/> ;
+  owl:imports <https://ontology.example.com/enterprise/> ;
+  owl:imports <https://ontology.example.com/enterprise/events/> ;
+  owl:imports <https://ontology.example.com/tmf/federation/> ;
+  owl:imports <https://ontology.example.com/government/> ;
+  owl:imports <https://ontology.example.com/insurance/> ;
+  owl:imports <https://ontology.example.com/logistics/> ;
+  owl:imports <https://ontology.example.com/pharma/> ;
+  owl:imports <https://ontology.example.com/enterprise/provenance/> ;
+  owl:imports <https://ontology.example.com/tmf/sid/>  .

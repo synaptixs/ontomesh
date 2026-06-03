@@ -1,0 +1,30 @@
+# CQ-CMP-03 — Are all compliance bundles signed and verifiable?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 4 invariant: any compliance bundle emitted by the
+# toolkit must carry a non-empty Ed25519 signature and a SHA-256
+# bundle hash stored in the graph.  An unverified bundle is an
+# audit-evidence breach.
+#
+# Pass condition: the result set is empty — no bundle lacks a
+# signature or a sha256 hash.
+#
+# Priority: Critical
+# Validates: Workstream 4 — bundle signing integrity
+# Expected: empty
+# Bound variables: ?bundle ?regId
+
+PREFIX cmp:  <https://ontology.example.com/compliance/>
+
+SELECT ?bundle ?regId
+WHERE {
+    ?bundle a cmp:EvidenceBundle ;
+            cmp:regulationId ?regId .
+
+    FILTER NOT EXISTS {
+        ?bundle cmp:signature ?sig ;
+                cmp:sha256    ?hash .
+        FILTER (STRLEN(STR(?sig))  > 40)
+        FILTER (STRLEN(STR(?hash)) = 64)
+    }
+}
+LIMIT 20

@@ -14,7 +14,7 @@ No external dependencies.
 
 import os
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 from db_introspector import (
     DBIntrospector, TableModel, ColumnModel,
     BASE_IRI, SHAPES_IRI, VOCAB_IRI, snake_to_lower_camel, snake_to_camel
@@ -75,6 +75,95 @@ def _sensitivity_property() -> str:
 """
 
 
+# ── L5.2 helpers — log-derived class emission ──────────────────────────
+
+
+_SEVERITY_TO_TIER = {
+    "DEBUG":   "Public",
+    "INFO":    "Public",
+    "WARN":    "Internal",
+    "WARNING": "Internal",
+    "ERROR":   "Confidential",
+    "CRITICAL": "Restricted",
+    "FATAL":   "Restricted",
+}
+
+
+def _session_has_log_discovery(session) -> bool:
+    if not isinstance(session, dict):
+        return False
+    for bucket in ("events", "entities", "relationships", "causal_rules"):
+        for item in (session.get(bucket) or []):
+            if isinstance(item, dict) and item.get("source") == "log-discovery":
+                return True
+    return False
+
+
+def _emit_log_derived_classes(session: dict) -> str:
+    """Per log-derived event/entity, emit a class block subclass-of
+    :CausalEvent (events) or :DomainEntity (entities), with
+    auto-generated time-interval data properties on events and a
+    severity-mapped sensitivity tier."""
+    if not isinstance(session, dict):
+        return ""
+    parts = ["# ── Log-Derived Classes (Phase L5) ──────────────────────────────────\n"]
+    seen = set()
+    for ev in session.get("events") or []:
+        if not isinstance(ev, dict) or ev.get("source") != "log-discovery":
+            continue
+        cls = _to_class_name(ev.get("name") or ev.get("label") or "LogEvent")
+        if cls in seen:
+            continue
+        seen.add(cls)
+        tier = _SEVERITY_TO_TIER.get(
+            (ev.get("severity") or "INFO").upper(), "Internal"
+        )
+        label = (ev.get("label") or cls).replace('"', "'")
+        comment = (ev.get("description") or "Mined from log corpus.").replace('"', "'")
+        parts.append(
+            f":{cls}\n"
+            f"  a owl:Class ;\n"
+            f"  rdfs:subClassOf :CausalEvent ;\n"
+            f'  rdfs:label "{label}" ;\n'
+            f'  rdfs:comment "{comment}" ;\n'
+            f"  :sensitivityTier :{tier} .\n"
+        )
+        # Time-interval data properties (one set per class — keeps the
+        # ontology compact, every log-derived class shares them).
+    if not seen:
+        return ""
+    parts.append(
+        ":startedAt\n"
+        "  a owl:DatatypeProperty ;\n"
+        "  rdfs:label \"started at\" ;\n"
+        "  rdfs:domain :CausalEvent ;\n"
+        "  rdfs:range xsd:dateTime ;\n"
+        "  :sensitivityTier :Internal .\n\n"
+        ":endedAt\n"
+        "  a owl:DatatypeProperty ;\n"
+        "  rdfs:label \"ended at\" ;\n"
+        "  rdfs:domain :CausalEvent ;\n"
+        "  rdfs:range xsd:dateTime ;\n"
+        "  :sensitivityTier :Internal .\n\n"
+        ":duration\n"
+        "  a owl:DatatypeProperty ;\n"
+        "  rdfs:label \"duration\" ;\n"
+        "  rdfs:domain :CausalEvent ;\n"
+        "  rdfs:range xsd:duration ;\n"
+        "  :sensitivityTier :Internal .\n"
+    )
+    return "\n".join(parts) + "\n"
+
+
+def _to_class_name(s: str) -> str:
+    """`event_18` / `Network Failure` / `outage event` → `Event18` /
+    `NetworkFailure` / `OutageEvent`."""
+    out = []
+    for token in (s or "").replace("-", " ").replace("_", " ").split():
+        out.append(token[0].upper() + token[1:])
+    return "".join(out) or "LogClass"
+
+
 def _base_classes() -> str:
     return """\
 # ── Base Classes ──────────────────────────────────────────────────────
@@ -118,9 +207,33 @@ def _class_block(t: TableModel) -> str:
         lines.append(f'  skos:altLabel "{_str(alt)}" ;')
     if t.cq_coverage:
         lines.append(f'  rdfs:isDefinedBy "{", ".join(t.cq_coverage)}" ;')
+    # Phase A: owl:hasKey for metadata-flagged meaningful identifier columns.
+    # Surrogate auto-increment `id` PKs are intentionally skipped — they carry
+    # no domain semantics. Authors opt in via has_key_columns metadata.
+    key_props = _has_key_property_iris(t)
+    if key_props:
+        lines.append(f"  owl:hasKey ( {' '.join(key_props)} ) ;")
     # Close — replace last ; with .
     lines[-1] = lines[-1][:-1] + " ."
     return "\n".join(lines) + "\n"
+
+
+def _has_key_property_iris(t: TableModel) -> List[str]:
+    """Resolve has_key_columns metadata to property IRIs (data or object)."""
+    if not t.has_key_columns:
+        return []
+    iris: List[str] = []
+    for col_name in t.has_key_columns:
+        col = next((c for c in t.columns if c.name == col_name), None)
+        if col is None:
+            continue
+        if col.is_object_property:
+            # Object properties are not emitted as `has{Camel}` — they use a
+            # derived name. Skip object FKs in keys; users almost always mean
+            # data identifiers (codes, IRIs, external IDs).
+            continue
+        iris.append(f":has{snake_to_camel(col.name)}")
+    return iris
 
 
 def _data_property_block(col: ColumnModel, table: TableModel) -> str:
@@ -157,13 +270,31 @@ def _object_property_block(col: ColumnModel, table: TableModel,
     prop_name = snake_to_lower_camel(col_stripped) + "Of" \
         if len(parts) == 1 else snake_to_lower_camel(col_stripped)
 
+    # Phase A: object-property characteristic types.
+    # FK columns are inherently functional — one row references at most one
+    # parent — so we always emit owl:FunctionalProperty for FK-backed object
+    # properties unless the metadata explicitly disables it. Authors can
+    # additionally flag transitive/symmetric/inverse-functional.
+    fk_default_functional = col.is_fk
+    types = ["owl:ObjectProperty"]
+    if col.is_transitive:
+        types.append("owl:TransitiveProperty")
+    if col.is_symmetric:
+        types.append("owl:SymmetricProperty")
+    if col.is_functional or fk_default_functional:
+        types.append("owl:FunctionalProperty")
+    if col.is_inverse_functional:
+        types.append("owl:InverseFunctionalProperty")
+
     lines = [
         f":{prop_name}",
-        f"  a owl:ObjectProperty ;",
+        f"  a {', '.join(types)} ;",
         f'  rdfs:label "{_str(col.effective_label)}" ;',
         f"  rdfs:domain :{table.class_name} ;",
         f"  rdfs:range {range_class} ;",
     ]
+    if col.inverse_of:
+        lines.append(f"  owl:inverseOf :{col.inverse_of} ;")
     if col.description:
         lines.append(f'  rdfs:comment "{_str(col.description)}" ;')
     if col.not_null:
@@ -173,20 +304,28 @@ def _object_property_block(col: ColumnModel, table: TableModel,
 
 
 def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
-    """Generate OWL subclasses for distinct event_type values."""
+    """Generate OWL subclasses for distinct event_type values.
+
+    Sibling subclasses derived from the same parent event table are mutually
+    exclusive by construction (a row has exactly one event_type), so we also
+    emit an owl:AllDisjointClasses axiom over each sibling group.
+    """
     event_tables = [t for t in tables if t.is_event_class]
     if not event_tables:
         return ""
 
     blocks = ["# ── Event Subclass Hierarchy ────────────────────────────────────────\n"]
     seen = set()
+    sibling_groups: List[List[str]] = []
     for et in event_tables:
         distinct = intro.get_distinct_values(et.name, "event_type")
+        siblings: List[str] = []
         for val in distinct:
             class_name = snake_to_camel(val.lower()) + "Event"
             if class_name in seen:
                 continue
             seen.add(class_name)
+            siblings.append(class_name)
             label = val.replace("_", " ").title() + " Event"
             blocks.append(
                 f":{class_name}\n"
@@ -196,7 +335,42 @@ def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
                 f'  rdfs:comment "Subclass of {et.class_name} for event_type = {val}." ;\n'
                 f"  :sensitivityTier :{et.sensitivity_tier} .\n"
             )
+        if len(siblings) >= 2:
+            sibling_groups.append(siblings)
+
+    for group in sibling_groups:
+        # Turtle RDF-list members must be whitespace-separated. A comma
+        # is a "same-subject same-predicate" repeat marker and isn't
+        # valid inside a `( ... )` collection — using one breaks parsers
+        # downstream (rdflib, pyshacl, ROBOT).
+        members = " ".join(f":{c}" for c in group)
+        blocks.append(
+            "[] a owl:AllDisjointClasses ;\n"
+            f"   owl:members ( {members} ) .\n"
+        )
+
     return "\n".join(blocks)
+
+
+def _disjoint_class_groups(tables: List[TableModel]) -> str:
+    """Emit owl:AllDisjointClasses for every shared `disjoint_group` value."""
+    groups: Dict[str, List[str]] = {}
+    for t in tables:
+        if t.disjoint_group:
+            groups.setdefault(t.disjoint_group, []).append(t.class_name)
+    if not groups:
+        return ""
+    out = ["# ── Disjoint Class Groups ───────────────────────────────────────────\n"]
+    for name, members in groups.items():
+        if len(members) < 2:
+            continue
+        member_iris = " ".join(f":{m}" for m in members)
+        out.append(
+            f'# Group: "{name}"\n'
+            "[] a owl:AllDisjointClasses ;\n"
+            f"   owl:members ( {member_iris} ) .\n"
+        )
+    return "\n".join(out)
 
 
 def _prov_patterns() -> str:
@@ -258,7 +432,20 @@ def _prov_patterns() -> str:
 
 # ── Main generator ───────────────────────────────────────────────────────
 
-def generate_ontology(intro: DBIntrospector, output_dir: str):
+def generate_ontology(intro: DBIntrospector, output_dir: str,
+                      *, session: dict = None):
+    """Generate the enterprise ontology.
+
+    Args:
+        intro: introspector around the operational DB.
+        output_dir: where to write enterprise.ttl + sibling files.
+        session: optional wizard session. When the session contains any
+            event/entity with ``source == "log-discovery"``, the RCA
+            taxonomy (:class:`rca_taxonomy.emit_taxonomy`) is included
+            so :hasCause / :rootCause queries work end-to-end. Per-class
+            time-interval data properties and severity-tier mappings
+            are also emitted for log-derived classes.
+    """
     tables = intro.introspect_all()
     os.makedirs(output_dir, exist_ok=True)
 
@@ -277,6 +464,14 @@ def generate_ontology(intro: DBIntrospector, output_dir: str):
         _base_classes(),
     ]
 
+    # L5.1 — RCA taxonomy. Pulled in when the active session carries
+    # any log-discovery output so :hasCause/:rootCause queries work.
+    if _session_has_log_discovery(session):
+        from rca_taxonomy import emit_taxonomy
+        lines.append(emit_taxonomy())
+        # L5.2 — log-derived classes from session.events + entities.
+        lines.append(_emit_log_derived_classes(session))
+
     lines.append("# ── Domain Classes ──────────────────────────────────────────────────\n")
     for t in tables:
         # Skip tables that are pure junction/log tables not needing a top-level class
@@ -291,6 +486,11 @@ def generate_ontology(intro: DBIntrospector, output_dir: str):
     for t in tables:
         for col in t.object_properties:
             lines.append(_object_property_block(col, t, tables))
+
+    disjoint_block = _disjoint_class_groups(tables)
+    if disjoint_block:
+        lines.append("\n")
+        lines.append(disjoint_block)
 
     lines.append("\n")
     lines.append(_prov_patterns())
@@ -361,18 +561,39 @@ def _detect_owl_profile(tables: list, ontology_path: str) -> dict:
 
     has_role_chains = False
     has_nominals    = False
+    has_inverse_of  = False
+    has_symmetric   = False
+    has_inv_func    = False
     try:
         with open(ontology_path) as f:
             content = f.read()
         has_role_chains = "propertyChainAxiom" in content
         has_nominals    = "owl:oneOf" in content
+        has_inverse_of  = "owl:inverseOf" in content
+        has_symmetric   = "owl:SymmetricProperty" in content
+        has_inv_func    = "owl:InverseFunctionalProperty" in content
     except OSError:
         pass
 
-    if has_role_chains or has_nominals:
+    dl_constructs = []
+    if has_role_chains:
+        dl_constructs.append("role chains")
+    if has_nominals:
+        dl_constructs.append("nominals")
+    if has_inverse_of:
+        dl_constructs.append("owl:inverseOf")
+    if has_symmetric:
+        dl_constructs.append("owl:SymmetricProperty")
+    if has_inv_func:
+        dl_constructs.append("owl:InverseFunctionalProperty")
+
+    if dl_constructs:
         profile  = "OWL 2 DL"
-        rationale = ("Role chains or nominals detected — OWL 2 DL required for "
-                     "full expressivity. Use HermiT or Pellet as the reasoner.")
+        rationale = (
+            f"OWL 2 DL constructs detected ({', '.join(dl_constructs)}). "
+            "OWL 2 EL does not permit these — the ontology requires a full DL "
+            "reasoner. Use HermiT or Pellet."
+        )
     elif axiom_count > 50_000:
         profile  = "OWL 2 EL"
         rationale = (f"Axiom count {axiom_count} exceeds 50 000 — OWL 2 EL recommended "
@@ -391,6 +612,10 @@ def _detect_owl_profile(tables: list, ontology_path: str) -> dict:
         "object_properties": obj_props,
         "has_role_chains": has_role_chains,
         "has_nominals":    has_nominals,
+        "has_inverse_of":  has_inverse_of,
+        "has_symmetric":   has_symmetric,
+        "has_inverse_functional": has_inv_func,
+        "dl_constructs":   dl_constructs,
         "rationale":       rationale,
         "reasoner":        "HermiT" if profile == "OWL 2 DL" else "ELK",
     }
@@ -419,6 +644,9 @@ def write_profile_recommendation(tables: list, ontology_path: str, output_dir: s
         "|------|---------|--------|\n",
         "| Role chains present | `owl:propertyChainAxiom` in ontology | OWL 2 DL |\n",
         "| Nominals present | `owl:oneOf` in ontology | OWL 2 DL |\n",
+        "| Inverse properties | `owl:inverseOf` in ontology | OWL 2 DL |\n",
+        "| Symmetric properties | `owl:SymmetricProperty` in ontology | OWL 2 DL |\n",
+        "| Inverse-functional properties | `owl:InverseFunctionalProperty` in ontology | OWL 2 DL |\n",
         "| Axiom count > 50 000 | Large schema | OWL 2 EL |\n",
         "| Default | No complex constructs, ≤ 50 000 axioms | OWL 2 EL |\n\n",
         "## Reasoner integration\n\n",

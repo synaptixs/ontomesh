@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Demo Test Plan — Ontology vs No-Ontology LLM Output</title>
+<style>
+  :root {
+    --fg: #1f2328;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --bg: #ffffff;
+    --bg-alt: #f6f8fa;
+    --accent: #0969da;
+    --ok: #1a7f37;
+    --warn: #9a6700;
+    --crit: #cf222e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    max-width: 960px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+    line-height: 1.55;
+  }
+  h1, h2, h3 {
+    line-height: 1.25;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3em;
+    margin-top: 2em;
+  }
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; }
+  h3 { font-size: 1.2em; border-bottom: none; }
+  .subtitle { color: var(--muted); font-size: 0.95em; margin-top: -0.5em; }
+  code, pre {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+  code { background: var(--bg-alt); padding: 0.1em 0.35em; border-radius: 3px; }
+  pre {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1em;
+    overflow-x: auto;
+  }
+  pre code { background: transparent; padding: 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    font-size: 0.92em;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55em 0.8em;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th { background: var(--bg-alt); font-weight: 600; }
+  tr:nth-child(even) td { background: #fcfcfd; }
+  blockquote {
+    border-left: 4px solid var(--accent);
+    margin: 1em 0;
+    padding: 0.3em 1em;
+    color: var(--muted);
+    background: var(--bg-alt);
+  }
+  .pill {
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 0.1em 0.55em;
+    border-radius: 10px;
+    color: #fff;
+    vertical-align: middle;
+  }
+  .pill-ok   { background: var(--ok); }
+  .pill-warn { background: var(--warn); }
+  .pill-crit { background: var(--crit); }
+  .pill-accent { background: var(--accent); }
+  .ascii { font-family: "SF Mono", Menlo, Consolas, monospace; white-space: pre; background: var(--bg-alt); padding: 1em; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85em; }
+  .toc { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 6px; padding: 0.8em 1.4em; }
+  .toc ol { margin: 0.3em 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+  a { color: var(--accent); }
+  .muted { color: var(--muted); }
+  .small { font-size: 0.88em; }
+  footer { margin-top: 3em; font-size: 0.85em; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Demo Test Plan — Ontology vs No-Ontology LLM Output</h1>
+<p class="subtitle">Branch: <code>first-contact</code> · Toolkit: v2.0 · Models: <span class="pill pill-accent">Anthropic claude-sonnet-4-5</span> <span class="pill pill-accent">OpenAI gpt-4o</span></p>
+
+<p><strong>Purpose.</strong> Demonstrate, side-by-side, the difference in answer quality, semantic precision, and auditability when an LLM is asked the same question (a) directly over raw SQLite rows and (b) through the toolkit's runtime layer with a generated OWL ontology, SHACL shapes, JSON-LD grounding, and PROV-O output stamping.</p>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#scope">Scope</a></li>
+    <li><a href="#success">Success criteria</a></li>
+    <li><a href="#env">Test environment</a></li>
+    <li><a href="#schema">Retail demo schema</a></li>
+    <li><a href="#phases">Phases</a></li>
+    <li><a href="#axes">Comparison axes</a></li>
+    <li><a href="#risks">Risks &amp; mitigations</a></li>
+    <li><a href="#deliverables">Deliverables</a></li>
+    <li><a href="#narrative">Demo narrative</a></li>
+  </ol>
+</div>
+
+<h2 id="scope">1. Scope</h2>
+
+<p><strong>In scope</strong></p>
+<ul>
+  <li>A small retail schema in SQLite (7 tables, ~50 rows of seed data) with well-defined foreign keys, state-machine columns, and an event table.</li>
+  <li>Toolkit pipeline run end-to-end against that SQLite file: Phases 1–5 + TMF-skip + test + report.</li>
+  <li>Two runtime configurations per question:
+    <ul>
+      <li><strong>Baseline (no ontology)</strong> — raw SQL rows serialised to JSON and pasted into a plain LLM prompt.</li>
+      <li><strong>Ontology-grounded</strong> — same records grounded through <code>RuntimeClient.ask()</code> with JSON-LD context, SHACL input gate, payload assembly, and SHACL output gate.</li>
+    </ul>
+  </li>
+  <li>Two LLM vendors: Anthropic and OpenAI.</li>
+</ul>
+
+<p><strong>Out of scope</strong></p>
+<ul>
+  <li>Cross-enterprise federation, vector retrieval, memory consolidation (those have their own CQ tests — see <a href="gates.html">gates</a>).</li>
+  <li>Performance benchmarking beyond wall-clock per call.</li>
+  <li>Production deployment.</li>
+</ul>
+
+<h2 id="success">2. Success criteria</h2>
+
+<p>The demo is considered successful when, for every question in the bank and for both vendors:</p>
+
+<table>
+  <tr>
+    <th>Criterion</th>
+    <th>Baseline</th>
+    <th>Ontology-grounded</th>
+  </tr>
+  <tr>
+    <td>Answer references the correct OWL class by name</td>
+    <td class="muted">not required</td>
+    <td><strong>required</strong></td>
+  </tr>
+  <tr>
+    <td>Every entity reference carries a stable IRI</td>
+    <td class="muted">not required</td>
+    <td><strong>required</strong></td>
+  </tr>
+  <tr>
+    <td>Output validated by SHACL shape</td>
+    <td class="muted">not required</td>
+    <td><strong>required — <code>valid=True</code></strong></td>
+  </tr>
+  <tr>
+    <td>Output stamped with PROV-O (model, timestamp, confidence)</td>
+    <td class="muted">absent</td>
+    <td><strong>required</strong></td>
+  </tr>
+  <tr>
+    <td>Answer is stored as an <code>ObservationRecord</code> in the DB</td>
+    <td class="muted">no</td>
+    <td><strong>yes</strong></td>
+  </tr>
+  <tr>
+    <td>Field-name ambiguity correctly disambiguated</td>
+    <td class="muted">inconsistent</td>
+    <td><strong>deterministic</strong></td>
+  </tr>
+</table>
+
+<p>At least <strong>3 of 8</strong> questions must produce <em>materially different</em> answers between baseline and ontology-grounded modes for the demo to have a teaching moment.</p>
+
+<h2 id="env">3. Test environment</h2>
+
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>OS</td><td>macOS 14+ / Linux</td></tr>
+  <tr><td>Python</td><td>3.10+</td></tr>
+  <tr><td>DB</td><td>SQLite 3 (bundled with Python)</td></tr>
+  <tr><td>Toolkit branch</td><td><code>first-contact</code></td></tr>
+  <tr><td>LLM deps</td><td><code>pip install anthropic openai</code></td></tr>
+  <tr><td>Env vars</td><td><code>ANTHROPIC_API_KEY</code> · <code>OPENAI_API_KEY</code></td></tr>
+  <tr><td>Output dir</td><td><code>output/demo/</code></td></tr>
+</table>
+
+<h2 id="schema">4. Retail demo schema</h2>
+
+<p>A small, self-explanatory retail schema. Seven tables, one event table, one status-driven lifecycle, one provenance-rich observation table, deliberate room for semantic ambiguity (e.g. <code>status</code> appears on <code>customers</code>, <code>orders</code>, <code>payments</code>).</p>
+
+<div class="ascii">customers ─┐
+           ├─ orders ─── order_items ── products
+           │     │
+           │     └─ shipments
+           │
+           └─ payments ─── invoices
+                               │
+                          order_events  (event table — lifecycle transitions)</div>
+
+<h3>4.1 DDL — <code>db/demo.sql</code></h3>
+<pre><code>-- System tables the toolkit needs (DDL from db/schema.sql; truncated here)
+CREATE TABLE ontology_metadata (...);
+CREATE TABLE semantic_loss_log (...);
+
+-- Domain tables
+CREATE TABLE customers (
+    id             INTEGER PRIMARY KEY,
+    full_name      TEXT NOT NULL,
+    email          TEXT NOT NULL UNIQUE,
+    status         TEXT CHECK (status IN ('Active','Suspended','Closed')) NOT NULL,
+    created_at     TEXT NOT NULL
+);
+
+CREATE TABLE products (
+    id             INTEGER PRIMARY KEY,
+    sku            TEXT NOT NULL UNIQUE,
+    name           TEXT NOT NULL,
+    unit_price     REAL NOT NULL,
+    category       TEXT NOT NULL
+);
+
+CREATE TABLE orders (
+    id             INTEGER PRIMARY KEY,
+    customer_id    INTEGER NOT NULL REFERENCES customers(id),
+    placed_at      TEXT NOT NULL,
+    status         TEXT CHECK (status IN ('Pending','Confirmed','Shipped','Delivered','Cancelled')) NOT NULL,
+    total_amount   REAL NOT NULL
+);
+
+CREATE TABLE order_items (
+    order_id       INTEGER NOT NULL REFERENCES orders(id),
+    product_id     INTEGER NOT NULL REFERENCES products(id),
+    quantity       INTEGER NOT NULL,
+    line_total     REAL NOT NULL,
+    PRIMARY KEY (order_id, product_id)
+);
+
+CREATE TABLE invoices (
+    id             INTEGER PRIMARY KEY,
+    order_id       INTEGER NOT NULL REFERENCES orders(id),
+    issued_at      TEXT NOT NULL,
+    due_at         TEXT NOT NULL,
+    amount_due     REAL NOT NULL,
+    status         TEXT CHECK (status IN ('Open','Paid','Overdue','Disputed')) NOT NULL
+);
+
+CREATE TABLE payments (
+    id             INTEGER PRIMARY KEY,
+    invoice_id     INTEGER NOT NULL REFERENCES invoices(id),
+    paid_at        TEXT NOT NULL,
+    amount         REAL NOT NULL,
+    method         TEXT CHECK (method IN ('CARD','BANK','WALLET')) NOT NULL,
+    status         TEXT CHECK (status IN ('Cleared','Pending','Reversed')) NOT NULL
+);
+
+CREATE TABLE shipments (
+    id             INTEGER PRIMARY KEY,
+    order_id       INTEGER NOT NULL REFERENCES orders(id),
+    shipped_at     TEXT,
+    delivered_at   TEXT,
+    carrier        TEXT NOT NULL,
+    tracking_ref   TEXT NOT NULL UNIQUE
+);
+
+-- Event table — lifecycle transitions
+CREATE TABLE order_events (
+    id             INTEGER PRIMARY KEY,
+    order_id       INTEGER NOT NULL REFERENCES orders(id),
+    event_type     TEXT CHECK (event_type IN ('PLACED','CONFIRMED','SHIPPED','DELIVERED','CANCELLED','REFUNDED')) NOT NULL,
+    occurred_at    TEXT NOT NULL,
+    actor_party    TEXT,
+    confidence     REAL CHECK (confidence BETWEEN 0.0 AND 1.0),
+    derivation     TEXT CHECK (derivation IN ('MEASURED','INFERRED','IMPORTED','SYNTHESIZED'))
+);</code></pre>
+
+<h3>4.2 Seed — <code>db/demo_seed.sql</code></h3>
+<p>Populate with ~50 rows across the 7 tables: 10 customers, 12 products, 15 orders (mixed statuses), 30 order items, 15 invoices (some Paid / Overdue / Disputed), 12 payments, 8 shipments, 25 order events spanning the lifecycle. Include one <em>Disputed</em> invoice with a <em>Reversed</em> payment and one <em>Cancelled</em> order with no shipment — those are the interesting edge cases the ontology will surface.</p>
+
+<h3>4.3 Ontology metadata seed</h3>
+<table>
+  <tr><th>target</th><th>table</th><th>column</th><th>semantic_type</th><th>sensitivity</th><th>notes</th></tr>
+  <tr><td>TABLE</td><td>customers</td><td>—</td><td>Customer</td><td><span class="pill pill-warn">Confidential</span></td><td>Party role</td></tr>
+  <tr><td>TABLE</td><td>products</td><td>—</td><td>Product</td><td><span class="pill pill-ok">Public</span></td><td></td></tr>
+  <tr><td>TABLE</td><td>orders</td><td>—</td><td>Order</td><td>Internal</td><td></td></tr>
+  <tr><td>TABLE</td><td>order_items</td><td>—</td><td>OrderLine</td><td>Internal</td><td></td></tr>
+  <tr><td>TABLE</td><td>invoices</td><td>—</td><td>Invoice</td><td><span class="pill pill-warn">Confidential</span></td><td></td></tr>
+  <tr><td>TABLE</td><td>payments</td><td>—</td><td>Payment</td><td><span class="pill pill-crit">Restricted</span></td><td>PII-adjacent</td></tr>
+  <tr><td>TABLE</td><td>shipments</td><td>—</td><td>Shipment</td><td>Internal</td><td></td></tr>
+  <tr><td>TABLE</td><td>order_events</td><td>—</td><td>OrderEvent</td><td>Internal</td><td><code>is_event_class=1</code></td></tr>
+  <tr><td>COLUMN</td><td>order_events</td><td>event_type</td><td>event discriminator</td><td>—</td><td>triggers OWL subclass generation</td></tr>
+  <tr><td>COLUMN</td><td>order_events</td><td>confidence</td><td>xsd:decimal</td><td>—</td><td>PROV-O confidence</td></tr>
+  <tr><td>COLUMN</td><td>order_events</td><td>derivation</td><td>xsd:string</td><td>—</td><td>MEASURED/INFERRED/IMPORTED/SYNTHESIZED</td></tr>
+</table>
+
+<h2 id="phases">5. Phases</h2>
+
+<h3>Phase 1 — Build the database</h3>
+<pre><code>sqlite3 db/demo.db &lt; db/demo.sql
+sqlite3 db/demo.db &lt; db/demo_seed.sql
+sqlite3 db/demo.db "SELECT COUNT(*) FROM orders;"   # sanity: 15</code></pre>
+<p><strong>Expected:</strong> <code>db/demo.db</code> exists, all 7 tables populated, <code>ontology_metadata</code> has ≥20 rows.</p>
+
+<h3>Phase 2 — Generate the ontology</h3>
+<pre><code>python3 toolkit.py --db db/demo.db --out output/demo/
+open output/demo/reports/toolkit_report.html</code></pre>
+
+<p><strong>Expected artifacts in <code>output/demo/</code>:</strong></p>
+<ul>
+  <li><code>ontology/enterprise.ttl</code> — 8 OWL classes, FK→object-property mapping</li>
+  <li><code>ontology/events.ttl</code> — 6 <code>OrderEvent</code> subclasses (one per <code>event_type</code> value)</li>
+  <li><code>ontology/provenance.ttl</code> — PROV-O patterns</li>
+  <li><code>shapes/enterprise-shapes.ttl</code> — 8 NodeShapes, ~60 constraints</li>
+  <li><code>shapes/agent-gate.ttl</code> — runtime acceptance gate</li>
+  <li><code>jsonld/enterprise-context.json</code> — term-to-IRI bindings</li>
+  <li><code>vocab/enterprise-skos.ttl</code> — SKOS for every status enumeration</li>
+  <li><code>mapping/semantic_loss_report.csv</code> — expected findings:
+    <ul>
+      <li><span class="pill pill-warn">MEDIUM</span> <code>FLOATING_VALUE</code> on <code>payments.amount</code> (no confidence score)</li>
+      <li><span class="pill pill-warn">HIGH</span> <code>STATUS_AS_EVENT</code> on <code>customers.status</code></li>
+      <li><span class="pill pill-crit">CRITICAL</span> <code>IMPLICIT_ACTOR</code> on <code>order_events</code> (no FK to party)</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Governance scorecard target:</strong> ≥ 3.5 / 5.0 on first run, ≥ 4.0 after resolving the CRITICAL finding.</p>
+
+<h3>Phase 3 — Build the question bank</h3>
+<p>Eight questions, chosen so three are semantically ambiguous, three require event/lifecycle reasoning, and two require provenance:</p>
+
+<table>
+  <tr><th>#</th><th>Question</th><th>Why it exposes the ontology delta</th></tr>
+  <tr><td>Q1</td><td><em>"Which customers are Active?"</em></td><td><code>status="Active"</code> exists on 3 tables — baseline guesses which one</td></tr>
+  <tr><td>Q2</td><td><em>"Show me overdue invoices and the customers who owe them."</em></td><td>Two-hop join (invoice → order → customer) — baseline often omits the customer entity</td></tr>
+  <tr><td>Q3</td><td><em>"Which orders never reached the Delivered state?"</em></td><td>Needs the event table, not the <code>orders.status</code> column — baseline conflates the two</td></tr>
+  <tr><td>Q4</td><td><em>"Are there any disputed invoices with reversed payments?"</em></td><td>State-machine intersection across two tables</td></tr>
+  <tr><td>Q5</td><td><em>"What is the full customer-to-payment traceability chain for order 7?"</em></td><td>Exercises FK→object-property chaining, JSON-LD <code>@id</code> linking</td></tr>
+  <tr><td>Q6</td><td><em>"Which cancellation events were inferred rather than measured?"</em></td><td>Requires PROV-O <code>derivation</code> — baseline has no vocabulary for this</td></tr>
+  <tr><td>Q7</td><td><em>"List active orders whose shipment is missing."</em></td><td>Ambiguity between order status and shipment status</td></tr>
+  <tr><td>Q8</td><td><em>"Summarise this customer's standing in one sentence."</em></td><td>Free-form — tests whether grounded output remains structurally valid</td></tr>
+</table>
+
+<h3>Phase 4 — Run baseline (no ontology)</h3>
+<pre><code># baseline.py  (see scripts/demo_baseline.py)
+import anthropic, openai, sqlite3, json
+
+# 1. Dump relevant rows as plain JSON
+rows = sqlite3.connect("db/demo.db").execute(
+    "SELECT * FROM customers LIMIT 50"
+).fetchall()
+context = json.dumps([dict(r) for r in rows])
+
+# 2. Plain-prompt LLM — no ontology, no SHACL, no PROV-O
+prompt = f"""
+You are a helpful analyst. Data:
+{context}
+
+Question: Which customers are Active?
+"""
+
+# Call Anthropic + OpenAI, save to output/demo/baseline_{model}_{q}.json</code></pre>
+<p>Record: raw answer text, wall-clock, token counts. No validation, no provenance.</p>
+
+<h3>Phase 5 — Run ontology-grounded</h3>
+<pre><code># grounded.py  (see scripts/demo_grounded.py)
+from runtime.client import RuntimeClient
+
+for vendor, model in [("anthropic","claude-sonnet-4-5"),
+                      ("openai","gpt-4o")]:
+    client = RuntimeClient(db_path="db/demo.db",
+                           adapter=vendor, model=model)
+    for q in QUESTIONS:
+        result = client.ask(question=q.text,
+                            flavor="retail",       # auto-generated from sid_domain groupings
+                            output_format="json")
+        save(result, f"output/demo/grounded_{vendor}_{q.id}.json")</code></pre>
+<p>Each <code>result</code> contains <code>answer</code>, <code>valid</code> (SHACL output-gate pass), <code>observation_iri</code>, and <code>prov</code> (model + timestamp + confidence + derivation_method).</p>
+
+<h3>Phase 6 — Build the comparison report</h3>
+<p>For each of the 32 cells (8 questions × 2 vendors × 2 modes), render a side-by-side table:</p>
+<table>
+  <tr>
+    <th>Question</th><th>Vendor</th><th>Baseline answer</th><th>Grounded answer</th>
+    <th>SHACL valid</th><th>PROV stamped</th><th>Δ notes</th>
+  </tr>
+  <tr>
+    <td>Q1</td><td>Anthropic</td>
+    <td class="muted">…</td><td class="muted">…</td>
+    <td><span class="pill pill-ok">✓</span></td><td><span class="pill pill-ok">✓</span></td>
+    <td class="small">baseline returned all "Active" rows across three tables; grounded returned only <code>Customer</code>-class</td>
+  </tr>
+  <tr><td colspan="7" class="muted small">…</td></tr>
+</table>
+
+<p>Write results to:</p>
+<ul>
+  <li><code>output/demo/comparison.csv</code></li>
+  <li><code>output/demo/comparison.html</code> (self-contained, open in a browser)</li>
+</ul>
+
+<h2 id="axes">6. Comparison axes</h2>
+<ol>
+  <li><strong>Semantic precision</strong> — did the answer name the right OWL class?</li>
+  <li><strong>IRI stability</strong> — can every named entity be clicked through to a stable IRI?</li>
+  <li><strong>Structural validity</strong> — does the output pass SHACL shape validation?</li>
+  <li><strong>Auditability</strong> — is there a PROV-O chain (model, timestamp, confidence, derivation)?</li>
+  <li><strong>Cross-vendor consistency</strong> — do Anthropic and OpenAI give <em>equivalent</em> grounded answers (IRIs, class names)? Baseline answers typically do not.</li>
+  <li><strong>Error surface</strong> — how do the two modes behave when the question is under-specified? (Grounded should fail shape validation; baseline will hallucinate.)</li>
+</ol>
+
+<h2 id="risks">7. Risks &amp; mitigations</h2>
+<table>
+  <tr><th>Risk</th><th>Mitigation</th></tr>
+  <tr><td>LLM API rate limits during a live demo</td><td>Pre-run Phase 4 + 5, cache outputs to disk, play back from <code>output/demo/</code></td></tr>
+  <tr><td>A model refuses a PII-adjacent question</td><td><code>payments</code> is marked <code>Restricted</code>; the <code>retail</code> flavor excludes it by default — demonstrates sensitivity-tier enforcement</td></tr>
+  <tr><td>SHACL shapes reject a well-formed answer</td><td>Keep one negative-case question to <em>intentionally</em> fail and show rollback behavior</td></tr>
+  <tr><td>Vendor output schema differences</td><td>All adapter outputs are normalised by <code>OutputGate</code> before comparison</td></tr>
+  <tr><td>Non-deterministic LLM output</td><td>Seed + low temperature (0.2); run each call 3× and report modal answer</td></tr>
+</table>
+
+<h2 id="deliverables">8. Deliverables</h2>
+<table>
+  <tr><th>Artefact</th><th>Path</th></tr>
+  <tr><td>DDL + seed</td><td><code>db/demo.sql</code> · <code>db/demo_seed.sql</code></td></tr>
+  <tr><td>Generated ontology</td><td><code>output/demo/ontology/*.ttl</code></td></tr>
+  <tr><td>SHACL shapes</td><td><code>output/demo/shapes/*.ttl</code></td></tr>
+  <tr><td>JSON-LD context</td><td><code>output/demo/jsonld/enterprise-context.json</code></td></tr>
+  <tr><td>Baseline LLM outputs</td><td><code>output/demo/baseline_{vendor}_{qid}.json</code></td></tr>
+  <tr><td>Grounded LLM outputs</td><td><code>output/demo/grounded_{vendor}_{qid}.json</code></td></tr>
+  <tr><td>Side-by-side report</td><td><code>output/demo/comparison.html</code> · <code>output/demo/comparison.csv</code></td></tr>
+  <tr><td>Demo scripts</td><td><code>scripts/demo_baseline.py</code> · <code>scripts/demo_grounded.py</code> · <code>scripts/demo_report.py</code></td></tr>
+  <tr><td>This test plan</td><td><a href="test-plan.md">test-plan.md</a> · <a href="test-plan.html">test-plan.html</a></td></tr>
+</table>
+
+<h2 id="narrative">9. Demo narrative (5-minute version)</h2>
+<ol>
+  <li><strong>30 s — The data.</strong> Show the SQLite DB. Seven tables, one event table. Point out that <code>status</code> appears on three tables.</li>
+  <li><strong>60 s — The toolkit.</strong> Run <code>python3 toolkit.py --db db/demo.db</code>. Open <code>toolkit_report.html</code>. Walk through the OWL hierarchy, SHACL shapes, and the <code>semantic_loss_report.csv</code> findings.</li>
+  <li><strong>90 s — Baseline.</strong> Paste Q1, Q3, Q6 into each model. Note the inconsistency across vendors and the hallucination on Q6 ("inferred" has no grounding anywhere in the raw rows).</li>
+  <li><strong>90 s — Grounded.</strong> Run the same three questions through <code>RuntimeClient.ask(flavor="retail")</code>. Show identical OWL class names and IRIs from both vendors. Open the stored <code>ObservationRecord</code> in SQLite — it has <code>prov:wasGeneratedBy</code>, <code>generatedAtTime</code>, <code>confidence</code>, and <code>derivation</code>.</li>
+  <li><strong>30 s — The takeaway.</strong> The raw-rows prompt is a guess. The grounded prompt is an auditable, governed enterprise fact.</li>
+</ol>
+
+<hr>
+<footer>Branch: <code>first-contact</code> · Toolkit: v2.0 · April 2026</footer>
+
+</body>
+</html>

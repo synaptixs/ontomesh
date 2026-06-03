@@ -1,0 +1,175 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ontomesh"
+version = "3.6.0-dev"
+description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [
+    { name = "nrohilla-fibonacci" },
+]
+keywords = ["ontology", "owl", "shacl", "rdf", "drift", "llm", "knowledge-graph"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+# Core (always installed) — minimum to run phases 1–5, tmf, test, report.
+# ~50 MB on disk, no compilation. Everything else is opt-in via extras.
+dependencies = [
+    "rdflib>=7.0.0",
+    "pyshacl>=0.26.0",
+    "sparqlwrapper>=2.0.0",
+    "pyyaml>=6.0.2",
+    "jinja2>=3.1.4",
+]
+
+[project.optional-dependencies]
+# ── Database drivers (per-driver) ────────────────────────────────────────
+# Both psycopg2 (used by src/db_connector.py for schema introspection
+# in --phase 1) and psycopg3 (used by wizard/ontologies_store.py for
+# the saved-ontologies + preferences store in P2.3) are needed when
+# the user opts into the Postgres backend.
+postgres = ["psycopg2-binary>=2.9.9", "psycopg[binary]>=3.2.0"]
+mysql    = ["mysql-connector-python>=8.3.0"]
+mssql    = ["pyodbc>=5.1.0"]
+oracle   = ["oracledb>=2.3.0"]
+db2      = ["ibm_db>=3.2.3", "ibm_db_dbi>=3.2.3"]
+db = [
+    "psycopg2-binary>=2.9.9",
+    "mysql-connector-python>=8.3.0",
+    "pyodbc>=5.1.0",
+    "oracledb>=2.3.0",
+    "ibm_db>=3.2.3",
+    "ibm_db_dbi>=3.2.3",
+]
+
+# ── Log-driven RCA (log mining, sequence learning, causality) ───────────
+# Used by `--phase mine`, `--phase sequence`, `--phase causality` and the
+# Studio's Log Discovery step. See docs/log-rca-roadmap.md for the design
+# and docs/log-rca-dev-plan.md for the build-out.
+mining = [
+    "drain3>=0.9.11",       # Drain template-clustering algorithm
+    "hmmlearn>=0.3.0",      # Per-service HMM for anomaly detection
+    "statsmodels>=0.14.0",  # Granger causality tests
+    "scikit-learn>=1.3.0",  # PCA / t-SNE for cluster visualisation
+]
+
+# ── Runtime LLM adapters ─────────────────────────────────────────────────
+runtime = [
+    "anthropic>=0.34.0",
+    "openai>=1.40.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "requests>=2.32.3",
+    "oci>=2.126.0",
+]
+# Per-vendor subset for users who only want one adapter
+anthropic = ["anthropic>=0.34.0"]
+openai    = ["openai>=1.40.0"]
+vertex    = ["google-cloud-aiplatform>=1.60.0"]
+ollama    = ["requests>=2.32.3"]
+oci       = ["oci>=2.126.0"]
+
+# ── Drift monitoring (runtime/drift/) ────────────────────────────────────
+drift = [
+    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drain3>=0.9",
+]
+
+# ── Advanced / opt-in ────────────────────────────────────────────────────
+wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1", "sqlglot>=25.0", "jsonschema>=4.20"]
+discover = ["spacy>=3.7.4"]
+neptune  = ["boto3>=1.35.0"]
+# (P2.3 — see the `postgres` extra under "Database drivers" above —
+# psycopg3 ships in there too so a single `pip install ontomesh[postgres]`
+# enables both schema introspection and the wizard's pg-backed store.)
+
+# ── Testing ──────────────────────────────────────────────────────────────
+test     = ["pytest>=8.2.2"]
+
+# ── Convenience aggregate ────────────────────────────────────────────────
+all = [
+    # db
+    "psycopg2-binary>=2.9.9",
+    "mysql-connector-python>=8.3.0",
+    "pyodbc>=5.1.0",
+    "oracledb>=2.3.0",
+    "ibm_db>=3.2.3",
+    "ibm_db_dbi>=3.2.3",
+    # runtime
+    "anthropic>=0.34.0",
+    "openai>=1.40.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "requests>=2.32.3",
+    "oci>=2.126.0",
+    # drift
+    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drain3>=0.9",
+    # advanced
+    "flask>=3.0.3",
+    "flask-cors>=4.0.1",
+    "sqlglot>=25.0",
+    "jsonschema>=4.20",
+    "spacy>=3.7.4",
+    "boto3>=1.35.0",
+    # test
+    "pytest>=8.2.2",
+]
+
+[project.scripts]
+# Canonical Ontomesh console scripts.  These are the entry points the
+# landing page and README promise; pip install -e . wires them up.
+ontomesh         = "ontomesh.cli:main"
+ontomesh-wizard  = "ontomesh.wizard_entry:main"
+ontomesh-onboard = "ontomesh.onboard_entry:main"
+# Legacy aliases kept for one release so existing automation and
+# documentation snippets keep working.
+ontology-toolkit = "toolkit:main"
+ontology-onboard = "onboard:main"
+
+[project.urls]
+Homepage = "https://github.com/nrohilla-fibonacci/ontology"
+Repository = "https://github.com/nrohilla-fibonacci/ontology"
+
+[tool.setuptools]
+py-modules = ["toolkit", "onboard"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "ontomesh*",
+    "runtime*",
+    "compliance*",
+    "federation*",
+    "src*",
+    "wizard*",
+]
+exclude = [
+    "tests*",
+    "output*",
+    "db*",
+    "scripts*",
+    "docker*",
+    "__pycache__*",
+]
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.json",
+    "*.yaml",
+    "*.yml",
+    "*.ttl",
+    "*.shacl",
+    "*.html",
+    "*.j2",
+    "templates/*",
+    "static/*",
+]

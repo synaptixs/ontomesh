@@ -1,0 +1,30 @@
+# CQ-CMP-02 — Do all SHACL-passed observations carry a validation timestamp?
+# ──────────────────────────────────────────────────────────────────────────
+# Workstream 4 invariant: an observation that passed the agent gate must
+# be stamped with its validation timestamp so auditors can reconstruct
+# the validation moment relative to the regulation's in-force date.
+#
+# Pass condition: every observation marked as SHACL-valid carries a
+# prov:generatedAtTime (or cmp:validatedAt) literal.
+#
+# Priority: High
+# Validates: Workstream 4 — validation timestamp completeness
+# Expected: empty
+# Bound variables: ?obs ?status
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+PREFIX cmp:  <https://ontology.example.com/compliance/>
+
+SELECT ?obs ?status
+WHERE {
+    ?obs a tmf:ObservationRecord .
+
+    OPTIONAL { ?obs cmp:shaclStatus ?status }
+
+    # Any observation missing BOTH a generation time and a
+    # validation time is an audit-trail gap.
+    FILTER NOT EXISTS { ?obs prov:generatedAtTime ?t }
+    FILTER NOT EXISTS { ?obs cmp:validatedAt      ?vt }
+}
+LIMIT 20

@@ -1,0 +1,596 @@
+@prefix :      <https://ontology.example.com/enterprise/> .
+@prefix ind:   <https://ontology.example.com/pharma/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+<https://ontology.example.com/pharma/>
+  a owl:Ontology ;
+  owl:versionIRI <https://ontology.example.com/pharma/1.0.0> ;
+  owl:imports <https://ontology.example.com/enterprise/> ;
+  rdfs:label "Pharmaceuticals Ontology Module" ;
+  rdfs:comment "Domain template for pharmaceutical manufacturers, CROs, and regulatory affairs teams. Covers drug product lifecycle from R&D through clinical trials, manufacturing, and pharmacovigilance. Aligned with IDMP (Identification of Medicinal Products, ISO 11616/11238/11239/11240/11615), EMA SPOR, ICH E2B(R3), and HL7 FHIR R4 MedicinalProduct resources." ;
+  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
+
+
+:MedicinalProduct
+  a owl:Class ;
+  rdfs:label "Medicinal Product" ;
+  rdfs:comment "A regulated pharmaceutical product with a marketing authorisation." ;
+  owl:equivalentClass <fhir:MedicinalProduct> ;
+  owl:equivalentClass <idmp:MedicinalProduct> ;
+  :sensitivityTier :Public .
+
+:product_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Product Id" ;
+  :sensitivityTier :Public .
+
+:product_name
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Product Name" ;
+  :sensitivityTier :Public .
+
+:inn
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Inn" ;
+  rdfs:comment "WHO International Nonproprietary Name" ;
+  :sensitivityTier :Public .
+
+:atc_code
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Atc Code" ;
+  rdfs:comment "WHO ATC classification code" ;
+  :sensitivityTier :Public .
+
+:regulatory_status
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Regulatory Status" ;
+  :sensitivityTier :Public .
+
+:marketing_authorisation_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Marketing Authorisation Number" ;
+  :sensitivityTier :Public .
+
+:indication
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Indication" ;
+  :sensitivityTier :Public .
+
+:therapeutic_area
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:string ;
+  rdfs:label "Therapeutic Area" ;
+  :sensitivityTier :Public .
+
+:orphan_designation
+  a owl:DatatypeProperty ;
+  rdfs:domain :MedicinalProduct ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Orphan Designation" ;
+  :sensitivityTier :Public .
+
+:ActiveSubstance
+  a owl:Class ;
+  rdfs:label "Active Substance" ;
+  rdfs:comment "A chemical or biological substance with pharmacological activity." ;
+  owl:equivalentClass <idmp:Substance> ;
+  :sensitivityTier :Public .
+
+:substance_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Substance Id" ;
+  :sensitivityTier :Public .
+
+:substance_name
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Substance Name" ;
+  :sensitivityTier :Public .
+
+:inn
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Inn" ;
+  :sensitivityTier :Public .
+
+:cas_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Cas Number" ;
+  rdfs:comment "CAS Registry Number" ;
+  :sensitivityTier :Public .
+
+:chebi_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Chebi Id" ;
+  :sensitivityTier :Public .
+
+:substance_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Substance Type" ;
+  :sensitivityTier :Public .
+
+:molecular_formula
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Molecular Formula" ;
+  :sensitivityTier :Public .
+
+:molecular_weight_dalton
+  a owl:DatatypeProperty ;
+  rdfs:domain :ActiveSubstance ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Molecular Weight Dalton" ;
+  :sensitivityTier :Public .
+
+:ClinicalTrial
+  a owl:Class ;
+  rdfs:label "Clinical Trial" ;
+  rdfs:comment "A human study evaluating the safety and efficacy of a medicinal product." ;
+  :sensitivityTier :Internal .
+
+:trial_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Trial Id" ;
+  :sensitivityTier :Internal .
+
+:nct_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Nct Number" ;
+  rdfs:comment "ClinicalTrials.gov NCT identifier" ;
+  :sensitivityTier :Internal .
+
+:eudract_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Eudract Number" ;
+  rdfs:comment "EU Clinical Trials Register" ;
+  :sensitivityTier :Internal .
+
+:product_id
+  a owl:ObjectProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range :MedicinalProduct ;
+  rdfs:label "Product Id" ;
+  :sensitivityTier :Internal .
+
+:phase
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Phase" ;
+  :sensitivityTier :Internal .
+
+:status
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Status" ;
+  :sensitivityTier :Internal .
+
+:sponsor
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Sponsor" ;
+  :sensitivityTier :Internal .
+
+:planned_enrolment
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Planned Enrolment" ;
+  :sensitivityTier :Internal .
+
+:actual_enrolment
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Actual Enrolment" ;
+  :sensitivityTier :Internal .
+
+:primary_endpoint
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:string ;
+  rdfs:label "Primary Endpoint" ;
+  :sensitivityTier :Internal .
+
+:study_start_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:date ;
+  rdfs:label "Study Start Date" ;
+  :sensitivityTier :Internal .
+
+:primary_completion_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :ClinicalTrial ;
+  rdfs:range xsd:date ;
+  rdfs:label "Primary Completion Date" ;
+  :sensitivityTier :Internal .
+
+:ManufacturingSite
+  a owl:Class ;
+  rdfs:label "Manufacturing Site" ;
+  rdfs:comment "A GMP-certified facility where pharmaceutical products are manufactured." ;
+  :sensitivityTier :Internal .
+
+:site_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:string ;
+  rdfs:label "Site Id" ;
+  :sensitivityTier :Internal .
+
+:site_name
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:string ;
+  rdfs:label "Site Name" ;
+  :sensitivityTier :Internal .
+
+:address
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:string ;
+  rdfs:label "Address" ;
+  :sensitivityTier :Internal .
+
+:country_code
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:string ;
+  rdfs:label "Country Code" ;
+  :sensitivityTier :Internal .
+
+:gmp_certificate_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:string ;
+  rdfs:label "Gmp Certificate Number" ;
+  :sensitivityTier :Internal .
+
+:gmp_certificate_expiry
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:date ;
+  rdfs:label "Gmp Certificate Expiry" ;
+  :sensitivityTier :Internal .
+
+:site_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:string ;
+  rdfs:label "Site Type" ;
+  :sensitivityTier :Internal .
+
+:capacity_batch_per_year
+  a owl:DatatypeProperty ;
+  rdfs:domain :ManufacturingSite ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Capacity Batch Per Year" ;
+  :sensitivityTier :Internal .
+
+:Batch
+  a owl:Class ;
+  rdfs:label "Product Batch" ;
+  rdfs:comment "A manufactured lot of a medicinal product with traceability to raw materials." ;
+  :sensitivityTier :Internal .
+
+:batch_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:string ;
+  rdfs:label "Batch Id" ;
+  :sensitivityTier :Internal .
+
+:batch_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:string ;
+  rdfs:label "Batch Number" ;
+  :sensitivityTier :Internal .
+
+:product_id
+  a owl:ObjectProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range :MedicinalProduct ;
+  rdfs:label "Product Id" ;
+  :sensitivityTier :Internal .
+
+:site_id
+  a owl:ObjectProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range :ManufacturingSite ;
+  rdfs:label "Site Id" ;
+  :sensitivityTier :Internal .
+
+:manufacture_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:date ;
+  rdfs:label "Manufacture Date" ;
+  :sensitivityTier :Internal .
+
+:expiry_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:date ;
+  rdfs:label "Expiry Date" ;
+  :sensitivityTier :Internal .
+
+:batch_size_units
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Batch Size Units" ;
+  :sensitivityTier :Internal .
+
+:batch_status
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:string ;
+  rdfs:label "Batch Status" ;
+  :sensitivityTier :Internal .
+
+:quality_release_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :Batch ;
+  rdfs:range xsd:date ;
+  rdfs:label "Quality Release Date" ;
+  :sensitivityTier :Internal .
+
+:AdverseEvent
+  a owl:Class ;
+  rdfs:label "Adverse Event" ;
+  rdfs:comment "An undesirable medical occurrence in a patient administered a medicinal product." ;
+  owl:equivalentClass <fhir:AdverseEvent> ;
+  :sensitivityTier :Confidential .
+
+:ae_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Ae Id" ;
+  :sensitivityTier :Confidential .
+
+:product_id
+  a owl:ObjectProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range :MedicinalProduct ;
+  rdfs:label "Product Id" ;
+  :sensitivityTier :Confidential .
+
+:batch_id
+  a owl:ObjectProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range :Batch ;
+  rdfs:label "Batch Id" ;
+  :sensitivityTier :Confidential .
+
+:reporter_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Reporter Type" ;
+  :sensitivityTier :Confidential .
+
+:seriousness
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Seriousness" ;
+  :sensitivityTier :Confidential .
+
+:meddra_preferred_term
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Meddra Preferred Term" ;
+  rdfs:comment "MedDRA PT code" ;
+  :sensitivityTier :Confidential .
+
+:onset_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:date ;
+  rdfs:label "Onset Date" ;
+  :sensitivityTier :Confidential .
+
+:report_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Report Date" ;
+  :sensitivityTier :Confidential .
+
+:case_number
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Case Number" ;
+  :sensitivityTier :Confidential .
+
+:regulatory_submission_due
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:date ;
+  rdfs:label "Regulatory Submission Due" ;
+  rdfs:comment "15-day for serious unexpected" ;
+  :sensitivityTier :Confidential .
+
+:regulatory_submitted
+  a owl:DatatypeProperty ;
+  rdfs:domain :AdverseEvent ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Regulatory Submitted" ;
+  :sensitivityTier :Confidential .
+
+:RegulatorySubmission
+  a owl:Class ;
+  rdfs:label "Regulatory Submission" ;
+  rdfs:comment "A dossier or safety report submitted to a health authority (EMA, FDA, PMDA)." ;
+  :sensitivityTier :Restricted .
+
+:submission_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:string ;
+  rdfs:label "Submission Id" ;
+  :sensitivityTier :Restricted .
+
+:product_id
+  a owl:ObjectProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range :MedicinalProduct ;
+  rdfs:label "Product Id" ;
+  :sensitivityTier :Restricted .
+
+:authority
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:string ;
+  rdfs:label "Authority" ;
+  :sensitivityTier :Restricted .
+
+:submission_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:string ;
+  rdfs:label "Submission Type" ;
+  :sensitivityTier :Restricted .
+
+:submission_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Submission Date" ;
+  :sensitivityTier :Restricted .
+
+:deadline_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Deadline Date" ;
+  :sensitivityTier :Restricted .
+
+:status
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:string ;
+  rdfs:label "Status" ;
+  :sensitivityTier :Restricted .
+
+:ectd_sequence
+  a owl:DatatypeProperty ;
+  rdfs:domain :RegulatorySubmission ;
+  rdfs:range xsd:string ;
+  rdfs:label "Ectd Sequence" ;
+  rdfs:comment "eCTD submission sequence number" ;
+  :sensitivityTier :Restricted .
+
+:QualityNonConformance
+  a owl:Class ;
+  rdfs:label "Quality Non-Conformance" ;
+  rdfs:comment "A deviation, out-of-specification result, or quality complaint." ;
+  :sensitivityTier :Confidential .
+
+:nc_id
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Nc Id" ;
+  :sensitivityTier :Confidential .
+
+:batch_id
+  a owl:ObjectProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range :Batch ;
+  rdfs:label "Batch Id" ;
+  :sensitivityTier :Confidential .
+
+:product_id
+  a owl:ObjectProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range :MedicinalProduct ;
+  rdfs:label "Product Id" ;
+  :sensitivityTier :Confidential .
+
+:nc_type
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Nc Type" ;
+  :sensitivityTier :Confidential .
+
+:severity
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Severity" ;
+  :sensitivityTier :Confidential .
+
+:detection_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Detection Date" ;
+  :sensitivityTier :Confidential .
+
+:root_cause
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:string ;
+  rdfs:label "Root Cause" ;
+  :sensitivityTier :Confidential .
+
+:capa_due_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:date ;
+  rdfs:label "Capa Due Date" ;
+  :sensitivityTier :Confidential .
+
+:capa_closed_date
+  a owl:DatatypeProperty ;
+  rdfs:domain :QualityNonConformance ;
+  rdfs:range xsd:date ;
+  rdfs:label "Capa Closed Date" ;
+  :sensitivityTier :Confidential .

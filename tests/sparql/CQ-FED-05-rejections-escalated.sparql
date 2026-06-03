@@ -1,0 +1,37 @@
+# CQ-FED-05 — Does every boundary rejection land in the governance queue?
+# ─────────────────────────────────────────────────────────────────────────
+# Every federation_query_log row with status=REJECTED should either
+# have already been acknowledged by governance OR be linked to an
+# open ontology_evolution_proposal of detection_strategy
+# SHACL_VIOLATION_ACCUMULATION so the boundary contract can be
+# tightened.  An un-escalated, un-acknowledged rejection is a
+# governance-gap finding.
+#
+# Pass condition: the result set is empty.
+#
+# Priority: Medium
+# Validates: Workstream 3 — rejection → governance feedback loop
+# Expected: empty
+# Bound variables: ?rejection ?partnerId
+
+PREFIX fed: <https://ontology.example.com/federation/>
+PREFIX evo: <https://ontology.example.com/evolution/>
+
+SELECT ?rejection ?partnerId
+WHERE {
+    ?rejection a fed:FederationQueryLog ;
+               fed:partnerId  ?partnerId ;
+               fed:status     "REJECTED" ;
+               fed:executedAt ?when .
+
+    FILTER NOT EXISTS {
+        ?proposal a evo:EvolutionProposal ;
+                  evo:title ?title ;
+                  evo:detectionStrategy "SHACL_VIOLATION_ACCUMULATION" .
+        FILTER (CONTAINS(STR(?title), STR(?partnerId)))
+    }
+    FILTER NOT EXISTS {
+        ?rejection fed:acknowledgedBy ?who .
+    }
+}
+LIMIT 20

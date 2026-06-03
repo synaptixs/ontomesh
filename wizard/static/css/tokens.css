@@ -1,0 +1,120 @@
+  /* ── Reset & Variables ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Three themes ship out of the box. Picker lives in the sidebar
+     footer; choice persists to localStorage; system preference seeds
+     the first visit. All component CSS uses tokens only — to add a
+     theme, add another [data-theme="..."] block below. */
+  :root {
+    /* ────────── LIGHT (default) ── Linear / Vercel feel ────────── */
+    --bg:            #f6f7f9;
+    --surface:       #ffffff;
+    --surface-2:     #f3f4f6;
+    --surface-hover: #fafbfc;
+    --border:        rgba(15,23,42,0.07);
+    --border-strong: rgba(15,23,42,0.14);
+    --accent:        #4f46e5;
+    --accent-hover:  #4338ca;
+    --accent-soft:   rgba(79,70,229,0.08);
+    --accent-2:      #a855f7;
+    --success:       #16a34a;
+    --success-soft:  rgba(22,163,74,0.10);
+    --warn:          #d97706;
+    --warn-soft:     rgba(217,119,6,0.10);
+    --danger:        #dc2626;
+    --danger-soft:   rgba(220,38,38,0.10);
+    --text:          #0f172a;
+    --text-2:        #1f2937;
+    --muted:         #4b5563;
+    --muted-2:       #6b7280;
+    --on-accent:     #ffffff;       /* text colour drawn on solid accent fills */
+
+    /* ── Brand layer (P1.1 — Ontomesh) ──────────────────────────────
+       Two-colour brand: indigo as the primary, cyan as the "mesh
+       thread."  Lives alongside the semantic --accent layer so
+       components keep using --accent for state-coloured affordances
+       while marketing surfaces use --brand directly.            */
+    --brand:         #4f46e5;
+    --brand-deep:    #3730a3;
+    --brand-mesh:    #06b6d4;
+    --brand-bg-soft: #eef2ff;
+    --on-brand:      #ffffff;
+
+    /* Shared across all themes. */
+    --radius:    10px;
+    --radius-sm: 7px;
+    --shadow-1: 0 1px 2px rgba(15,23,42,0.04),
+                0 1px 3px rgba(15,23,42,0.04);
+    --shadow-2: 0 1px 2px rgba(15,23,42,0.04),
+                0 6px 16px rgba(15,23,42,0.06);
+    --shadow-modal: 0 24px 60px rgba(15,23,42,0.18),
+                    0 1px 0 rgba(15,23,42,0.04);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+            system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+
+  /* ────────── DARK ── Tokyo-night-ish, indigo accent on near-black ────────── */
+  [data-theme="dark"] {
+    --bg:            #0a0c10;
+    --surface:       #11141a;
+    --surface-2:     #181b22;
+    --surface-hover: #1c2029;
+    --border:        rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.14);
+    --accent:        #818cf8;
+    --accent-hover:  #a5b0fb;
+    --accent-soft:   rgba(129,140,248,0.14);
+    --accent-2:      #c084fc;
+    --success:       #4ade80;
+    --success-soft:  rgba(74,222,128,0.12);
+    --warn:          #fbbf24;
+    --warn-soft:     rgba(251,191,36,0.12);
+    --danger:        #f87171;
+    --danger-soft:   rgba(248,113,113,0.12);
+    --text:          #e6e8ee;
+    --text-2:        #c5cad4;
+    --muted:         #9aa3b6;
+    --muted-2:       #6b7388;
+    --on-accent:     #0a0c10;
+    /* Brand — softened indigo & cyan for the dark canvas. */
+    --brand:         #818cf8;
+    --brand-deep:    #6366f1;
+    --brand-mesh:    #22d3ee;
+    --brand-bg-soft: #1e1b4b;
+    --on-brand:      #0f172a;
+    --shadow-1:  0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
+    --shadow-2:  0 1px 2px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.32);
+    --shadow-modal: 0 24px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  /* ────────── MONO ── high-contrast monochrome, status-only colour ────────── */
+  [data-theme="mono"] {
+    --bg:            #ffffff;
+    --surface:       #ffffff;
+    --surface-2:     #f5f5f5;
+    --surface-hover: #fafafa;
+    --border:        rgba(0,0,0,0.10);
+    --border-strong: rgba(0,0,0,0.24);
+    --accent:        #0f172a;     /* near-black accent — Notion / Apple feel */
+    --accent-hover:  #000000;
+    --accent-soft:   rgba(15,23,42,0.06);
+    --accent-2:      #475569;     /* slate for the secondary node colour */
+    --success:       #15803d;
+    --success-soft:  rgba(21,128,61,0.10);
+    --warn:          #b45309;
+    --warn-soft:     rgba(180,83,9,0.10);
+    --danger:        #b91c1c;
+    --danger-soft:   rgba(185,28,28,0.10);
+    --text:          #0a0a0a;
+    --text-2:        #262626;
+    --muted:         #525252;
+    --muted-2:       #737373;
+    --on-accent:     #ffffff;
+    /* Brand stays monochrome in mono theme — print-friendly. */
+    --brand:         #0a0a0a;
+    --brand-deep:    #000000;
+    --brand-mesh:    #525252;
+    --brand-bg-soft: #f5f5f5;
+    --on-brand:      #ffffff;
+  }

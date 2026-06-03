@@ -1,0 +1,724 @@
+{
+  "generated": "2026-04-22T20:08:54Z",
+  "module_count": 13,
+  "total_classes": 186,
+  "total_properties": 986,
+  "cycles_detected": 0,
+  "iri_conflicts": 128,
+  "modules": [
+    {
+      "filename": "alignment.ttl",
+      "iri": "https://ontology.example.com/tmf/alignment/",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [
+        "https://ontology.example.com/tmf/"
+      ],
+      "class_count": 0,
+      "property_count": 0
+    },
+    {
+      "filename": "drift.ttl",
+      "iri": "https://ontology.example.com/enterprise/drift/",
+      "version": "1.0.0",
+      "version_iri": "https://ontology.example.com/enterprise/drift/1.0.0",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 7,
+      "property_count": 10
+    },
+    {
+      "filename": "energy_utilities.ttl",
+      "iri": "https://ontology.example.com/energy/",
+      "version": "unknown",
+      "version_iri": "https://ontology.example.com/energy/1.0.0",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 8,
+      "property_count": 50
+    },
+    {
+      "filename": "enterprise.ttl",
+      "iri": "https://ontology.example.com/enterprise/",
+      "version": "1.0.0",
+      "version_iri": "https://ontology.example.com/enterprise/1.0.0",
+      "imports": [],
+      "class_count": 62,
+      "property_count": 645
+    },
+    {
+      "filename": "events.ttl",
+      "iri": "https://ontology.example.com/enterprise/events/",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 5,
+      "property_count": 0
+    },
+    {
+      "filename": "federation-config.ttl",
+      "iri": "https://ontology.example.com/tmf/federation/",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 0,
+      "property_count": 0
+    },
+    {
+      "filename": "government.ttl",
+      "iri": "https://ontology.example.com/government/",
+      "version": "unknown",
+      "version_iri": "https://ontology.example.com/government/1.0.0",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 8,
+      "property_count": 61
+    },
+    {
+      "filename": "insurance.ttl",
+      "iri": "https://ontology.example.com/insurance/",
+      "version": "unknown",
+      "version_iri": "https://ontology.example.com/insurance/1.0.0",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 7,
+      "property_count": 59
+    },
+    {
+      "filename": "logistics_supply_chain.ttl",
+      "iri": "https://ontology.example.com/logistics/",
+      "version": "unknown",
+      "version_iri": "https://ontology.example.com/logistics/1.0.0",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 8,
+      "property_count": 66
+    },
+    {
+      "filename": "pharmaceuticals.ttl",
+      "iri": "https://ontology.example.com/pharma/",
+      "version": "unknown",
+      "version_iri": "https://ontology.example.com/pharma/1.0.0",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 8,
+      "property_count": 74
+    },
+    {
+      "filename": "provenance.ttl",
+      "iri": "https://ontology.example.com/enterprise/provenance/",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 0,
+      "property_count": 6
+    },
+    {
+      "filename": "tmf-sid-hierarchy.ttl",
+      "iri": "https://ontology.example.com/tmf/sid/",
+      "version": "23.0",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 70,
+      "property_count": 4
+    },
+    {
+      "filename": "tmf630-task-bulk.ttl",
+      "iri": "",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 3,
+      "property_count": 11
+    }
+  ],
+  "cycles": [],
+  "conflicts": {
+    "https://ontology.example.com/enterprise/asset_id": [
+      "energy_utilities.ttl",
+      "energy_utilities.ttl"
+    ],
+    "https://ontology.example.com/enterprise/capacity_mw": [
+      "energy_utilities.ttl",
+      "energy_utilities.ttl"
+    ],
+    "https://ontology.example.com/enterprise/geo_location": [
+      "energy_utilities.ttl",
+      "logistics_supply_chain.ttl"
+    ],
+    "https://ontology.example.com/enterprise/meter_id": [
+      "energy_utilities.ttl",
+      "energy_utilities.ttl"
+    ],
+    "https://ontology.example.com/enterprise/location_id": [
+      "energy_utilities.ttl",
+      "logistics_supply_chain.ttl"
+    ],
+    "https://ontology.example.com/enterprise/DomainEvent": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ObservationRecord": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Policy": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "insurance.ttl"
+    ],
+    "https://ontology.example.com/enterprise/TmfExportJob": [
+      "enterprise.ttl",
+      "tmf630-task-bulk.ttl"
+    ],
+    "https://ontology.example.com/enterprise/TmfImportJob": [
+      "enterprise.ttl",
+      "tmf630-task-bulk.ttl"
+    ],
+    "https://ontology.example.com/enterprise/TmfTask": [
+      "enterprise.ttl",
+      "tmf630-task-bulk.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasValidFrom": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasValidUntil": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasName": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasActive": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCreatedAt": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCode": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasLabel": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasDescription": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasUnitOfMeasure": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasStatus": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasUpdatedAt": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSensitivityTier": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasAssembledAt": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEventType": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasTitle": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOutcome": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasIndexName": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasFlavor": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOwlClasses": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasRecordCount": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasExecutedAt": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasNumericValue": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasConfidenceScore": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "provenance.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasDerivationMethod": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSourceRef": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasObservedAt": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasVersion": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOrgType": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasPolicyType": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEffectiveFrom": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEffectiveUntil": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasStrategy": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasFlavorName": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasQuestion": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasUrl": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOwnerType": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasResolvedAt": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCurrencyCode": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasState": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasValidForStart": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasValidForEnd": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasContentType": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasPath": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCreationDate": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCompletionDate": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasErrorLog": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasHref": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasBaseType": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSchemaLocation": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasLatitude": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasLongitude": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasLifecycleStatus": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasStartDate": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEndDate": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasIsBundle": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOrderIri": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOrderDate": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasOrderType": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSpecIri": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCategory": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasServiceType": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasPriority": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSlaViolated": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasResolutionNotes": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSubmittedAt": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/agentOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/parentOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/externalOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/assetOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ownerOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/policyOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/modelOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/eventOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/partnerOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/queryOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/proposalOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/payloadOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/raisedBy": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/assignedTo": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/resolvedBy": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/partyOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/customerAccount": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/placeOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/resourceOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/agreementOf": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/serviceOf": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/productOffering": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/submittedBy": [
+      "enterprise.ttl",
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ],
+    "https://ontology.example.com/enterprise/serviceSpec": [
+      "enterprise.ttl",
+      "enterprise.ttl"
+    ]
+  }
+}

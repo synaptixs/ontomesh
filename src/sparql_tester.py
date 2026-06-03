@@ -125,8 +125,15 @@ def _run_rdflib(sparql: str, turtle_paths: List[str]) -> Dict:
     try:
         results = g.query(sparql)
         rows = []
-        for row in results:
-            rows.append({str(var): {"value": str(val)} for var, val in zip(results.vars, row)})
+        # ASK queries return a boolean result — vars is None
+        if results.vars is None:
+            # Treat ASK=True as one synthetic row, ASK=False as empty
+            ask_val = bool(results.askAnswer) if hasattr(results, "askAnswer") else bool(results)
+            if ask_val:
+                rows = [{"ask_result": {"value": "true"}}]
+        else:
+            for row in results:
+                rows.append({str(var): {"value": str(val)} for var, val in zip(results.vars, row)})
         return {"backend": "rdflib", "available": True, "rows": rows, "error": None}
     except Exception as e:
         return {
@@ -146,7 +153,20 @@ def _load_sparql_files() -> List[Dict]:
     queries = []
     for path in files:
         filename = os.path.basename(path)
-        cq_id = filename.replace(".sparql", "").split("-")[0] + "-" + filename.replace(".sparql", "").split("-")[1]
+        # Default ID from filename: take every dash-joined token up to the
+        # first purely-descriptive word (e.g. CQ-CMP-05 from
+        # 'CQ-CMP-05-restricted-not-federated.sparql').
+        stem = filename.replace(".sparql", "")
+        stem_tokens = stem.split("-")
+        id_tokens = []
+        for tok in stem_tokens:
+            # Keep tokens that are uppercase codes (CMP, FED, MEM, TMF10)
+            # or two-digit sequence numbers (01, 10, 42).
+            if tok.isupper() or tok.isdigit() or (len(tok) >= 2 and tok[:2].isdigit()):
+                id_tokens.append(tok)
+            else:
+                break
+        cq_id = "-".join(id_tokens) if id_tokens else stem_tokens[0]
         with open(path) as f:
             content = f.read()
 
@@ -156,7 +176,8 @@ def _load_sparql_files() -> List[Dict]:
         for line in content.splitlines():
             if not line.startswith("#"):
                 break
-            m = re.match(r"#\s*(CQ-\w+):\s*(.+)", line)
+            # Allow both ':' and ' — '/'—'/'-' separators after the CQ ID
+            m = re.match(r"#\s*(CQ-[\w\-]+?)\s*[:—–-]\s+(.+)", line)
             if m:
                 meta["id"] = m.group(1)
                 meta["question"] = m.group(2).strip()

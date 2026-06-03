@@ -1,0 +1,200 @@
+# Logistics & Supply Chain Industry Template
+# Ontology Toolkit — Phase 3 · Sprint S14
+
+industry: logistics_supply_chain
+label: "Logistics & Supply Chain"
+description: >
+  Domain template for freight, warehousing, last-mile delivery, and supply chain visibility.
+  Suitable for 3PL providers, e-commerce fulfillment, cold chain, and customs/trade compliance.
+version: "1.0.0"
+base_iri: "https://ontology.example.com/logistics/"
+external_alignments:
+  - schema_org: "https://schema.org/"
+  - gs1: "https://www.gs1.org/voc/"
+  - dcterms: "http://purl.org/dc/terms/"
+
+entities:
+  - name: Shipment
+    label: "Shipment"
+    description: "A collection of goods being transported from origin to destination."
+    sensitivity: Internal
+    schema_equivalent: "schema:ParcelDelivery"
+    properties:
+      - shipment_id: {type: string, required: true}
+      - tracking_number: {type: string, required: true}
+      - origin_facility_id: {type: string, required: true, fk: Facility}
+      - destination_facility_id: {type: string, required: true, fk: Facility}
+      - carrier_id: {type: string, required: true, fk: Carrier}
+      - service_level: {type: string, values: [SameDay, NextDay, Standard, Economy, Freight]}
+      - shipment_status: {type: string, values: [Created, PickedUp, InTransit, OutForDelivery, Delivered, Returned, Exception]}
+      - estimated_delivery: {type: datetime, required: false}
+      - actual_delivery: {type: datetime, required: false}
+      - gross_weight_kg: {type: decimal, required: false}
+      - declared_value: {type: decimal, required: false}
+      - incoterms: {type: string, values: [EXW, FCA, CPT, CIP, DAP, DPU, DDP, FAS, FOB, CFR, CIF]}
+
+  - name: Package
+    label: "Package"
+    description: "An individual physical container within a shipment."
+    sensitivity: Internal
+    gs1_equivalent: "gs1:Logistic_Unit"
+    properties:
+      - package_id: {type: string, required: true}
+      - shipment_id: {type: string, required: true, fk: Shipment}
+      - sscc: {type: string, required: false, description: "GS1 Serial Shipping Container Code"}
+      - package_type: {type: string, values: [Box, Pallet, Envelope, Drum, Crate, Bag, Bundle]}
+      - weight_kg: {type: decimal, required: false}
+      - length_cm: {type: decimal, required: false}
+      - width_cm: {type: decimal, required: false}
+      - height_cm: {type: decimal, required: false}
+      - is_hazmat: {type: boolean, required: false}
+      - temperature_requirement: {type: string, values: [Ambient, Chilled, Frozen, Controlled]}
+
+  - name: Facility
+    label: "Facility"
+    description: "A warehouse, distribution centre, port, airport, or retail fulfilment location."
+    sensitivity: Internal
+    properties:
+      - facility_id: {type: string, required: true}
+      - facility_name: {type: string, required: true}
+      - facility_type: {type: string, values: [Warehouse, DistributionCenter, Port, Airport, CrossDock, RetailStore, CustomerAddress]}
+      - address: {type: string, required: true}
+      - country_code: {type: string, required: true}
+      - geo_location: {type: string, required: false, description: "WKT POINT"}
+      - capacity_sqm: {type: decimal, required: false}
+      - operator_id: {type: string, required: false}
+
+  - name: Carrier
+    label: "Carrier"
+    description: "A transport service provider (airline, road freight, rail, ocean liner)."
+    sensitivity: Internal
+    properties:
+      - carrier_id: {type: string, required: true}
+      - carrier_name: {type: string, required: true}
+      - carrier_scac: {type: string, required: false, description: "Standard Carrier Alpha Code"}
+      - carrier_type: {type: string, values: [Road, Rail, Air, Ocean, Intermodal, Courier]}
+      - is_preferred: {type: boolean, required: false}
+
+  - name: Order
+    label: "Customer Order"
+    description: "A customer purchase order that triggers fulfilment and shipment creation."
+    sensitivity: Confidential
+    schema_equivalent: "schema:Order"
+    properties:
+      - order_id: {type: string, required: true}
+      - customer_id: {type: string, required: true}
+      - order_date: {type: datetime, required: true}
+      - order_status: {type: string, values: [Pending, Processing, Shipped, Delivered, Cancelled, Returned]}
+      - total_value: {type: decimal, required: true}
+      - currency: {type: string, required: true}
+      - priority_flag: {type: boolean, required: false}
+      - channel: {type: string, values: [eCommerce, EDI, Manual, Marketplace, API]}
+
+  - name: InventoryItem
+    label: "Inventory Item"
+    description: "A SKU held in a facility at a point in time."
+    sensitivity: Internal
+    gs1_equivalent: "gs1:Product"
+    properties:
+      - inventory_id: {type: string, required: true}
+      - sku: {type: string, required: true}
+      - facility_id: {type: string, required: true, fk: Facility}
+      - quantity_on_hand: {type: integer, required: true}
+      - quantity_reserved: {type: integer, required: false}
+      - reorder_point: {type: integer, required: false}
+      - unit_cost: {type: decimal, required: false}
+      - expiry_date: {type: date, required: false}
+      - lot_number: {type: string, required: false}
+
+  - name: TrackingEvent
+    label: "Tracking Event"
+    description: "A scan event recording the location and status of a shipment or package."
+    sensitivity: Internal
+    is_event: true
+    properties:
+      - event_id: {type: string, required: true}
+      - shipment_id: {type: string, required: true, fk: Shipment}
+      - event_timestamp: {type: datetime, required: true}
+      - event_type: {type: string, values: [Pickup, Arrival, Departure, DeliveryAttempt, Delivered, Exception, Return]}
+      - location_id: {type: string, required: false, fk: Facility}
+      - scan_location_description: {type: string, required: false}
+      - exception_code: {type: string, required: false}
+
+  - name: CustomsDeclaration
+    label: "Customs Declaration"
+    description: "Cross-border customs entry declaration for international shipments."
+    sensitivity: Restricted
+    properties:
+      - declaration_id: {type: string, required: true}
+      - shipment_id: {type: string, required: true, fk: Shipment}
+      - hs_code: {type: string, required: true, description: "Harmonized System commodity code"}
+      - declared_value_usd: {type: decimal, required: true}
+      - country_of_origin: {type: string, required: true}
+      - customs_status: {type: string, values: [Pending, Submitted, Cleared, Held, Rejected]}
+      - duty_amount: {type: decimal, required: false}
+
+events:
+  - name: DeliveryException
+    label: "Delivery Exception"
+    description: "A delivery attempt failed or a shipment encountered a problem."
+    parent: TrackingEvent
+  - name: InventoryAlert
+    label: "Inventory Alert"
+    description: "Stock falls below reorder point or expiry date is approaching."
+    is_event: true
+  - name: CarrierDelayEvent
+    label: "Carrier Delay Event"
+    description: "Carrier reports delay — weather, mechanical, customs, or capacity."
+    is_event: true
+  - name: TemperatureBreachEvent
+    label: "Temperature Breach Event"
+    description: "Cold chain temperature breached acceptable range — product may be compromised."
+    sensitivity: Confidential
+    is_event: true
+
+relationships:
+  - "A Shipment contains one or more Packages."
+  - "A Shipment is transported by exactly one Carrier."
+  - "A Shipment moves between exactly two Facilities (origin and destination)."
+  - "An Order generates one or more Shipments."
+  - "A TrackingEvent records the current state of a Shipment."
+  - "An InventoryItem is held at exactly one Facility."
+  - "A CustomsDeclaration covers exactly one Shipment."
+
+competency_questions:
+  - id: CQ-LS-01
+    question: "What is the current status and location of shipment X?"
+    priority: Critical
+  - id: CQ-LS-02
+    question: "Which shipments are currently delayed beyond their estimated delivery date?"
+    priority: Critical
+  - id: CQ-LS-03
+    question: "Which SKUs are below reorder point across all facilities?"
+    priority: Critical
+  - id: CQ-LS-04
+    question: "What is the on-time delivery rate per carrier for the last 30 days?"
+    priority: High
+  - id: CQ-LS-05
+    question: "Which cold-chain shipments experienced temperature breaches this month?"
+    priority: High
+  - id: CQ-LS-06
+    question: "What customs declarations are currently held at border?"
+    priority: High
+  - id: CQ-LS-07
+    question: "What is the average transit time from warehouse A to destination B?"
+    priority: Medium
+  - id: CQ-LS-08
+    question: "Which facilities have capacity utilisation above 90%?"
+    priority: Medium
+  - id: CQ-LS-09
+    question: "Which orders have been returned and what is the return reason?"
+    priority: Medium
+  - id: CQ-LS-10
+    question: "What is the total declared customs value crossing border X this week?"
+    priority: Low
+
+sensitivity_classification:
+  Public:       []
+  Internal:     [Shipment, Package, Facility, Carrier, InventoryItem, TrackingEvent]
+  Confidential: [Order, TemperatureBreachEvent]
+  Restricted:   [CustomsDeclaration]

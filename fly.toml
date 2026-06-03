@@ -1,0 +1,81 @@
+# Ontomesh — Fly.io deployment config (P2.4).
+#
+# Wraps the P2.1 Dockerfile and runs the wizard on Fly's global Anycast
+# network with auto-issued TLS.  Fly is the simplest managed-runtime
+# path for Ontomesh because it natively supports long-lived HTTP
+# connections (SSE), runs Docker images unmodified, and ships with
+# attached Postgres ("Fly Postgres") if you need P2.3.
+#
+# Setup (first time):
+#   flyctl auth login
+#   flyctl launch --no-deploy --name ontomesh-prod --copy-config
+#   # ↑ creates the app on Fly, copies this file into ~/.fly/, doesn't deploy yet
+#
+# Deploy:
+#   flyctl deploy
+#
+# Tail logs:
+#   flyctl logs
+#
+# Open the wizard in your browser:
+#   flyctl open
+#
+# Attach Fly Postgres (optional, when ready for P2.3 in production):
+#   flyctl postgres create --name ontomesh-db
+#   flyctl postgres attach ontomesh-db --app ontomesh-prod
+#   # ↑ sets the DATABASE_URL secret automatically.  Then set:
+#   flyctl secrets set ONTOMESH_DB_URL=postgres://...
+#
+# Tear down:
+#   flyctl apps destroy ontomesh-prod
+
+app          = "ontomesh-prod"
+primary_region = "iad"                          # change to your closest region
+kill_signal  = "SIGINT"
+kill_timeout = "10s"
+
+[build]
+  # Use the multi-stage P2.1 Dockerfile at the repo root.
+  dockerfile = "Dockerfile"
+
+[env]
+  # Fly's $PORT injection ignored; we tell the wizard which port to
+  # bind by setting ONTOMESH_PORT to match [http_service].internal_port.
+  ONTOMESH_HOST = "0.0.0.0"
+  ONTOMESH_PORT = "5051"
+  ONTOMESH_DATA_DIR = "/data"
+
+# Persistent volume for SQLite + saved ontologies + outputs.
+[mounts]
+  source      = "ontomesh_data"
+  destination = "/data"
+
+# Single-machine deployment.  Fly's "shared" preset is cheap enough
+# for a low-traffic wizard; bump to "performance" for production.
+[[vm]]
+  cpu_kind = "shared"
+  cpus     = 1
+  memory   = "1gb"
+
+# HTTPS auto-issued; HTTP → HTTPS redirect free.
+# SSE works out of the box: Fly proxies don't buffer responses.
+[http_service]
+  internal_port  = 5051
+  force_https    = true
+  auto_stop_machines   = "stop"        # cost: scale to zero when idle
+  auto_start_machines  = true
+  min_machines_running = 0             # set to 1 for always-on
+  processes      = ["app"]
+
+  [http_service.concurrency]
+    type       = "requests"
+    hard_limit = 200
+    soft_limit = 100
+
+  # /health → Fly's built-in healthcheck.
+  [[http_service.checks]]
+    grace_period  = "20s"
+    interval      = "30s"
+    method        = "GET"
+    timeout       = "5s"
+    path          = "/health"

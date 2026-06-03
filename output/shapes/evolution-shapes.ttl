@@ -1,0 +1,100 @@
+@prefix :     <https://ontology.example.com/enterprise/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix shapes: <https://ontology.example.com/shapes/enterprise/> .
+@prefix evo:    <https://ontology.example.com/evolution/> .
+
+# ────────────────────────────────────────────────────────────────
+# Ontology-Evolution Proposal Shapes
+# Workstream 2 (Gen2) — validates structure of every autonomous
+# evolution proposal before it can enter the review queue.
+# ────────────────────────────────────────────────────────────────
+
+shapes:EvolutionProposalShape
+  a sh:NodeShape ;
+  sh:targetClass evo:EvolutionProposal ;
+  sh:property [
+    sh:path evo:proposalId ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Every evolution proposal must carry a unique proposal_id (UUID)." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:proposalType ;
+    sh:minCount 1 ;
+    sh:in ( "NEW_CLASS" "NEW_PROPERTY" "NEW_CONSTRAINT" "DEPRECATE" ) ;
+    sh:message "proposal_type must be one of NEW_CLASS/NEW_PROPERTY/NEW_CONSTRAINT/DEPRECATE." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:candidateTurtle ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:minLength 10 ;
+    sh:message "Proposal must include a proposed OWL axiom serialised as Turtle." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:evidenceSparql ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:minLength 10 ;
+    sh:message "Proposal must include the SPARQL query that surfaced the evidence." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:detectionStrategy ;
+    sh:minCount 1 ;
+    sh:in ( "SHACL_VIOLATION_ACCUMULATION" "CARDINALITY_BREACH"
+            "CLASS_COOCCURRENCE" "NLP_CANDIDATE_PROMOTION" ) ;
+    sh:message "detection_strategy must be one of the four monitor strategies." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:confidenceScore ;
+    sh:minCount 1 ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0.0 ;
+    sh:maxInclusive 1.0 ;
+    sh:message "confidence_score must be a number between 0.0 and 1.0 inclusive." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:status ;
+    sh:minCount 1 ;
+    sh:in ( "PENDING" "APPROVED" "REJECTED" "DEFERRED" ) ;
+    sh:message "status must be one of PENDING/APPROVED/REJECTED/DEFERRED." ;
+    sh:severity sh:Violation
+  ] .
+
+# ── Approval-gate shape ─────────────────────────────────────────
+# Enforces that any APPROVED proposal carries both reviewer_id and
+# a semver version_target so the auto-versioner can act on it.
+shapes:EvolutionApprovalGate
+  a sh:NodeShape ;
+  sh:targetClass evo:EvolutionProposal ;
+  sh:property [
+    sh:path evo:reviewerId ;
+    sh:message "Approved proposal must carry a reviewer_id." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:property [
+    sh:path evo:versionTarget ;
+    sh:pattern "^\\d+\\.\\d+\\.\\d+$" ;
+    sh:message "Approved proposal must carry a semver version_target (MAJOR.MINOR.PATCH)." ;
+    sh:severity sh:Violation
+  ] ;
+  sh:sparql [
+    sh:message "Approved proposals require reviewer_id + version_target." ;
+    sh:select """
+      PREFIX evo: <https://ontology.example.com/evolution/>
+      SELECT ?this WHERE {
+        ?this evo:status "APPROVED" .
+        FILTER NOT EXISTS { ?this evo:reviewerId ?r }
+      }
+    """
+  ] .

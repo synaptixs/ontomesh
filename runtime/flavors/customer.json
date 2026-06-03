@@ -25,5 +25,23 @@
   },
   "db_tables": ["tmf_party", "tmf_product", "tmf_service"],
   "system_prompt_hint": "You are a customer relationship AI assistant. Focus on party lifecycle states, customer product holdings, service activation status, and related party associations. Respect data minimisation — return only fields required to answer the question. Use TMF632 and TMF638 terminology.",
-  "cq_ids": ["CQ-TMF6", "CQ-TMF7", "CQ-TMF8"]
+  "cq_ids": ["CQ-TMF6", "CQ-TMF7", "CQ-TMF8"],
+  "memory_sharing": {
+    "can_read_from": ["customer"],
+    "can_be_read_by": ["billing", "compliance"],
+    "max_readable_tier": "Internal",
+    "prov_influence_enabled": false,
+    "sharing_note": "Customer observations shared with billing for billing-to-customer linkage and compliance for party audit. Customer agents isolated from network/fault observations."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://customer",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/Party",
+      "https://ontology.example.com/tmf/Product",
+      "https://ontology.example.com/tmf/Service"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Internal"
+  }
 }

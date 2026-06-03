@@ -25,5 +25,23 @@
   },
   "db_tables": ["tmf_conflict_event", "observation_record", "semantic_loss_log"],
   "system_prompt_hint": "You are a compliance and governance AI assistant. Focus on unresolved conflict events, SHACL violation patterns, low-confidence observations, and policy adherence. Flag escalated conflicts and semantic losses immediately. Use PROV-O derivation terminology.",
-  "cq_ids": ["CQ-P2B-conflict-resolution"]
+  "cq_ids": ["CQ-P2B-conflict-resolution"],
+  "memory_sharing": {
+    "can_read_from": ["network-ops", "fault-management", "billing", "customer", "compliance"],
+    "can_be_read_by": ["compliance"],
+    "max_readable_tier": "Confidential",
+    "prov_influence_enabled": true,
+    "sharing_note": "Compliance has cross-flavor read access (up to Confidential tier) for audit and governance purposes. Compliance observations are not shared downstream to preserve audit independence."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://compliance",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/ObservationRecord",
+      "https://ontology.example.com/tmf/ConflictEvent",
+      "https://ontology.example.com/tmf/Policy"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Confidential"
+  }
 }

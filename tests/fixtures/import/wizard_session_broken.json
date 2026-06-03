@@ -1,0 +1,13 @@
+{
+  "domain": { "name": "" },
+  "entities": [
+    { "name": "Customer A",  "label": "Customer A", "description": "Has an unsafe space in name." },
+    { "name": "duplicate",   "label": "Duplicate" },
+    { "name": "duplicate",   "label": "Duplicate" }
+  ],
+  "events": [],
+  "relationships": [
+    { "from_entity": "Duplicate", "label": "uses", "to_entity": "DoesNotExist" }
+  ],
+  "competency_questions": []
+}

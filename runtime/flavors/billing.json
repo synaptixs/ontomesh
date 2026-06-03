@@ -25,5 +25,24 @@
   },
   "db_tables": ["tmf_customer_bill", "tmf_product", "tmf_agreement"],
   "system_prompt_hint": "You are a billing and revenue management AI assistant. Focus on bill disputes, overdue payments, SLA-linked commercial agreements, and product subscription lifecycles. Treat all financial amounts and customer account data as Confidential. Use TMF678 and TMF651 terminology.",
-  "cq_ids": ["CQ-TMF13"]
+  "cq_ids": ["CQ-TMF13"],
+  "memory_sharing": {
+    "can_read_from": ["billing"],
+    "can_be_read_by": ["compliance"],
+    "max_readable_tier": "Confidential",
+    "prov_influence_enabled": false,
+    "sharing_note": "Billing data is Confidential. Only compliance can read billing observations for audit purposes. Billing agents cannot read from other flavors to prevent data leakage."
+  },
+  "embedding": {
+    "model": "hash-local-384",
+    "vector_store": "memory://billing",
+    "owl_classes": [
+      "https://ontology.example.com/tmf/CustomerBill",
+      "https://ontology.example.com/tmf/BillingAccount",
+      "https://ontology.example.com/tmf/Product",
+      "https://ontology.example.com/tmf/Agreement"
+    ],
+    "chunk_size": 1,
+    "max_sensitivity": "Confidential"
+  }
 }

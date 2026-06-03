@@ -10,11 +10,12 @@ Usage:
 """
 
 import asyncio
+import json
 import os
 import sys
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
@@ -25,6 +26,8 @@ from grounder import Grounder
 from assembler import PayloadAssembler
 from output_gate import OutputGate
 from input_gate import InputGate
+from memory import AgentMemory
+from hybrid_retriever import HybridRetriever
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -104,6 +107,8 @@ class RuntimeClient:
         model: Optional[str] = None,
         api_key: Optional[str] = None,
         min_confidence: float = 0.0,
+        drift_monitor=None,
+        drift_propagator=None,
     ):
         """Initialise the RuntimeClient.
 
@@ -116,6 +121,15 @@ class RuntimeClient:
             model: Optional model override for the adapter.
             api_key: Optional API key override (defaults to env var).
             min_confidence: Minimum confidence score for InputGate screening.
+            drift_monitor: Optional :class:`runtime.drift.OntologyDriftMonitor`.
+                When provided, every :meth:`ask` call may inject the most
+                recent production drift alerts into the LLM payload (set
+                ``drift_alerts > 0`` on the call). See
+                ``runtime/drift/__init__.py`` for full integration notes.
+            drift_propagator: Optional :class:`runtime.drift.OWLPropagator`.
+                When set alongside ``drift_monitor``, every alert injected
+                into the payload also fires :meth:`OWLPropagator.propagate`,
+                escalating monitoring on dependent / sibling entities.
         """
         self._db_path = db_path
         self._out_path = out_path
@@ -126,6 +140,12 @@ class RuntimeClient:
         self._input_gate = InputGate(db_path, min_confidence=min_confidence)
         self._output_gate = OutputGate(db_path)
         self._adapter_instance = self._init_adapter(adapter, model, api_key)
+        self._memory = AgentMemory(db_path)
+        # Workstream 5 — lazy per-flavor HybridRetriever cache
+        self._retrievers: dict = {}
+        # feature/monitordrift — production drift monitoring
+        self._drift_monitor = drift_monitor
+        self._drift_propagator = drift_propagator
 
     # ------------------------------------------------------------------
     # Properties
@@ -161,6 +181,11 @@ class RuntimeClient:
         """The active LLM adapter instance."""
         return self._adapter_instance
 
+    @property
+    def memory(self) -> AgentMemory:
+        """The active AgentMemory instance for this client."""
+        return self._memory
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -172,6 +197,13 @@ class RuntimeClient:
         max_records: int = 50,
         output_format: str = "json",
         save_payload: bool = False,
+        memory_recall: bool = False,
+        memory_recall_limit: int = 5,
+        memory_time_range: Optional[Tuple[str, str]] = None,
+        retrieval: str = "structured",
+        class_expression: Optional[str] = None,
+        retrieval_k: int = 5,
+        drift_alerts: int = 0,
     ) -> dict:
         """Run the full pipeline for a single question.
 
@@ -181,11 +213,33 @@ class RuntimeClient:
             max_records: Maximum records to retrieve from the DB.
             output_format: Desired LLM response format (``"json"``, ``"text"``, etc.).
             save_payload: If ``True``, save the assembled payload to disk.
+            memory_recall: If ``True``, prepend relevant prior reasoning from
+                the memory layer to the assembled payload before calling the
+                LLM.  This gives the agent access to its own prior answers
+                on related topics, enabling progressive reasoning across
+                invocations.
+            memory_recall_limit: Maximum number of prior observations to
+                prepend (default 5).  Higher values increase context richness
+                but also token cost.
+            memory_time_range: Optional ``(iso_from, iso_to)`` tuple to
+                restrict which prior observations are recalled.  ``None``
+                returns the most recent regardless of age.
+            retrieval: Retrieval strategy — ``"structured"`` (default,
+                SQL grounding only), ``"hybrid"`` (ontology-bounded
+                vector search + SQL grounding via Workstream 5), or
+                ``"vector-only"`` (skip SQL grounding).
+            class_expression: OWL class expression restricting the
+                hybrid retriever's search population (e.g.
+                ``"tmf:NetworkFunction"`` or
+                ``"tmf:Alarm | tmf:TroubleTicket"``).  Defaults to the
+                flavor's declared OWL classes.
+            retrieval_k: Number of hybrid-retrieval results to prepend
+                to the payload (default 5).
 
         Returns:
             A result dict with keys: ``question``, ``flavor``, ``answer``,
             ``valid``, ``violations``, ``observation_iri``, ``prov``,
-            ``model``, ``elapsed_ms``.
+            ``model``, ``elapsed_ms``, ``memory_context_count``.
         """
         t_start = time.monotonic()
 
@@ -199,6 +253,48 @@ class RuntimeClient:
         grounded_data["@graph"] = accepted
         grounded_data["meta"]["record_count"] = len(accepted)
         grounded_data["meta"]["rejected_count"] = len(rejected)
+
+        # Step 2a: Hybrid retrieval — ontology-bounded vector search (Workstream 5)
+        hybrid_context_count = 0
+        if retrieval in ("hybrid", "vector-only"):
+            retriever = self._get_retriever(flavor)
+            hybrid = retriever.retrieve(
+                question,
+                class_expression=class_expression,
+                k=retrieval_k,
+                strategy="ONTOLOGY_BOUNDED",
+            )
+            hybrid_records = [r["jsonld"] for r in hybrid["results"] if r.get("jsonld")]
+            hybrid_context_count = len(hybrid_records)
+            if hybrid_records:
+                if retrieval == "vector-only":
+                    grounded_data["@graph"] = hybrid_records
+                else:
+                    grounded_data["@graph"] = hybrid_records + grounded_data["@graph"]
+                grounded_data["meta"]["hybrid_context_count"] = hybrid_context_count
+                grounded_data["meta"]["record_count"] = len(grounded_data["@graph"])
+                grounded_data["meta"]["hybrid_resolved_classes"] = hybrid["resolved_classes"][:12]
+
+        # Step 2b: Memory recall — prepend prior reasoning to the payload
+        memory_context_count = 0
+        if memory_recall:
+            recall_result = self._memory.recall(
+                query=question,
+                flavor=flavor,
+                time_range=memory_time_range,
+                limit=memory_recall_limit,
+            )
+            prior_graph = recall_result.get("@graph", [])
+            memory_context_count = len(prior_graph)
+            if prior_graph:
+                # Prepend prior observations to the grounded @graph so
+                # PayloadAssembler includes them in the system context
+                grounded_data["@graph"] = prior_graph + grounded_data["@graph"]
+                grounded_data["meta"]["memory_context_count"] = memory_context_count
+                grounded_data["meta"]["record_count"] += memory_context_count
+
+        # Step 2c: Drift alerts — prepend production-drift context (feature/monitordrift)
+        drift_alert_count = self._inject_drift_context(grounded_data, drift_alerts)
 
         # Step 3: Assemble payload
         payload = self._assembler.assemble(
@@ -226,7 +322,135 @@ class RuntimeClient:
         )
 
         elapsed_ms = int((time.monotonic() - t_start) * 1000)
-        return self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result["memory_context_count"] = memory_context_count
+        result["hybrid_context_count"] = hybrid_context_count
+        result["drift_alert_count"] = drift_alert_count
+        result["retrieval"] = retrieval
+        return result
+
+    def retrieve(
+        self,
+        question: str,
+        flavor: str,
+        *,
+        class_expression: Optional[str] = None,
+        k: int = 5,
+        strategy: str = "ONTOLOGY_BOUNDED",
+    ) -> dict:
+        """Run ontology-bounded hybrid retrieval without calling the LLM.
+
+        Thin wrapper around :class:`HybridRetriever` for teams that want
+        the retrieval layer only (Workstream 5 — hybrid retrieval for
+        custom RAG pipelines).  Returns the raw
+        :meth:`HybridRetriever.retrieve` output.
+        """
+        return self._get_retriever(flavor).retrieve(
+            question,
+            class_expression=class_expression,
+            k=k,
+            strategy=strategy,
+        )
+
+    # ------------------------------------------------------------------
+    # feature/monitordrift — drift context injection
+    # ------------------------------------------------------------------
+
+    def _inject_drift_context(self, grounded_data: dict, drift_alerts: int) -> int:
+        """Prepend recent drift alerts as JSON-LD records and propagate.
+
+        Symmetric with the memory-recall block above. Returns the number
+        of alert records injected. When ``drift_alerts == 0`` or no
+        drift_monitor is wired into this client, this is a no-op
+        returning ``0``. When a propagator is also wired in, every
+        alert fires :meth:`OWLPropagator.propagate` to record
+        escalations on dependent entities.
+        """
+        if drift_alerts <= 0 or self._drift_monitor is None:
+            return 0
+        alerts = self._drift_monitor.recent_alerts(n=drift_alerts)
+        if not alerts:
+            return 0
+        nodes = [self._alert_to_jsonld(a) for a in alerts]
+        grounded_data["@graph"] = nodes + grounded_data.get("@graph", [])
+        grounded_data["meta"]["drift_alert_count"] = len(nodes)
+        grounded_data["meta"]["record_count"] = (
+            grounded_data["meta"].get("record_count", 0) + len(nodes)
+        )
+        if self._drift_propagator is not None:
+            for a in alerts:
+                self._drift_propagator.propagate(a)
+        return len(nodes)
+
+    @staticmethod
+    def _alert_to_jsonld(alert) -> dict:
+        """Convert a :class:`drift_monitor.Alert` (or dict) to JSON-LD."""
+        def _f(name, default=None):
+            if hasattr(alert, name):
+                return getattr(alert, name)
+            if isinstance(alert, dict):
+                return alert.get(name, default)
+            return default
+        ek = _f("entity_key", "")
+        return {
+            "@type":            "drift:DriftAlert",
+            "@id":              f"drift:alert/{ek}/{_f('timestamp', '')}",
+            "drift:entityKey":  ek,
+            "drift:severity":   _f("severity"),
+            "drift:metric":     _f("metric_type"),
+            "drift:observed":   _f("observed"),
+            "drift:threshold":  _f("threshold"),
+            "drift:message":    _f("message"),
+            "drift:recommendation": _f("recommendation"),
+            "drift:feature":    _f("feature"),
+            "drift:timestamp":  _f("timestamp"),
+        }
+
+    def _get_retriever(self, flavor: str) -> HybridRetriever:
+        """Cache one :class:`HybridRetriever` per flavor."""
+        if flavor not in self._retrievers:
+            self._retrievers[flavor] = HybridRetriever(
+                flavor=flavor,
+                db_path=self._db_path,
+            )
+        return self._retrievers[flavor]
+
+    def remember(
+        self,
+        subject: str,
+        flavor: Optional[str] = None,
+        limit: int = 20,
+        time_range: Optional[Tuple[str, str]] = None,
+    ) -> dict:
+        """Convenience method: recall prior observations about a subject.
+
+        Wraps :meth:`AgentMemory.recall` for ergonomic use alongside
+        :meth:`ask`.  Returns a typed JSON-LD dict ready for inspection
+        or direct injection into a custom payload.
+
+        Args:
+            subject: Free-text subject string — matched against stored
+                     ``value_text`` and ``source_ref`` fields.
+            flavor: Optional flavor scope restriction.
+            limit: Maximum records to return (default 20).
+            time_range: Optional ``(iso_from, iso_to)`` tuple.
+
+        Returns:
+            A ``MemoryRecallResult`` JSON-LD dict (same as
+            :meth:`AgentMemory.recall`).
+
+        Example::
+
+            client = RuntimeClient(db_path="db/enterprise.db")
+            prior = client.remember("AMF-East-01", flavor="network-ops")
+            print(f"Found {prior['result_count']} prior observations")
+        """
+        return self._memory.recall(
+            query=subject,
+            flavor=flavor,
+            time_range=time_range,
+            limit=limit,
+        )
 
     async def ask_async(
         self,
@@ -235,6 +459,13 @@ class RuntimeClient:
         max_records: int = 50,
         output_format: str = "json",
         save_payload: bool = False,
+        memory_recall: bool = False,
+        memory_recall_limit: int = 5,
+        memory_time_range: Optional[Tuple[str, str]] = None,
+        retrieval: str = "structured",
+        class_expression: Optional[str] = None,
+        retrieval_k: int = 5,
+        drift_alerts: int = 0,
     ) -> dict:
         """Async version of :meth:`ask`.
 
@@ -244,6 +475,10 @@ class RuntimeClient:
             max_records: Maximum records to retrieve from the DB.
             output_format: Desired LLM response format.
             save_payload: If ``True``, save the assembled payload to disk.
+            memory_recall: If ``True``, prepend relevant prior reasoning to
+                the payload before the LLM call (same as sync :meth:`ask`).
+            memory_recall_limit: Maximum prior observations to prepend.
+            memory_time_range: Optional ``(iso_from, iso_to)`` time filter.
 
         Returns:
             A result dict (same shape as :meth:`ask`).
@@ -264,6 +499,52 @@ class RuntimeClient:
         grounded_data["meta"]["record_count"] = len(accepted)
         grounded_data["meta"]["rejected_count"] = len(rejected)
 
+        # Hybrid retrieval (async-compatible: DB I/O in executor)
+        hybrid_context_count = 0
+        if retrieval in ("hybrid", "vector-only"):
+            retriever = self._get_retriever(flavor)
+            hybrid = await loop.run_in_executor(
+                None,
+                lambda: retriever.retrieve(
+                    question,
+                    class_expression=class_expression,
+                    k=retrieval_k,
+                    strategy="ONTOLOGY_BOUNDED",
+                ),
+            )
+            hybrid_records = [r["jsonld"] for r in hybrid["results"] if r.get("jsonld")]
+            hybrid_context_count = len(hybrid_records)
+            if hybrid_records:
+                if retrieval == "vector-only":
+                    grounded_data["@graph"] = hybrid_records
+                else:
+                    grounded_data["@graph"] = hybrid_records + grounded_data["@graph"]
+                grounded_data["meta"]["hybrid_context_count"] = hybrid_context_count
+                grounded_data["meta"]["record_count"] = len(grounded_data["@graph"])
+                grounded_data["meta"]["hybrid_resolved_classes"] = hybrid["resolved_classes"][:12]
+
+        # Memory recall (async-compatible: DB I/O in executor)
+        memory_context_count = 0
+        if memory_recall:
+            recall_result = await loop.run_in_executor(
+                None,
+                lambda: self._memory.recall(
+                    query=question,
+                    flavor=flavor,
+                    time_range=memory_time_range,
+                    limit=memory_recall_limit,
+                ),
+            )
+            prior_graph = recall_result.get("@graph", [])
+            memory_context_count = len(prior_graph)
+            if prior_graph:
+                grounded_data["@graph"] = prior_graph + grounded_data["@graph"]
+                grounded_data["meta"]["memory_context_count"] = memory_context_count
+                grounded_data["meta"]["record_count"] += memory_context_count
+
+        # Drift alerts (feature/monitordrift) — same helper as sync ask()
+        drift_alert_count = self._inject_drift_context(grounded_data, drift_alerts)
+
         payload = self._assembler.assemble(
             question=question,
             flavor_name=flavor,
@@ -281,7 +562,12 @@ class RuntimeClient:
         )
 
         elapsed_ms = int((time.monotonic() - t_start) * 1000)
-        return self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result = self._build_result(payload, llm_response, gate_result, elapsed_ms)
+        result["memory_context_count"] = memory_context_count
+        result["hybrid_context_count"] = hybrid_context_count
+        result["drift_alert_count"] = drift_alert_count
+        result["retrieval"] = retrieval
+        return result
 
     def list_flavors(self) -> list:
         """Return a sorted list of all registered flavor names."""
@@ -354,9 +640,16 @@ class RuntimeClient:
                 kwargs["model"] = model
             return OllamaAdapter(**kwargs)
 
+        if adapter_name == "oci":
+            from oci_adapter import OCIAdapter
+            kwargs = {}
+            if model:
+                kwargs["model"] = model
+            return OCIAdapter(**kwargs)
+
         raise ValueError(
             f"Unknown adapter '{adapter_name}'. "
-            "Choose from: anthropic, openai, vertex, ollama"
+            "Choose from: anthropic, openai, vertex, ollama, oci"
         )
 
     def _build_result(

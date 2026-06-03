@@ -1,0 +1,80 @@
+{
+  "regulation_id": "basel-iv-sr-11-7",
+  "name": "Basel IV \u2014 SR 11-7 Supervisory Guidance on Model Risk Management",
+  "short_name": "Basel IV SR 11-7",
+  "jurisdiction": "United States (Federal Reserve, OCC)",
+  "effective_date": "2011-04-04",
+  "last_verified_date": "2026-04-01",
+  "regulatory_source_url": "https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm",
+  "scope": "Banking organisations using models for risk management, capital adequacy, and decisioning",
+  "applies_to": [
+    "finance"
+  ],
+  "summary": "Requires a sound model risk management framework covering model development, implementation, use, validation, governance, policies, and controls. Algorithmic decisions must be explainable and evidence trails must be preserved for independent review.",
+  "requirements": [
+    {
+      "req_id": "SR-11-7-DEV-1",
+      "title": "Model development transparency",
+      "description": "Model structure, inputs, and intended use must be documented in machine-readable form linked to the deployed model.",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Core entity identification",
+      "pass_expression": "score >= 3"
+    },
+    {
+      "req_id": "SR-11-7-VAL-1",
+      "title": "Validation of model outputs",
+      "description": "Every model output must pass a structural validation gate before it is used in risk decisioning.",
+      "artefact_type": "SHACL_SHAPE",
+      "evidence_selector": "ObservationAcceptanceGate",
+      "pass_expression": "exists"
+    },
+    {
+      "req_id": "SR-11-7-GOV-1",
+      "title": "Governance scorecard coverage",
+      "description": "A risk-management scorecard covering entity identification, constraint definition, and boundary validation must be produced on a recurring basis.",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Boundary validation",
+      "pass_expression": "score >= 3"
+    },
+    {
+      "req_id": "SR-11-7-PROV-1",
+      "title": "Provenance of every model decision",
+      "description": "Every model decision must carry agent attribution and observation timestamps sufficient to reconstruct the decision chain.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-004",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "SR-11-7-PROV-2",
+      "title": "Confidence and derivation audit",
+      "description": "Confidence scores and derivation methods must be recorded for every observation used in model input or output.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-005",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "SR-11-7-USE-1",
+      "title": "Policy governance coverage",
+      "description": "Each model-driven event must name the governing policy and its compliance outcome.",
+      "artefact_type": "SPARQL_CQ",
+      "evidence_selector": "CQ-007",
+      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+    },
+    {
+      "req_id": "SR-11-7-USE-2",
+      "title": "Source attribution completeness",
+      "description": "At least 90% of observations must carry full source attribution (recorded_by and observed_at).",
+      "artefact_type": "GOVERNANCE_SCORECARD_CRITERION",
+      "evidence_selector": "Source attribution",
+      "pass_expression": "score >= 3"
+    },
+    {
+      "req_id": "SR-11-7-AUD-1",
+      "title": "Independent review artefact",
+      "description": "A PROV-O chain for the decision under audit must be exportable for independent third-party review.",
+      "artefact_type": "PROV_O_CHAIN",
+      "evidence_selector": "decision_iri",
+      "pass_expression": "chain_depth >= 1"
+    }
+  ]
+}

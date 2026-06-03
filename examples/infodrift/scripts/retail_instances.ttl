@@ -1,0 +1,22 @@
+@prefix :    <https://ontology.example.com/retail#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# A minimal instance graph for the infodrift demo.
+#
+# In a production setup these individuals would be materialised by
+# `toolkit.py` from your DB rows or by a downstream RML mapping. For the
+# demo we declare them inline so the example is self-contained and works
+# the moment the toolkit pipeline has produced its class-level ontology.
+
+:Transaction a owl:Class .
+:Order       a owl:Class ; rdfs:subClassOf :Transaction .
+:Invoice     a owl:Class ; rdfs:subClassOf :Transaction .
+:Customer    a owl:Class .
+
+<https://ontology.example.com/retail#Customer/1> a :Customer, owl:NamedIndividual .
+<https://ontology.example.com/retail#Customer/2> a :Customer, owl:NamedIndividual .
+<https://ontology.example.com/retail#Order/1>    a :Order,    owl:NamedIndividual .
+<https://ontology.example.com/retail#Order/2>    a :Order,    owl:NamedIndividual .
+<https://ontology.example.com/retail#Invoice/1>  a :Invoice,  owl:NamedIndividual .
+<https://ontology.example.com/retail#Invoice/2>  a :Invoice,  owl:NamedIndividual .

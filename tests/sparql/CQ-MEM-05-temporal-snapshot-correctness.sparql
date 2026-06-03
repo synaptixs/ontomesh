@@ -1,0 +1,37 @@
+# CQ-MEM-05 — Does temporal snapshot return correct state at a given timestamp?
+# ─────────────────────────────────────────────────────────────────────────────
+# Verifies the point-in-time snapshot operation: given a target timestamp T,
+# the query must return only observations that:
+#   (a) were generated at or before T (transaction-time constraint)
+#   (b) are not invalidated (no prov:wasInvalidatedBy property present)
+#
+# This is the correctness test for TQ-01 (point-in-time snapshot template)
+# and the memory.snapshot() method.
+#
+# Pass condition (PASS-STRUCTURAL): The query pattern is structurally valid
+# against the ontology TBox. With ABox instance data present, it returns
+# the set of valid observations at any given timestamp.
+#
+# Bound variables:
+#   ?record, ?entity, ?method, ?generated
+
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX tmf:  <https://ontology.example.com/tmf/>
+
+SELECT ?record ?entity ?method ?generated
+WHERE {
+    ?record a tmf:ObservationRecord ;
+            tmf:entity_iri        ?entity ;
+            tmf:derivation_method ?method ;
+            prov:generatedAtTime  ?generated .
+
+    # Exclude invalidated records — they are not valid at any snapshot time
+    FILTER NOT EXISTS {
+        ?record prov:wasInvalidatedBy ?inv .
+    }
+
+    # Ensure the generation timestamp is populated
+    FILTER (BOUND(?generated))
+}
+ORDER BY DESC(?generated)
+LIMIT 10

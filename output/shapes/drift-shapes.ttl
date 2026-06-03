@@ -1,0 +1,121 @@
+@prefix :      <https://ontology.example.com/enterprise/> .
+@prefix drift: <https://ontology.example.com/enterprise/drift/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix ssn:   <http://www.w3.org/ns/ssn/> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SHACL Shapes — Drift Detection
+#  Phase 3 · Sprint S14 · Generated 2026-04-22T20:08:54Z
+# ═══════════════════════════════════════════════════════════════════════════
+
+<https://ontology.example.com/enterprise/drift/shapes>
+  a owl:Ontology ;
+  rdfs:label "Drift Detection SHACL Shapes" .
+
+
+# ── DriftObservation base shape ────────────────────────────────────────────
+
+:DriftObservationShape
+  a sh:NodeShape ;
+  sh:targetClass :DriftObservation ;
+  rdfs:label "Drift Observation Shape" ;
+
+  sh:property [
+    sh:path      :metricValue ;
+    sh:minCount  1 ;
+    sh:datatype  xsd:decimal ;
+    sh:message   "metricValue is required and must be xsd:decimal." ;
+    sh:severity  sh:Violation ;
+  ] ;
+
+  sh:property [
+    sh:path      :driftMetricType ;
+    sh:minCount  1 ;
+    sh:class     :DriftMetricType ;
+    sh:message   "driftMetricType is required." ;
+    sh:severity  sh:Violation ;
+  ] ;
+
+  sh:property [
+    sh:path      :baselinePeriod ;
+    sh:minCount  1 ;
+    sh:datatype  xsd:string ;
+    sh:message   "baselinePeriod (ISO 8601 interval) is required." ;
+    sh:severity  sh:Violation ;
+  ] ;
+
+  sh:property [
+    sh:path      :observationPeriod ;
+    sh:minCount  1 ;
+    sh:datatype  xsd:string ;
+    sh:message   "observationPeriod (ISO 8601 interval) is required." ;
+    sh:severity  sh:Violation ;
+  ] ;
+
+  sh:property [
+    sh:path      :driftSeverity ;
+    sh:in        ( "OK" "WARNING" "CRITICAL" ) ;
+    sh:message   "driftSeverity must be OK, WARNING, or CRITICAL." ;
+    sh:severity  sh:Violation ;
+  ] ;
+
+  sh:property [
+    sh:path      :featureName ;
+    sh:datatype  xsd:string ;
+    sh:message   "featureName must be a string." ;
+    sh:severity  sh:Warning ;
+  ] .
+
+
+# ── PSI-specific shape (threshold enforcement) ─────────────────────────────
+
+:PSIDriftObservationShape
+  a sh:NodeShape ;
+  sh:targetClass :PSIDriftObservation ;
+
+  sh:property [
+    sh:path        :metricValue ;
+    sh:maxInclusive 1.0 ;
+    sh:minInclusive 0.0 ;
+    sh:message     "PSI value must be in [0.0, 1.0]." ;
+    sh:severity    sh:Violation ;
+  ] .
+
+
+# ── JS Divergence shape (bounded 0–1) ─────────────────────────────────────
+
+:JSDriftObservationShape
+  a sh:NodeShape ;
+  sh:targetClass :JSDriftObservation ;
+
+  sh:property [
+    sh:path        :metricValue ;
+    sh:maxInclusive 1.0 ;
+    sh:minInclusive 0.0 ;
+    sh:message     "JS divergence must be in [0.0, 1.0]." ;
+    sh:severity    sh:Violation ;
+  ] .
+
+
+# ── Calibration score shape ────────────────────────────────────────────────
+
+:CalibrationDriftObservationShape
+  a sh:NodeShape ;
+  sh:targetClass :CalibrationDriftObservation ;
+
+  sh:property [
+    sh:path        :metricValue ;
+    sh:maxInclusive 1.0 ;
+    sh:minInclusive 0.0 ;
+    sh:message     "Calibration score (ECE) must be in [0.0, 1.0]." ;
+    sh:severity    sh:Violation ;
+  ] .
