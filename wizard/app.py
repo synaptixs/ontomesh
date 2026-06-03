@@ -92,6 +92,14 @@ except Exception as _exc:                                              # noqa: B
     print(f"[wizard.app] structured logging install skipped: {_exc!r}",
           file=sys.stderr)
 
+# P3.5 — Prometheus /metrics endpoint.
+try:
+    from wizard.metrics_exporter import install as _install_metrics
+    _install_metrics(app)
+except Exception as _exc:                                              # noqa: BLE001
+    print(f"[wizard.app] metrics install skipped: {_exc!r}",
+          file=sys.stderr)
+
 _pipeline_lock = threading.Lock()
 _pipeline_running = False
 _pipeline_log: list[str] = []
