@@ -99,11 +99,19 @@ USER ontomesh
 EXPOSE 5051
 
 # Hit /health every 30 s; consider the container unhealthy after 3
-# consecutive failures.  start-period gives Flask room to boot.
+# consecutive failures.  start-period gives gunicorn room to boot.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD curl -fsS "http://localhost:${ONTOMESH_PORT}/health" || exit 1
 
-# Single-process entrypoint.  Wizard's main() reads --host / --port;
-# we pass them via env-var-expanded args so `docker run -e
-# ONTOMESH_PORT=8080` works without rebuilding.
-ENTRYPOINT ["sh", "-c", "exec ontomesh-wizard --host \"${ONTOMESH_HOST}\" --port \"${ONTOMESH_PORT}\""]
+# Multi-worker, multi-threaded gunicorn (P3.1).
+#
+# We invoke gunicorn directly instead of going through the
+# `ontomesh-wizard` console script — gunicorn manages its own
+# argument parsing via the config file, so an extra Python layer
+# would only get in the way.
+#
+# The config file at deploy/gunicorn.conf.py reads ONTOMESH_HOST /
+# ONTOMESH_PORT / ONTOMESH_WORKERS / ONTOMESH_THREADS /
+# ONTOMESH_TIMEOUT from the environment, so `docker run -e
+# ONTOMESH_WORKERS=4` still works without a rebuild.
+ENTRYPOINT ["gunicorn", "--config", "/app/deploy/gunicorn.conf.py", "wizard.app:app"]
