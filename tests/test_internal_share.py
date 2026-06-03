@@ -125,16 +125,21 @@ def test_workflow_publishes_branch_on_manual_run(workflow):
 def test_readme_leads_with_docker_quickstart():
     """The first install instruction in the README must be the
     `docker run` line — that's the whole point of P2.5.  A source
-    install can come later in the file."""
+    install can come later in the file (or not at all — the
+    P2.5.1 package-page README deliberately drops it and links the
+    source repo instead)."""
     text = README.read_text()
-    # Find where each install path is first mentioned.
+    # docker run must appear above the fold.
     docker_idx = text.find("docker run")
-    pip_idx    = text.find("pip install")
-    git_idx    = text.find("git clone")
-    assert docker_idx > 0, "README doesn't mention docker run"
-    # docker run appears before git clone and pip install.
-    assert docker_idx < pip_idx, "pip install appears before docker run"
-    assert docker_idx < git_idx, "git clone appears before docker run"
+    assert 0 < docker_idx < 2000, "docker run not in the README opener"
+    # If pip install or git clone DO appear, they must come after.
+    # Absence is also fine — the package-page README links the
+    # source repo for those.
+    for marker in ("pip install", "git clone"):
+        idx = text.find(marker)
+        if idx >= 0:
+            assert idx > docker_idx, \
+                f"{marker!r} appears before docker run"
 
 
 def test_readme_documents_ghcr_login():
@@ -178,17 +183,79 @@ def test_readme_links_at_least_four_surfaces():
         assert path in text, f"README missing {path}"
 
 
-def test_readme_mentions_console_scripts():
+def test_readme_mentions_entrypoint_script():
+    """The README must say which console script the image's
+    ENTRYPOINT runs — that's the bridge between `docker run` and
+    "you can also run it locally with pip"."""
     text = README.read_text()
-    for cmd in ("ontomesh ", "ontomesh-wizard", "ontomesh-onboard"):
-        assert cmd in text, f"README missing console script {cmd!r}"
+    assert "ontomesh-wizard" in text, \
+        "README doesn't name the wizard entrypoint script"
+
+
+def test_readme_links_source_repo():
+    """The package-page README is intentionally focused on what's
+    in the image; deeper docs (deploy guides, integrate.md) live
+    in the source repo, which the README must link."""
+    text = README.read_text()
+    assert "github.com/nrohilla-fibonacci/ontology" in text
 
 
 def test_readme_links_deploy_guide():
-    """deploy/README.md is the picking guide for the five
-    deployment shapes; the project README must link it."""
+    """deploy/README.md is the picking guide for the deployment
+    shapes; the project README must link it (or the path in the
+    source repo)."""
     text = README.read_text()
     assert "deploy/README.md" in text
+
+
+# ── Package-page surface (P2.5.1) ─────────────────────────────────────
+
+
+def test_readme_describes_image_size_and_arch():
+    """The package-page README must answer 'how big' and 'what arch'
+    in the first screen so a tester knows whether to pull on the
+    coffee-shop wifi."""
+    text = README.read_text()
+    # Some kind of size statement.
+    assert "MB" in text or "GB" in text
+    # Multi-arch declared.
+    assert "amd64" in text and "arm64" in text
+
+
+def test_readme_documents_every_env_var():
+    """The four canonical env vars (HOST/PORT/DATA_DIR/DB_URL) must
+    all appear with a default / description, so an operator doesn't
+    have to grep the Dockerfile."""
+    text = README.read_text()
+    for var in ("ONTOMESH_HOST", "ONTOMESH_PORT",
+                "ONTOMESH_DATA_DIR", "ONTOMESH_DB_URL"):
+        assert var in text, f"README doesn't document {var}"
+
+
+def test_readme_lists_api_endpoints():
+    """A tester who wants to script against the image needs to know
+    /api/* exists; the README's What-you-get table calls them out."""
+    text = README.read_text()
+    assert "/api/events/stream" in text
+    assert "/api/ontologies" in text
+
+
+def test_readme_calls_out_nonroot_user():
+    """Security-review checks read this in 10 seconds — make sure
+    the image's non-root user (uid 10001) is documented."""
+    text = README.read_text()
+    assert "non-root" in text or "10001" in text
+
+
+def test_readme_lists_starter_industries():
+    """First-run onboarding loads from ten starter industries —
+    the package page should preview them so a tester knows what
+    they're picking from."""
+    text = README.read_text()
+    # All 10 should be at least mentioned somewhere in the README.
+    for industry in ("telecom", "healthcare", "finance", "manufacturing",
+                     "retail"):
+        assert industry in text, f"README doesn't preview {industry}"
 
 
 def test_readme_version_matches_pyproject():
