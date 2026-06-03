@@ -81,6 +81,17 @@ except ImportError:
 app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)
 
+# P3.4 — JSON access logging + X-Request-Id correlation.  Installed
+# AFTER `app` exists so every Flask request goes through the
+# before/after-request hooks.
+try:
+    from wizard.structured_logging import install as _install_logging
+    _install_logging(app)
+except Exception as _exc:                                              # noqa: BLE001
+    # Logging setup must NEVER prevent the wizard from booting.
+    print(f"[wizard.app] structured logging install skipped: {_exc!r}",
+          file=sys.stderr)
+
 _pipeline_lock = threading.Lock()
 _pipeline_running = False
 _pipeline_log: list[str] = []
