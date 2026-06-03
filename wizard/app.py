@@ -49,7 +49,13 @@ sys.path.insert(0, ROOT)
 
 SESSION_FILE = os.path.join(ROOT, ".wizard_session.json")
 TEMPLATES_DIR = os.path.join(ROOT, "templates")
-ONTOLOGIES_DB = os.path.join(ROOT, "db", "ontologies.db")
+# P2.3 — Database URL.  Defaults to local SQLite for back-compat;
+# set ONTOMESH_DB_URL=postgresql://user:pass@host/db to use Postgres
+# (requires ``pip install ontomesh[postgres]``).
+ONTOLOGIES_DB = os.environ.get(
+    "ONTOMESH_DB_URL",
+    os.path.join(ROOT, "db", "ontologies.db"),
+)
 OUTPUT_DIR = os.path.join(ROOT, "output")
 
 from wizard import ontologies_store as _store

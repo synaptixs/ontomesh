@@ -1,0 +1,62 @@
+# Ontomesh — Render.com Blueprint (P2.4).
+#
+# Render's "Blueprint Sync" reads this file from the repo root and
+# provisions exactly the services declared here.  It's the easiest
+# managed-runtime path if you don't want to learn flyctl.
+#
+# Setup:
+#   1. Push this repo to GitHub.
+#   2. Visit https://render.com/dashboard → New + → Blueprint.
+#   3. Connect the repo; Render auto-detects this file.
+#   4. Click "Apply" — services come up in ~5 minutes.
+#
+# Updates: every git push to the linked branch triggers an automatic
+# rebuild + zero-downtime deploy.
+#
+# Notes
+# - Render's Free plan spins down after 15 min idle (cold-start hurts
+#   the first wizard load).  Pick "starter" or higher for always-on.
+# - The Postgres database is created on-demand by uncommenting the
+#   `databases` section + the ONTOMESH_DB_URL env var below.
+# - SSE works on Render — they don't buffer HTTP responses.
+
+services:
+
+  # ── Wizard ────────────────────────────────────────────────────────
+  - type: web
+    name: ontomesh
+    runtime: docker
+    plan: starter                            # "free" for testing
+    region: ohio                             # pick closest to your users
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true                         # rebuild on every push
+    envVars:
+      - key: ONTOMESH_HOST
+        value: "0.0.0.0"
+      - key: ONTOMESH_PORT
+        value: "5051"
+      - key: ONTOMESH_DATA_DIR
+        value: "/data"
+
+      # Uncomment to use the Postgres database created below:
+      # - key: ONTOMESH_DB_URL
+      #   fromDatabase:
+      #     name: ontomesh-db
+      #     property: connectionString
+
+    # Persistent disk for SQLite + saved ontologies + outputs.
+    disk:
+      name: ontomesh-data
+      mountPath: /data
+      sizeGB: 10
+
+# Uncomment to provision a managed Postgres instance and wire it up
+# via the ONTOMESH_DB_URL env var above.
+#
+# databases:
+#   - name: ontomesh-db
+#     plan: starter
+#     databaseName: ontomesh
+#     user: ontomesh

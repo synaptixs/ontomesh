@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ontomesh"
-version = "3.5.0-dev"
+version = "3.6.0-dev"
 description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,7 +34,11 @@ dependencies = [
 
 [project.optional-dependencies]
 # ── Database drivers (per-driver) ────────────────────────────────────────
-postgres = ["psycopg2-binary>=2.9.9"]
+# Both psycopg2 (used by src/db_connector.py for schema introspection
+# in --phase 1) and psycopg3 (used by wizard/ontologies_store.py for
+# the saved-ontologies + preferences store in P2.3) are needed when
+# the user opts into the Postgres backend.
+postgres = ["psycopg2-binary>=2.9.9", "psycopg[binary]>=3.2.0"]
 mysql    = ["mysql-connector-python>=8.3.0"]
 mssql    = ["pyodbc>=5.1.0"]
 oracle   = ["oracledb>=2.3.0"]
@@ -84,6 +88,9 @@ drift = [
 wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1", "sqlglot>=25.0", "jsonschema>=4.20"]
 discover = ["spacy>=3.7.4"]
 neptune  = ["boto3>=1.35.0"]
+# (P2.3 — see the `postgres` extra under "Database drivers" above —
+# psycopg3 ships in there too so a single `pip install ontomesh[postgres]`
+# enables both schema introspection and the wizard's pg-backed store.)
 
 # ── Testing ──────────────────────────────────────────────────────────────
 test     = ["pytest>=8.2.2"]
