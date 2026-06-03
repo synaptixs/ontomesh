@@ -10,7 +10,7 @@
 
 | | |
 |---|---|
-| **Image** | `ghcr.io/nrohilla-fibonacci/ontomesh:3.6.0-dev` (and `:latest`) |
+| **Image** | `ghcr.io/nrohilla-fibonacci/ontomesh:3.7.0-dev` (and `:latest`) |
 | **Size** | ~316 MB compressed |
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
@@ -106,4 +106,4 @@ Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/nrohilla
 
 ---
 
-*Ontomesh v3.6.0-dev · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 217+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.7.0-dev · gunicorn · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 250+ tests · Docker, Compose, Fly.io, Render, Cloud Run*

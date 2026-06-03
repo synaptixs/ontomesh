@@ -72,10 +72,12 @@ kill_timeout = "10s"
     hard_limit = 200
     soft_limit = 100
 
-  # /health → Fly's built-in healthcheck.
+  # P3.3 — Liveness probe on /live.  Fly routes traffic only when
+  # this passes; for a deeper readiness check pair this with a
+  # separate `/ready` monitor in your dashboard.
   [[http_service.checks]]
     grace_period  = "20s"
     interval      = "30s"
     method        = "GET"
     timeout       = "5s"
-    path          = "/health"
+    path          = "/live"

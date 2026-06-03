@@ -102,6 +102,80 @@ def test_workflow_uses_gha_layer_cache(workflow):
     assert "type=gha" in build_step["with"].get("cache-to",   "")
 
 
+# ── P3.6 — Supply chain hardening ────────────────────────────────────
+
+
+def test_workflow_attaches_sbom_and_provenance(workflow):
+    """build-push-action must emit both an SLSA provenance
+    attestation AND a SPDX SBOM as OCI artefacts."""
+    job = workflow["jobs"]["build-and-push"]
+    build_step = next(s for s in job["steps"]
+                      if "build-push-action" in (s.get("uses") or ""))
+    assert "provenance" in build_step["with"], \
+        "build-push-action missing provenance: attestation"
+    # mode=max gives the full SLSA build description, not just stub.
+    assert "max" in str(build_step["with"]["provenance"])
+    assert build_step["with"].get("sbom") is True or \
+           str(build_step["with"].get("sbom")) == "true"
+
+
+def test_workflow_runs_trivy_scan(workflow):
+    """Every published image must be scanned for HIGH/CRITICAL CVEs
+    before signing.  The Trivy step uses aquasecurity/trivy-action."""
+    job = workflow["jobs"]["build-and-push"]
+    trivy_steps = [s for s in job["steps"]
+                   if "aquasecurity/trivy-action" in (s.get("uses") or "")]
+    assert len(trivy_steps) == 1
+    trivy = trivy_steps[0]
+    # Severity floor.
+    severity = str(trivy["with"]["severity"]).upper()
+    assert "CRITICAL" in severity
+    assert "HIGH"     in severity
+    # SARIF output uploaded to the Security tab.
+    assert trivy["with"]["format"] == "sarif"
+
+
+def test_workflow_uploads_trivy_sarif_to_security_tab(workflow):
+    job = workflow["jobs"]["build-and-push"]
+    sarif_uploads = [s for s in job["steps"]
+                     if "codeql-action/upload-sarif" in (s.get("uses") or "")]
+    assert len(sarif_uploads) == 1
+
+
+def test_workflow_signs_image_with_cosign(workflow):
+    """Every published tag must be signed via keyless OIDC cosign so
+    consumers can verify the image's provenance without a
+    long-lived signing key in repo secrets."""
+    job = workflow["jobs"]["build-and-push"]
+    # Cosign installer step present.
+    cosign_install = [s for s in job["steps"]
+                      if "sigstore/cosign-installer" in (s.get("uses") or "")]
+    assert len(cosign_install) == 1
+    # Sign step iterates each tag and calls cosign sign --yes.
+    sign_steps = [s for s in job["steps"]
+                  if s.get("name") == "Sign image"]
+    assert len(sign_steps) == 1
+    assert "cosign sign" in sign_steps[0]["run"]
+    # Keyless mode signs against the digest of the build.
+    assert "DIGEST" in sign_steps[0]["env"]
+
+
+def test_workflow_grants_id_token_permission(workflow):
+    """id-token:write is required for cosign's keyless OIDC flow.
+    Without it the sign step fails with 'OIDC token unavailable.'"""
+    job = workflow["jobs"]["build-and-push"]
+    perms = job.get("permissions", {})
+    assert perms.get("id-token") == "write", \
+        "id-token:write needed for keyless cosign"
+
+
+def test_workflow_grants_security_events_permission(workflow):
+    job = workflow["jobs"]["build-and-push"]
+    perms = job.get("permissions", {})
+    assert perms.get("security-events") == "write", \
+        "security-events:write needed to upload Trivy SARIF"
+
+
 def test_workflow_publishes_latest_on_tag(workflow):
     """On a tag push, both ontomesh:<version> AND ontomesh:latest
     must be published so teammates can `docker pull :latest` and

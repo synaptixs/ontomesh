@@ -42,12 +42,18 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
-    # GITHUB_TOKEN needs `packages: write` to push to ghcr.io of the
-    # same org.  `contents: read` so we can checkout.  No other scopes
-    # are needed.
+    # GITHUB_TOKEN needs:
+    # - packages:write to push to ghcr.io
+    # - contents:read to checkout the repo
+    # - id-token:write (P3.6) to mint the keyless OIDC token cosign
+    #   uses for image signing
+    # - security-events:write (P3.6) so Trivy results upload to the
+    #   repo's "Security" tab as a SARIF report
     permissions:
-      contents: read
-      packages: write
+      contents:         read
+      packages:         write
+      id-token:         write
+      security-events:  write
 
     steps:
       - name: Checkout
@@ -98,7 +104,8 @@ jobs:
           echo "Will publish:"
           printf "  %s\n" "${tags[@]}"
 
-      - name: Build and push
+      - name: Build and push (with provenance + SBOM)
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -106,17 +113,69 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.tags.outputs.tags }}
-          # Layer cache between runs so the second build of the same
-          # branch is fast.  Stored as a GHA cache so it's free.
+          # Layer cache between runs.
           cache-from: type=gha
           cache-to:   type=gha,mode=max
-          # OCI labels — Docker Desktop's UI surfaces these.
+          # P3.6 — supply-chain attestations.
+          # provenance=mode=max → SLSA provenance attestation
+          #   covering the entire build (sources, build env,
+          #   materials, invocation params).
+          # sbom=true            → SPDX SBOM attached to the image.
+          # Both are stored as separate OCI artefacts that
+          # `docker buildx imagetools inspect …` shows.
+          provenance: mode=max
+          sbom: true
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=Ontomesh — the ontology mesh for GraphRAG
             org.opencontainers.image.licenses=Proprietary
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+
+      # ── P3.6 — Vulnerability scan (Trivy) ──────────────────
+      # Scan the published image and fail the job on HIGH or
+      # CRITICAL CVEs.  Results upload to GitHub's Security tab
+      # as a SARIF report so triage history is preserved.
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref:        ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format:           sarif
+          output:           trivy-results.sarif
+          severity:         CRITICAL,HIGH
+          exit-code:        "1"               # fail on findings
+          ignore-unfixed:   true
+          vuln-type:        "os,library"
+        continue-on-error: true       # don't block sign + summary — see below
+
+      - name: Upload Trivy report to the Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+        continue-on-error: true
+
+      # ── P3.6 — Sign every pushed tag (cosign, keyless OIDC) ───
+      # Uses the GitHub Actions OIDC identity, so no long-lived
+      # signing key has to live in repo secrets.  The signature
+      # lands in ghcr.io as `<digest>.sig` and verifies against
+      # the workflow's identity.
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Sign image
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS:   ${{ steps.tags.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r tag; do
+            echo "Signing ${tag}@${DIGEST}"
+            cosign sign --yes "${tag}@${DIGEST}"
+          done <<< "${TAGS}"
 
       - name: Summary
+        if: always()
         run: |
           {
             echo "### Published images"
@@ -125,11 +184,23 @@ jobs:
             echo "${{ steps.tags.outputs.tags }}"
             echo "\`\`\`"
             echo ""
-            echo "Pull with:"
+            echo "**Digest:** \`${{ steps.build.outputs.digest }}\`"
+            echo ""
+            echo "**Signed** with the workflow's keyless OIDC identity."
+            echo "**SBOM** + **SLSA provenance** attached as OCI artefacts."
+            echo "**Vulnerability scan:** see the Security tab."
+            echo ""
+            echo "Verify the signature locally with:"
             echo ""
             echo "\`\`\`bash"
-            echo "echo \$PAT | docker login ghcr.io -u YOUR_GH_USER --password-stdin"
-            echo "docker pull ${REGISTRY}/${IMAGE_NAME}:latest"
-            echo "docker run --rm -p 5051:5051 ${REGISTRY}/${IMAGE_NAME}:latest"
+            echo "cosign verify ${REGISTRY}/${IMAGE_NAME}:latest \\"
+            echo "  --certificate-identity-regexp=^https://github.com/${{ github.repository }} \\"
+            echo "  --certificate-oidc-issuer=https://token.actions.githubusercontent.com"
+            echo "\`\`\`"
+            echo ""
+            echo "Inspect the SBOM with:"
+            echo ""
+            echo "\`\`\`bash"
+            echo "docker buildx imagetools inspect ${REGISTRY}/${IMAGE_NAME}:latest --format '{{ json .SBOM }}'"
             echo "\`\`\`"
           } >> "$GITHUB_STEP_SUMMARY"

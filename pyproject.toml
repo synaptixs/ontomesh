@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ontomesh"
-version = "3.6.0-dev"
+version = "3.7.0-dev"
 description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -85,12 +85,30 @@ drift = [
 ]
 
 # ── Advanced / opt-in ────────────────────────────────────────────────────
-wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1", "sqlglot>=25.0", "jsonschema>=4.20"]
+# P3.1 — gunicorn replaces Flask's dev server for production deployments.
+# gthread worker class supports long-lived connections (SSE), so SSE
+# subscribers don't get evicted on the worker's next request.
+wizard   = [
+    "flask>=3.0.3",
+    "flask-cors>=4.0.1",
+    "sqlglot>=25.0",
+    "jsonschema>=4.20",
+    "gunicorn>=22.0.0",
+    # P3.4 — structured JSON logging + request-id correlation.
+    "python-json-logger>=3.2.0",
+    # P3.5 — Prometheus /metrics endpoint.
+    "prometheus-client>=0.20.0",
+]
 discover = ["spacy>=3.7.4"]
 neptune  = ["boto3>=1.35.0"]
 # (P2.3 — see the `postgres` extra under "Database drivers" above —
 # psycopg3 ships in there too so a single `pip install ontomesh[postgres]`
 # enables both schema introspection and the wizard's pg-backed store.)
+
+# P3.2 — Redis-backed SSE bus.  Required when running multi-worker
+# (gunicorn workers > 1) or multi-replica.  Activated by setting
+# ONTOMESH_REDIS_URL; without it the bus falls back to in-memory.
+redis = ["redis>=5.0.0"]
 
 # ── Testing ──────────────────────────────────────────────────────────────
 test     = ["pytest>=8.2.2"]
