@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ontomesh"
-version = "3.6.0-dev"
+version = "3.7.0-dev"
 description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -85,7 +85,16 @@ drift = [
 ]
 
 # ── Advanced / opt-in ────────────────────────────────────────────────────
-wizard   = ["flask>=3.0.3", "flask-cors>=4.0.1", "sqlglot>=25.0", "jsonschema>=4.20"]
+# P3.1 — gunicorn replaces Flask's dev server for production deployments.
+# gthread worker class supports long-lived connections (SSE), so SSE
+# subscribers don't get evicted on the worker's next request.
+wizard   = [
+    "flask>=3.0.3",
+    "flask-cors>=4.0.1",
+    "sqlglot>=25.0",
+    "jsonschema>=4.20",
+    "gunicorn>=22.0.0",
+]
 discover = ["spacy>=3.7.4"]
 neptune  = ["boto3>=1.35.0"]
 # (P2.3 — see the `postgres` extra under "Database drivers" above —

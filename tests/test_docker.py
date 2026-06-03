@@ -85,16 +85,22 @@ def test_dockerfile_has_healthcheck(df_text):
     assert "curl" in head
 
 
-def test_entrypoint_uses_console_script(df_text):
-    """ENTRYPOINT must invoke the P1.2.5 console script `ontomesh-wizard`,
-    not a hard-coded `python wizard/app.py`.  This keeps the image's
-    interface aligned with `pip install ontomesh`."""
+def test_entrypoint_uses_gunicorn(df_text):
+    """P3.1 — ENTRYPOINT must invoke gunicorn (the production WSGI
+    server), not Flask's dev server.  The image is shipped to real
+    customers; running with `app.run()` would print "WARNING: This
+    is a development server" on every boot."""
     ep_lines = [l for l in df_text.splitlines()
                 if l.strip().startswith("ENTRYPOINT")]
     assert ep_lines, "no ENTRYPOINT"
     last = ep_lines[-1]
-    assert "ontomesh-wizard" in last, \
-        f"ENTRYPOINT doesn't use ontomesh-wizard: {last}"
+    assert "gunicorn" in last, \
+        f"ENTRYPOINT doesn't use gunicorn: {last}"
+    # The config file pulls every operator-tunable knob from env
+    # vars (workers / threads / timeout / port).
+    assert "gunicorn.conf.py" in last
+    # And the WSGI app reference is the canonical wizard.app:app.
+    assert "wizard.app:app" in last
 
 
 def test_runtime_exposes_5051(df_text):
