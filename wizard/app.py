@@ -114,13 +114,37 @@ def _save_session(data: dict) -> None:
 # ── Routes ─────────────────────────────────────────────────────────────────
 
 @app.route("/")
-def index():
-    # render_template so {{ url_for('static', ...) }} in the
-    # template resolves to the Flask-served static path for the
-    # extracted CSS / JS modules. The previous send_from_directory
-    # would have returned the URL placeholders verbatim.
+def landing():
+    """P1.2 — Marketing landing page.
+
+    Before v3.5 the wizard chrome was served from ``/``.  Now the
+    root is a marketing surface (hero, value prop, how-it-works,
+    CTA) and the wizard lives at ``/wizard``.  Bookmarks that
+    deep-linked via ``/?step=X`` are forwarded to the wizard so
+    external docs and saved links don't break.
+    """
+    from flask import render_template, redirect, request
+    if request.args.get("step"):
+        return redirect("/wizard?" + request.query_string.decode("utf-8"), code=301)
+    return render_template("landing.html")
+
+
+@app.route("/wizard")
+def wizard():
+    """The interactive wizard — what used to live at ``/``."""
     from flask import render_template
     return render_template("index.html")
+
+
+@app.route("/index")
+def _legacy_index():
+    """Redirect for legacy bookmarks that hit /index or /?step=...
+    Send them to the wizard so deep-linking from external docs still
+    works after the route reshuffle."""
+    from flask import redirect, request
+    qs = request.query_string.decode("utf-8")
+    target = "/wizard" + ("?" + qs if qs else "")
+    return redirect(target, code=301)
 
 
 @app.route("/health")
