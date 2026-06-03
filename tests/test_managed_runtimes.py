@@ -46,7 +46,12 @@ def test_fly_exposes_5051(fly_text):
 
 
 def test_fly_has_health_check(fly_text):
-    assert 'path          = "/health"' in fly_text \
+    """P3.3 moved this from /health → /live (back-compat /health
+    still works).  Accept either form so the test doesn't pin one
+    legacy path forever."""
+    assert 'path          = "/live"' in fly_text \
+        or 'path = "/live"' in fly_text \
+        or 'path          = "/health"' in fly_text \
         or 'path = "/health"' in fly_text
 
 
@@ -89,7 +94,9 @@ def test_render_uses_docker_runtime(render_doc):
 
 def test_render_has_health_check(render_doc):
     svc = render_doc["services"][0]
-    assert svc.get("healthCheckPath") == "/health"
+    # P3.3 — /live is cheaper and doesn't restart the pod on a DB
+    # outage; /health stays for back-compat.
+    assert svc.get("healthCheckPath") in ("/live", "/health")
 
 
 def test_render_sets_ontomesh_env(render_doc):
@@ -148,8 +155,10 @@ def test_cloudrun_has_health_probes(cloudrun_doc):
     container = cloudrun_doc["spec"]["template"]["spec"]["containers"][0]
     startup = container.get("startupProbe", {}).get("httpGet", {})
     live    = container.get("livenessProbe", {}).get("httpGet", {})
-    assert startup.get("path") == "/health"
-    assert live.get("path")    == "/health"
+    # P3.3 — /live is cheaper than /health and explicitly does
+    # NOT touch the DB.
+    assert startup.get("path") in ("/live", "/health")
+    assert live.get("path")    in ("/live", "/health")
 
 
 def test_cloudrun_sse_safe_timeout(cloudrun_doc):

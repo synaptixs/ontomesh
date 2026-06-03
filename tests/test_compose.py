@@ -70,7 +70,8 @@ def test_wizard_has_healthcheck(compose):
     hc = svc.get("healthcheck", {})
     assert hc, "wizard has no healthcheck stanza"
     test = " ".join(hc.get("test", []))
-    assert "/health" in test
+    # P3.3 — cheaper /live probe; /health stays for back-compat.
+    assert "/live" in test or "/health" in test
     assert "curl" in test
 
 
