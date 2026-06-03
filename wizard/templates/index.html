@@ -99,7 +99,10 @@
 
     <!-- Step 1: Domain -->
     <div class="step-panel active" id="step-domain">
-      <div class="step-title">Domain Identity</div>
+      <div class="step-title">Domain Identity
+        <a class="help-pill" href="/help/domain" target="_blank"
+           rel="noopener" title="What is Domain Identity?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Define the scope of your ontology. All generated IRIs and documentation will use these values.</div>
 
       <div class="card">
@@ -270,7 +273,10 @@
 
     <!-- Step 2: Entities -->
     <div class="step-panel" id="step-entities">
-      <div class="step-title">Entities</div>
+      <div class="step-title">Entities
+        <a class="help-pill" href="/help/entities" target="_blank"
+           rel="noopener" title="What does the Entities phase do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">The main things in your domain — assets, customers, resources, orders. Each becomes an OWL class.</div>
 
       <div class="card">
@@ -554,7 +560,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 3: Events -->
     <div class="step-panel" id="step-events">
-      <div class="step-title">Events</div>
+      <div class="step-title">Events
+        <a class="help-pill" href="/help/events" target="_blank"
+           rel="noopener" title="What does the Events phase do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Things that happen — incidents, alerts, orders. Events become OWL subclasses of a base Event class.</div>
 
       <div class="card">
@@ -584,7 +593,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 4: Relationships -->
     <div class="step-panel" id="step-relationships">
-      <div class="step-title">Relationships</div>
+      <div class="step-title">Relationships
+        <a class="help-pill" href="/help/relationships" target="_blank"
+           rel="noopener" title="What does the Relationships phase do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Describe how entities connect. Write plain sentences — e.g. "A Customer places one or more Orders."</div>
 
       <div class="card">
@@ -652,7 +664,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 5: CQs -->
     <div class="step-panel" id="step-cqs">
-      <div class="step-title">Competency Questions</div>
+      <div class="step-title">Competency Questions
+        <a class="help-pill" href="/help/cqs" target="_blank"
+           rel="noopener" title="What are Competency Questions?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Questions your ontology must be able to answer. These drive the governance scorecard and SPARQL test suite.</div>
 
       <div class="card">
@@ -687,7 +702,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 7 — Rules & Reasoning (third step in the Enrich phase) -->
     <div class="step-panel" id="step-rules">
-      <div class="step-title">Rules &amp; Reasoning</div>
+      <div class="step-title">Rules &amp; Reasoning
+        <a class="help-pill" href="/help/rules" target="_blank"
+           rel="noopener" title="What does Rules &amp; Reasoning do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Author SHACL, SPARQL CONSTRUCT, and OWL-axiom rules. Saved rules are validated, persisted to <code>session.rules</code>, and consumed by <code>--phase reason</code> at materialisation time.</div>
 
       <div class="card">
@@ -730,7 +748,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Step 6: Generate -->
     <div class="step-panel" id="step-generate">
-      <div class="step-title">Generate Ontology</div>
+      <div class="step-title">Generate Ontology
+        <a class="help-pill" href="/help/generate" target="_blank"
+           rel="noopener" title="What does Generate do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Review your session and run the toolkit pipeline to generate OWL, SHACL, JSON-LD, SKOS, and the governance report.</div>
 
       <!-- Pre-flight + run CTA. Surfaces prereqs first so the user knows
@@ -911,7 +932,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Evolution Review (Workstream 2) -->
     <div class="step-panel" id="step-evolve">
-      <div class="step-title">Ontology Evolution Review</div>
+      <div class="step-title">Ontology Evolution Review
+        <a class="help-pill" href="/help/evolve" target="_blank"
+           rel="noopener" title="What does Evolution Review do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Workstream 2 — Review ontology-evolution proposals surfaced from production observations. Approve, reject, or defer each candidate. Approved proposals flow through the reasoner + SPARQL CQ gate before auto-bumping the ontology version.</div>
 
       <div class="preflight-banner" id="preflight-evolve" style="display:none"></div>
@@ -990,7 +1014,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Compliance Dashboard (Workstream 4) -->
     <div class="step-panel" id="step-comply">
-      <div class="step-title">Regulatory Compliance Dashboard</div>
+      <div class="step-title">Regulatory Compliance Dashboard
+        <a class="help-pill" href="/help/comply" target="_blank"
+           rel="noopener" title="What does the Compliance Dashboard do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Workstream 4 — Assemble signed, machine-verifiable evidence bundles for named regulatory frameworks. Monitor per-regulation coverage, traffic-light status per requirement, and gap analysis.</div>
 
       <div class="preflight-banner" id="preflight-comply" style="display:none"></div>
@@ -1086,7 +1113,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
 
     <!-- Vector Retrieval (Workstream 5) -->
     <div class="step-panel" id="step-retrieve">
-      <div class="step-title">Ontology-Bounded Vector Retrieval</div>
+      <div class="step-title">Ontology-Bounded Vector Retrieval
+        <a class="help-pill" href="/help/retrieve" target="_blank"
+           rel="noopener" title="What does Vector Retrieval do?">ⓘ How it works</a>
+      </div>
       <div class="step-subtitle">Workstream 5 — The OWL class hierarchy becomes a hard semantic filter on vector similarity search. Inspect embedding indexes, query with class-scoped semantics, and compare retrieval strategies.</div>
 
       <div class="preflight-banner" id="preflight-retrieve" style="display:none"></div>

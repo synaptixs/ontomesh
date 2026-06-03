@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ page.title }} — Help</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/tokens.css') }}">
+  <style>
+    /* P0.4 — shared help-page styles.  Light + dark theme aware via
+       the same tokens the wizard uses.                              */
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter",
+                   "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); }
+    code, .mono {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      background: var(--surface-2, var(--surface));
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--text);
+    }
+    .skip-link {
+      position: absolute; top: 6px; left: 6px;
+      background: var(--accent); color: var(--on-accent, #fff);
+      padding: 8px 14px; transform: translateY(-150%);
+      transition: transform .15s ease-out; z-index: 1000;
+      text-decoration: none; font-weight: 600;
+    }
+    .skip-link:focus, .skip-link:focus-visible {
+      transform: translateY(0);
+      outline: 2px solid var(--accent-hover, var(--accent));
+    }
+    /* Layout ────────────────────────────────────────────────────── */
+    .wrap {
+      max-width: 980px; margin: 0 auto; padding: 32px 24px 80px;
+    }
+    header.page {
+      border-bottom: 1px solid var(--border, rgba(0,0,0,.08));
+      padding-bottom: 20px; margin-bottom: 28px;
+    }
+    .crumb {
+      font-size: 12px; color: var(--muted, #64748b);
+      letter-spacing: .04em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .crumb a { color: inherit; text-decoration: none; }
+    .crumb a:hover { color: var(--accent); }
+    .step-num {
+      display: inline-block; min-width: 26px; text-align: center;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--accent); color: var(--on-accent, #fff);
+      font-weight: 700; font-size: 12px; margin-right: 8px;
+    }
+    h1 {
+      margin: 0 0 6px; font-size: 28px; line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .tagline {
+      font-size: 16px; color: var(--muted, #64748b); margin: 0;
+    }
+    /* Section blocks ─────────────────────────────────────────────── */
+    section.block {
+      margin-bottom: 28px;
+    }
+    h2 {
+      font-size: 16px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted, #64748b);
+      margin: 0 0 10px; font-weight: 700;
+    }
+    p { margin: 0 0 12px; }
+    ul.capabilities, ul.workflow {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; gap: 10px;
+    }
+    ul.capabilities li, ul.workflow li {
+      border: 1px solid var(--border, rgba(0,0,0,.08));
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: var(--surface);
+    }
+    ul.capabilities li strong, ul.workflow li strong {
+      display: block; margin-bottom: 2px; color: var(--text);
+      font-size: 14px;
+    }
+    ul.capabilities li span, ul.workflow li span {
+      color: var(--text); opacity: 0.85; font-size: 14px;
+    }
+    ul.tips {
+      padding-left: 20px; margin: 0;
+    }
+    ul.tips li { margin-bottom: 6px; }
+    dl.concepts {
+      display: grid; grid-template-columns: max-content 1fr;
+      gap: 6px 18px; margin: 0;
+    }
+    dl.concepts dt {
+      font-weight: 700; color: var(--text);
+    }
+    dl.concepts dd {
+      margin: 0; color: var(--text); opacity: 0.85;
+    }
+    /* Footer nav ────────────────────────────────────────────────── */
+    nav.pager {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; margin-top: 40px;
+      border-top: 1px solid var(--border, rgba(0,0,0,.08));
+      padding-top: 20px;
+    }
+    nav.pager a {
+      padding: 8px 14px; border-radius: 6px;
+      border: 1px solid var(--border, rgba(0,0,0,.08));
+      text-decoration: none; color: var(--text); font-weight: 500;
+      background: var(--surface);
+    }
+    nav.pager a:hover, nav.pager a:focus-visible {
+      border-color: var(--accent); color: var(--accent);
+      outline: none;
+    }
+    nav.pager .placeholder { visibility: hidden; }
+    .back-to-wizard {
+      display: inline-block; margin-top: 6px;
+      font-size: 13px; color: var(--muted, #64748b);
+      text-decoration: none;
+    }
+    .back-to-wizard:hover { color: var(--accent); }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="wrap">
+    <header class="page">
+      <div class="crumb">
+        <a href="/">Wizard</a> · Help · Step {{ page.step_num }}
+      </div>
+      <h1>
+        <span class="step-num" aria-hidden="true">{{ page.step_num }}</span>
+        {{ page.title }}
+      </h1>
+      <p class="tagline">{{ page.tagline }}</p>
+      <a href="/?step={{ page.slug }}" class="back-to-wizard">
+        ← Back to wizard
+      </a>
+    </header>
+
+    <main id="main" tabindex="-1" role="main"
+          aria-label="{{ page.title }} help content">
+
+      <section class="block" aria-labelledby="h-what">
+        <h2 id="h-what">What this phase does</h2>
+        <p>{{ page.what }}</p>
+      </section>
+
+      <section class="block" aria-labelledby="h-why">
+        <h2 id="h-why">Why it matters</h2>
+        <p>{{ page.why }}</p>
+      </section>
+
+      <section class="block" aria-labelledby="h-cap">
+        <h2 id="h-cap">Key capabilities</h2>
+        <ul class="capabilities">
+          {% for label, desc in page.capabilities %}
+          <li>
+            <strong>{{ label }}</strong>
+            <span>{{ desc }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="block" aria-labelledby="h-flow">
+        <h2 id="h-flow">Workflow</h2>
+        <ul class="workflow">
+          {% for heading, body in page.workflow %}
+          <li>
+            <strong>{{ loop.index }}. {{ heading }}</strong>
+            <span>{{ body }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="block" aria-labelledby="h-tips">
+        <h2 id="h-tips">Tips &amp; gotchas</h2>
+        <ul class="tips">
+          {% for tip in page.tips %}
+          <li>{{ tip }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      {% if page.concepts %}
+      <section class="block" aria-labelledby="h-conc">
+        <h2 id="h-conc">Concepts</h2>
+        <dl class="concepts">
+          {% for term, gloss in page.concepts %}
+          <dt>{{ term }}</dt>
+          <dd>{{ gloss }}</dd>
+          {% endfor %}
+        </dl>
+      </section>
+      {% endif %}
+
+      <nav class="pager" aria-label="Phase help pages">
+        {% if page.prev %}
+        <a href="/help/{{ page.prev[0] }}" rel="prev">
+          {{ page.prev[1] }}
+        </a>
+        {% else %}
+        <span class="placeholder">·</span>
+        {% endif %}
+        {% if page.next %}
+        <a href="/help/{{ page.next[0] }}" rel="next">
+          {{ page.next[1] }}
+        </a>
+        {% else %}
+        <span class="placeholder">·</span>
+        {% endif %}
+      </nav>
+    </main>
+  </div>
+</body>
+</html>

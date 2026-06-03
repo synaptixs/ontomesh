@@ -205,6 +205,40 @@ def log_discovery_help():
     )
 
 
+# ── P0.4 — per-phase help pages ────────────────────────────────────────
+
+
+@app.route("/help/<slug>")
+def phase_help(slug):
+    """Render the help page for one wizard phase.
+
+    All phases except Log Discovery (which has a bespoke deeper page
+    at /log-discovery/help) share one Jinja template fed by the
+    ``HELP_PAGES`` dict in ``wizard/help_content.py``."""
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
+    from help_content import get_help                              # noqa: E402
+    # Log Discovery keeps its bespoke deeper page.
+    if slug == "log-discovery":
+        return log_discovery_help()
+    page = get_help(slug)
+    if page is None:
+        return ("Unknown phase: " + slug, 404)
+    from flask import render_template as _rt                       # noqa: E402
+    return _rt("phase_help.html", page=page)
+
+
+@app.route("/help")
+def phase_help_index():
+    """Redirect /help → first phase help page."""
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
+    from help_content import all_slugs                             # noqa: E402
+    slugs = all_slugs()
+    first = slugs[0] if slugs else "domain"
+    return phase_help(first)
+
+
 @app.route("/api/session", methods=["GET"])
 def get_session():
     return jsonify(_load_session())
