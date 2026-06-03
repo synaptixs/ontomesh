@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{{ page.title }} — Help</title>
+  <title>{{ page.title }} — Ontomesh Help</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ page.tagline }}">
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/tokens.css') }}">
   <style>

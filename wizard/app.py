@@ -128,6 +128,34 @@ def health():
     return jsonify({"ok": True, "timestamp": _now()})
 
 
+# ── P1.1 — Branded error pages ────────────────────────────────────────
+
+
+@app.errorhandler(404)
+def _not_found(e):                                                  # noqa: ARG001
+    from flask import render_template as _rt                        # noqa: E402
+    return _rt(
+        "error.html",
+        code="404",
+        title="Page not found",
+        message="That page isn't here. Maybe it moved during the rename "
+                "to Ontomesh, or you followed a stale link.",
+    ), 404
+
+
+@app.errorhandler(500)
+def _server_error(e):                                               # noqa: ARG001
+    from flask import render_template as _rt                        # noqa: E402
+    return _rt(
+        "error.html",
+        code="500",
+        title="Something broke",
+        message="An unexpected error stopped the request. Check the "
+                "server logs, then try again — your session data is "
+                "intact.",
+    ), 500
+
+
 @app.route("/api/events/stream")
 def events_stream():
     """P0.3 — Server-Sent Events endpoint.
