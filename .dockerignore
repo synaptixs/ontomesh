@@ -1,0 +1,68 @@
+# Keep the Docker build context small and reproducible.
+# Anything listed here is NOT shipped to the build daemon.
+
+# ── Git / version control ──────────────────────────────────
+.git
+.gitignore
+.gitattributes
+.github
+**/.gitkeep
+
+# ── Python caches & build artefacts ────────────────────────
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+*.egg
+.eggs
+build
+dist
+.venv
+venv
+env
+
+# ── Test + lint caches ─────────────────────────────────────
+.pytest_cache
+.coverage
+.coverage.*
+htmlcov
+.mypy_cache
+.ruff_cache
+.tox
+
+# ── Editor & OS noise ──────────────────────────────────────
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Local dev data we don't want baked into the image ──────
+.wizard_session.json
+db/*.db-journal
+db/*.db-wal
+db/*.db-shm
+output/
+benchmarks/out/
+
+# ── Documentation that doesn't ship in the runtime image ───
+docs/
+*.md
+!README.md            # …except the README — pyproject reads it.
+
+# ── Docker / deployment configs (these don't belong IN the image) ──
+Dockerfile
+.dockerignore
+docker-compose*.yml
+compose*.yaml
+fly.toml
+render.yaml
+cloudrun.yaml
+k8s/
+helm/
+
+# ── Test suite & fixtures (saves ~30 MB and a lot of unused files) ──
+tests/
+conftest.py

@@ -36,7 +36,7 @@ pytest.importorskip("flask")
 
 def test_ontomesh_package_imports():
     import ontomesh
-    assert ontomesh.__version__.startswith("3.5"), \
+    assert ontomesh.__version__.startswith("3.6"), \
         f"unexpected version {ontomesh.__version__!r}"
 
 
