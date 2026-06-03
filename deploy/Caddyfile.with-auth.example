@@ -1,0 +1,72 @@
+# Ontomesh — Caddyfile variant with HTTP Basic auth (P2.6).
+#
+# Use this when you're hosting a single shared internal instance
+# that multiple teammates need to reach via a URL — for the cases
+# where "each tester runs their own docker locally" isn't practical.
+#
+# To use:
+#   1. Generate a bcrypt hash for each teammate's password:
+#        docker run --rm -it caddy:2-alpine caddy hash-password
+#      Paste it where the placeholder hashes are below.
+#   2. Copy this file over `deploy/Caddyfile` (or point Compose at it
+#      explicitly):
+#        services:
+#          caddy:
+#            volumes:
+#              - ./deploy/Caddyfile.with-auth.example:/etc/caddy/Caddyfile:ro
+#   3. Restart the stack: `docker compose up -d`
+#
+# Notes
+# - basicauth is HTTP-only protection.  Pair with Let's Encrypt TLS
+#   (which Caddy does automatically once you set $ONTOMESH_DOMAIN) so
+#   the credentials aren't sent in cleartext.
+# - The wizard has NO native auth.  This Caddy layer IS the auth
+#   boundary.  Anyone who can reach port 5051 directly (bypassing
+#   Caddy) gets in unauthenticated — so in production make sure the
+#   wizard's host port is NOT exposed.  Remove the `ports:` block
+#   from the wizard service in compose.yml when adopting this.
+# - For 5+ users, swap basicauth for OIDC via Caddy's
+#   `caddy-security` plugin or an Authentik / Keycloak sidecar.
+
+{$ONTOMESH_DOMAIN} {
+
+    encode gzip zstd
+
+    # HTTP Basic auth — protects EVERY route.  /health is included so
+    # external monitors don't punch through; use a separate internal
+    # path or an allowlist if you need an open /health.
+    basicauth * {
+        # Replace these with hashes from `caddy hash-password`.
+        # Usernames are arbitrary strings; passwords are hashed offline.
+        # Format: <username> <bcrypt-hash>
+        alice  $2a$14$REPLACE_THIS_WITH_A_REAL_BCRYPT_HASH_FOR_ALICE_PASSWORD
+        bob    $2a$14$REPLACE_THIS_WITH_A_REAL_BCRYPT_HASH_FOR_BOB_PASSWORD
+        carol  $2a$14$REPLACE_THIS_WITH_A_REAL_BCRYPT_HASH_FOR_CAROL_PASSWORD
+    }
+
+    reverse_proxy wizard:5051 {
+        header_up X-Real-IP         {http.request.remote.host}
+        header_up X-Forwarded-For   {http.request.remote.host}
+        header_up X-Forwarded-Proto {http.request.scheme}
+        # Also forward the authenticated username so the wizard's
+        # access log can attribute who did what.
+        header_up X-Authenticated-User {http.auth.user.id}
+        transport http {
+            read_timeout  24h
+            write_timeout 24h
+        }
+    }
+
+    header {
+        Strict-Transport-Security  "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options     "nosniff"
+        X-Frame-Options            "DENY"
+        Referrer-Policy            "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}
