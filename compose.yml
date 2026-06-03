@@ -11,12 +11,18 @@
 #
 # ── Quickstart ────────────────────────────────────────────────────────
 #
-#   # Local (HTTP only):
+#   # Local (HTTP only, SQLite backend):
 #   docker compose up -d
 #   # → wizard on http://localhost:5051, also reverse-proxied at http://localhost
 #
 #   # Public (TLS via Let's Encrypt — DNS must point at this host):
 #   ONTOMESH_DOMAIN=ontomesh.example.com docker compose up -d
+#
+#   # With Postgres backend (P2.3 — opt-in via the `pg` profile):
+#   docker compose --profile pg up -d
+#   # → adds a postgres sidecar and points the wizard at it via
+#   #   ONTOMESH_DB_URL.  Image is rebuilt with the [postgres] extra
+#   #   so psycopg is on the venv.
 #
 #   # Stop and remove (volumes preserved):
 #   docker compose down
@@ -90,10 +96,41 @@ services:
       wizard:
         condition: service_healthy
 
+  # ── Postgres (opt-in via `pg` profile) ────────────────────────────
+  # Default `docker compose up` SKIPS this service so the SQLite path
+  # stays the zero-config default.  Run with `--profile pg` to bring
+  # it up and point the wizard at it.
+  postgres:
+    image: postgres:16-alpine
+    container_name: ontomesh-postgres
+    restart: unless-stopped
+    profiles: ["pg"]
+    environment:
+      POSTGRES_USER: "${ONTOMESH_PG_USER:-ontomesh}"
+      POSTGRES_PASSWORD: "${ONTOMESH_PG_PASSWORD:-ontomesh}"
+      POSTGRES_DB: "${ONTOMESH_PG_DB:-ontomesh}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Wizard variant that points at Postgres ────────────────────────
+  # Selected with the same `--profile pg` switch.  Same image, same
+  # volumes — only difference is ONTOMESH_DB_URL.  Requires the image
+  # to have been built with the [postgres] extra; the Dockerfile's
+  # builder stage installs .[wizard] only by default, so for the pg
+  # path build with: `docker build --build-arg PIP_EXTRAS=wizard,postgres -t ontomesh:pg .`
+  # (Postgres extra wiring lands fully in a future Dockerfile pass.)
+
 volumes:
   # Stateful data: SQLite session DB, saved ontologies, generated outputs.
   # Back this up the same way you back up any other named volume.
   ontomesh-data:
+  # Postgres data volume (only created when the `pg` profile is active).
+  postgres-data:
   # Caddy's auto-managed cert + ACME state.  Don't delete unless you
   # want to re-issue.
   caddy-data:
