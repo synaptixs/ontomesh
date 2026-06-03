@@ -510,3 +510,118 @@
     color: var(--on-accent, #fff);
     outline: none;
   }
+
+  /* ── P1.3 — First-run onboarding overlay ────────────────────────── */
+  #onb-root {
+    position: fixed; inset: 0; z-index: 9999;
+    display: grid; place-items: center;
+    padding: 24px;
+    animation: onb-fade .18s ease-out;
+  }
+  #onb-root.is-leaving { animation: onb-fade-out .18s ease-in forwards; }
+  @keyframes onb-fade     { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes onb-fade-out { to   { opacity: 0 } }
+  @media (prefers-reduced-motion: reduce) {
+    #onb-root, #onb-root.is-leaving { animation: none; }
+  }
+  .onb-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+  }
+  [data-theme="dark"] .onb-backdrop { background: rgba(0, 0, 0, 0.7); }
+  .onb-modal {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-modal);
+    width: min(880px, 100%);
+    max-height: 90vh; overflow-y: auto;
+    padding: 32px 36px 28px;
+    outline: none;
+  }
+  .onb-close {
+    position: absolute; top: 14px; right: 16px;
+    width: 32px; height: 32px;
+    border: 0; background: transparent;
+    color: var(--muted); font-size: 24px;
+    cursor: pointer; border-radius: 6px;
+    line-height: 1;
+  }
+  .onb-close:hover, .onb-close:focus-visible {
+    background: var(--surface-2); color: var(--text);
+    outline: none;
+  }
+  .onb-head { margin-bottom: 28px; max-width: 640px; }
+  .onb-eyebrow {
+    font-family: var(--mono); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--brand); font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .onb-modal h2 {
+    font-family: 'Inter Tight', var(--font);
+    font-size: 28px; font-weight: 700;
+    letter-spacing: -0.025em; line-height: 1.15;
+    margin: 0 0 10px; color: var(--text);
+  }
+  .onb-sub {
+    color: var(--muted); font-size: 14.5px;
+    margin: 0; line-height: 1.55;
+  }
+  .onb-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+  .onb-card {
+    text-align: left;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: border-color .12s, transform .12s, box-shadow .12s;
+    font-family: inherit;
+  }
+  .onb-card:hover, .onb-card:focus-visible {
+    border-color: var(--brand);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+    outline: none;
+  }
+  .onb-card.is-loading { opacity: 0.6; cursor: progress; }
+  .onb-card-icon { font-size: 22px; line-height: 1; }
+  .onb-card-title {
+    font-family: 'Inter Tight', var(--font);
+    font-weight: 700; font-size: 15.5px; color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .onb-card-desc {
+    color: var(--muted); font-size: 12.5px;
+    line-height: 1.5; flex: 1;
+  }
+  .onb-card-cta {
+    color: var(--brand); font-weight: 600;
+    font-size: 12px; margin-top: 6px;
+    opacity: 0; transform: translateY(2px);
+    transition: opacity .12s, transform .12s;
+  }
+  .onb-card:hover .onb-card-cta,
+  .onb-card:focus-visible .onb-card-cta {
+    opacity: 1; transform: translateY(0);
+  }
+  .onb-foot { margin-top: 24px; text-align: center; }
+  .onb-skip {
+    background: transparent; border: 0;
+    color: var(--muted); font-size: 13px;
+    cursor: pointer; padding: 8px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .onb-skip:hover, .onb-skip:focus-visible {
+    color: var(--text); background: var(--surface-2);
+    outline: 1px solid var(--border);
+  }

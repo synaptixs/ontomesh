@@ -50,6 +50,15 @@
     // hello packet doesn't race the toast helper's bootstrap.
     window.addEventListener('DOMContentLoaded', () => live.start());
   </script>
+  <!-- P1.3 — first-run onboarding.  Shows a sample-project picker
+       when the wizard loads with an empty session.  Bound to
+       window.Onboarding so devs can force-show with
+       `Onboarding.showNow(...)` or reset with `Onboarding.reset()`. -->
+  <script type="module">
+    import { Onboarding }
+      from "{{ url_for('static', filename='js/components/onboarding.js') }}";
+    window.Onboarding = Onboarding;
+  </script>
   <!-- vis-network: force-directed graph rendering for the Relationships > Graph tab.
        MIT-licensed, ~150 KB minified. Loaded from unpkg. If offline / CDN-blocked,
        the Graph tab falls back to a friendly "couldn't load" message. -->
@@ -1624,6 +1633,32 @@ async function init() {
   loadTemplateList();
   _imSetupDropZone();
   render();
+  // P1.3 — show the onboarding picker when the session is empty,
+  // so a first-time visitor lands on something inviting instead of
+  // a blank Step 1. `Onboarding.maybeShow` no-ops if a session is
+  // already populated OR the user previously dismissed it.
+  if (window.Onboarding) {
+    window.Onboarding.maybeShow({
+      session,
+      onTemplatePicked: async (name) => {
+        const r = await fetch('/api/template/' + encodeURIComponent(name));
+        if (!r.ok) throw new Error('template load failed');
+        session = await r.json();
+        await reloadSessionAndRender();
+        // Land the user on Step 2 (Entities) — the first step
+        // where the template payload becomes visible.
+        goStep('entities');
+        if (typeof showToast === 'function') {
+          showToast('Loaded the ' + name + ' starter — edit any entity to make it yours.');
+        }
+      },
+      onSkip: () => {
+        if (typeof showToast === 'function') {
+          showToast('Starting blank — visit Library any time for a template.');
+        }
+      },
+    });
+  }
 }
 
 async function loadSession() {
