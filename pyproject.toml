@@ -101,6 +101,11 @@ neptune  = ["boto3>=1.35.0"]
 # psycopg3 ships in there too so a single `pip install ontomesh[postgres]`
 # enables both schema introspection and the wizard's pg-backed store.)
 
+# P3.2 — Redis-backed SSE bus.  Required when running multi-worker
+# (gunicorn workers > 1) or multi-replica.  Activated by setting
+# ONTOMESH_REDIS_URL; without it the bus falls back to in-memory.
+redis = ["redis>=5.0.0"]
+
 # ── Testing ──────────────────────────────────────────────────────────────
 test     = ["pytest>=8.2.2"]
 
