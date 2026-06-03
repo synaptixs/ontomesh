@@ -392,3 +392,82 @@
   .card-btn                   { padding: 3px 10px; font-size: 11px; }
   .card-btn-graph             { margin-left: auto; }
   .card-status-summary        { color: var(--muted); font-size: 11px; }
+
+  /* ─────── P0.2 — Accessibility primitives ─────── */
+
+  /* Skip-link: visually hidden until focused, then renders as a
+     pill at the top of the viewport. Pressing Tab from page load
+     surfaces it as the first interactive element. */
+  .skip-link {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    z-index: 1000;
+    transform: translateY(-150%);
+    transition: transform .15s ease-out;
+  }
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 2px;
+  }
+
+  /* Visible focus rings — make sure :focus-visible on interactive
+     elements never gets lost. The browser default would be either
+     no ring (we removed it) or a brand-mismatched blue. */
+  .step-nav li:focus-visible,
+  .btn:focus-visible,
+  .theme-btn:focus-visible,
+  .card-btn:focus-visible,
+  details.ld-group > summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Toast host: a screen-reader live region. Visually positioned
+     at the bottom-right; individual .toast children animate in. */
+  #toast-host {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+    pointer-events: none;
+  }
+  #toast-host > .toast {
+    position: static;
+    pointer-events: auto;
+  }
+
+  /* Reduce motion for users who request it. The whole UI fades /
+     slides; honour the OS preference. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Visually hidden but available to screen readers — for labels
+     we want assistive tech to announce but UI not to render. */
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
