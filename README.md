@@ -100,7 +100,9 @@ Specifically:
 
 ## Feedback
 
-File issues against the source repo with the `tester-feedback` label, or message the team directly.
+[**File a tester-feedback issue**](https://github.com/nrohilla-fibonacci/ontology/issues/new?template=tester-feedback.yml) — the form has a short three-option dropdown (Bug · Friction · Idea · Docs), optional repro/expected sections, and auto-applies the `tester-feedback` label.  Or message the team directly.
+
+Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/nrohilla-fibonacci/ontology/blob/main/CHANGELOG.md).
 
 ---
 
