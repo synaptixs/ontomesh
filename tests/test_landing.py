@@ -101,10 +101,13 @@ def test_landing_has_two_distinct_ctas_to_wizard(client):
 
 
 def test_landing_install_snippet_present(client):
+    """P1.2.5 grounded these in reality — see test_package_surface.py
+    for the deeper assertions.  Smoke test: install instructions and
+    a real CLI command are both visible."""
     body = client.get("/").get_data(as_text=True)
-    assert "pip install ontomesh" in body
-    # And the alternate Python usage snippet.
-    assert "HybridRetriever" in body
+    assert "git clone" in body
+    assert "pip install -e ." in body
+    assert "ontomesh-wizard" in body
 
 
 # ── A11y baseline ─────────────────────────────────────────────────────

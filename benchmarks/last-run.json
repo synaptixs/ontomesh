@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "db": "db/demo.db",
+  "db_bytes": 872448,
+  "db_size_human": "852.0 KB",
+  "elapsed_seconds": 4.8,
+  "elapsed_human": "4.8 s",
+  "owl_classes": 283,
+  "owl_properties": 1429,
+  "shacl_shapes": 159,
+  "owl_bytes": 2141923,
+  "shacl_bytes": 298310,
+  "returncode": 0
+}

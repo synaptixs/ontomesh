@@ -55,9 +55,10 @@
           for <span class="grad">GraphRAG.</span>
         </h1>
         <p class="sub">
-          Mine ontologies from your logs, validate with SHACL,
-          ship a hybrid retriever — without hand-crafting a single
-          Turtle file.
+          Generate production-ready OWL 2 ontologies + SHACL shapes
+          from your relational schema or your logs &mdash; with materialised
+          inference, full <code>prov:wasDerivedFrom</code> lineage, and
+          a wizard that puts every candidate in front of you for review.
         </p>
         <div class="cta-row">
           <a href="/wizard" class="btn btn-primary btn-lg">
@@ -69,14 +70,18 @@
           </a>
           <code class="install">
             <span class="prompt">$</span>
-            pip install ontomesh
+            git clone … &amp;&amp; pip install -e .
             <button class="copy" type="button"
                     aria-label="Copy install command"
-                    onclick="navigator.clipboard.writeText('pip install ontomesh')">
+                    onclick="navigator.clipboard.writeText('git clone https://github.com/nrohilla-fibonacci/ontology.git && cd ontology && pip install -e .')">
               copy
             </button>
           </code>
         </div>
+        <p class="install-note">
+          Currently source-install only.
+          <code>pip install ontomesh</code> from PyPI lands in v3.6.
+        </p>
       </div>
       <!-- Hero illustration: stylized mesh with floating nodes -->
       <div class="hero-art" aria-hidden="true">
@@ -123,17 +128,16 @@
     </section>
 
     <!-- ── Logos / trust strip (lightweight social proof) ──────── -->
-    <section class="trust" aria-label="What it powers">
-      <p class="trust-label">Powers ontology + GraphRAG stacks built on</p>
+    <section class="trust" aria-label="Stack">
+      <p class="trust-label">Built on open standards</p>
       <ul class="trust-row" role="list">
-        <li><code>FAISS</code></li>
-        <li><code>Chroma</code></li>
-        <li><code>Qdrant</code></li>
-        <li><code>pgvector</code></li>
-        <li><code>LangChain</code></li>
-        <li><code>LlamaIndex</code></li>
-        <li><code>Rulewerk</code></li>
+        <li><code>OWL 2</code></li>
         <li><code>SHACL</code></li>
+        <li><code>SPARQL</code></li>
+        <li><code>JSON-LD</code></li>
+        <li><code>SKOS</code></li>
+        <li><code>Datalog (Rulewerk)</code></li>
+        <li><code>SQLite / Postgres / MySQL</code></li>
       </ul>
     </section>
 
@@ -153,15 +157,22 @@
               <path d="M3 17l9 4 9-4"/>
             </svg>
           </div>
-          <h3>Mine an ontology from raw logs.</h3>
-          <p>Drift, brevity, and silent regressions die here. Ontomesh
-          mines templates with online clustering, builds a candidate
-          entity graph from co-occurrence (PMI), fits per-service HMMs
-          for anomalies, and gates causal edges with Granger /
-          transfer-entropy. You review one candidate at a time.</p>
-          <p class="stat">
-            <span>30M log lines</span> · <span>11 minutes</span> ·
-            <span>1,400 candidates</span>
+          <h3>Generate a full ontology from a database schema.</h3>
+          <p>Point Ontomesh at a relational database. The headless
+          pipeline introspects the schema, lifts it through OWL 2 /
+          SHACL / JSON-LD / SKOS, runs the reasoner, and produces a
+          materialised artifact bundle with full
+          <code>prov:wasDerivedFrom</code> lineage.</p>
+          <p class="stat" data-bench>
+            {% if bench %}
+            <span>{{ bench.db_size_human }} DB</span> ·
+            <span>{{ bench.elapsed_human }}</span> ·
+            <span>{{ bench.owl_classes }} classes,
+                  {{ bench.owl_properties_human }} properties</span>
+            {% else %}
+            <span>OWL 2</span> · <span>SHACL</span> ·
+            <span>JSON-LD</span> · <span>SKOS</span>
+            {% endif %}
           </p>
         </article>
 
@@ -179,8 +190,10 @@
           <code>prov:wasDerivedFrom</code> lineage. Every reasoner run
           emits a materialisation report you can diff against the
           last release.</p>
-          <p class="stat">
-            <span>SHACL 1.1</span> · <span>SWRL</span> ·
+          <p class="stat" data-bench>
+            {% if bench %}<span>{{ bench.shacl_shapes }} SHACL shapes</span>
+            {% else %}<span>SHACL 1.1</span>{% endif %} ·
+            <span>SWRL</span> ·
             <span>Datalog (Rulewerk)</span>
           </p>
         </article>
@@ -193,15 +206,16 @@
               <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
             </svg>
           </div>
-          <h3>Ship a hybrid GraphRAG retriever.</h3>
-          <p>Pure-vector retrieval blurs entity boundaries. Pure-graph
-          is brittle to phrasing. Ontomesh ships a hybrid retriever
-          that combines semantic similarity with graph-distance
-          re-ranking — entity-aware chunks, multiple backends, one
-          drop-in for LangChain / LlamaIndex.</p>
+          <h3>Mine candidates from raw logs.</h3>
+          <p>Log Discovery (phases L4&ndash;L13) mines templates with
+          online clustering, surfaces candidate entities / events /
+          relationships from co-occurrence (PMI), fits per-service
+          HMMs for anomalies, and gates causal edges with Granger /
+          transfer-entropy. You review one candidate at a time in
+          the wizard.</p>
           <p class="stat">
-            <span>FAISS</span> · <span>Chroma</span> ·
-            <span>Qdrant</span> · <span>pgvector</span>
+            <span>L4 templates</span> · <span>L8 regimes</span> ·
+            <span>L11 causal DAG</span> · <span>L13 rate anomalies</span>
           </p>
         </article>
       </div>
@@ -246,18 +260,20 @@
     <section class="snippet" aria-labelledby="snip-h">
       <header class="section-head">
         <p class="eyebrow">Get started</p>
-        <h2 id="snip-h">Two commands. One ontology. One retriever.</h2>
+        <h2 id="snip-h">One command, a full ontology bundle.</h2>
       </header>
-      <pre class="code"><span class="c"># 1. Install</span>
-<span class="kw">pip install</span> ontomesh
+      <pre class="code"><span class="c"># 1. Install (PyPI publish lands in v3.6 — for now, source install)</span>
+git clone https://github.com/nrohilla-fibonacci/ontology.git
+<span class="kw">cd</span> ontology &amp;&amp; pip install -e .
 
-<span class="c"># 2. Mine an ontology from your logs and emit the artifact bundle</span>
-<span class="kw">ontomesh</span> --logs ./logs --out ./output
+<span class="c"># 2. Generate the full OWL / SHACL / JSON-LD bundle from a SQLite DB</span>
+<span class="kw">ontomesh</span> --db db/demo.db --out ./output
 
-<span class="c"># 3. Drop the hybrid retriever into your RAG pipeline</span>
-<span class="kw">from</span> ontomesh.retrieval <span class="kw">import</span> HybridRetriever
-retriever = HybridRetriever.from_bundle(<span class="s">"./output"</span>)
-results = retriever.query(<span class="s">"why did checkout fail for EU users last week?"</span>)</pre>
+<span class="c"># 3. Or launch the interactive wizard at http://localhost:5051</span>
+<span class="kw">ontomesh-wizard</span> --port 5051
+
+<span class="c"># 4. Mine candidates from raw logs (phases L4–L13)</span>
+<span class="kw">ontomesh</span> --phase log --db db/demo.db --out ./output</pre>
       <p class="alt-cta">
         Prefer to point and click?
         <a href="/wizard">Open the wizard →</a>

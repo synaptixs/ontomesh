@@ -151,6 +151,16 @@ img { max-width: 100%; display: block; }
   background: var(--surface-2); color: var(--text);
   outline: 1px solid var(--brand);
 }
+.install-note {
+  margin: 18px 0 0;
+  font-size: 13px; color: var(--muted-2);
+  max-width: 520px;
+}
+.install-note code {
+  font-family: var(--mono); font-size: 12px;
+  padding: 1px 6px; border-radius: 3px;
+  background: var(--surface-2); color: var(--text);
+}
 .hero-art {
   width: 100%; max-width: 460px; justify-self: end;
   filter: drop-shadow(0 24px 60px rgba(79,70,229,0.18));

@@ -118,6 +118,13 @@ all = [
 ]
 
 [project.scripts]
+# Canonical Ontomesh console scripts.  These are the entry points the
+# landing page and README promise; pip install -e . wires them up.
+ontomesh         = "ontomesh.cli:main"
+ontomesh-wizard  = "ontomesh.wizard_entry:main"
+ontomesh-onboard = "ontomesh.onboard_entry:main"
+# Legacy aliases kept for one release so existing automation and
+# documentation snippets keep working.
 ontology-toolkit = "toolkit:main"
 ontology-onboard = "onboard:main"
 
@@ -131,6 +138,7 @@ py-modules = ["toolkit", "onboard"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
+    "ontomesh*",
     "runtime*",
     "compliance*",
     "federation*",
