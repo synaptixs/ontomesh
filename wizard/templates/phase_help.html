@@ -148,14 +148,14 @@
   <div class="wrap">
     <header class="page">
       <div class="crumb">
-        <a href="/">Wizard</a> · Help · Step {{ page.step_num }}
+        <a href="/">Ontomesh</a> · <a href="/wizard">Wizard</a> · Help · Step {{ page.step_num }}
       </div>
       <h1>
         <span class="step-num" aria-hidden="true">{{ page.step_num }}</span>
         {{ page.title }}
       </h1>
       <p class="tagline">{{ page.tagline }}</p>
-      <a href="/?step={{ page.slug }}" class="back-to-wizard">
+      <a href="/wizard?step={{ page.slug }}" class="back-to-wizard">
         ← Back to wizard
       </a>
     </header>
