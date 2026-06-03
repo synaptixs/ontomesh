@@ -3,13 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ontology Toolkit — Ontology Studio</title>
+  <title>Ontomesh — the ontology mesh for GraphRAG</title>
+  <meta name="description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.">
+  <!-- P1.1 — Brand: favicon + social cards. SVG favicon is rendered
+       by all modern browsers; legacy clients fall back to default. -->
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='brand/favicon.svg') }}">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Ontomesh — the ontology mesh for GraphRAG">
+  <meta property="og:description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever.">
+  <meta property="og:image"       content="{{ url_for('static', filename='brand/og-card.svg') }}">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="Ontomesh — the ontology mesh for GraphRAG">
+  <meta name="twitter:description" content="Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever.">
+  <meta name="twitter:image"      content="{{ url_for('static', filename='brand/twitter-card.svg') }}">
   <!-- Inter and JetBrains Mono — modern sans + mono pair. Falls back to
        system font stack if the CDN is blocked. preconnect first to keep
        cold-load latency tight. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/wizard.css') }}">
   <!-- P0.1 — reusable proposal-card module. Bound to window.* so
@@ -53,8 +66,13 @@
   <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
   <aside class="sidebar" aria-label="Pipeline phases">
     <div class="sidebar-logo">
-      <strong>Ontology Toolkit</strong>
-      <span>Ontology Studio · v3.0</span>
+      <a href="/" aria-label="Ontomesh — home" class="brand-link">
+        <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
+             alt="Ontomesh"
+             class="brand-wordmark"
+             width="180" height="40">
+        <span class="brand-version">v3.5</span>
+      </a>
     </div>
     <nav aria-label="Pipeline steps">
     <ul class="step-nav" id="step-nav" role="list">

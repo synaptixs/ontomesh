@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ontology-toolkit"
-version = "3.4.0-dev"
-description = "Ontology Engineering Toolkit — DB → OWL → SHACL pipeline with runtime gates, drift monitoring, federation, and compliance."
+name = "ontomesh"
+version = "3.5.0-dev"
+description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Proprietary" }
