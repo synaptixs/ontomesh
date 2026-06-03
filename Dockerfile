@@ -98,10 +98,11 @@ USER ontomesh
 
 EXPOSE 5051
 
-# Hit /health every 30 s; consider the container unhealthy after 3
-# consecutive failures.  start-period gives gunicorn room to boot.
+# Liveness check.  Uses /live (P3.3) which is cheaper than /health
+# and intentionally does NOT touch dependencies — a DB outage
+# shouldn't restart the container.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD curl -fsS "http://localhost:${ONTOMESH_PORT}/health" || exit 1
+  CMD curl -fsS "http://localhost:${ONTOMESH_PORT}/live" || exit 1
 
 # Multi-worker, multi-threaded gunicorn (P3.1).
 #

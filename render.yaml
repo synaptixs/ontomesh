@@ -30,7 +30,8 @@ services:
     region: ohio                             # pick closest to your users
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    healthCheckPath: /health
+    # P3.3 — Liveness probe; /health is kept as a back-compat alias.
+    healthCheckPath: /live
     autoDeploy: true                         # rebuild on every push
     envVars:
       - key: ONTOMESH_HOST

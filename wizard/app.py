@@ -194,7 +194,95 @@ def _legacy_index():
 
 @app.route("/health")
 def health():
+    """Back-compat alias.  Behaves like /live — returns 200 as long
+    as the process is responding to HTTP.  New deployments should
+    prefer /live (k8s livenessProbe) + /ready (readinessProbe)."""
     return jsonify({"ok": True, "timestamp": _now()})
+
+
+# ── P3.3 — Differentiated liveness / readiness probes ─────────────────
+
+
+@app.route("/live")
+def live():
+    """**Liveness probe.**  Cheap, no I/O.  Returns 200 as long as
+    the process is alive.  Used by Docker / k8s livenessProbe; a
+    failure here means "restart this pod."
+
+    Deliberately does NOT touch the DB or Redis — a pod with a
+    broken DB connection is STILL alive and should NOT be killed
+    (the restart loop wouldn't help; the DB is the problem)."""
+    return jsonify({
+        "status":    "alive",
+        "version":   _version_string(),
+        "timestamp": _now(),
+    })
+
+
+@app.route("/ready")
+def ready():
+    """**Readiness probe.**  Checks every dependency the wizard
+    needs to serve traffic.  Used by k8s readinessProbe + load
+    balancer; a failure here means "don't route traffic here yet,"
+    but the pod stays alive (so it can recover).
+
+    Currently probes:
+      • Saved-ontologies + preferences store (SQLite or Postgres).
+      • Event bus (in-memory always passes; Redis pings the server).
+
+    Returns 200 with ``status: ready`` when everything is up.
+    Returns 503 with per-dependency detail when anything is down.
+    The body shape is stable so monitoring can parse it."""
+    checks: dict[str, dict] = {}
+    overall_ok = True
+
+    # ── Saved-ontologies store ──
+    try:
+        _store.list_ontologies(ONTOLOGIES_DB)
+        checks["store"] = {"ok": True, "backend": _store_backend_name()}
+    except Exception as exc:                                          # noqa: BLE001
+        checks["store"] = {"ok": False, "error": str(exc)[:200]}
+        overall_ok = False
+
+    # ── Event bus ──
+    try:
+        if "_src" not in dir():
+            import sys as _sys
+            _src = os.path.join(ROOT, "src")
+            if _src not in _sys.path:
+                _sys.path.insert(0, _src)
+        from events_bus import get_bus                                # noqa: E402
+        stats = get_bus().stats
+        checks["events"] = {"ok": True, "backend": stats.get("backend", "unknown")}
+    except Exception as exc:                                          # noqa: BLE001
+        checks["events"] = {"ok": False, "error": str(exc)[:200]}
+        overall_ok = False
+
+    response = {
+        "status":     "ready" if overall_ok else "not_ready",
+        "checks":     checks,
+        "version":    _version_string(),
+        "timestamp":  _now(),
+    }
+    return jsonify(response), (200 if overall_ok else 503)
+
+
+def _version_string() -> str:
+    try:
+        if HERE not in sys.path:
+            sys.path.insert(0, HERE)
+        from ontomesh import __version__                              # noqa: E402
+        return __version__
+    except Exception:                                                 # noqa: BLE001
+        return "unknown"
+
+
+def _store_backend_name() -> str:
+    """Best-effort label for /ready — 'sqlite' or 'postgres'."""
+    url = str(ONTOLOGIES_DB)
+    if url.startswith("postgresql") or url.startswith("postgres"):
+        return "postgres"
+    return "sqlite"
 
 
 # ── P1.1 — Branded error pages ────────────────────────────────────────
