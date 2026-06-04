@@ -112,7 +112,7 @@ body:
     id: privacy
     attributes:
       label: Privacy check
-      description: We're internal — but accidents happen.  Confirm the stuff below before you submit.
+      description: This is a public repository.  Confirm the stuff below before you submit.
       options:
-        - label: I checked that nothing in this issue (logs, screenshots, repro data) leaks customer data or anything beyond the internal team.
+        - label: I checked that nothing in this issue (logs, screenshots, repro data) contains credentials, customer data, or other private information.
           required: true
