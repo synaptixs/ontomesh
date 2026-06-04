@@ -61,7 +61,7 @@ body:
     attributes:
       label: Image tag
       description: Which Ontomesh tag are you running?  Run `docker inspect ontomesh-wizard --format='{{.Config.Image}}'` if you're not sure.
-      placeholder: "ghcr.io/nrohilla-fibonacci/ontomesh:3.6.0-dev"
+      placeholder: "ghcr.io/synaptixs/ontomesh:3.6.0-dev"
     validations:
       required: false
 
