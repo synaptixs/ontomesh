@@ -92,8 +92,8 @@ Do **not** open a public issue for a security vulnerability. Email the maintaine
 
 ```bash
 # 1. Clone the repository (external contributors: fork first, then clone your fork)
-git clone https://github.com/nrohilla-fibonacci/ontology.git
-cd ontology
+git clone https://github.com/synaptixs/ontomesh.git
+cd ontomesh
 
 # 2. Create the conda environment
 conda create -n ontology python=3.12 -y
@@ -192,7 +192,7 @@ Branch naming rules:
 
 ```bash
 # Add the upstream remote once
-git remote add upstream https://github.com/nrohilla-fibonacci/ontology.git
+git remote add upstream https://github.com/synaptixs/ontomesh.git
 
 # Keep your fork's develop in sync before starting work
 git fetch upstream
@@ -330,7 +330,7 @@ Maintainers are responsible for enforcing this guide and the code of conduct fai
 
 **Contact the maintainers:**
 
-Open a [GitHub Discussion](https://github.com/nrohilla-fibonacci/ontology/discussions) for general questions.  
+Open a [GitHub Discussion](https://github.com/synaptixs/ontomesh/discussions) for general questions.  
 For conduct violations or security issues, contact the project owner directly through GitHub (`@nrohilla-fibonacci`).
 
 ---

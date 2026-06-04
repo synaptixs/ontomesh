@@ -149,7 +149,7 @@ def test_changelog_links_compare_urls(changelog_text):
     """The Keep-a-Changelog footer compare-link block lets readers
     jump to the GitHub diff for each version."""
     assert "[3.6.0-dev]:" in changelog_text
-    assert "github.com/nrohilla-fibonacci/ontology/compare/" in changelog_text
+    assert "github.com/synaptixs/ontomesh/compare/" in changelog_text
 
 
 # ── Basic-auth Caddyfile example ─────────────────────────────────────

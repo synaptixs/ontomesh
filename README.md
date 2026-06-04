@@ -10,7 +10,7 @@
 
 | | |
 |---|---|
-| **Image** | `ghcr.io/nrohilla-fibonacci/ontomesh:3.7.0-dev` (and `:latest`) |
+| **Image** | `ghcr.io/synaptixs/ontomesh:3.7.1-dev` (and `:latest`) |
 | **Size** | ~316 MB compressed |
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
@@ -29,7 +29,7 @@
 echo $TOKEN | docker login ghcr.io -u YOUR_GH_USER --password-stdin
 
 # Ephemeral run (resets on stop):
-docker run --rm -p 5051:5051 ghcr.io/nrohilla-fibonacci/ontomesh:latest
+docker run --rm -p 5051:5051 ghcr.io/synaptixs/ontomesh:latest
 
 # Persistent run (saved ontologies survive container restart):
 docker volume create ontomesh-data
@@ -37,7 +37,7 @@ docker run -d --name ontomesh \
   -p 5051:5051 \
   -v ontomesh-data:/data \
   -e ONTOMESH_DATA_DIR=/data \
-  ghcr.io/nrohilla-fibonacci/ontomesh:latest
+  ghcr.io/synaptixs/ontomesh:latest
 ```
 
 Then open **http://localhost:5051** in your browser.
@@ -90,7 +90,7 @@ The image defaults to SQLite-on-disk. For multi-host or multi-replica deployment
 
 The full developer documentation, deployment guides (Compose / Fly.io / Render / Cloud Run), and source code live in the repository:
 
-**https://github.com/nrohilla-fibonacci/ontology**
+**https://github.com/synaptixs/ontomesh**
 
 Specifically:
 - `deploy/README.md` — picking a deployment target
@@ -100,10 +100,10 @@ Specifically:
 
 ## Feedback
 
-[**File a tester-feedback issue**](https://github.com/nrohilla-fibonacci/ontology/issues/new?template=tester-feedback.yml) — the form has a short three-option dropdown (Bug · Friction · Idea · Docs), optional repro/expected sections, and auto-applies the `tester-feedback` label.  Or message the team directly.
+[**File a tester-feedback issue**](https://github.com/synaptixs/ontomesh/issues/new?template=tester-feedback.yml) — the form has a short three-option dropdown (Bug · Friction · Idea · Docs), optional repro/expected sections, and auto-applies the `tester-feedback` label.  Or message the team directly.
 
-Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/nrohilla-fibonacci/ontology/blob/main/CHANGELOG.md).
+Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/synaptixs/ontomesh/blob/main/CHANGELOG.md).
 
 ---
 
-*Ontomesh v3.7.0-dev · gunicorn · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 250+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.7.1-dev · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 297+ tests · Docker, Compose, Fly.io, Render, Cloud Run*

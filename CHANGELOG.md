@@ -6,13 +6,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [3.7.1-dev] — 2026-06-04 · Repo move to `synaptixs/ontomesh`
+
+### Changed
+
+- **Repository moved** from `nrohilla-fibonacci/ontology` to `synaptixs/ontomesh` to make space for the future Synaptixs umbrella org.  GitHub auto-redirects the old URL for ~30 days; update your bookmarks.
+- **Container image path** changed from `ghcr.io/nrohilla-fibonacci/ontomesh:*` to `ghcr.io/synaptixs/ontomesh:*`.  Re-pull with the new path; the v3.7.1-dev tag fires the publish workflow which signs, SBOMs, and SLSA-attests the new image.
+- Every README, docs, share-message, deploy-config, and CI workflow updated to the new URLs.
+- `cosign verify` identity-regexp updated to `^https://github.com/synaptixs/ontomesh`.
+
+### Notes
+
+- The legacy `infodrift` repo reference in the `[drift]` extra still points at `nrohilla-fibonacci/infodrift` — that's a separate repo and stays where it is.
+- The author field in `pyproject.toml` remains `nrohilla-fibonacci` — orgs publish; people author.
+
+---
+
+## [3.7.0-dev] — 2026-06-04 · Production hardening (P3)
+
+Six-phase line that takes the wizard from "internal preview on Flask's dev server" to "production-grade service."
+
+### Added
+
+- **gunicorn** replaces Flask's dev server (P3.1).  gthread worker class, 2 workers × 8 threads default, env-var overridable.  "Do not use in production" warning gone.
+- **Redis-backed SSE bus** (P3.2).  `ONTOMESH_REDIS_URL` activates; in-memory stays the default.  Multi-worker / multi-replica safe.  Compose adds opt-in `redis` profile.
+- **Differentiated `/live` + `/ready` probes** (P3.3).  `/live` is cheap and dependency-free; `/ready` checks every dependency and 503s on failure.  Dockerfile / Compose / Fly / Render / Cloud Run probes all updated.
+- **Structured JSON access logs + X-Request-Id correlation** (P3.4).  python-json-logger; every request gets an X-Request-Id (auto-generated or echoed); /live and /ready excluded from log noise.
+- **Prometheus `/metrics` endpoint** (P3.5).  Five families (HTTP requests counter, request-duration histogram, SSE subscribers gauge, drift events counter, pipeline runs counter); path-label normalisation keeps cardinality bounded.
+- **Image security + supply chain** (P3.6).  Trivy vulnerability scan (HIGH/CRITICAL fails the workflow; SARIF uploaded to the Security tab); cosign keyless OIDC signing; SBOM + SLSA provenance attestation.
+
+---
+
 ## [3.6.0-dev] — 2026-06-03 · Production deployment
 
 Five-phase deployment line plus the first internal-share workflow.
 
 ### Added
 
-- **Single-container image** (`ghcr.io/nrohilla-fibonacci/ontomesh:3.6.0-dev`) — multi-stage `Dockerfile`, non-root `ontomesh` user (uid 10001), `HEALTHCHECK` against `/health`. Multi-arch (`linux/amd64` + `linux/arm64`). 316 MB. (P2.1)
+- **Single-container image** (`ghcr.io/synaptixs/ontomesh:3.6.0-dev`) — multi-stage `Dockerfile`, non-root `ontomesh` user (uid 10001), `HEALTHCHECK` against `/health`. Multi-arch (`linux/amd64` + `linux/arm64`). 316 MB. (P2.1)
 - **Docker Compose stack** — `compose.yml` brings up the wizard behind Caddy with auto-issued TLS. SSE-safe `read_timeout 24h`. Persistent volumes for SQLite + Caddy cert state. (P2.2)
 - **Postgres backend** — `wizard/ontologies_store.py` refactored to be backend-agnostic. Set `ONTOMESH_DB_URL=postgresql://...` to switch; default stays SQLite. Single `[postgres]` extra ships psycopg2 + psycopg3. (P2.3)
 - **Managed-runtime configs** — `fly.toml`, `render.yaml`, `deploy/cloudrun.yaml`, all wrap the same image. `deploy/README.md` is the picking guide. (P2.4)
@@ -123,11 +154,13 @@ Accessibility, design tokens, live drift, per-phase help.
 
 ---
 
-[3.6.0-dev]: https://github.com/nrohilla-fibonacci/ontology/compare/v3.5.0-dev...v3.6.0-dev
-[3.5.0-dev]: https://github.com/nrohilla-fibonacci/ontology/compare/v3.4.0-dev...v3.5.0-dev
-[3.4.0-dev]: https://github.com/nrohilla-fibonacci/ontology/compare/3.3.0...v3.4.0-dev
-[3.3.0]: https://github.com/nrohilla-fibonacci/ontology/compare/3.2.0...3.3.0
-[3.2.0]: https://github.com/nrohilla-fibonacci/ontology/compare/3.1.0...3.2.0
-[3.1.0]: https://github.com/nrohilla-fibonacci/ontology/compare/3.0.0...3.1.0
-[3.0.0]: https://github.com/nrohilla-fibonacci/ontology/compare/v1.5...3.0.0
-[1.5]: https://github.com/nrohilla-fibonacci/ontology/releases/tag/v1.5
+[3.7.1-dev]: https://github.com/synaptixs/ontomesh/compare/v3.7.0-dev...v3.7.1-dev
+[3.7.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.6.0-dev...v3.7.0-dev
+[3.6.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.5.0-dev...v3.6.0-dev
+[3.5.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.4.0-dev...v3.5.0-dev
+[3.4.0-dev]: https://github.com/synaptixs/ontomesh/compare/3.3.0...v3.4.0-dev
+[3.3.0]: https://github.com/synaptixs/ontomesh/compare/3.2.0...3.3.0
+[3.2.0]: https://github.com/synaptixs/ontomesh/compare/3.1.0...3.2.0
+[3.1.0]: https://github.com/synaptixs/ontomesh/compare/3.0.0...3.1.0
+[3.0.0]: https://github.com/synaptixs/ontomesh/compare/v1.5...3.0.0
+[1.5]: https://github.com/synaptixs/ontomesh/releases/tag/v1.5
