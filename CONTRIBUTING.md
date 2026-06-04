@@ -1,6 +1,6 @@
-# Contributing to Ontology Engineering Toolkit
+# Contributing to Ontomesh
 
-Thank you for your interest in contributing. This guide explains how both **internal team members** and **external contributors** can submit issues, propose changes, and have code merged — and the conduct we expect from everyone involved.
+Thank you for your interest in contributing. This guide explains how to submit issues, propose changes, and have code merged — and the conduct we expect from everyone involved.
 
 ---
 
@@ -330,8 +330,8 @@ Maintainers are responsible for enforcing this guide and the code of conduct fai
 
 **Contact the maintainers:**
 
-Open a [GitHub Discussion](https://github.com/synaptixs/ontomesh/discussions) for general questions.  
-For conduct violations or security issues, contact the project owner directly through GitHub (`@nrohilla-fibonacci`).
+Open a [GitHub Discussion](https://github.com/synaptixs/ontomesh/discussions) for general questions.
+For conduct violations or security issues, see [`SECURITY.md`](SECURITY.md) for the disclosure process.
 
 ---
 

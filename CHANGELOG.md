@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [3.7.0-dev] — 2026-06-04 · Production hardening (P3)
 
-Six-phase line that takes the wizard from "internal preview on Flask's dev server" to "production-grade service."
+Six-phase line that takes the wizard from "preview on Flask's dev server" to "production-grade service."
 
 ### Added
 
