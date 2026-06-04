@@ -17,8 +17,8 @@ How to install the toolkit, point it at a database, and get a working ontology. 
 **Python:** 3.10 or later.
 
 ```bash
-git clone https://github.com/nrohilla-fibonacci/ontology.git
-cd ontology
+git clone https://github.com/synaptixs/ontomesh.git
+cd ontomesh
 pip install -r requirements-core.txt
 ```
 
