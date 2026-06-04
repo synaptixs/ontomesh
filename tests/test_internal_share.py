@@ -226,7 +226,7 @@ def test_readme_documents_ghcr_login():
 
 def test_readme_uses_internal_image_path():
     text = README.read_text()
-    assert "ghcr.io/nrohilla-fibonacci/ontomesh" in text
+    assert "ghcr.io/synaptixs/ontomesh" in text
 
 
 def test_readme_warns_internal_only():
@@ -271,7 +271,7 @@ def test_readme_links_source_repo():
     in the image; deeper docs (deploy guides, integrate.md) live
     in the source repo, which the README must link."""
     text = README.read_text()
-    assert "github.com/nrohilla-fibonacci/ontology" in text
+    assert "github.com/synaptixs/ontomesh" in text
 
 
 def test_readme_links_deploy_guide():
