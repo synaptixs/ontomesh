@@ -19,7 +19,7 @@
 #   2. Log Docker into ghcr.io:
 #        echo $TOKEN | docker login ghcr.io -u $YOUR_GH_USER --password-stdin
 #   3. Run:
-#        docker run --rm -p 5051:5051 ghcr.io/nrohilla-fibonacci/ontomesh:latest
+#        docker run --rm -p 5051:5051 ghcr.io/synaptixs/ontomesh:latest
 
 name: Publish container image
 

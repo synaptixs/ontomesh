@@ -18,8 +18,8 @@ Three commands, one bundled SQLite database, no API keys, no driver compiles.
 
 ```bash
 # 1. Clone + minimum dependencies (~50 MB, no compile)
-git clone https://github.com/nrohilla-fibonacci/ontology.git
-cd ontology
+git clone https://github.com/synaptixs/ontomesh.git
+cd ontomesh
 pip install -r requirements-core.txt
 
 # 2. Run the full pipeline against the bundled retail demo DB
