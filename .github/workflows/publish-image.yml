@@ -143,10 +143,14 @@ jobs:
           format:           sarif
           output:           trivy-results.sarif
           severity:         CRITICAL,HIGH
-          exit-code:        "1"               # fail on findings
+          # Scan-and-report (not scan-and-fail) — findings land in the
+          # repo's Security tab via the SARIF upload below for async
+          # triage.  Failing the workflow on every new upstream CVE
+          # would block image publishes; we'd rather have an image
+          # shipped (signed + SBOM'd) with a tracked finding list.
+          exit-code:        "0"
           ignore-unfixed:   true
           vuln-type:        "os,library"
-        continue-on-error: true       # don't block sign + summary — see below
 
       - name: Upload Trivy report to the Security tab
         if: always()
