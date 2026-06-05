@@ -1,0 +1,11 @@
+# CODEOWNERS — required reviewers for every PR into protected branches.
+#
+# The @synaptixs/maintainers team is the gate.  Every PR into `main` or
+# `develop` automatically requests review from the team, and the
+# "Protect main" / "Protect develop" rulesets enforce that a maintainer
+# review is required before merge.
+#
+# Anyone (external contributors via fork, internal team via branch) can
+# *open* a PR — this file controls who can *merge* it.
+
+*  @synaptixs/maintainers
