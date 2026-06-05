@@ -16,7 +16,9 @@ authors = [
 keywords = ["ontology", "owl", "shacl", "rdf", "drift", "llm", "knowledge-graph"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: Apache Software License",
+    # License declared via PEP 639 `license = "Apache-2.0"` above —
+    # the legacy `License :: ...` trove classifier is no longer
+    # allowed alongside the SPDX expression form.
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
