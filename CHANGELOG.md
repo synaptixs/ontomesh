@@ -38,7 +38,7 @@ First public release on PyPI + GHCR (public).  Consolidates the 3.7.0-dev and 3.
 
 ### Notes
 
-- The legacy `infodrift` repo reference in the `[drift]` extra still points at `nrohilla-fibonacci/infodrift` — that's a separate repo and is unaffected by this rename.
+- The `infodrift` repo (drift-monitor source for the `[drift]` extra) was also transferred under the Synaptixs org and now lives at `synaptixs/infodrift`.  GitHub auto-redirects the old `nrohilla-fibonacci/infodrift` URL during the transitional window.
 - Pre-release dev cuts (`3.7.0-dev`, `3.7.1-dev`) remain accessible as historical tags but are not advertised as supported.
 
 ---

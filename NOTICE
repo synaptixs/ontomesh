@@ -77,7 +77,7 @@ The drift-monitor (`infodrift`) dependency
 ──────────────────────────────────────────────────────────────────
 
 The optional [drift] extra installs `drift-monitor` from a separate
-git repository (https://github.com/nrohilla-fibonacci/infodrift).
+git repository (https://github.com/synaptixs/infodrift).
 At the time of writing that repository is private; the license
 applies whatever terms are documented in that repository when it
 becomes accessible.  The [drift] extra is opt-in; the core toolkit

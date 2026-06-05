@@ -52,7 +52,7 @@ Rebuild from source:
 python -m build      # produces dist/*.whl and dist/*.tar.gz
 ```
 
-> The `drift-monitor` dependency is a git+VCS reference to [infodrift](https://github.com/nrohilla-fibonacci/infodrift), so the wheel is intended for private/internal distribution rather than PyPI.
+> The `drift-monitor` dependency is a git+VCS reference to [infodrift](https://github.com/synaptixs/infodrift), so the wheel is intended for private/internal distribution rather than PyPI.
 
 ---
 

@@ -488,7 +488,7 @@ The config file declares strategies, `older_than_days`, and `schedule_cron`.
 
 ## `runtime.drift.*` — Production drift monitoring
 
-Wraps the [infodrift](https://github.com/nrohilla-fibonacci/infodrift) `drift_monitor` library so it is driven by OWL individuals, validates DataFrames against SHACL, enriches reports as JSON-LD ObservationRecords, and propagates alerts along the OWL class graph.
+Wraps the [infodrift](https://github.com/synaptixs/infodrift) `drift_monitor` library so it is driven by OWL individuals, validates DataFrames against SHACL, enriches reports as JSON-LD ObservationRecords, and propagates alerts along the OWL class graph.
 
 Phases (P1–P5):
 
