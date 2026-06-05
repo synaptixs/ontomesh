@@ -1,0 +1,148 @@
+# mkdocs-material configuration for the Ontomesh documentation site.
+#
+# Build locally:   mkdocs serve            (live-reload at http://127.0.0.1:8000)
+# Build static:    mkdocs build            (output to ./site)
+# Auto-deployed:   .github/workflows/docs.yml builds & publishes to GitHub Pages
+#                  on every push to `main`.
+#
+# Public URL (after Pages is enabled):
+#   https://synaptixs.github.io/ontomesh
+#
+# When a custom domain lands (Stage 4c), set CNAME under docs/ and update
+# site_url + repo_url below.
+
+site_name:        Ontomesh
+site_url:         https://synaptixs.github.io/ontomesh/
+site_description: The ontology mesh for GraphRAG — mine ontologies from logs, validate with SHACL, ship a hybrid retriever.
+site_author:      Synaptixs
+copyright:        Apache-2.0 · &copy; Synaptixs
+
+repo_name:        synaptixs/ontomesh
+repo_url:         https://github.com/synaptixs/ontomesh
+edit_uri:         edit/develop/docs/
+
+# Source: all Markdown lives under docs/.  The site is generated into ./site
+# (gitignored).
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: en
+  logo:    ../wizard/static/brand/ontomesh-mark.svg
+  favicon: ../wizard/static/brand/favicon.svg
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent:  cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent:  cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+    - announce.dismiss
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index:     !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - footnotes
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/synaptixs/ontomesh
+    - icon: fontawesome/brands/docker
+      link: https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh
+  version:
+    provider: mike
+    default: latest
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - getting-started/index.md
+      - Install:        getting-started/install.md
+      - Quickstart:     getting-started/quickstart.md
+      - First wizard:   getting-started/first-wizard.md
+  - Concepts:
+      - concepts/index.md
+      - Pipeline phases: concepts/pipeline.md
+      - Ontology model:  concepts/ontology-model.md
+      - Log mining:      concepts/log-mining.md
+      - Drift monitoring: concepts/drift.md
+  - Deployment:
+      - deployment/index.md
+      - Docker:           deployment/docker.md
+      - Docker Compose:   deployment/compose.md
+      - Postgres backend: deployment/postgres.md
+      - Managed runtimes: deployment/managed-runtimes.md
+      - Production hardening: deployment/production.md
+  - Reference:
+      - reference/index.md
+      - SDK:        sdk.md
+      - Runtime:    runtime.md
+      - Integrate:  integrate.md
+      - Extending:  extending.md
+      - Artifacts:  artifacts.md
+      - Metadata:   metadata.md
+      - TMF Forum:  tmf.md
+      - Advanced:   advanced.md
+  - Releases:
+      - Changelog:  release-notes.md
+      - Roadmap:    toolkit-v3-roadmap.md
+  - Project:
+      - GitHub:        https://github.com/synaptixs/ontomesh
+      - Container:     https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh
+      - Discussions:   https://github.com/synaptixs/ontomesh/discussions
+      - Issues:        https://github.com/synaptixs/ontomesh/issues
