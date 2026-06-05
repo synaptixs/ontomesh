@@ -8,9 +8,9 @@
 # Install: pip install -r requirements-drift.txt
 #
 # NOTE: the drift-monitor distribution is hosted on a private git repo
-# (see https://github.com/nrohilla-fibonacci/infodrift). The wheel
+# (see https://github.com/synaptixs/infodrift). The wheel
 # produced by `python -m build` is therefore intended for private /
 # internal distribution — not PyPI.
 
-drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop
+drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop
 drain3>=0.9                     # Optional — required only by LogTemplateMonitor

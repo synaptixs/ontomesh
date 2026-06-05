@@ -86,7 +86,7 @@ oci       = ["oci>=2.126.0"]
 
 # ── Drift monitoring (runtime/drift/) ────────────────────────────────────
 drift = [
-    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop",
     "drain3>=0.9",
 ]
 
@@ -135,7 +135,7 @@ all = [
     "requests>=2.32.3",
     "oci>=2.126.0",
     # drift
-    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop",
     "drain3>=0.9",
     # advanced
     "flask>=3.0.3",
