@@ -6,34 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
-## [3.7.1-dev] — 2026-06-04 · Repo move to `synaptixs/ontomesh`
+## [3.7.0] — 2026-06-05 · Public release
+
+First public release on PyPI + GHCR (public).  Consolidates the 3.7.0-dev and 3.7.1-dev preview cuts into one tagged release under the new `synaptixs/ontomesh` namespace and Apache-2.0 licence.
+
+### Added
+
+- **Apache-2.0 licence** at `LICENSE`; matching `NOTICE` documents every third-party dependency.
+- **`SECURITY.md`** describes the responsible-disclosure process (GitHub Security Advisories + back-up email).
+- **`CODE_OF_CONDUCT.md`** — Contributor Covenant 2.1.
+- **`.github/PULL_REQUEST_TEMPLATE.md`** for incoming contributions.
+- **`docs/PUBLIC_RELEASE_PLAN.md`** — the canonical roadmap for going from private to public.
 
 ### Changed
 
-- **Repository moved** from `nrohilla-fibonacci/ontology` to `synaptixs/ontomesh` to make space for the future Synaptixs umbrella org.  GitHub auto-redirects the old URL for ~30 days; update your bookmarks.
-- **Container image path** changed from `ghcr.io/nrohilla-fibonacci/ontomesh:*` to `ghcr.io/synaptixs/ontomesh:*`.  Re-pull with the new path; the v3.7.1-dev tag fires the publish workflow which signs, SBOMs, and SLSA-attests the new image.
-- Every README, docs, share-message, deploy-config, and CI workflow updated to the new URLs.
-- `cosign verify` identity-regexp updated to `^https://github.com/synaptixs/ontomesh`.
+- **Repository moved** from `nrohilla-fibonacci/ontology` to `synaptixs/ontomesh`.  GitHub auto-redirects the old URL for ~30 days.
+- **Container image path** is now `ghcr.io/synaptixs/ontomesh:3.7.0` (and `:latest`).  Multi-arch (`linux/amd64` + `linux/arm64`), signed via keyless cosign, ships with SLSA provenance + SPDX SBOM as OCI artefacts.
+- **Identity de-link** — `pyproject.toml` author is `Synaptixs`; `CONTRIBUTING.md` security contact now points at `SECURITY.md` rather than a personal handle.
+- **README** rewritten for a public audience: license + Python + Docker + Discussions badges; removed the "internal preview · private artefact" disclaimer; removed the `docker login` prelude.
+- **Issue templates** rewritten for a public audience; the privacy-check checkbox now warns about a *public* repo rather than an internal team.
+- **CI workflow** (`publish-image.yml`): Trivy step now scans-and-reports (uploads SARIF) instead of failing the build on every new upstream CVE.
 
-### Notes
-
-- The legacy `infodrift` repo reference in the `[drift]` extra still points at `nrohilla-fibonacci/infodrift` — that's a separate repo and stays where it is.
-- The author field in `pyproject.toml` remains `nrohilla-fibonacci` — orgs publish; people author.
-
----
-
-## [3.7.0-dev] — 2026-06-04 · Production hardening (P3)
-
-Six-phase line that takes the wizard from "preview on Flask's dev server" to "production-grade service."
-
-### Added
+### Production hardening (P3 line — first available in 3.7.0)
 
 - **gunicorn** replaces Flask's dev server (P3.1).  gthread worker class, 2 workers × 8 threads default, env-var overridable.  "Do not use in production" warning gone.
 - **Redis-backed SSE bus** (P3.2).  `ONTOMESH_REDIS_URL` activates; in-memory stays the default.  Multi-worker / multi-replica safe.  Compose adds opt-in `redis` profile.
 - **Differentiated `/live` + `/ready` probes** (P3.3).  `/live` is cheap and dependency-free; `/ready` checks every dependency and 503s on failure.  Dockerfile / Compose / Fly / Render / Cloud Run probes all updated.
-- **Structured JSON access logs + X-Request-Id correlation** (P3.4).  python-json-logger; every request gets an X-Request-Id (auto-generated or echoed); /live and /ready excluded from log noise.
+- **Structured JSON access logs + X-Request-Id correlation** (P3.4).  Every request gets an X-Request-Id (auto-generated or echoed); /live and /ready excluded from log noise.
 - **Prometheus `/metrics` endpoint** (P3.5).  Five families (HTTP requests counter, request-duration histogram, SSE subscribers gauge, drift events counter, pipeline runs counter); path-label normalisation keeps cardinality bounded.
-- **Image security + supply chain** (P3.6).  Trivy vulnerability scan (HIGH/CRITICAL fails the workflow; SARIF uploaded to the Security tab); cosign keyless OIDC signing; SBOM + SLSA provenance attestation.
+- **Image security + supply chain** (P3.6).  Trivy vulnerability scan (SARIF in Security tab); cosign keyless OIDC signing; SBOM + SLSA provenance attestation.
+
+### Notes
+
+- The legacy `infodrift` repo reference in the `[drift]` extra still points at `nrohilla-fibonacci/infodrift` — that's a separate repo and is unaffected by this rename.
+- Pre-release dev cuts (`3.7.0-dev`, `3.7.1-dev`) remain accessible as historical tags but are not advertised as supported.
 
 ---
 
@@ -154,8 +160,7 @@ Accessibility, design tokens, live drift, per-phase help.
 
 ---
 
-[3.7.1-dev]: https://github.com/synaptixs/ontomesh/compare/v3.7.0-dev...v3.7.1-dev
-[3.7.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.6.0-dev...v3.7.0-dev
+[3.7.0]: https://github.com/synaptixs/ontomesh/compare/v3.6.0-dev...v3.7.0
 [3.6.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.5.0-dev...v3.6.0-dev
 [3.5.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.4.0-dev...v3.5.0-dev
 [3.4.0-dev]: https://github.com/synaptixs/ontomesh/compare/3.3.0...v3.4.0-dev
