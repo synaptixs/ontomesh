@@ -23,27 +23,15 @@ Thank you for your interest in contributing. This guide explains how to submit i
 
 ## 1. Code of Conduct
 
-This project is committed to providing a welcoming environment for everyone, regardless of background, experience level, gender, identity, nationality, religion, or any other personal attribute.
+This project follows the **[Contributor Covenant 2.1](CODE_OF_CONDUCT.md)**.  By participating, you agree to abide by its terms.
 
-### Expected behaviour
+In short:
 
-- Be respectful and constructive in all written and verbal communication.
+- Be welcoming and respectful.  Critique the work, not the person.
 - Assume good intent; ask for clarification before assuming malice.
-- Give and receive feedback gracefully — critique the work, not the person.
-- Credit others' contributions honestly.
-- Respect maintainer decisions even when you disagree; open a discussion rather than circumventing process.
+- No harassment, doxing, sustained disruption, or claiming credit for others' work.
 
-### Unacceptable behaviour
-
-- Harassment, intimidation, or discrimination in any form.
-- Posting others' private information without consent.
-- Sustained disruption of discussions, reviews, or community spaces.
-- Dishonest attribution — claiming credit for work you did not do.
-- Introducing intentional security vulnerabilities or malicious code.
-
-### Reporting a conduct violation
-
-If you witness or experience behaviour that violates this code, report it privately to the maintainers at the address listed in [§12 Enforcement and contact](#12-enforcement-and-contact). Reports are handled confidentially. Retaliation against reporters is itself a violation.
+Report conduct violations privately by opening a [draft Security Advisory](https://github.com/synaptixs/ontomesh/security/advisories/new) (yes, the same channel as security disclosures — it's the only private channel GitHub gives us).  Retaliation against reporters is itself a violation.
 
 ---
 
