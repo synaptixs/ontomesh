@@ -160,8 +160,13 @@ ontology-toolkit = "toolkit:main"
 ontology-onboard = "onboard:main"
 
 [project.urls]
-Homepage = "https://github.com/synaptixs/ontomesh"
-Repository = "https://github.com/synaptixs/ontomesh"
+Homepage      = "https://github.com/synaptixs/ontomesh"
+Documentation = "https://synaptixs.github.io/ontomesh/"
+Repository    = "https://github.com/synaptixs/ontomesh"
+Issues        = "https://github.com/synaptixs/ontomesh/issues"
+Discussions   = "https://github.com/synaptixs/ontomesh/discussions"
+Changelog     = "https://github.com/synaptixs/ontomesh/blob/main/CHANGELOG.md"
+Container     = "https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh"
 
 [tool.setuptools]
 py-modules = ["toolkit", "onboard"]
