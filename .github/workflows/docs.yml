@@ -3,7 +3,7 @@
 # Triggers on every push to `main` (the public branch).  The repo's Pages
 # settings must be configured to deploy from "GitHub Actions" (not from a
 # branch) — that's a one-time UI click documented in
-# docs/PUBLIC_RELEASE_PLAN.md.
+# the repo settings.
 #
 # Public URL: https://synaptixs.github.io/ontomesh/
 

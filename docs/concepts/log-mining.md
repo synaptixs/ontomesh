@@ -17,4 +17,3 @@ The L4–L13 enrichment phases turn raw application logs into ontology-evolution
 
 Output is a stream of JSON-LD ObservationRecords that the **Evolution review** step (build phase 7) reads.
 
-The design rationale is in [`docs/log-rca-roadmap.md`](https://github.com/synaptixs/ontomesh/blob/main/docs/log-rca-roadmap.md).
