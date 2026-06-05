@@ -73,7 +73,7 @@ The package ships with a set of optional extras you can compose:
 | `mysql`, `mssql`, `oracle`, `db2` | Respective drivers | Schema introspection against those engines |
 | `runtime` | anthropic, openai, google-cloud-aiplatform, requests, oci | LLM adapters used at runtime |
 | `mining` | drain3, hmmlearn, statsmodels, scikit-learn | Log mining phases (L4–L13) |
-| `drift` | drift-monitor (git VCS), drain3 | Production drift monitoring |
+| `drift` | drain3 (plus a follow-on `pip install git+https://github.com/synaptixs/infodrift.git` for `drift-monitor` itself) | Production drift monitoring |
 | `discover` | spaCy | Log-entity discovery |
 | `neptune` | boto3 | AWS Neptune graph backend |
 | `redis` | redis-py | Multi-worker SSE bus |

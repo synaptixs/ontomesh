@@ -16,7 +16,6 @@ First public release on PyPI + GHCR (public).  Consolidates the 3.7.0-dev and 3.
 - **`SECURITY.md`** describes the responsible-disclosure process (GitHub Security Advisories + back-up email).
 - **`CODE_OF_CONDUCT.md`** — Contributor Covenant 2.1.
 - **`.github/PULL_REQUEST_TEMPLATE.md`** for incoming contributions.
-- **`docs/PUBLIC_RELEASE_PLAN.md`** — the canonical roadmap for going from private to public.
 
 ### Changed
 

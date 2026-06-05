@@ -139,8 +139,7 @@ nav:
       - TMF Forum:  tmf.md
       - Advanced:   advanced.md
   - Releases:
-      - Changelog:  release-notes.md
-      - Roadmap:    toolkit-v3-roadmap.md
+      - Release notes: release-notes.md
   - Project:
       - GitHub:        https://github.com/synaptixs/ontomesh
       - Container:     https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh
