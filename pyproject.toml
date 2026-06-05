@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ontomesh"
-version = "3.7.0"
+version = "3.7.1-dev"
 description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
