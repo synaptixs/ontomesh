@@ -1,0 +1,97 @@
+Ontomesh
+Copyright 2026 Synaptixs
+
+This product is licensed under the Apache License, Version 2.0
+(see the LICENSE file).  This NOTICE file is provided as required
+by Section 4(d) of the Apache License — it lists third-party
+software the project depends on at runtime, and the license under
+which each of those is distributed.  No third-party source code
+is bundled in this repository; the libraries are installed via
+``pip`` from their original distributors.
+
+──────────────────────────────────────────────────────────────────
+Core runtime dependencies
+──────────────────────────────────────────────────────────────────
+
+rdflib              BSD License        https://github.com/RDFLib/rdflib
+pyshacl             Apache-2.0         https://github.com/RDFLib/pyshacl
+SPARQLWrapper       W3C License        https://github.com/RDFLib/sparqlwrapper
+PyYAML              MIT                https://github.com/yaml/pyyaml
+Jinja2              BSD License        https://github.com/pallets/jinja
+
+──────────────────────────────────────────────────────────────────
+Wizard runtime (extra: [wizard])
+──────────────────────────────────────────────────────────────────
+
+Flask               BSD License        https://github.com/pallets/flask
+flask-cors          MIT                https://github.com/corydolphin/flask-cors
+sqlglot             MIT                https://github.com/tobymao/sqlglot
+jsonschema          MIT                https://github.com/python-jsonschema/jsonschema
+gunicorn            MIT                https://github.com/benoitc/gunicorn
+python-json-logger  BSD-2-Clause       https://github.com/madzak/python-json-logger
+prometheus-client   Apache-2.0 AND     https://github.com/prometheus/client_python
+                    BSD-2-Clause
+
+──────────────────────────────────────────────────────────────────
+Optional extras
+──────────────────────────────────────────────────────────────────
+
+psycopg             LGPL-3.0-only      https://github.com/psycopg/psycopg
+psycopg-binary      LGPL-3.0-only      https://github.com/psycopg/psycopg
+
+psycopg2-binary     LGPL-3.0+          https://github.com/psycopg/psycopg2
+                    with exceptions
+
+redis               MIT                https://github.com/redis/redis-py
+drain3              MIT                https://github.com/IBM/Drain3
+hmmlearn            BSD-3-Clause       https://github.com/hmmlearn/hmmlearn
+statsmodels         BSD-3-Clause       https://github.com/statsmodels/statsmodels
+scikit-learn        BSD-3-Clause       https://github.com/scikit-learn/scikit-learn
+anthropic           MIT                https://github.com/anthropics/anthropic-sdk-python
+openai              Apache-2.0         https://github.com/openai/openai-python
+google-cloud-       Apache-2.0         https://github.com/googleapis/python-aiplatform
+   aiplatform
+oci                 UPL or Apache-2.0  https://github.com/oracle/oci-python-sdk
+requests            Apache-2.0         https://github.com/psf/requests
+boto3               Apache-2.0         https://github.com/boto/boto3
+spacy               MIT                https://github.com/explosion/spaCy
+
+──────────────────────────────────────────────────────────────────
+psycopg's LGPL — what it means in practice
+──────────────────────────────────────────────────────────────────
+
+psycopg (used by the [postgres] extra to power the wizard's
+saved-ontologies store on Postgres) is distributed under the GNU
+Lesser General Public License v3.0.  Apache-2.0 and LGPL-3.0 are
+compatible for the case where psycopg is *used as a library*
+(linked dynamically via Python imports) without modification, as
+this project does.
+
+If you redistribute Ontomesh together with a modified copy of
+psycopg, those modifications must remain under LGPL-3.0.  If you
+redistribute Ontomesh without psycopg (e.g. by using the SQLite
+backend only), the LGPL has no further effect.
+
+──────────────────────────────────────────────────────────────────
+The drift-monitor (`infodrift`) dependency
+──────────────────────────────────────────────────────────────────
+
+The optional [drift] extra installs `drift-monitor` from a separate
+git repository (https://github.com/nrohilla-fibonacci/infodrift).
+At the time of writing that repository is private; the license
+applies whatever terms are documented in that repository when it
+becomes accessible.  The [drift] extra is opt-in; the core toolkit
+does not require it.
+
+──────────────────────────────────────────────────────────────────
+Brand assets
+──────────────────────────────────────────────────────────────────
+
+The wordmark, mark, favicon, OG / Twitter cards and SVG illustrations
+in wizard/static/brand/ are original work by Synaptixs and are
+licensed alongside the rest of the codebase under Apache-2.0.
+
+Fonts referenced by the wizard (Inter, Inter Tight, JetBrains Mono)
+are loaded from Google Fonts at runtime and are not bundled.  Each
+font is licensed under the SIL Open Font License 1.1 by its
+respective authors.
