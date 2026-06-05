@@ -4,7 +4,7 @@
 
 > **Theme:** turn a folder of logs into a reviewed, materialised, queryable RCA ontology — without leaving the toolkit.
 
-This release implements the entire roadmap in [docs/log-rca-roadmap.md](log-rca-roadmap.md) and the development plan in [docs/log-rca-dev-plan.md](log-rca-dev-plan.md) — Phases L1 through L7, all seven shipped.
+This release ships Phases L1 through L7 — the full log-driven RCA pipeline (template clustering, sequence learning, causality, ontology generation).
 
 **263 tests, all green.** No breaking changes; the new pipeline lives alongside the existing one.
 
@@ -92,8 +92,6 @@ A closed-loop hook: re-runs Drain3 (with a stricter `sim_th=0.7`) against incomi
 ### Files added or substantially extended
 
 ```
-docs/log-rca-roadmap.md                   plan
-docs/log-rca-dev-plan.md                  build-out
 docs/release-notes.md                     this entry
 
 src/log_corpus.py                         L1.1 folder iterator
@@ -193,7 +191,7 @@ The Viewer's Materialised tab (from v3.1) renders the derivation premise tree en
 
 > **Theme:** turn the toolkit's narrow "ontology generator with a reasoner hook" into "ontology generator with first-class rules, materialised inference, explanations, and grounded LLM Insights."
 
-This release implements the entire roadmap in [docs/reasoning-roadmap.md](reasoning-roadmap.md) — Phases A through E — plus a follow-up suite of authoring affordances (slot-fill builder, test-fire preview, premise tree, NL drafting, rule-impact heat map, conversational drawer).
+This release ships Phases A through E of the rules-and-reasoning line — plus a follow-up suite of authoring affordances (slot-fill builder, test-fire preview, premise tree, NL drafting, rule-impact heat map, conversational drawer).
 
 **171 tests, all green.** No breaking changes to the existing pipeline; every addition is opt-in.
 
@@ -314,7 +312,6 @@ wizard/rules.py                     # Phase C + #3 + F2 + #7
 wizard/templates/index.html         # all UI surfaces above
 templates/preview_abox.ttl          # F2 / #6
 templates/rules/{telecom,healthcare,finance}.yaml  # Phase C starter library
-docs/reasoning-roadmap.md           # plan
 docs/release-notes.md               # this file
 tests/test_phase_a_axioms.py        # 8 tests
 tests/test_phase_b_materializer.py  # 7 tests
@@ -343,6 +340,5 @@ tests/test_convo_rule.py            # 5 tests (#8)
 
 ### Documentation
 
-- [docs/reasoning-roadmap.md](reasoning-roadmap.md) — the original plan.
 - [docs/runtime.md](runtime.md) — runtime layer + adapter contracts.
 - [docs/integrate.md](integrate.md) — 5-minute path; no changes required.

@@ -85,8 +85,18 @@ ollama    = ["requests>=2.32.3"]
 oci       = ["oci>=2.126.0"]
 
 # ── Drift monitoring (runtime/drift/) ────────────────────────────────────
+# `drift-monitor` itself is not yet on PyPI — it lives at
+# github.com/synaptixs/infodrift and is installed as a follow-on step:
+#
+#     pip install 'ontomesh[drift]'
+#     pip install git+https://github.com/synaptixs/infodrift.git@develop
+#
+# PyPI rejects direct git+URL dependencies as part of its
+# anti-supply-chain policy, so we publish only the *PyPI-installable*
+# half of the drift extra here (drain3) and document the follow-on
+# step in the drift docs.  Once drift-monitor is published to PyPI we
+# can fold it back in as a normal versioned dependency.
 drift = [
-    "drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop",
     "drain3>=0.9",
 ]
 
@@ -134,8 +144,9 @@ all = [
     "google-cloud-aiplatform>=1.60.0",
     "requests>=2.32.3",
     "oci>=2.126.0",
-    # drift
-    "drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop",
+    # drift (PyPI-installable subset — drift-monitor itself ships
+    # separately from github.com/synaptixs/infodrift; see the [drift]
+    # extra above for the rationale)
     "drain3>=0.9",
     # advanced
     "flask>=3.0.3",
