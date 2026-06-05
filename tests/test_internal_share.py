@@ -216,28 +216,20 @@ def test_readme_leads_with_docker_quickstart():
                 f"{marker!r} appears before docker run"
 
 
-def test_readme_documents_ghcr_login():
+def test_readme_uses_ghcr_path():
     text = README.read_text()
     assert "ghcr.io" in text
-    # Tells the user to make a PAT with read:packages.
-    assert "read:packages" in text
-    assert "docker login" in text
-
-
-def test_readme_uses_internal_image_path():
-    text = README.read_text()
     assert "ghcr.io/synaptixs/ontomesh" in text
 
 
-def test_readme_warns_internal_only():
-    """A reader must see "this is private; do not share" before
-    they think this is a public artifact."""
+def test_readme_lifecycle_disclaimer():
+    """Above the fold the README must set expectations about API
+    stability — calling this a 'preview' or noting breaking changes
+    are possible before 1.0 prevents disappointed bug reports."""
     text = README.read_text()
-    # Look for an "internal" / "private" disclaimer somewhere in the
-    # first 1500 characters (above-the-fold).
-    head = text[:1500]
-    assert "Internal" in head or "internal" in head
-    assert "private" in head.lower()
+    head = text[:1500].lower()
+    assert "preview" in head or "1.0" in head, \
+        "README missing pre-1.0 stability disclaimer"
 
 
 def test_readme_documents_persistent_volume():

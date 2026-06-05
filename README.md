@@ -1,8 +1,13 @@
 # Ontomesh
 
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Docker pulls](https://img.shields.io/badge/docker-ghcr.io%2Fsynaptixs%2Fontomesh-2496ED?logo=docker)](https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh)
+[![Discussions](https://img.shields.io/badge/Discussions-join-1f6feb?logo=github)](https://github.com/synaptixs/ontomesh/discussions)
+
 **The ontology mesh for GraphRAG.** Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.
 
-> **Internal preview · private artefact.** This image is published from a private repository to a private container registry. Do **not** share image URLs, screenshots of session data, or test data outside the team.
+> **Preview release.** Public API surface is stabilising; expect occasional breaking changes until 1.0.
 
 ---
 
@@ -23,11 +28,6 @@
 ## Run it
 
 ```bash
-# One-time per machine: log Docker into the private registry.
-# (Token needs `read:packages` scope — make one at
-#  https://github.com/settings/tokens/new?scopes=read:packages )
-echo $TOKEN | docker login ghcr.io -u YOUR_GH_USER --password-stdin
-
 # Ephemeral run (resets on stop):
 docker run --rm -p 5051:5051 ghcr.io/synaptixs/ontomesh:latest
 
