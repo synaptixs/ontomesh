@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| **Image** | `ghcr.io/synaptixs/ontomesh:3.7.1-dev` (and `:latest`) |
+| **Image** | `ghcr.io/synaptixs/ontomesh:3.7.0` (and `:latest`) |
 | **Size** | ~316 MB compressed |
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
@@ -106,4 +106,4 @@ Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/synaptix
 
 ---
 
-*Ontomesh v3.7.1-dev · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 297+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.7.0 · Apache-2.0 · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 297+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
