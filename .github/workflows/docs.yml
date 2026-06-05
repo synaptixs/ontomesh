@@ -1,0 +1,73 @@
+# Build & publish the mkdocs-material site to GitHub Pages.
+#
+# Triggers on every push to `main` (the public branch).  The repo's Pages
+# settings must be configured to deploy from "GitHub Actions" (not from a
+# branch) — that's a one-time UI click documented in
+# docs/PUBLIC_RELEASE_PLAN.md.
+#
+# Public URL: https://synaptixs.github.io/ontomesh/
+
+name: Docs site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+# Pages requires a special permission set + concurrency group.
+permissions:
+  contents: read
+  pages:    write
+  id-token: write
+
+concurrency:
+  group:               docs-site
+  cancel-in-progress:  false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # mike (versioned docs) needs full history
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install docs build deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-docs.txt
+
+      - name: Build site
+        run: mkdocs build
+        # NOTE: --strict is intentionally off while we incrementally rewrite
+        # the legacy `docs/*.md` files (carried over from the pre-public
+        # repo layout) to use site-internal links instead of repo-root
+        # relative paths.  Tracked as follow-up after P5.3 lands.  Once
+        # those links are fixed we'll flip --strict back on so future PRs
+        # can't reintroduce broken links.
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url:  ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

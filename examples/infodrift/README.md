@@ -1,6 +1,6 @@
 # infodrift × ontology-toolkit — integration demo
 
-This example shows how to integrate **[`drift_monitor`](https://github.com/nrohilla-fibonacci/infodrift) (the package formerly known as *infodrift*)** with the ontology-toolkit, where the toolkit's OWL ontology is the *source of truth* for production drift monitoring — not a separate hand-written config.
+This example shows how to integrate **[`drift_monitor`](https://github.com/synaptixs/infodrift) (the package formerly known as *infodrift*)** with the ontology-toolkit, where the toolkit's OWL ontology is the *source of truth* for production drift monitoring — not a separate hand-written config.
 
 ## Why this matters (the real-world case)
 

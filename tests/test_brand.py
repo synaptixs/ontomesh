@@ -33,6 +33,11 @@ REQUIRED_ASSETS = [
     "ontomesh-wordmark-dark.svg",
     "og-card.svg",
     "twitter-card.svg",
+    # PNG renders for OG / Twitter — LinkedIn/Slack/Twitter scrape PNG
+    # more reliably than SVG, so we ship both and reference PNG from
+    # the <meta> tags.  2400×1260 (2x retina of the 1200×630 OG spec).
+    "og-card.png",
+    "twitter-card.png",
 ]
 
 
@@ -43,7 +48,11 @@ def test_brand_asset_file_exists(name):
     assert path.stat().st_size > 200, f"{name} suspiciously small"
 
 
-@pytest.mark.parametrize("name", REQUIRED_ASSETS)
+SVG_ASSETS = [a for a in REQUIRED_ASSETS if a.endswith(".svg")]
+PNG_ASSETS = [a for a in REQUIRED_ASSETS if a.endswith(".png")]
+
+
+@pytest.mark.parametrize("name", SVG_ASSETS)
 def test_brand_asset_is_valid_svg(name):
     text = (BRAND_DIR / name).read_text()
     assert text.lstrip().startswith("<svg") or "<svg" in text[:200], \
@@ -53,6 +62,19 @@ def test_brand_asset_is_valid_svg(name):
     # canonical brand colours so re-skins are easy to grep for.
     assert any(c in text for c in ("#4f46e5", "#818cf8", "#06b6d4", "#22d3ee", "#0a0a0a")), \
         f"{name} doesn't reference a brand colour"
+
+
+@pytest.mark.parametrize("name", PNG_ASSETS)
+def test_brand_asset_is_valid_png(name):
+    raw = (BRAND_DIR / name).read_bytes()
+    # PNG magic header.
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n", f"{name} is not a valid PNG"
+    # 2400×1260 (2x retina of the 1200×630 OG spec).  PNG IHDR sits at
+    # bytes 8–24; width is bytes 16–20, height is bytes 20–24, big-endian.
+    width  = int.from_bytes(raw[16:20], "big")
+    height = int.from_bytes(raw[20:24], "big")
+    assert (width, height) == (2400, 1260), \
+        f"{name} is {width}x{height}, expected 2400x1260 (2x of 1200x630)"
 
 
 # ── Tokens ────────────────────────────────────────────────────────────
@@ -73,7 +95,7 @@ def test_tokens_css_defines_brand_layer():
 def test_pyproject_renamed_to_ontomesh():
     py = (ROOT / "pyproject.toml").read_text()
     assert 'name = "ontomesh"' in py
-    assert 'version = "3.7.0"' in py
+    assert 'version = "3.7.1-dev"' in py
 
 
 # ── Flask wiring ──────────────────────────────────────────────────────
@@ -91,8 +113,9 @@ def client():
 def test_brand_asset_served_by_flask(client, name):
     rv = client.get(f"/static/brand/{name}")
     assert rv.status_code == 200, f"{name} -> {rv.status_code}"
-    assert rv.content_type.startswith("image/svg") or \
-           rv.content_type.startswith("application/octet-stream"), \
+    assert (rv.content_type.startswith("image/svg")
+            or rv.content_type.startswith("image/png")
+            or rv.content_type.startswith("application/octet-stream")), \
         f"{name} content-type: {rv.content_type}"
 
 
@@ -105,9 +128,9 @@ def test_index_has_brand_wired_into_head(client):
     # OG + Twitter cards.
     assert "og:title" in body
     assert "Ontomesh" in body
-    assert "og:image" in body and "brand/og-card.svg" in body
+    assert "og:image" in body and "brand/og-card.png" in body
     assert "twitter:card" in body
-    assert "twitter:image" in body and "brand/twitter-card.svg" in body
+    assert "twitter:image" in body and "brand/twitter-card.png" in body
     # Sidebar wordmark, not the old "Ontology Toolkit" string.
     assert "ontomesh-wordmark.svg" in body
     assert "Ontology Toolkit" not in body

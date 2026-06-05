@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ontomesh"
-version = "3.7.0"
+version = "3.7.1-dev"
 description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -86,7 +86,7 @@ oci       = ["oci>=2.126.0"]
 
 # ── Drift monitoring (runtime/drift/) ────────────────────────────────────
 drift = [
-    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop",
     "drain3>=0.9",
 ]
 
@@ -135,7 +135,7 @@ all = [
     "requests>=2.32.3",
     "oci>=2.126.0",
     # drift
-    "drift-monitor @ git+https://github.com/nrohilla-fibonacci/infodrift.git@develop",
+    "drift-monitor @ git+https://github.com/synaptixs/infodrift.git@develop",
     "drain3>=0.9",
     # advanced
     "flask>=3.0.3",
@@ -160,8 +160,13 @@ ontology-toolkit = "toolkit:main"
 ontology-onboard = "onboard:main"
 
 [project.urls]
-Homepage = "https://github.com/synaptixs/ontomesh"
-Repository = "https://github.com/synaptixs/ontomesh"
+Homepage      = "https://github.com/synaptixs/ontomesh"
+Documentation = "https://synaptixs.github.io/ontomesh/"
+Repository    = "https://github.com/synaptixs/ontomesh"
+Issues        = "https://github.com/synaptixs/ontomesh/issues"
+Discussions   = "https://github.com/synaptixs/ontomesh/discussions"
+Changelog     = "https://github.com/synaptixs/ontomesh/blob/main/CHANGELOG.md"
+Container     = "https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh"
 
 [tool.setuptools]
 py-modules = ["toolkit", "onboard"]
