@@ -29,25 +29,25 @@ site_dir: site
 theme:
   name: material
   language: en
-  logo:    ../wizard/static/brand/ontomesh-mark.svg
-  favicon: ../wizard/static/brand/favicon.svg
+  logo:    assets/ontomesh-mark.svg
+  favicon: assets/favicon.svg
   font:
     text: Inter
     code: JetBrains Mono
   palette:
-    # Light mode
+    # Light mode — navy primary + green accent (custom, see assets/brand.css)
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent:  cyan
+      primary: custom
+      accent:  custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    # Dark mode
+    # Dark mode — Twilight navy + lime accent
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent:  cyan
+      primary: custom
+      accent:  custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -69,6 +69,9 @@ theme:
     - content.tabs.link
     - content.action.edit
     - announce.dismiss
+
+extra_css:
+  - assets/brand.css
 
 markdown_extensions:
   - admonition

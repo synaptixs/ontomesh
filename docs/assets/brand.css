@@ -1,0 +1,57 @@
+/* Ontomesh brand palette for the docs site — navy + lime-green.
+ *
+ * Mirrors the app's Twilight identity. Activated via `primary: custom`
+ * and `accent: custom` in mkdocs.yml. Light mode uses a deeper green for
+ * links/accents so text stays WCAG AA on white; dark mode uses the bright
+ * lime on a navy canvas. */
+
+:root {
+  /* Navy header + nav (the dominant brand surface). */
+  --md-primary-fg-color:         #14284a;
+  --md-primary-fg-color--light:  #1f3a5f;
+  --md-primary-fg-color--dark:   #0e1b34;
+  --md-primary-bg-color:         #ffffff;
+  --md-primary-bg-color--light:  rgba(255, 255, 255, 0.7);
+
+  /* Green accent (interactive). Deep enough for AA as link text on white. */
+  --md-accent-fg-color:              #3f7a22;
+  --md-accent-fg-color--transparent: rgba(125, 194, 66, 0.10);
+}
+
+/* Light scheme — green links, AA on white. */
+[data-md-color-scheme="default"] {
+  --md-typeset-a-color: #3f7a22;
+}
+
+/* Dark (slate) scheme — Twilight navy canvas + luminous lime accents. */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #16213d;
+  --md-primary-fg-color--light: #1f3a5f;
+  --md-primary-fg-color--dark:  #0e1b34;
+
+  --md-accent-fg-color: #8fd14f;
+  --md-typeset-a-color: #8fd14f;
+
+  /* Navy-tinted surfaces to match the app's Twilight theme. */
+  --md-default-bg-color:        #16213d;
+  --md-default-bg-color--light: #1f2d50;
+  --md-code-bg-color:           #0f1b30;
+}
+
+/* Brand the home-page primary CTA (Get started) green to match the app. */
+.md-button--primary {
+  background-color: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+  color: #ffffff;
+}
+.md-button--primary:hover,
+.md-button--primary:focus {
+  background-color: #356619;
+  border-color: #356619;
+  color: #ffffff;
+}
+
+/* Lime underline glow under image captions / the brand mark, subtle. */
+.md-header__button.md-logo img {
+  height: 1.5rem;
+}
