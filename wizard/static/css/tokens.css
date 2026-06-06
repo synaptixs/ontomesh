@@ -1,91 +1,107 @@
   /* ── Reset & Variables ─────────────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Three themes ship out of the box. Picker lives in the sidebar
-     footer; choice persists to localStorage; system preference seeds
-     the first visit. All component CSS uses tokens only — to add a
-     theme, add another [data-theme="..."] block below. */
-  :root {
-    /* ────────── LIGHT (default) ── Linear / Vercel feel ────────── */
-    --bg:            #f6f7f9;
-    --surface:       #ffffff;
-    --surface-2:     #f3f4f6;
-    --surface-hover: #fafbfc;
-    --border:        rgba(15,23,42,0.07);
-    --border-strong: rgba(15,23,42,0.14);
-    --accent:        #4f46e5;
-    --accent-hover:  #4338ca;
-    --accent-soft:   rgba(79,70,229,0.08);
-    --accent-2:      #a855f7;
-    --success:       #16a34a;
-    --success-soft:  rgba(22,163,74,0.10);
-    --warn:          #d97706;
-    --warn-soft:     rgba(217,119,6,0.10);
-    --danger:        #dc2626;
-    --danger-soft:   rgba(220,38,38,0.10);
-    --text:          #0f172a;
-    --text-2:        #1f2937;
-    --muted:         #4b5563;
-    --muted-2:       #6b7280;
-    --on-accent:     #ffffff;       /* text colour drawn on solid accent fills */
+  /* Three themes ship out of the box: Twilight Navy (default, dark),
+     Mono (high-contrast monochrome), and Light. Picker lives in the
+     sidebar/top chrome; choice persists to localStorage; Twilight seeds
+     the first visit. All component CSS uses tokens only — to add a theme,
+     add another [data-theme="..."] block below.
 
-    /* ── Brand layer (P1.1 — Ontomesh) ──────────────────────────────
-       Two-colour brand: indigo as the primary, cyan as the "mesh
-       thread."  Lives alongside the semantic --accent layer so
-       components keep using --accent for state-coloured affordances
-       while marketing surfaces use --brand directly.            */
-    --brand:         #4f46e5;
-    --brand-deep:    #3730a3;
-    --brand-mesh:    #06b6d4;
-    --brand-bg-soft: #eef2ff;
+     Brand (P-UX uplift): navy + lime-green, drawn from the logo mark.
+       · navy  → the calm frame / ink  (--brand)
+       · green → the single scarce accent for CTAs + active state
+                 (--accent on dark; --brand-mesh holds the bright lime
+                  for graphics/hero in every theme)
+     Green is bright-lime as a FILL (paired with dark --on-accent) but a
+     deeper green as TEXT on light surfaces — that's why the Light theme's
+     --accent is darker than Twilight's: it must stay legible as link text
+     and active-nav labels, where lime would fail WCAG AA. */
+
+  :root {
+    /* ────────── LIGHT ── calm editorial · navy ink, green accent ───────── */
+    --bg:            #f7f9f8;
+    --surface:       #ffffff;
+    --surface-2:     #eef2ef;
+    --surface-hover: #f4f7f4;
+    --border:        rgba(20,40,74,0.08);
+    --border-strong: rgba(20,40,74,0.16);
+    /* Deep brand green — readable both as text on white (~5.2:1) and as a
+       fill behind white --on-accent text. Lime lives in --brand-mesh. */
+    --accent:        #3f7a22;
+    --accent-hover:  #356619;
+    --accent-soft:   rgba(125,194,66,0.12);
+    --accent-2:      #1f3a5f;       /* navy — secondary graph-node colour */
+    --success:       #15803d;
+    --success-soft:  rgba(21,128,61,0.10);
+    --warn:          #b45309;
+    --warn-soft:     rgba(180,83,9,0.10);
+    --danger:        #b91c1c;
+    --danger-soft:   rgba(185,28,28,0.10);
+    --text:          #0f1b2d;       /* navy-ink, not pure slate */
+    --text-2:        #1f2e44;
+    --muted:         #4b5a72;
+    --muted-2:       #6b7a90;
+    --on-accent:     #ffffff;       /* white on the deep-green fill (AA) */
+
+    /* ── Brand layer ── navy primary, lime "mesh thread" accent. */
+    --brand:         #14284a;
+    --brand-deep:    #0e1b34;
+    --brand-mesh:    #7dc242;        /* the bright lime, for art/threads */
+    --brand-bg-soft: #eef5e7;
     --on-brand:      #ffffff;
 
     /* Shared across all themes. */
-    --radius:    10px;
-    --radius-sm: 7px;
-    --shadow-1: 0 1px 2px rgba(15,23,42,0.04),
-                0 1px 3px rgba(15,23,42,0.04);
-    --shadow-2: 0 1px 2px rgba(15,23,42,0.04),
-                0 6px 16px rgba(15,23,42,0.06);
-    --shadow-modal: 0 24px 60px rgba(15,23,42,0.18),
-                    0 1px 0 rgba(15,23,42,0.04);
+    --radius:      14px;
+    --radius-sm:   10px;
+    --radius-pill: 999px;
+    --shadow-1: 0 1px 2px rgba(20,40,74,0.05),
+                0 1px 3px rgba(20,40,74,0.05);
+    --shadow-2: 0 1px 2px rgba(20,40,74,0.05),
+                0 10px 28px rgba(20,40,74,0.07);
+    --shadow-modal: 0 24px 60px rgba(20,40,74,0.18),
+                    0 1px 0 rgba(20,40,74,0.04);
     --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
             system-ui, sans-serif;
     --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   }
 
-  /* ────────── DARK ── Tokyo-night-ish, indigo accent on near-black ────────── */
-  [data-theme="dark"] {
-    --bg:            #0a0c10;
-    --surface:       #11141a;
-    --surface-2:     #181b22;
-    --surface-hover: #1c2029;
-    --border:        rgba(255,255,255,0.06);
-    --border-strong: rgba(255,255,255,0.14);
-    --accent:        #818cf8;
-    --accent-hover:  #a5b0fb;
-    --accent-soft:   rgba(129,140,248,0.14);
-    --accent-2:      #c084fc;
-    --success:       #4ade80;
-    --success-soft:  rgba(74,222,128,0.12);
+  /* ────────── TWILIGHT NAVY (default, dark) ──────────────────────────────
+     Lighter than a true black — a lifted navy canvas with a luminous lime
+     accent. `dark` is aliased to the same palette so any stored
+     wizard-theme="dark" (pre-uplift visitors) lands on Twilight until the
+     picker/JS is updated. */
+  [data-theme="dark"],
+  [data-theme="twilight"] {
+    --bg:            #16213d;
+    --surface:       #1f2d50;
+    --surface-2:     #273a63;
+    --surface-hover: #243456;
+    --border:        rgba(255,255,255,0.09);
+    --border-strong: rgba(255,255,255,0.18);
+    --accent:        #8fd14f;        /* luminous lime on the navy canvas */
+    --accent-hover:  #a7e06b;
+    --accent-soft:   rgba(143,209,79,0.15);
+    --accent-2:      #7da6e0;         /* steel-blue secondary node colour */
+    --success:       #5fd07a;
+    --success-soft:  rgba(95,208,122,0.14);
     --warn:          #fbbf24;
-    --warn-soft:     rgba(251,191,36,0.12);
+    --warn-soft:     rgba(251,191,36,0.14);
     --danger:        #f87171;
-    --danger-soft:   rgba(248,113,113,0.12);
-    --text:          #e6e8ee;
-    --text-2:        #c5cad4;
-    --muted:         #9aa3b6;
-    --muted-2:       #6b7388;
-    --on-accent:     #0a0c10;
-    /* Brand — softened indigo & cyan for the dark canvas. */
-    --brand:         #818cf8;
-    --brand-deep:    #6366f1;
-    --brand-mesh:    #22d3ee;
-    --brand-bg-soft: #1e1b4b;
-    --on-brand:      #0f172a;
-    --shadow-1:  0 1px 2px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
-    --shadow-2:  0 1px 2px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.32);
-    --shadow-modal: 0 24px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04);
+    --danger-soft:   rgba(248,113,113,0.14);
+    --text:          #eef2f9;
+    --text-2:        #b6c4da;
+    --muted:         #7d8cab;
+    --muted-2:       #5f6e8c;
+    --on-accent:     #15203a;         /* navy text on the lime fill (AA 8.5) */
+    /* Brand — light ink wordmark, lime thread. */
+    --brand:         #eef2f9;
+    --brand-deep:    #c9d6ea;
+    --brand-mesh:    #8fd14f;
+    --brand-bg-soft: #1f2d50;
+    --on-brand:      #15203a;
+    --shadow-1:  0 1px 2px rgba(0,0,0,0.32), 0 1px 3px rgba(0,0,0,0.22);
+    --shadow-2:  0 1px 2px rgba(0,0,0,0.32), 0 12px 30px rgba(0,0,0,0.40);
+    --shadow-modal: 0 28px 70px rgba(0,0,0,0.58), 0 1px 0 rgba(255,255,255,0.05);
   }
 
   /* ────────── MONO ── high-contrast monochrome, status-only colour ────────── */

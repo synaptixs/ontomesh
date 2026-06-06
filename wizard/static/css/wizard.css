@@ -90,13 +90,13 @@
     border-top: 1px solid var(--border);
   }
   .step-nav li.step-divider:hover { background: transparent; color: var(--muted-2); }
-  .step-nav li.active .step-num { background: var(--accent); color: #fff; }
+  .step-nav li.active .step-num { background: var(--accent); color: var(--on-accent); }
   .step-nav li.done .step-num   { background: var(--success); color: #fff; }
   .sidebar-footer { margin-top: auto; padding: 14px 20px;
                     border-top: 1px solid var(--border); }
   .btn-run { width: 100%; padding: 10px 12px; border: none;
              border-radius: var(--radius-sm); background: var(--accent);
-             color: #fff; font-weight: 600; font-size: 13px;
+             color: var(--on-accent); font-weight: 600; font-size: 13px;
              cursor: pointer; letter-spacing: -0.005em;
              box-shadow: var(--shadow-1);
              transition: background .12s, box-shadow .15s, transform .1s; }
@@ -182,7 +182,7 @@
          transition: background .12s, border-color .12s, color .12s,
                      box-shadow .15s, transform .1s; }
   .btn:active { transform: translateY(1px); }
-  .btn-primary  { background: var(--accent); color: #fff; font-weight: 600;
+  .btn-primary  { background: var(--accent); color: var(--on-accent); font-weight: 600;
                   box-shadow: var(--shadow-1); }
   .btn-primary:hover  { background: var(--accent-hover);
                         box-shadow: var(--shadow-2); }
