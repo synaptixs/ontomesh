@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Direction A · Calm Editorial (landing)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Direction A tokens: navy ink, scarce lime-green accent ── */
+  :root{
+    --bg:#f7f9f8; --surface:#fff; --surface-2:#f1f4f2;
+    --ink:#14284a; --ink-2:#33415c; --muted:#5b687e;
+    --line:rgba(20,40,74,.08); --line-strong:rgba(20,40,74,.16);
+    --green:#5aa430; --green-deep:#4c8c28; --green-soft:rgba(125,194,66,.14);
+    --navy:#14284a; --navy-deep:#0e1b34;
+    --radius:16px; --radius-sm:11px; --pill:999px;
+    --font:'Inter',system-ui,sans-serif; --tight:'Inter Tight',var(--font); --mono:'JetBrains Mono',monospace;
+    --shadow:0 1px 2px rgba(20,40,74,.05),0 12px 32px rgba(20,40,74,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+  /* nav */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:22px 32px;max-width:1160px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--tight);font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .logo{width:28px;height:28px;border-radius:8px;background:var(--navy);display:grid;place-items:center}
+  .logo span{color:var(--green);font-weight:800;font-size:15px;font-family:var(--tight)}
+  .navlinks{display:flex;align-items:center;gap:30px;font-weight:500;font-size:14px;color:var(--ink-2)}
+  .navlinks a:hover{color:var(--green-deep)}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;border-radius:var(--pill);padding:11px 20px;border:1px solid transparent;cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(90,164,48,.3)}
+  .btn-primary:hover{background:var(--green-deep);transform:translateY(-1px)}
+  .btn-ghost{border-color:var(--line-strong);color:var(--ink);background:var(--surface)}
+  .btn-ghost:hover{border-color:var(--navy)}
+  .btn-lg{padding:15px 28px;font-size:15px}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:64px 0 40px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--green-deep);background:var(--green-soft);padding:6px 12px;border-radius:var(--pill);letter-spacing:.01em;margin-bottom:24px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  h1{font-family:var(--tight);font-weight:800;font-size:58px;line-height:1.04;letter-spacing:-.035em;margin-bottom:20px}
+  h1 em{font-style:normal;color:var(--green)}
+  .sub{font-size:19px;color:var(--ink-2);max-width:30ch;margin-bottom:32px}
+  .cta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .install{font-family:var(--mono);font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);padding:11px 16px}
+  .install b{color:var(--green-deep)}
+  /* hero art */
+  .art{aspect-ratio:1;background:radial-gradient(circle at 60% 40%,rgba(125,194,66,.12),transparent 60%);display:grid;place-items:center}
+  .art svg{width:100%;max-width:420px}
+  /* trust */
+  .trust{text-align:center;padding:26px 0 56px}
+  .trust p{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:18px;font-weight:600}
+  .trust ul{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;list-style:none}
+  .trust li{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);padding:7px 14px}
+  /* sections */
+  section.band{padding:72px 0}
+  .eyebrow{font-size:13px;font-weight:700;color:var(--green-deep);letter-spacing:.02em;text-transform:uppercase;margin-bottom:12px}
+  h2{font-family:var(--tight);font-weight:800;font-size:38px;letter-spacing:-.03em;line-height:1.1;max-width:18ch}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:44px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);transition:.2s}
+  .card:hover{transform:translateY(-3px);border-color:var(--green-soft)}
+  .cicon{width:46px;height:46px;border-radius:13px;background:var(--green-soft);display:grid;place-items:center;color:var(--green-deep);margin-bottom:18px}
+  .card h3{font-family:var(--tight);font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px}
+  .card p{font-size:14.5px;color:var(--ink-2)}
+  .stat{margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  /* steps */
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:44px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .flowstep{padding:32px 28px;border-right:1px solid var(--line)}
+  .flowstep:last-child{border-right:none}
+  .sn{width:34px;height:34px;border-radius:var(--pill);background:var(--navy);color:var(--green);font-family:var(--tight);font-weight:800;display:grid;place-items:center;margin-bottom:16px}
+  .flowstep h3{font-family:var(--tight);font-size:18px;font-weight:700;margin-bottom:8px}
+  .flowstep p{font-size:14px;color:var(--ink-2)}
+  /* end cta */
+  .end{background:var(--navy);border-radius:24px;padding:64px 48px;text-align:center;color:#fff;margin:32px 0 72px}
+  .end h2{color:#fff;margin:0 auto 14px;max-width:22ch}
+  .end p{color:rgba(255,255,255,.72);max-width:46ch;margin:0 auto 28px;font-size:16px}
+  .end .green{color:var(--green)}
+  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:13px}
+  .fwrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .ribbon{position:fixed;top:14px;right:14px;background:var(--navy);color:var(--green);font-family:var(--mono);font-size:11px;padding:5px 11px;border-radius:var(--pill);z-index:50}
+  @media(max-width:860px){.hero,.cards,.flow{grid-template-columns:1fr}.art{display:none}h1{font-size:42px}}
+</style>
+</head>
+<body>
+<div class="ribbon">MOCKUP · Direction A</div>
+<nav>
+  <div class="brand"><span class="logo"><span>fb</span></span> Ontomesh</div>
+  <div class="navlinks">
+    <a href="#">Product</a><a href="#">Docs</a><a href="#">Projects</a><a href="#">GitHub</a>
+    <a href="#" class="btn btn-primary">Open the wizard →</a>
+  </div>
+</nav>
+
+<header class="wrap">
+  <div class="hero">
+    <div>
+      <span class="kicker"><span class="dot"></span> v3.7 · gunicorn · Prometheus · cosign · SBOM</span>
+      <h1>The ontology mesh<br>for <em>GraphRAG.</em></h1>
+      <p class="sub">Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.</p>
+      <div class="cta-row">
+        <a href="#" class="btn btn-primary btn-lg">Open the wizard →</a>
+        <code class="install">$ pip install <b>ontomesh</b></code>
+      </div>
+    </div>
+    <div class="art">
+      <svg viewBox="0 0 400 400">
+        <defs><radialGradient id="g" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#7dc242" stop-opacity=".22"/>
+          <stop offset="100%" stop-color="#7dc242" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="200" cy="200" r="180" fill="url(#g)"/>
+        <g fill="none" stroke-width="1.5" stroke-linecap="round">
+          <path d="M120 80 L280 80 L340 200 L280 320 L120 320 L60 200 Z" stroke="#14284a" stroke-opacity=".45"/>
+          <path d="M120 80 L280 320" stroke="#7dc242" stroke-opacity=".7" stroke-width="2"/>
+          <path d="M280 80 L120 320" stroke="#7dc242" stroke-opacity=".7" stroke-width="2"/>
+          <path d="M60 200 L340 200" stroke="#14284a" stroke-opacity=".3"/>
+          <path d="M200 200 L120 80M200 200 L280 80M200 200 L340 200M200 200 L280 320M200 200 L120 320M200 200 L60 200" stroke="#14284a" stroke-opacity=".35"/>
+        </g>
+        <g fill="#14284a"><circle cx="120" cy="80" r="7"/><circle cx="280" cy="80" r="7"/><circle cx="340" cy="200" r="7"/><circle cx="280" cy="320" r="7"/><circle cx="120" cy="320" r="7"/><circle cx="60" cy="200" r="7"/></g>
+        <circle cx="200" cy="200" r="12" fill="#7dc242"/>
+        <circle cx="200" cy="200" r="22" fill="none" stroke="#7dc242" stroke-opacity=".4" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <p>Built on open standards</p>
+  <ul><li>OWL 2</li><li>SHACL</li><li>SPARQL</li><li>JSON-LD</li><li>SKOS</li><li>Datalog</li><li>SQLite / Postgres</li></ul>
+</div>
+
+<section class="band wrap">
+  <p class="eyebrow">What you can build</p>
+  <h2>Three things you'd otherwise hand-craft for months.</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 17l9 4 9-4"/></svg></div>
+      <h3>Generate a full ontology from a schema.</h3>
+      <p>Point Ontomesh at a database. It introspects the schema, lifts it through OWL 2 / SHACL / JSON-LD, runs the reasoner, and emits a bundle with full lineage.</p>
+      <p class="stat">316 MB DB · 4.2 s · 142 classes, 1.1k properties</p>
+    </div>
+    <div class="card">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <h3>Validate with SHACL. Reason with Datalog.</h3>
+      <p>Shapes catch data-quality issues before production. Datalog rules derive new facts with full provenance. Every run emits a diffable materialisation report.</p>
+      <p class="stat">38 SHACL shapes · SWRL · Datalog (Rulewerk)</p>
+    </div>
+    <div class="card">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+      <h3>Mine candidates from raw logs.</h3>
+      <p>Log Discovery mines templates with online clustering, surfaces candidate entities and events, and gates causal edges — you review one candidate at a time.</p>
+      <p class="stat">L4 templates · L8 regimes · L11 causal DAG</p>
+    </div>
+  </div>
+</section>
+
+<section class="band wrap">
+  <p class="eyebrow">How it works</p>
+  <h2>From raw signal to graph-grounded RAG, in three steps.</h2>
+  <div class="flow">
+    <div class="flowstep"><div class="sn">1</div><h3>Discover</h3><p>Point Ontomesh at logs or a schema. Candidates surface with confidence, provenance, and a one-click accept.</p></div>
+    <div class="flowstep"><div class="sn">2</div><h3>Model &amp; validate</h3><p>Add SHACL shapes and Datalog rules. The reasoner materialises derived triples; the CQ runner gives you regression coverage.</p></div>
+    <div class="flowstep"><div class="sn">3</div><h3>Generate &amp; ship</h3><p>One click emits OWL Turtle, SHACL, JSON-LD, and bindings — plus a hybrid retriever ready for your RAG stack.</p></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="end">
+    <h2>Stop hand-crafting ontologies for your RAG stack.</h2>
+    <p>Open the wizard, load a sample domain — telecom, healthcare, e-commerce — and watch a real ontology and retriever fall out the other end in under a minute.</p>
+    <a href="#" class="btn btn-primary btn-lg" style="background:var(--green)">Open the wizard <span class="green">→</span></a>
+  </div>
+</div>
+
+<footer><div class="wrap fwrap">
+  <span>Ontomesh v3.7 · Built for engineers building GraphRAG.</span>
+  <span>Wizard · Docs · GitHub</span>
+</div></footer>
+</body>
+</html>

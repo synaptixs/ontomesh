@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Direction A · Refined Rail (wizard)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f9f8;--surface:#fff;--surface-2:#f1f4f2;
+    --ink:#14284a;--ink-2:#33415c;--muted:#5b687e;
+    --line:rgba(20,40,74,.08);--line-strong:rgba(20,40,74,.16);
+    --green:#5aa430;--green-deep:#4c8c28;--green-soft:rgba(125,194,66,.14);
+    --navy:#14284a;
+    --radius:16px;--radius-sm:11px;--pill:999px;
+    --font:'Inter',system-ui,sans-serif;--tight:'Inter Tight',var(--font);--mono:'JetBrains Mono',monospace;
+    --shadow:0 1px 2px rgba(20,40,74,.05),0 10px 28px rgba(20,40,74,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+  .app{display:flex;height:100vh;overflow:hidden}
+  /* ── sidebar rail ── */
+  .rail{width:264px;min-width:264px;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column}
+  .railhead{padding:20px 22px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .logo{width:28px;height:28px;border-radius:8px;background:var(--navy);display:grid;place-items:center}
+  .logo span{color:var(--green);font-weight:800;font-size:14px;font-family:var(--tight)}
+  .brand{font-family:var(--tight);font-weight:800;font-size:17px;letter-spacing:-.02em}
+  .ver{font-size:10px;color:var(--muted);font-family:var(--mono);margin-left:auto;background:var(--surface-2);padding:2px 7px;border-radius:var(--pill)}
+  /* progress */
+  .prog{padding:16px 22px 10px}
+  .prog .row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:7px}
+  .bar{height:6px;background:var(--surface-2);border-radius:var(--pill);overflow:hidden}
+  .bar i{display:block;height:100%;width:36%;background:linear-gradient(90deg,var(--green),#8fd14f);border-radius:var(--pill)}
+  /* nav */
+  .nav{flex:1;overflow-y:auto;padding:8px 12px}
+  .divider{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;padding:14px 12px 6px;border-top:1px solid var(--line);margin-top:8px}
+  .divider:first-child{border-top:none;margin-top:0}
+  .item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:var(--radius-sm);color:var(--ink-2);cursor:pointer;font-weight:500;margin-bottom:2px;transition:.12s}
+  .item:hover{background:var(--surface-2)}
+  .item.active{background:var(--green-soft);color:var(--green-deep);font-weight:600}
+  .item.done{color:var(--ink-2)}
+  .sn{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--muted);flex-shrink:0}
+  .item.active .sn{background:var(--green);color:#fff}
+  .item.done .sn{background:var(--navy);color:var(--green)}
+  /* footer */
+  .railfoot{padding:14px 18px;border-top:1px solid var(--line)}
+  .theme{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface-2);border-radius:var(--radius-sm);padding:4px;margin-bottom:12px}
+  .theme button{border:none;background:transparent;padding:6px;font-size:11px;color:var(--muted);border-radius:7px;cursor:pointer;font-family:inherit}
+  .theme button.on{background:var(--surface);color:var(--green-deep);font-weight:600;box-shadow:var(--shadow)}
+  /* ── main ── */
+  .main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .topbar{position:sticky;top:0;background:rgba(247,249,248,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 40px;display:flex;align-items:center;gap:16px;z-index:5}
+  .crumb{font-size:12.5px;color:var(--muted);font-weight:500}
+  .crumb b{color:var(--green-deep)}
+  .topbar .right{margin-left:auto;display:flex;gap:10px}
+  .content{padding:36px 40px 120px;max-width:860px}
+  /* you-are-here banner */
+  .here{display:flex;gap:14px;align-items:flex-start;background:var(--green-soft);border:1px solid rgba(125,194,66,.3);border-radius:var(--radius);padding:16px 18px;margin-bottom:28px}
+  .here .ic{width:34px;height:34px;border-radius:10px;background:var(--green);color:#fff;display:grid;place-items:center;flex-shrink:0;font-weight:800;font-family:var(--tight)}
+  .here h4{font-family:var(--tight);font-size:15px;margin-bottom:3px}
+  .here p{font-size:13.5px;color:var(--ink-2)}
+  .here .tag{font-size:11px;font-weight:700;color:var(--green-deep);text-transform:uppercase;letter-spacing:.04em}
+  h1{font-family:var(--tight);font-weight:800;font-size:32px;letter-spacing:-.025em;margin-bottom:8px}
+  .lede{font-size:16px;color:var(--ink-2);margin-bottom:28px;max-width:60ch}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);margin-bottom:20px}
+  .card h3{font-family:var(--tight);font-size:17px;margin-bottom:6px}
+  .card .hint{font-size:13px;color:var(--muted);margin-bottom:16px}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+  input,select{width:100%;padding:11px 14px;font-size:14px;font-family:inherit;border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink);margin-bottom:16px}
+  input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid2 input{margin-bottom:0}
+  .grid2>div{margin-bottom:16px}
+  /* sticky next action */
+  .actionbar{position:fixed;bottom:0;left:264px;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:14px 40px;display:flex;align-items:center;gap:14px}
+  .actionbar .nexthint{font-size:13px;color:var(--muted)}
+  .actionbar .right{margin-left:auto;display:flex;gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;border-radius:var(--pill);padding:11px 22px;border:1px solid transparent;cursor:pointer;font-family:inherit;transition:.15s}
+  .btn-primary{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(90,164,48,.3)}
+  .btn-primary:hover{background:var(--green-deep);transform:translateY(-1px)}
+  .btn-ghost{border-color:var(--line-strong);color:var(--ink);background:var(--surface)}
+  .btn-ghost:hover{border-color:var(--navy)}
+  .ribbon{position:fixed;top:12px;right:14px;background:var(--navy);color:var(--green);font-family:var(--mono);font-size:11px;padding:5px 11px;border-radius:var(--pill);z-index:50}
+</style>
+</head>
+<body>
+<div class="ribbon">MOCKUP · Direction A</div>
+<div class="app">
+  <!-- ── RAIL ── -->
+  <aside class="rail">
+    <div class="railhead"><span class="logo"><span>fb</span></span><span class="brand">Ontomesh</span><span class="ver">v3.7</span></div>
+    <div class="prog"><div class="row"><span>Your progress</span><span>4 / 11 steps</span></div><div class="bar"><i></i></div></div>
+    <nav class="nav">
+      <div class="item done"><span class="sn">📚</span> Library</div>
+      <div class="divider">Define</div>
+      <div class="item done"><span class="sn">✓</span> Domain Identity</div>
+      <div class="item active"><span class="sn">2</span> Entities</div>
+      <div class="item"><span class="sn">3</span> Events</div>
+      <div class="item"><span class="sn">4</span> Relationships</div>
+      <div class="divider">Enrich</div>
+      <div class="item"><span class="sn">5</span> Log Discovery</div>
+      <div class="item"><span class="sn">6</span> Competency Questions</div>
+      <div class="item"><span class="sn">7</span> Rules &amp; Reasoning</div>
+      <div class="divider">Build</div>
+      <div class="item"><span class="sn">8</span> Generate</div>
+      <div class="divider">After generation</div>
+      <div class="item"><span class="sn">9</span> Evolution Review</div>
+      <div class="item"><span class="sn">10</span> Compliance</div>
+      <div class="item"><span class="sn">11</span> Vector Retrieval</div>
+    </nav>
+    <div class="railfoot">
+      <div class="theme"><button class="on">☀ Light</button><button>☾ Dark</button><button>◐ Mono</button></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center">⚡ Generate ontology</button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <div class="topbar">
+      <span class="crumb">Define · <b>Entities</b> · Step 2 of 11</span>
+      <div class="right"><button class="btn btn-ghost">Save</button></div>
+    </div>
+    <div class="content">
+      <div class="here">
+        <div class="ic">2</div>
+        <div>
+          <span class="tag">Phase 1 of 3 · Define · Recommended</span>
+          <h4>You're defining the things in your domain</h4>
+          <p>Each entity you add becomes an OWL class. Add a few of your main nouns — you can always come back. When you're happy, hit <b>Continue</b> to move to Events.</p>
+        </div>
+      </div>
+
+      <h1>Entities</h1>
+      <p class="lede">The main things in your domain — assets, customers, resources, orders. Each becomes an OWL class.</p>
+
+      <div class="card">
+        <h3>Add an entity</h3>
+        <p class="hint">Write it the way you'd say it. We'll handle the IRIs and capitalisation.</p>
+        <div class="grid2">
+          <div><label>Name</label><input value="Customer" /></div>
+          <div><label>Plural label (optional)</label><input placeholder="Customers" /></div>
+        </div>
+        <label>What is it? (one line)</label>
+        <input placeholder="A person or organisation that places orders" />
+        <button class="btn btn-primary">＋ Add entity</button>
+      </div>
+
+      <div class="card">
+        <h3>Your entities · 3</h3>
+        <p class="hint">Customer · Order · Product — these will become OWL classes in your generated ontology.</p>
+      </div>
+    </div>
+
+    <!-- sticky next action -->
+    <div class="actionbar">
+      <span class="nexthint">Next: <b>Events</b> — things that happen, like incidents or orders.</span>
+      <div class="right">
+        <button class="btn btn-ghost">← Back</button>
+        <button class="btn btn-primary">Continue to Events →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
