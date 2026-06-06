@@ -111,24 +111,24 @@ def generate_report(output_base: str):
 <meta charset="utf-8">
 <title>Ontology Toolkit Report</title>
 <style>
-  body {{ font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #1f2937; }}
-  .header {{ background: linear-gradient(135deg, #0f2e5e, #1a56a8); color: #fff; padding: 32px 40px; }}
+  body {{ font-family: Arial, sans-serif; margin: 0; background: #f7f9f8; color: #1f2937; }}
+  .header {{ background: linear-gradient(135deg, #14284a, #1f3a5f); color: #fff; padding: 32px 40px; border-bottom: 4px solid #7dc242; }}
   .header h1 {{ margin: 0 0 6px; font-size: 28px; }}
   .header p  {{ margin: 0; opacity: .8; font-size: 14px; }}
   .content {{ padding: 32px 40px; max-width: 1200px; }}
   .stats {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }}
   .stat {{ background: #fff; border-radius: 8px; padding: 20px; border: 1px solid #e5e7eb; text-align: center; }}
-  .stat .num {{ font-size: 36px; font-weight: bold; color: #0f2e5e; }}
+  .stat .num {{ font-size: 36px; font-weight: bold; color: #14284a; }}
   .stat .lbl {{ font-size: 12px; color: #6b7280; margin-top: 4px; }}
   .section {{ background: #fff; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px; overflow: hidden; }}
-  .section-header {{ background: #0f2e5e; color: #fff; padding: 12px 20px; font-weight: bold; font-size: 14px; }}
+  .section-header {{ background: #14284a; color: #fff; padding: 12px 20px; font-weight: bold; font-size: 14px; }}
   table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
-  th {{ background: #f1f5f9; padding: 8px 12px; text-align: left; font-size: 12px; border-bottom: 2px solid #e5e7eb; color: #374151; }}
+  th {{ background: #eef2ef; padding: 8px 12px; text-align: left; font-size: 12px; border-bottom: 2px solid #e5e7eb; color: #374151; }}
   td {{ padding: 8px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }}
-  tr:hover td {{ background: #f8fafc; }}
+  tr:hover td {{ background: #f7f9f8; }}
   .files {{ padding: 16px 20px; }}
   .files ul {{ margin: 0; padding-left: 20px; }}
-  .files li {{ font-size: 13px; margin-bottom: 4px; font-family: monospace; color: #1a56a8; }}
+  .files li {{ font-size: 13px; margin-bottom: 4px; font-family: monospace; color: #1f3a5f; }}
   .footer {{ text-align: center; padding: 24px; color: #9ca3af; font-size: 12px; }}
 </style>
 </head>

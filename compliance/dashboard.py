@@ -92,12 +92,16 @@ _HTML_TEMPLATE = """<!doctype html>
 <title>Compliance Evidence Summary</title>
 <style>
   body {{ font-family: -apple-system, Segoe UI, sans-serif; margin: 24px;
-         color: #24292f; }}
-  h1 {{ border-bottom: 2px solid #d0d7de; padding-bottom: 8px; }}
-  table {{ border-collapse: collapse; width: 100%; margin-bottom: 32px; }}
+         color: #24292f; background: #f7f9f8; }}
+  h1 {{ background: linear-gradient(135deg, #14284a, #1f3a5f); color: #fff;
+        margin: -24px -24px 20px; padding: 24px 32px;
+        border-bottom: 4px solid #7dc242; font-size: 24px; }}
+  h2 {{ color: #14284a; }}
+  table {{ border-collapse: collapse; width: 100%; margin-bottom: 32px;
+           background: #fff; }}
   th, td {{ border: 1px solid #d0d7de; padding: 6px 10px; text-align: left;
             vertical-align: top; }}
-  th {{ background: #f6f8fa; }}
+  th {{ background: #eef2ef; }}
   .light {{ display: inline-block; width: 14px; height: 14px;
             border-radius: 50%; vertical-align: middle; margin-right: 6px; }}
   .green {{ background: #3fb950; }}
