@@ -3099,7 +3099,7 @@ function _buildRelGraphData() {
       // Pull node colours from the active theme's CSS vars so the graph
       // stays in sync with Light / Dark / Mono without per-theme branches.
       color: (() => {
-        const c1 = _cssVar(evt ? '--accent-2' : '--accent', evt ? '#a855f7' : '#4f46e5');
+        const c1 = _cssVar(evt ? '--accent-2' : '--accent', evt ? '#1f3a5f' : '#7dc242');
         const c2 = _cssVar(evt ? '--accent-2' : '--accent-hover', c1);
         return { background: c1, border: c1, highlight: { background: c2, border: c2 } };
       })(),
@@ -3135,8 +3135,8 @@ function _buildRelGraphData() {
       label: verb,
       arrows: 'to',
       color: { color: _cssVar('--muted-2', '#9aa3b6'),
-               highlight: _cssVar('--accent', '#4f46e5'),
-               hover:     _cssVar('--accent', '#4f46e5') },
+               highlight: _cssVar('--accent', '#7dc242'),
+               hover:     _cssVar('--accent', '#7dc242') },
       font: { color: _cssVar('--text', '#0f172a'), size: 11, strokeWidth: 0,
               background: _cssVar('--surface', '#ffffff'), align: 'middle',
               face: 'Inter, system-ui, sans-serif' },
@@ -3242,7 +3242,7 @@ async function _applyRuleHeat(data) {
   }
   const byLabel = _coverageByLabel(cov.coverage);
   const cool = _cssVar('--surface-2', '#1e293b');
-  const hot  = _cssVar('--accent', '#4f46e5');
+  const hot  = _cssVar('--accent', '#7dc242');
   const updates = data.nodes.map(n => {
     const entry = byLabel[n.id] || byLabel[n.label];
     if (!entry || !entry.count) return null;
@@ -3995,7 +3995,7 @@ async function renderLogMiniGraph(pid) {
   host.innerHTML = `<div id="log-disco-canvas-${pid}" style="height:120px;background:var(--bg);border-radius:6px;margin-top:6px"></div>`;
   host._rendered = true;
   if (typeof vis === 'undefined' || !vis.Network) return;
-  const accent = _cssVar('--accent', '#4f46e5');
+  const accent = _cssVar('--accent', '#7dc242');
   const text = _cssVar('--text', '#0f172a');
   const idle = _cssVar('--surface', '#ffffff');
   const border = _cssVar('--border', '#cbd5e1');
@@ -4219,7 +4219,7 @@ function _renderConvoGraph(highlightIris) {
   // mini graph reads cleanly in Light, Dark, and Mono. The previous
   // version used `--surface-2` for unlit nodes, which collapses against
   // the panel background in the light theme.
-  const accent     = _cssVar('--accent',    '#4f46e5');
+  const accent     = _cssVar('--accent',    '#7dc242');
   const onAccent   = _cssVar('--on-accent', '#ffffff');
   const idleBg     = _cssVar('--surface',   '#ffffff');
   const idleBorder = _cssVar('--border',    '#cbd5e1');
