@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <title>Ontomesh</title>
+  <rect width="48" height="48" rx="10" fill="#14284a"/>
+  <g fill="none" stroke-linecap="round" stroke-width="2.5">
+    <path d="M14 14 L34 14 L34 34 L14 34 Z" stroke="#cdd9ec"/>
+    <path d="M14 14 L34 34" stroke="#cdd9ec"/>
+    <path d="M34 14 L14 34" stroke="#8fd14f"/>
+  </g>
+  <g fill="#cdd9ec">
+    <circle cx="14" cy="14" r="3"/>
+    <circle cx="34" cy="14" r="3"/>
+    <circle cx="14" cy="34" r="3"/>
+    <circle cx="34" cy="34" r="3"/>
+  </g>
+</svg>
