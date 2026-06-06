@@ -90,16 +90,20 @@
      bypass the long sidebar straight into the main content. -->
 <a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="app">
-  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
-  <aside class="sidebar" aria-label="Pipeline phases">
-    <div class="sidebar-logo">
-      <a href="/" aria-label="Ontomesh — home" class="brand-link">
-        <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
-             alt="Ontomesh"
-             class="brand-wordmark"
-             width="180" height="40">
-        <span class="brand-version">v3.7</span>
-      </a>
+  <!-- ── Direction B chrome: nav drawer · top bar · phase rail ──────────────
+       The 11-step pipeline nav no longer lives in a persistent left rail —
+       it slides in from this drawer (power-user "jump anywhere"), while a
+       4-phase stepper up top gives novices orientation. The drawer reuses
+       the original .step-nav markup verbatim (same data-step / classes), so
+       goStep() and the existing keyboard-nav IIFE keep driving it unchanged. -->
+
+  <!-- Nav drawer (all steps) + scrim -->
+  <div class="nav-scrim" id="nav-scrim" onclick="toggleNavDrawer(false)"></div>
+  <aside class="nav-drawer" id="nav-drawer" aria-label="All pipeline steps" aria-hidden="true">
+    <div class="nav-drawer-head">
+      <span class="nav-drawer-title">All steps</span>
+      <button type="button" class="nav-drawer-close" onclick="toggleNavDrawer(false)"
+              aria-label="Close steps menu">&times;</button>
     </div>
     <nav aria-label="Pipeline steps">
     <ul class="step-nav" id="step-nav" role="list">
@@ -123,7 +127,7 @@
       <li data-step="settings" tabindex="0" role="link"><span class="step-num">⚙</span> Settings</li>
     </ul>
     </nav>
-    <div class="sidebar-footer">
+    <div class="nav-drawer-foot">
       <!-- P1.5 — Live SSE status pill.  Updated by the LiveEvents
            component (P0.3) via onStateChange + per-kind handlers. -->
       <div id="live-pill" class="live-pill" data-state="idle"
@@ -144,9 +148,36 @@
           <span class="theme-icon">◐</span><span>Mono</span>
         </button>
       </div>
-      <div id="save-status" style="font-size:11px;color:var(--muted);text-align:center"></div>
     </div>
   </aside>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <a href="/" class="brand-link" aria-label="Ontomesh — home">
+      <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
+           alt="Ontomesh" class="brand-wordmark" width="150" height="32">
+      <span class="brand-version">v3.7</span>
+    </a>
+    <button type="button" class="drawer-toggle" id="drawer-toggle"
+            onclick="toggleNavDrawer()" aria-expanded="false" aria-controls="nav-drawer">
+      <span aria-hidden="true">▸</span> All steps
+    </button>
+    <div class="topbar-right">
+      <span id="save-status" class="save-status"></span>
+      <a href="/projects" class="topbar-exit">Exit</a>
+    </div>
+  </header>
+
+  <!-- Phase rail (4-phase progress) -->
+  <div class="phase-rail">
+    <ol class="phases" id="phase-stepper" aria-label="Build phases">
+      <li class="ph active" data-phase="define"><span class="pline" aria-hidden="true"></span><span class="pdot">1</span><span class="plabel">Define</span></li>
+      <li class="ph" data-phase="enrich"><span class="pline" aria-hidden="true"></span><span class="pdot">2</span><span class="plabel">Enrich</span></li>
+      <li class="ph" data-phase="build"><span class="pline" aria-hidden="true"></span><span class="pdot">3</span><span class="plabel">Build</span></li>
+      <li class="ph" data-phase="after"><span class="pdot">4</span><span class="plabel">After</span></li>
+    </ol>
+    <p class="substep-line" id="substep-line">Define · <b>Domain Identity</b></p>
+  </div>
 
   <!-- ── Main content ──────────────────────────────────────────────── -->
   <main class="main" id="main-content" role="main" tabindex="-1" aria-label="Current pipeline step">
@@ -1762,6 +1793,7 @@ function goStep(name) {
   // to be visible before the run CTA).
   const main = document.querySelector('.main');
   if (main) main.scrollTop = 0;
+  _syncPhaseRail(name);            // keep the 4-phase rail + sub-step line in sync
 }
 
 // P0.2 — keyboard + click navigation on the sidebar step list.
@@ -1797,6 +1829,71 @@ function goStep(name) {
     });
   });
 })();
+
+// ── Direction B chrome: nav drawer + 4-phase rail ──────────────────────────
+//
+// The drawer holds the full 11-step nav (reusing .step-nav, so goStep and the
+// keyboard IIFE above still drive it). The phase rail up top gives novices
+// orientation. _syncPhaseRail() is called at the end of goStep(), so the rail
+// always reflects the active step with zero changes to the navigation engine.
+function toggleNavDrawer(force) {
+  const d = document.getElementById('nav-drawer');
+  const s = document.getElementById('nav-scrim');
+  const t = document.getElementById('drawer-toggle');
+  if (!d) return;
+  const open = (typeof force === 'boolean') ? force : !d.classList.contains('open');
+  d.classList.toggle('open', open);
+  if (s) s.classList.toggle('open', open);
+  d.setAttribute('aria-hidden', open ? 'false' : 'true');
+  if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) {
+    const first = d.querySelector('.step-nav li[data-step]');
+    if (first) first.focus();
+  } else if (t) {
+    t.focus();
+  }
+}
+// Esc closes the drawer; choosing a step from it closes it too.
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') toggleNavDrawer(false);
+});
+document.getElementById('step-nav')?.addEventListener('click', e => {
+  if (e.target.closest('li[data-step]')) toggleNavDrawer(false);
+});
+
+// Step → phase mapping. Library & Settings are out-of-band (no phase): the
+// rail simply shows no active phase for them.
+const PHASE_OF = {
+  domain:'define', entities:'define', events:'define', relationships:'define',
+  'log-discovery':'enrich', cqs:'enrich', rules:'enrich',
+  generate:'build',
+  evolve:'after', comply:'after', retrieve:'after',
+};
+const PHASE_ORDER  = ['define', 'enrich', 'build', 'after'];
+const PHASE_LABEL  = { define:'Define', enrich:'Enrich', build:'Build', after:'After generation' };
+const STEP_LABEL   = {
+  library:'Library', domain:'Domain Identity', entities:'Entities', events:'Events',
+  relationships:'Relationships', 'log-discovery':'Log Discovery',
+  cqs:'Competency Questions', rules:'Rules & Reasoning', generate:'Generate',
+  evolve:'Evolution Review', comply:'Compliance Dashboard', retrieve:'Vector Retrieval',
+  settings:'Settings',
+};
+function _syncPhaseRail(name) {
+  const phase  = PHASE_OF[name] || null;
+  const curIdx = phase ? PHASE_ORDER.indexOf(phase) : -1;
+  document.querySelectorAll('#phase-stepper .ph').forEach(el => {
+    const i = PHASE_ORDER.indexOf(el.dataset.phase);
+    el.classList.toggle('active', el.dataset.phase === phase);
+    el.classList.toggle('done', curIdx > -1 && i < curIdx);
+  });
+  const line = document.getElementById('substep-line');
+  if (!line) return;
+  const label = STEP_LABEL[name] || name;
+  if (phase) line.innerHTML = PHASE_LABEL[phase] + ' · <b></b>';
+  else       line.innerHTML = '<b></b>';
+  line.querySelector('b').textContent = label;   // textContent → no HTML injection
+}
+_syncPhaseRail(currentStep);   // seed the rail to match the initial step
 
 // ── Templates ─────────────────────────────────────────────────────────────
 async function loadTemplateList() {
