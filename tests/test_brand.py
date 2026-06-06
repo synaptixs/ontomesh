@@ -60,7 +60,9 @@ def test_brand_asset_is_valid_svg(name):
     assert 'xmlns="http://www.w3.org/2000/svg"' in text
     # Brand colour palette — every asset uses at least one of the
     # canonical brand colours so re-skins are easy to grep for.
-    assert any(c in text for c in ("#4f46e5", "#818cf8", "#06b6d4", "#22d3ee", "#0a0a0a")), \
+    # Navy + lime-green identity (UX uplift): navy ink #14284a, light-navy
+    # #cdd9ec, lime #7dc242 / #8fd14f.
+    assert any(c in text for c in ("#14284a", "#cdd9ec", "#7dc242", "#8fd14f")), \
         f"{name} doesn't reference a brand colour"
 
 
@@ -152,5 +154,7 @@ def test_404_page_is_branded(client):
     body = rv.get_data(as_text=True)
     assert "Ontomesh" in body
     assert "Page not found" in body
-    assert "brand/ontomesh-mark.svg" in body
+    # The 404 icon is the self-contained favicon tile (navy ground + lime
+    # lattice) so it stays legible on the Twilight (dark) canvas.
+    assert "brand/favicon.svg" in body
     assert "Back to Ontomesh" in body
