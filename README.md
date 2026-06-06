@@ -11,6 +11,27 @@
 
 ---
 
+## Screenshots
+
+A guided, navy + lime-green **Twilight** workspace that walks you from a domain to a
+generated ontology in four phases — Define → Enrich → Build → After:
+
+![Ontomesh wizard — Domain Identity step, Twilight theme](docs/assets/screenshots/wizard-twilight.png)
+
+The marketing landing page:
+
+![Ontomesh landing page](docs/assets/screenshots/landing-twilight.png)
+
+Every run emits a branded HTML report — competency-question results, governance
+scorecard, semantic-loss analysis, and orphan-class checks:
+
+![Ontomesh run report](docs/assets/screenshots/report-branded.png)
+
+> Ships with three themes — **Twilight** (default), **Mono**, and **Light** —
+> switchable from the wizard's “All steps” drawer.
+
+---
+
 ## What's in the image
 
 | | |
