@@ -158,8 +158,10 @@ def test_landing_css_reachable(client):
     rv = client.get("/static/css/landing.css")
     assert rv.status_code == 200
     text = rv.get_data(as_text=True)
-    # Token usage so re-skins flow through.
-    assert "var(--brand)" in text
+    # Token usage so re-skins flow through. The landing drives interactive
+    # accents through --accent (navy + lime-green uplift); --brand resolves
+    # to light ink on the Twilight canvas and is reserved for structure.
+    assert "var(--accent)" in text
     assert ".hero" in text
     assert ".card" in text
 

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Direction B · Guided Focus (landing)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1220;--bg-2:#0e1729;--surface:#111d33;--surface-2:#16223b;
+    --ink:#eaf0f7;--ink-2:#aab8cc;--muted:#6b7a93;
+    --line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.16);
+    --green:#8fd14f;--green-deep:#7dc242;--green-soft:rgba(143,209,79,.13);
+    --navy-line:#1b2c4a;
+    --radius:18px;--radius-sm:12px;--pill:999px;
+    --font:'Inter',system-ui,sans-serif;--tight:'Inter Tight',var(--font);--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
+       background-image:radial-gradient(900px 500px at 80% -10%,rgba(143,209,79,.10),transparent),radial-gradient(700px 500px at 0% 10%,rgba(27,44,74,.7),transparent)}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:22px 32px;max-width:1160px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--tight);font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(140deg,#16284a,#0b1220);border:1px solid var(--navy-line);display:grid;place-items:center}
+  .logo span{color:var(--green);font-weight:800;font-size:15px;font-family:var(--tight)}
+  .navlinks{display:flex;align-items:center;gap:30px;font-weight:500;font-size:14px;color:var(--ink-2)}
+  .navlinks a:hover{color:var(--green)}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;border-radius:var(--pill);padding:11px 20px;border:1px solid transparent;cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--green);color:#0b1220;box-shadow:0 6px 22px rgba(143,209,79,.28)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(143,209,79,.4)}
+  .btn-ghost{border-color:var(--line-strong);color:var(--ink);background:rgba(255,255,255,.03)}
+  .btn-ghost:hover{border-color:var(--green);color:var(--green)}
+  .btn-lg{padding:15px 28px;font-size:15px}
+  /* hero centred */
+  .hero{text-align:center;padding:72px 0 36px;max-width:880px;margin:0 auto}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--green);background:var(--green-soft);border:1px solid rgba(143,209,79,.25);padding:6px 14px;border-radius:var(--pill);margin-bottom:28px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+  h1{font-family:var(--tight);font-weight:800;font-size:66px;line-height:1.02;letter-spacing:-.04em;margin-bottom:22px}
+  h1 em{font-style:normal;background:linear-gradient(120deg,#8fd14f,#bdf07e);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:20px;color:var(--ink-2);max-width:54ch;margin:0 auto 36px}
+  .cta-row{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .install{font-family:var(--mono);font-size:13px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);padding:12px 18px}
+  .install b{color:var(--green)}
+  /* hero panel preview */
+  .preview{margin:48px auto 0;max-width:980px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 40px 120px rgba(0,0,0,.5);overflow:hidden}
+  .pvtop{display:flex;gap:7px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center}
+  .pvtop i{width:11px;height:11px;border-radius:50%;background:var(--surface-2)}
+  .pvtop b{margin-left:12px;font-size:12px;color:var(--muted);font-weight:500;font-family:var(--mono)}
+  .pvbody{display:grid;grid-template-columns:1.2fr 1fr;gap:0}
+  .pvcode{padding:24px;font-family:var(--mono);font-size:13px;line-height:1.9;border-right:1px solid var(--line)}
+  .pvcode .c{color:var(--muted)}.pvcode .k{color:var(--green)}.pvcode .s{color:#bdf07e}
+  .pvgraph{padding:24px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(143,209,79,.08),transparent 65%)}
+  .pvgraph svg{width:100%;max-width:280px}
+  .trust{text-align:center;padding:48px 0 64px}
+  .trust p{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:18px;font-weight:600}
+  .trust ul{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;list-style:none}
+  .trust li{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);padding:7px 14px}
+  section.band{padding:72px 0}
+  .eyebrow{font-size:13px;font-weight:700;color:var(--green);letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;text-align:center}
+  h2{font-family:var(--tight);font-weight:800;font-size:40px;letter-spacing:-.03em;line-height:1.08;text-align:center;max-width:22ch;margin:0 auto}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:46px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;transition:.2s}
+  .card:hover{border-color:rgba(143,209,79,.4);transform:translateY(-3px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  .cicon{width:46px;height:46px;border-radius:13px;background:var(--green-soft);border:1px solid rgba(143,209,79,.25);display:grid;place-items:center;color:var(--green);margin-bottom:18px}
+  .card h3{font-family:var(--tight);font-size:19px;font-weight:700;margin-bottom:10px}
+  .card p{font-size:14.5px;color:var(--ink-2)}
+  .stat{margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  /* stepper band */
+  .stepper{display:flex;align-items:center;justify-content:center;gap:0;margin-top:46px}
+  .sp{display:flex;flex-direction:column;align-items:center;gap:12px;flex:1;max-width:230px;text-align:center}
+  .spn{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--green);color:var(--green);font-family:var(--tight);font-weight:800;font-size:20px;display:grid;place-items:center;background:var(--green-soft)}
+  .spline{height:1.5px;flex:1;background:linear-gradient(90deg,var(--green),var(--navy-line));max-width:90px;margin-top:-40px}
+  .sp h3{font-family:var(--tight);font-size:17px}.sp p{font-size:13.5px;color:var(--ink-2)}
+  .end{background:linear-gradient(140deg,#16284a,#0b1220);border:1px solid var(--navy-line);border-radius:26px;padding:64px 48px;text-align:center;margin:32px 0 72px;position:relative;overflow:hidden}
+  .end::after{content:"";position:absolute;inset:0;background:radial-gradient(500px 300px at 50% 0,rgba(143,209,79,.14),transparent)}
+  .end h2,.end p{position:relative}
+  .end p{color:var(--ink-2);max-width:48ch;margin:14px auto 28px;font-size:16px}
+  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:13px}
+  .fwrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .ribbon{position:fixed;top:14px;right:14px;background:var(--green);color:#0b1220;font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 11px;border-radius:var(--pill);z-index:50}
+  @media(max-width:860px){.cards,.pvbody{grid-template-columns:1fr}.stepper{flex-direction:column;gap:24px}.spline{display:none}h1{font-size:44px}}
+</style>
+</head>
+<body>
+<div class="ribbon">MOCKUP · Direction B</div>
+<nav>
+  <div class="brand"><span class="logo"><span>fb</span></span> Ontomesh</div>
+  <div class="navlinks">
+    <a href="#">Product</a><a href="#">Docs</a><a href="#">Projects</a><a href="#">GitHub</a>
+    <a href="#" class="btn btn-primary">Open the wizard →</a>
+  </div>
+</nav>
+
+<header class="wrap">
+  <div class="hero">
+    <span class="kicker"><span class="dot"></span> v3.7 · gunicorn · Prometheus · cosign · SBOM</span>
+    <h1>The ontology mesh<br>for <em>GraphRAG.</em></h1>
+    <p class="sub">Mine ontologies from your logs, validate with SHACL, and ship a hybrid retriever — without hand-crafting a single Turtle file.</p>
+    <div class="cta-row">
+      <a href="#" class="btn btn-primary btn-lg">Open the wizard →</a>
+      <a href="#" class="btn btn-ghost btn-lg">Watch the 90-sec tour</a>
+    </div>
+    <p style="margin-top:18px"><code class="install">$ pip install <b>ontomesh</b></code></p>
+  </div>
+
+  <!-- product preview -->
+  <div class="preview">
+    <div class="pvtop"><i></i><i></i><i></i><b>ontomesh · wizard</b></div>
+    <div class="pvbody">
+      <div class="pvcode">
+<span class="c"># Generate a full bundle from a SQLite DB</span><br>
+<span class="k">ontomesh</span> --db <span class="s">db/demo.db</span> --out ./output<br><br>
+<span class="c"># → 142 OWL classes · 38 SHACL shapes</span><br>
+<span class="c"># → JSON-LD · SKOS · hybrid retriever</span><br>
+<span class="c"># → prov:wasDerivedFrom lineage ✓</span><br><br>
+<span class="k">ontomesh-wizard</span> --port 5051<br>
+<span class="c"># → http://localhost:5051</span>
+      </div>
+      <div class="pvgraph">
+        <svg viewBox="0 0 280 280">
+          <g fill="none" stroke-width="1.4" stroke-linecap="round">
+            <path d="M80 60 L200 60 L240 140 L200 220 L80 220 L40 140 Z" stroke="#1b2c4a"/>
+            <path d="M80 60 L200 220M200 60 L80 220" stroke="#8fd14f" stroke-opacity=".6" stroke-width="1.8"/>
+            <path d="M140 140 L80 60M140 140 L200 60M140 140 L240 140M140 140 L200 220M140 140 L80 220M140 140 L40 140" stroke="#2b4068"/>
+          </g>
+          <g fill="#2b4068"><circle cx="80" cy="60" r="6"/><circle cx="200" cy="60" r="6"/><circle cx="240" cy="140" r="6"/><circle cx="200" cy="220" r="6"/><circle cx="80" cy="220" r="6"/><circle cx="40" cy="140" r="6"/></g>
+          <circle cx="140" cy="140" r="11" fill="#8fd14f"/>
+          <circle cx="140" cy="140" r="20" fill="none" stroke="#8fd14f" stroke-opacity=".4" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <p>Built on open standards</p>
+  <ul><li>OWL 2</li><li>SHACL</li><li>SPARQL</li><li>JSON-LD</li><li>SKOS</li><li>Datalog</li><li>SQLite / Postgres</li></ul>
+</div>
+
+<section class="band wrap">
+  <p class="eyebrow">What you can build</p>
+  <h2>Three things you'd otherwise hand-craft for months.</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 17l9 4 9-4"/></svg></div>
+      <h3>A full ontology from a schema.</h3>
+      <p>Point Ontomesh at a database. It lifts the schema through OWL 2 / SHACL / JSON-LD, runs the reasoner, and emits a bundle with full lineage.</p>
+      <p class="stat">316 MB DB · 4.2 s · 142 classes</p>
+    </div>
+    <div class="card">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <h3>Validation &amp; reasoning, built in.</h3>
+      <p>SHACL shapes catch data issues before production. Datalog rules derive new facts with provenance. Every run emits a diffable report.</p>
+      <p class="stat">38 shapes · SWRL · Datalog</p>
+    </div>
+    <div class="card">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+      <h3>Candidates mined from raw logs.</h3>
+      <p>Log Discovery mines templates, surfaces candidate entities and events, and gates causal edges — you review one candidate at a time.</p>
+      <p class="stat">L4 templates · L11 causal DAG</p>
+    </div>
+  </div>
+</section>
+
+<section class="band wrap">
+  <p class="eyebrow">How it works</p>
+  <h2>From raw signal to graph-grounded RAG, in three steps.</h2>
+  <div class="stepper">
+    <div class="sp"><div class="spn">1</div><h3>Discover</h3><p>Point at logs or a schema. Candidates surface with confidence and provenance.</p></div>
+    <div class="spline"></div>
+    <div class="sp"><div class="spn">2</div><h3>Model &amp; validate</h3><p>Add SHACL shapes and Datalog rules. The reasoner materialises derived triples.</p></div>
+    <div class="spline"></div>
+    <div class="sp"><div class="spn">3</div><h3>Generate &amp; ship</h3><p>One click emits the full bundle plus a hybrid retriever for your RAG stack.</p></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="end">
+    <h2>Stop hand-crafting ontologies.</h2>
+    <p>Open the wizard, load a sample domain — telecom, healthcare, e-commerce — and watch a real ontology and retriever fall out in under a minute.</p>
+    <a href="#" class="btn btn-primary btn-lg">Open the wizard →</a>
+  </div>
+</div>
+
+<footer><div class="wrap fwrap">
+  <span>Ontomesh v3.7 · Built for engineers building GraphRAG.</span>
+  <span>Wizard · Docs · GitHub</span>
+</div></footer>
+</body>
+</html>

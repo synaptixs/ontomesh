@@ -106,10 +106,12 @@ def write_summary(
     with open(html_path, "w") as f:
         f.write("<!doctype html><html><head><meta charset='utf-8'>"
                 "<title>Ontology-Bounded Vector Retrieval</title>"
-                "<style>body{font-family:system-ui,sans-serif;margin:2em;max-width:1024px}"
-                "table{border-collapse:collapse;width:100%;margin:1em 0}"
+                "<style>body{font-family:system-ui,sans-serif;margin:2em;max-width:1024px;color:#1f2937;background:#f7f9f8}"
+                "h1{background:linear-gradient(135deg,#14284a,#1f3a5f);color:#fff;"
+                "margin:-2em -2em 1em;padding:1em 2em;border-bottom:4px solid #7dc242}"
+                "table{border-collapse:collapse;width:100%;margin:1em 0;background:#fff}"
                 "th,td{border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:.9em}"
-                "th{background:#f6f6f6}h2{margin-top:2em}</style></head><body>")
+                "th{background:#eef2ef}h2{margin-top:2em;color:#14284a}</style></head><body>")
         f.write("<h1>Workstream 5 — Ontology-Bounded Vector Retrieval</h1>")
         f.write("\n".join(body_parts))
         f.write("</body></html>")

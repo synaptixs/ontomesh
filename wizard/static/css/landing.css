@@ -1,8 +1,10 @@
 /* P1.2 — Marketing landing page styles.
  *
- * Tokens-aware (light / dark / mono themes inherit automatically
- * from tokens.css).  Single CSS file, no JS dependency for the
- * static surface — only the copy button uses navigator.clipboard.
+ * Tokens-aware: Twilight / Mono / Light all inherit from tokens.css.
+ * Interactive accents use --accent (green in every theme) rather than
+ * --brand (which is navy on light but light-ink on the Twilight canvas),
+ * so CTAs / links / step numbers stay visible across themes. Single CSS
+ * file, no JS dependency — only the copy button uses navigator.clipboard.
  */
 
 /* ── Reset / base ────────────────────────────────────────────── */
@@ -12,6 +14,10 @@ body {
   margin: 0;
   font-family: var(--font);
   background: var(--bg);
+  /* Subtle Direction-B glow: a green wash bleeding from the top-right. */
+  background-image: radial-gradient(900px 520px at 82% -12%,
+                                    var(--accent-soft), transparent 70%);
+  background-repeat: no-repeat;
   color: var(--text);
   line-height: 1.6;
   font-size: 16px;
@@ -21,14 +27,14 @@ body {
   html { scroll-behavior: auto; }
   * { transition: none !important; animation: none !important; }
 }
-a { color: var(--brand); text-decoration: none; }
+a { color: var(--accent); text-decoration: none; }
 a:hover, a:focus-visible { text-decoration: underline; }
 img { max-width: 100%; display: block; }
 
 /* Skip link — same pattern as wizard.css. */
 .skip-link {
   position: absolute; top: 6px; left: 6px;
-  background: var(--brand); color: var(--on-brand);
+  background: var(--accent); color: var(--on-accent);
   padding: 8px 14px; transform: translateY(-150%);
   transition: transform .15s ease-out;
   z-index: 100; font-weight: 600;
@@ -47,6 +53,17 @@ img { max-width: 100%; display: block; }
 }
 .brand-link { display: flex; align-items: center; }
 .brand-wordmark { height: 32px; width: auto; }
+/* Wordmark theme swap: navy-ink asset for Light, light-ink asset for the
+   Twilight canvas. Mono shows the Light asset desaturated. */
+.wm-dark { display: none; }
+[data-theme="twilight"] .wm-light,
+[data-theme="dark"]     .wm-light { display: none; }
+[data-theme="twilight"] .wm-dark,
+[data-theme="dark"]     .wm-dark  { display: block; }
+[data-theme="mono"] .wm-light { filter: grayscale(1) contrast(1.05); }
+/* The footer mark is the navy lattice — lighten it on the dark canvas. */
+[data-theme="twilight"] .footer-mark,
+[data-theme="dark"] .footer-mark { filter: brightness(0) invert(0.82); }
 .nav-links {
   display: flex; align-items: center; gap: 28px;
   list-style: none; padding: 0; margin: 0;
@@ -57,30 +74,30 @@ img { max-width: 100%; display: block; }
   font-size: 14px;
 }
 .nav-links a:hover, .nav-links a:focus-visible {
-  color: var(--brand);
+  color: var(--accent);
   text-decoration: none;
 }
 
 /* Buttons ─────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 16px;
-  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
   font-weight: 600; font-size: 14px;
   border: 1px solid transparent;
   cursor: pointer;
   transition: background .12s, transform .12s, box-shadow .12s;
 }
 .btn-primary {
-  background: var(--brand); color: var(--on-brand);
+  background: var(--accent); color: var(--on-accent);
 }
 .btn-primary:hover, .btn-primary:focus-visible {
-  background: var(--brand-deep);
+  background: var(--accent-hover);
   text-decoration: none;
   outline: 2px solid var(--brand-mesh);
   outline-offset: 2px;
 }
-.btn-lg { padding: 13px 22px; font-size: 15px; }
+.btn-lg { padding: 14px 24px; font-size: 15px; }
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero {
@@ -104,7 +121,7 @@ img { max-width: 100%; display: block; }
 .kicker-dot {
   width: 8px; height: 8px; border-radius: 999px;
   background: var(--brand-mesh);
-  box-shadow: 0 0 0 4px var(--brand-bg-soft);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 .hero h1 {
   font-family: 'Inter Tight', var(--font);
@@ -116,7 +133,7 @@ img { max-width: 100%; display: block; }
   color: var(--text);
 }
 .grad {
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-mesh) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--brand-mesh) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -136,10 +153,10 @@ img { max-width: 100%; display: block; }
   background: var(--surface); color: var(--text);
   border: 1px solid var(--border);
   padding: 11px 16px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   position: relative;
 }
-.install .prompt { color: var(--brand); font-weight: 600; }
+.install .prompt { color: var(--accent); font-weight: 600; }
 .install .copy {
   background: transparent; border: 0;
   font-family: var(--mono); font-size: 11px;
@@ -149,7 +166,7 @@ img { max-width: 100%; display: block; }
 }
 .install .copy:hover, .install .copy:focus-visible {
   background: var(--surface-2); color: var(--text);
-  outline: 1px solid var(--brand);
+  outline: 1px solid var(--accent);
 }
 .install-note {
   margin: 18px 0 0;
@@ -163,7 +180,7 @@ img { max-width: 100%; display: block; }
 }
 .hero-art {
   width: 100%; max-width: 460px; justify-self: end;
-  filter: drop-shadow(0 24px 60px rgba(79,70,229,0.18));
+  filter: drop-shadow(0 24px 60px rgba(125,194,66,0.18));
 }
 @media (max-width: 900px) {
   .hero {
@@ -203,7 +220,7 @@ img { max-width: 100%; display: block; }
 .section-head .eyebrow {
   font-family: var(--mono); font-size: 12px;
   text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--brand); font-weight: 600;
+  color: var(--accent); font-weight: 600;
   margin: 0 0 12px;
 }
 .section-head h2 {
@@ -231,17 +248,18 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius);
   padding: 28px;
   display: flex; flex-direction: column;
-  transition: border-color .15s, transform .15s;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
 }
 .card:hover {
-  border-color: var(--brand);
-  transform: translateY(-2px);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
 }
 .card-icon {
   width: 44px; height: 44px;
   display: grid; place-items: center;
   border-radius: var(--radius-sm);
-  background: var(--brand-bg-soft); color: var(--brand);
+  background: var(--accent-soft); color: var(--accent);
   margin-bottom: 18px;
 }
 .card h3 {
@@ -284,7 +302,7 @@ img { max-width: 100%; display: block; }
 }
 .steps .arrow {
   align-self: center;
-  color: var(--brand);
+  color: var(--accent);
   font-size: 28px;
   font-weight: 300;
 }
@@ -292,7 +310,7 @@ img { max-width: 100%; display: block; }
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px;
   border-radius: 999px;
-  background: var(--brand); color: var(--on-brand);
+  background: var(--accent); color: var(--on-accent);
   font-weight: 700; font-size: 14px;
   margin-bottom: 14px;
 }
@@ -326,10 +344,11 @@ img { max-width: 100%; display: block; }
   border: 1px solid #1e293b;
   box-shadow: var(--shadow-2);
 }
-.code .c  { color: #64748b; }                /* comment */
-.code .kw { color: #c4b5fd; font-weight: 600; }/* keyword */
-.code .s  { color: #6ee7b7; }                /* string */
-[data-theme="dark"] .code { background: #06080f; }
+.code .c  { color: #64748b; }                 /* comment */
+.code .kw { color: #b9f27c; font-weight: 600; }/* keyword — brand lime */
+.code .s  { color: #6ee7b7; }                 /* string */
+[data-theme="twilight"] .code,
+[data-theme="dark"] .code { background: #0a1326; }
 [data-theme="mono"] .code {
   background: #0a0a0a; color: #e5e5e5;
   border-color: #262626;
@@ -349,7 +368,7 @@ img { max-width: 100%; display: block; }
   text-align: center;
   padding: 80px 40px;
   background: linear-gradient(135deg,
-    var(--brand-bg-soft) 0%,
+    var(--accent-soft) 0%,
     var(--surface) 100%);
   border-radius: calc(var(--radius) * 1.6);
   border: 1px solid var(--border);
@@ -388,5 +407,5 @@ img { max-width: 100%; display: block; }
   color: var(--text-2); font-size: 13px; font-weight: 500;
 }
 .footer a:hover, .footer a:focus-visible {
-  color: var(--brand); text-decoration: none;
+  color: var(--accent); text-decoration: none;
 }

@@ -19,11 +19,11 @@
     <!-- Mark (96px) -->
     <g transform="scale(2)">
       <g fill="none" stroke-linecap="round" stroke-width="2.5">
-        <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#4f46e5"/>
-        <path d="M12 12 L36 36" stroke="#4f46e5"/>
-        <path d="M36 12 L12 36" stroke="#06b6d4"/>
+        <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#14284a"/>
+        <path d="M12 12 L36 36" stroke="#14284a"/>
+        <path d="M36 12 L12 36" stroke="#7dc242"/>
       </g>
-      <g fill="#4f46e5">
+      <g fill="#14284a">
         <circle cx="12" cy="12" r="3.2"/>
         <circle cx="36" cy="12" r="3.2"/>
         <circle cx="12" cy="36" r="3.2"/>
@@ -36,7 +36,7 @@
           font-family="'Inter Tight', Inter, system-ui, sans-serif"
           font-weight="800" font-size="96" letter-spacing="-3"
           fill="#0f172a">
-      <tspan>onto</tspan><tspan fill="#4f46e5">mesh</tspan>
+      <tspan>onto</tspan><tspan fill="#7dc242">mesh</tspan>
     </text>
   </g>
 
@@ -59,7 +59,7 @@
 
   <!-- Footer pill -->
   <g transform="translate(80 540)">
-    <rect width="220" height="44" rx="22" fill="#4f46e5"/>
+    <rect width="220" height="44" rx="22" fill="#14284a"/>
     <text x="110" y="29" text-anchor="middle"
           font-family="Inter, system-ui, sans-serif"
           font-weight="600" font-size="16" fill="#ffffff">

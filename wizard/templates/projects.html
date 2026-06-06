@@ -16,7 +16,7 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: var(--font); background: var(--bg);
            color: var(--text); font-size: 15px; }
-    a { color: var(--brand); text-decoration: none; }
+    a { color: var(--accent); text-decoration: none; }
     a:hover, a:focus-visible { text-decoration: underline; }
     code { font-family: var(--mono); font-size: 12.5px;
            background: var(--surface-2); padding: 1px 6px;
@@ -24,7 +24,7 @@
 
     .skip-link {
       position: absolute; top: 6px; left: 6px;
-      background: var(--brand); color: var(--on-brand);
+      background: var(--accent); color: var(--on-accent);
       padding: 8px 14px; transform: translateY(-150%);
       transition: transform .15s ease-out;
       z-index: 100; font-weight: 600; border-radius: 4px;
@@ -39,24 +39,30 @@
            max-width: 1200px; margin: 0 auto; padding: 22px 40px; }
     .brand-link { display: flex; align-items: center; }
     .brand-wordmark { height: 32px; }
+    .wm-dark { display: none; }
+    [data-theme="twilight"] .wm-light,
+    [data-theme="dark"]     .wm-light { display: none; }
+    [data-theme="twilight"] .wm-dark,
+    [data-theme="dark"]     .wm-dark  { display: block; }
+    [data-theme="mono"] .wm-light { filter: grayscale(1) contrast(1.05); }
     .nav-links { display: flex; align-items: center; gap: 28px;
                  list-style: none; padding: 0; margin: 0; }
     .nav-links a { color: var(--text); font-weight: 500; font-size: 14px; }
-    .nav-links a:hover, .nav-links a:focus-visible { color: var(--brand); text-decoration: none; }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--accent); text-decoration: none; }
     .btn { display: inline-flex; align-items: center; gap: 8px;
            padding: 9px 16px; border-radius: var(--radius-sm);
            font-weight: 600; font-size: 14px; border: 1px solid transparent;
            cursor: pointer; font-family: inherit;
            transition: background .12s, transform .12s; }
-    .btn-primary { background: var(--brand); color: var(--on-brand); }
+    .btn-primary { background: var(--accent); color: var(--on-accent); }
     .btn-primary:hover, .btn-primary:focus-visible {
-      background: var(--brand-deep);
+      background: var(--accent-hover);
       outline: 2px solid var(--brand-mesh); outline-offset: 2px;
     }
     .btn-ghost { background: transparent; color: var(--text);
                  border-color: var(--border); }
     .btn-ghost:hover, .btn-ghost:focus-visible {
-      border-color: var(--brand); color: var(--brand);
+      border-color: var(--accent); color: var(--accent);
     }
 
     /* ── Header ──────────────────────────────────────────────── */
@@ -95,8 +101,8 @@
       color: var(--text); font-size: 14px; font-family: inherit;
     }
     .filter-bar input:focus-visible {
-      outline: 2px solid var(--brand); outline-offset: 0;
-      border-color: var(--brand);
+      outline: 2px solid var(--accent); outline-offset: 0;
+      border-color: var(--accent);
     }
     .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
     .chip { padding: 5px 12px; border-radius: 999px;
@@ -104,10 +110,10 @@
             color: var(--text); font-size: 12.5px; font-weight: 500;
             font-family: inherit; cursor: pointer;
             transition: all .12s; }
-    .chip:hover, .chip:focus-visible { border-color: var(--brand);
-                                       color: var(--brand); outline: none; }
-    .chip.active { background: var(--brand); color: var(--on-brand);
-                   border-color: var(--brand); }
+    .chip:hover, .chip:focus-visible { border-color: var(--accent);
+                                       color: var(--accent); outline: none; }
+    .chip.active { background: var(--accent); color: var(--on-accent);
+                   border-color: var(--accent); }
     .chip .count { font-family: var(--mono); margin-left: 6px;
                    opacity: 0.7; }
 
@@ -121,12 +127,12 @@
                display: flex; flex-direction: column; gap: 12px;
                cursor: pointer; }
     .project:hover, .project:focus-visible {
-      border-color: var(--brand); transform: translateY(-2px);
+      border-color: var(--accent); transform: translateY(-2px);
       box-shadow: var(--shadow-2); outline: none;
     }
     .project-head { display: flex; align-items: flex-start; gap: 12px; }
     .project-icon { width: 40px; height: 40px; border-radius: 8px;
-                    background: var(--brand-bg-soft); color: var(--brand);
+                    background: var(--accent-soft); color: var(--accent);
                     display: grid; place-items: center; font-size: 18px;
                     flex-shrink: 0; }
     .project-body { flex: 1; min-width: 0; }
@@ -155,16 +161,16 @@
       font-weight: 600; cursor: pointer; font-family: inherit;
     }
     .project-actions button.primary {
-      background: var(--brand); color: var(--on-brand);
-      border-color: var(--brand);
+      background: var(--accent); color: var(--on-accent);
+      border-color: var(--accent);
     }
     .project-actions button:hover, .project-actions button:focus-visible {
-      border-color: var(--brand);
+      border-color: var(--accent);
       outline: none;
     }
     .project-actions button.primary:hover,
     .project-actions button.primary:focus-visible {
-      background: var(--brand-deep);
+      background: var(--accent-hover);
       outline: 2px solid var(--brand-mesh); outline-offset: 2px;
     }
 
@@ -173,7 +179,7 @@
       grid-column: 1 / -1;
       padding: 56px 32px;
       background: linear-gradient(135deg,
-        var(--brand-bg-soft) 0%, var(--surface) 100%);
+        var(--accent-soft) 0%, var(--surface) 100%);
       border: 1px solid var(--border); border-radius: 14px;
       text-align: center;
     }
@@ -198,14 +204,17 @@
     }
   </style>
 </head>
-<body data-theme="light">
+<body data-theme="twilight">
   <a href="#main" class="skip-link">Skip to content</a>
 
   <!-- ── Nav ──────────────────────────────────────────────────── -->
   <nav class="nav" aria-label="Primary">
     <a href="/" class="brand-link" aria-label="Ontomesh — home">
       <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
-           alt="Ontomesh" class="brand-wordmark"
+           alt="Ontomesh" class="brand-wordmark wm-light"
+           width="180" height="40">
+      <img src="{{ url_for('static', filename='brand/ontomesh-wordmark-dark.svg') }}"
+           alt="" aria-hidden="true" class="brand-wordmark wm-dark"
            width="180" height="40">
     </a>
     <ul class="nav-links" role="list">

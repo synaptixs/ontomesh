@@ -34,12 +34,12 @@
     .err p { color: var(--muted); margin: 0 0 28px; }
     .err a.cta {
       display: inline-block;
-      padding: 10px 18px; border-radius: var(--radius-sm);
-      background: var(--brand); color: var(--on-brand);
+      padding: 10px 18px; border-radius: var(--radius-pill);
+      background: var(--accent); color: var(--on-accent);
       text-decoration: none; font-weight: 600; font-size: 14px;
     }
     .err a.cta:hover, .err a.cta:focus-visible {
-      background: var(--brand-deep);
+      background: var(--accent-hover);
       outline: 2px solid var(--brand-mesh);
       outline-offset: 2px;
     }
@@ -47,12 +47,12 @@
       display: block; margin-top: 16px;
       color: var(--muted-2); font-size: 13px;
     }
-    .err .alt a { color: var(--brand); }
+    .err .alt a { color: var(--accent); }
   </style>
 </head>
-<body data-theme="light">
+<body data-theme="twilight">
   <div class="err" role="alert" aria-live="polite">
-    <img src="{{ url_for('static', filename='brand/ontomesh-mark.svg') }}"
+    <img src="{{ url_for('static', filename='brand/favicon.svg') }}"
          alt="" aria-hidden="true">
     <div class="code">{{ code }}</div>
     <h1>{{ title }}</h1>
