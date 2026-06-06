@@ -7,6 +7,12 @@
 
 ---
 
+![The Ontomesh wizard — a guided, four-phase modeling workspace](assets/screenshots/wizard-twilight.png)
+
+*The guided wizard (Twilight theme) — Define → Enrich → Build → After. Also ships Mono and Light themes.*
+
+---
+
 ## What ships in the box
 
 | | |
