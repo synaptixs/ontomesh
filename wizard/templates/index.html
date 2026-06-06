@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="twilight">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -138,14 +138,14 @@
         <span class="stat"><strong>0</strong> events</span>
       </div>
       <div class="theme-picker" role="radiogroup" aria-label="Theme">
-        <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
-          <span class="theme-icon">☀</span><span>Light</span>
-        </button>
-        <button type="button" class="theme-btn" data-theme-name="dark"  onclick="setTheme('dark')"  title="Dark theme">
-          <span class="theme-icon">☾</span><span>Dark</span>
+        <button type="button" class="theme-btn" data-theme-name="twilight" onclick="setTheme('twilight')" title="Twilight Navy theme">
+          <span class="theme-icon">☾</span><span>Twilight</span>
         </button>
         <button type="button" class="theme-btn" data-theme-name="mono"  onclick="setTheme('mono')"  title="Monochrome theme">
           <span class="theme-icon">◐</span><span>Mono</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
+          <span class="theme-icon">☀</span><span>Light</span>
         </button>
       </div>
     </div>
@@ -1686,14 +1686,18 @@ const TEMPLATE_ICONS = {
 
 // ── Theme switcher ───────────────────────────────────────────────────────
 //
-// Three themes: light (default), dark, mono. Choice persists in
-// localStorage; first visit seeds from the user's system preference
-// (prefers-color-scheme). The graph view re-reads CSS vars on each
-// draw, so node/edge colours follow the active theme automatically.
-const THEMES = ['light', 'dark', 'mono'];
+// Three themes: Twilight Navy (default, dark), Mono (monochrome) and Light.
+// Choice persists in localStorage. Twilight is the deliberate default on a
+// first visit — system prefers-color-scheme no longer forces a theme. The
+// graph view re-reads CSS vars on each draw, so node/edge colours follow the
+// active theme automatically.
+const THEMES = ['twilight', 'mono', 'light'];
+// Migrate the pre-uplift theme name: the old 'dark' palette is now Twilight.
+const THEME_ALIASES = { dark: 'twilight' };
 
 function setTheme(name) {
-  if (!THEMES.includes(name)) name = 'light';
+  name = THEME_ALIASES[name] || name;
+  if (!THEMES.includes(name)) name = 'twilight';
   document.documentElement.setAttribute('data-theme', name);
   document.querySelectorAll('.theme-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.themeName === name);
@@ -1710,10 +1714,9 @@ function setTheme(name) {
 function _initTheme() {
   let stored = null;
   try { stored = localStorage.getItem('wizard-theme'); } catch(_) {}
+  stored = THEME_ALIASES[stored] || stored;
   if (stored && THEMES.includes(stored)) { setTheme(stored); return; }
-  const prefersDark = window.matchMedia &&
-                      window.matchMedia('(prefers-color-scheme: dark)').matches;
-  setTheme(prefersDark ? 'dark' : 'light');
+  setTheme('twilight');   // deliberate default, not system-derived
 }
 _initTheme();   // run before first paint to avoid a flash of wrong theme
 
