@@ -30,7 +30,10 @@
   <nav class="nav" aria-label="Primary">
     <a href="/" class="brand-link" aria-label="Ontomesh — home">
       <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
-           alt="Ontomesh" class="brand-wordmark"
+           alt="Ontomesh" class="brand-wordmark wm-light"
+           width="180" height="40">
+      <img src="{{ url_for('static', filename='brand/ontomesh-wordmark-dark.svg') }}"
+           alt="" aria-hidden="true" class="brand-wordmark wm-dark"
            width="180" height="40">
     </a>
     <ul class="nav-links" role="list">

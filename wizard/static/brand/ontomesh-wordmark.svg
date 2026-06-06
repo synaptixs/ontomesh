@@ -4,11 +4,11 @@
   <!-- Mark (mirror of ontomesh-mark.svg, scaled to 36px) -->
   <g transform="translate(6 6) scale(0.75)">
     <g fill="none" stroke-linecap="round" stroke-width="3">
-      <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#4f46e5"/>
-      <path d="M12 12 L36 36" stroke="#4f46e5"/>
-      <path d="M36 12 L12 36" stroke="#06b6d4"/>
+      <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#14284a"/>
+      <path d="M12 12 L36 36" stroke="#14284a"/>
+      <path d="M36 12 L12 36" stroke="#7dc242"/>
     </g>
-    <g fill="#4f46e5">
+    <g fill="#14284a">
       <circle cx="12" cy="12" r="3.6"/>
       <circle cx="36" cy="12" r="3.6"/>
       <circle cx="12" cy="36" r="3.6"/>
@@ -21,7 +21,7 @@
         font-weight="700"
         font-size="26"
         letter-spacing="-0.5"
-        fill="#0f172a">
-    <tspan>onto</tspan><tspan fill="#4f46e5">mesh</tspan>
+        fill="#14284a">
+    <tspan>onto</tspan><tspan fill="#7dc242">mesh</tspan>
   </text>
 </svg>

@@ -155,7 +155,9 @@
   <header class="topbar">
     <a href="/" class="brand-link" aria-label="Ontomesh — home">
       <img src="{{ url_for('static', filename='brand/ontomesh-wordmark.svg') }}"
-           alt="Ontomesh" class="brand-wordmark" width="150" height="32">
+           alt="Ontomesh" class="brand-wordmark wm-light" width="150" height="32">
+      <img src="{{ url_for('static', filename='brand/ontomesh-wordmark-dark.svg') }}"
+           alt="" aria-hidden="true" class="brand-wordmark wm-dark" width="150" height="32">
       <span class="brand-version">v3.7</span>
     </a>
     <button type="button" class="drawer-toggle" id="drawer-toggle"

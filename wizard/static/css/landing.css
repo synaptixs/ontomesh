@@ -53,11 +53,15 @@ img { max-width: 100%; display: block; }
 }
 .brand-link { display: flex; align-items: center; }
 .brand-wordmark { height: 32px; width: auto; }
-/* The shipped wordmark SVG has dark ink — invert it on dark canvases so
-   "onto" stays legible. Stopgap until Phase 6 ships a light wordmark asset. */
-[data-theme="twilight"] .brand-wordmark,
-[data-theme="dark"] .brand-wordmark { filter: invert(1) hue-rotate(180deg); }
-[data-theme="mono"] .brand-wordmark { filter: grayscale(1) contrast(1.15); }
+/* Wordmark theme swap: navy-ink asset for Light, light-ink asset for the
+   Twilight canvas. Mono shows the Light asset desaturated. */
+.wm-dark { display: none; }
+[data-theme="twilight"] .wm-light,
+[data-theme="dark"]     .wm-light { display: none; }
+[data-theme="twilight"] .wm-dark,
+[data-theme="dark"]     .wm-dark  { display: block; }
+[data-theme="mono"] .wm-light { filter: grayscale(1) contrast(1.05); }
+/* The footer mark is the navy lattice — lighten it on the dark canvas. */
 [data-theme="twilight"] .footer-mark,
 [data-theme="dark"] .footer-mark { filter: brightness(0) invert(0.82); }
 .nav-links {

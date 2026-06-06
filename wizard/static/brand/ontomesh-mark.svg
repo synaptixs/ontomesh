@@ -3,20 +3,20 @@
   <!--
     Ontomesh mark — K4 graph (4 nodes, 6 edges).
     The two crossing diagonals are the "mesh" moment.
-    Indigo for the lattice, cyan for one diagonal so it reads as
+    Navy for the lattice, lime-green for one diagonal so it reads as
     woven, not just drawn.
   -->
   <title>Ontomesh</title>
   <g fill="none" stroke-linecap="round" stroke-width="2.5">
     <!-- Square frame -->
-    <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#4f46e5"/>
+    <path d="M12 12 L36 12 L36 36 L12 36 Z" stroke="#14284a"/>
     <!-- First diagonal (indigo) -->
-    <path d="M12 12 L36 36" stroke="#4f46e5"/>
+    <path d="M12 12 L36 36" stroke="#14284a"/>
     <!-- Second diagonal (cyan — the woven thread) -->
-    <path d="M36 12 L12 36" stroke="#06b6d4"/>
+    <path d="M36 12 L12 36" stroke="#7dc242"/>
   </g>
   <!-- Four nodes -->
-  <g fill="#4f46e5">
+  <g fill="#14284a">
     <circle cx="12" cy="12" r="3.2"/>
     <circle cx="36" cy="12" r="3.2"/>
     <circle cx="12" cy="36" r="3.2"/>
