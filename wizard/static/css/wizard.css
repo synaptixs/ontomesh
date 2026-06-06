@@ -822,10 +822,32 @@
   /* ── Focus area: centre the step content ─────────────────────────────── */
   .main > .step-panel { max-width: 880px; margin-left: auto; margin-right: auto; }
 
+  /* ── Sticky action bar ───────────────────────────────────────────────
+     The single visible navigation surface. Mirrors the active panel's
+     per-step footer (which is hidden below), so the bar is always pinned
+     to the bottom of the focus area regardless of scroll position. */
+  .action-bar { flex-shrink: 0; display: flex; align-items: center; gap: 16px;
+                padding: 12px 24px; background: var(--surface);
+                border-top: 1px solid var(--border);
+                box-shadow: 0 -6px 20px rgba(15,27,45,0.05); }
+  .action-bar[hidden] { display: none; }
+  .action-bar .ab-hint { font-size: 13px; color: var(--muted);
+                         letter-spacing: -0.005em; }
+  .action-bar .ab-right { margin-left: auto; display: flex; gap: 10px; }
+  .action-bar .btn { border-radius: var(--radius-pill); padding: 10px 20px; }
+  .action-bar .btn[hidden] { display: none; }
+
+  /* The per-step footers are superseded by the sticky action bar, which
+     mirrors and proxy-clicks them. Kept in the DOM (still the source of
+     truth for each step's real action), just hidden. */
+  .step-nav-footer { display: none !important; }
+
   /* ── Responsive: stack the phase rail on narrow viewports ────────────── */
   @media (max-width: 720px) {
     .phases { max-width: none; }
     .phases .plabel { font-size: 11px; }
     .topbar { gap: 10px; padding: 10px 16px; }
     .main { padding: 24px 18px; }
+    .action-bar { padding: 10px 16px; gap: 10px; }
+    .action-bar .ab-hint { display: none; }
   }

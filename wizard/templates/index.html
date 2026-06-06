@@ -1336,6 +1336,21 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
     </div>
 
   </main>
+
+  <!-- ── Sticky action bar ───────────────────────────────────────────────
+       Mirrors the (now hidden) per-step .step-nav-footer of the active
+       panel: it re-labels and proxy-clicks the real footer buttons, so
+       step-specific actions (e.g. saveDomain()) keep firing — no nav
+       logic is duplicated here. Hidden on steps that have no footer
+       (Library, Settings, the post-generation review peers). -->
+  <div class="action-bar" id="action-bar" hidden>
+    <span class="ab-hint" id="ab-hint"></span>
+    <div class="ab-right">
+      <button type="button" class="btn btn-ghost"   id="ab-back" hidden></button>
+      <button type="button" class="btn btn-ghost"   id="ab-skip" hidden></button>
+      <button type="button" class="btn btn-primary" id="ab-next" hidden></button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Entity Modal ──────────────────────────────────────────────────────── -->
@@ -1794,6 +1809,7 @@ function goStep(name) {
   const main = document.querySelector('.main');
   if (main) main.scrollTop = 0;
   _syncPhaseRail(name);            // keep the 4-phase rail + sub-step line in sync
+  _syncActionBar(name);            // mirror the step's footer into the sticky bar
 }
 
 // P0.2 — keyboard + click navigation on the sidebar step list.
@@ -1894,6 +1910,58 @@ function _syncPhaseRail(name) {
   line.querySelector('b').textContent = label;   // textContent → no HTML injection
 }
 _syncPhaseRail(currentStep);   // seed the rail to match the initial step
+
+// ── Sticky action bar ──────────────────────────────────────────────────────
+//
+// Rather than re-encode each step's forward/back/skip targets (some call
+// step-specific functions like saveDomain()), the bar mirrors the active
+// panel's .step-nav-footer and proxy-clicks the real buttons. Footers are
+// hidden via CSS, so the bar is the single visible navigation surface.
+function _wireProxy(btn, src, fallbackLabel) {
+  if (!btn) return;
+  if (!src) { btn.hidden = true; btn.onclick = null; return; }
+  btn.hidden = false;
+  btn.textContent = (src.textContent || fallbackLabel || '').trim();
+  btn.onclick = () => src.click();   // fire the real footer button (keeps saveDomain etc.)
+}
+function _syncActionBar(name) {
+  const bar = document.getElementById('action-bar');
+  if (!bar) return;
+  const panel  = document.getElementById('step-' + name);
+  const footer = panel ? panel.querySelector('.step-nav-footer') : null;
+  if (!footer) { bar.hidden = true; return; }   // no footer → no bar (Library, peers…)
+
+  const backSrc = footer.querySelector(':scope > .btn');   // ← Back is a direct child
+  let skipSrc = null, primarySrc = null;
+  footer.querySelectorAll('.nav-right .btn').forEach(b => {
+    if (b.classList.contains('btn-primary'))      primarySrc = b;
+    else if (/skip/i.test(b.textContent))         skipSrc = b;
+    else if (!primarySrc)                         primarySrc = b;   // e.g. Generate's "View Library"
+  });
+  const hint = footer.querySelector('.nav-hint');
+
+  _wireProxy(document.getElementById('ab-back'), backSrc, '← Back');
+  _wireProxy(document.getElementById('ab-skip'), skipSrc, null);
+  _wireProxy(document.getElementById('ab-next'), primarySrc, 'Continue →');
+  const gHint = document.getElementById('ab-hint');
+  if (gHint) gHint.textContent = hint ? hint.textContent.trim() : '';
+  bar.hidden = false;
+}
+_syncActionBar(currentStep);   // seed the bar to match the initial step
+
+// ── Drawer focus trap ──────────────────────────────────────────────────────
+// While the nav drawer is open, keep Tab focus cycling inside it.
+document.getElementById('nav-drawer')?.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const d = e.currentTarget;
+  if (!d.classList.contains('open')) return;
+  const list = [...d.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')]
+    .filter(el => el.offsetParent !== null);
+  if (!list.length) return;
+  const first = list[0], last = list[list.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 
 // ── Templates ─────────────────────────────────────────────────────────────
 async function loadTemplateList() {
