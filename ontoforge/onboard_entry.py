@@ -1,10 +1,10 @@
-"""``ontomesh-onboard`` console script — the interactive REPL wizard.
+"""``ontoforge-onboard`` console script — the interactive REPL wizard.
 
-Wires the ``ontomesh-onboard`` console script declared in
+Wires the ``ontoforge-onboard`` console script declared in
 ``pyproject.toml`` to ``onboard.py``'s ``main()`` so:
 
     pip install -e .
-    ontomesh-onboard --industry telecom
+    ontoforge-onboard --industry telecom
 
 works identically to the historical:
 
@@ -18,7 +18,7 @@ import sys
 
 
 def main() -> None:
-    """Console entry point for the ``ontomesh-onboard`` script."""
+    """Console entry point for the ``ontoforge-onboard`` script."""
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if here not in sys.path:
         sys.path.insert(0, here)

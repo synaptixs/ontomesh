@@ -138,7 +138,7 @@ def install(app, *, refresh_interval_seconds: float = 5.0) -> None:
         import sys as _sys
         print(
             "[metrics_exporter] prometheus-client not installed; "
-            "/metrics endpoint disabled.  Install ontomesh[wizard] "
+            "/metrics endpoint disabled.  Install ontoforge[wizard] "
             "to enable.",
             file=_sys.stderr,
         )

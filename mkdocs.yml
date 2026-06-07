@@ -134,6 +134,7 @@ nav:
   - Reference:
       - reference/index.md
       - SDK:        sdk.md
+      - Reasoning search: reference/search.md
       - Runtime:    runtime.md
       - Integrate:  integrate.md
       - Extending:  extending.md

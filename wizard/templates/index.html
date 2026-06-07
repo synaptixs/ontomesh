@@ -108,6 +108,7 @@
     <nav aria-label="Pipeline steps">
     <ul class="step-nav" id="step-nav" role="list">
       <li data-step="library" tabindex="0" role="link"><span class="step-num">📚</span> Library</li>
+      {% if search_enabled %}<li data-step="ask" tabindex="0" role="link"><span class="step-num">💬</span> Ask</li>{% endif %}
       <li class="step-divider" role="presentation" aria-hidden="true">Define</li>
       <li class="active" data-step="domain" tabindex="0" role="link" aria-current="page"><span class="step-num">1</span> Domain Identity</li>
       <li data-step="entities" tabindex="0" role="link"><span class="step-num">2</span> Entities</li>
@@ -166,6 +167,7 @@
     </button>
     <div class="topbar-right">
       <span id="save-status" class="save-status"></span>
+      {% if search_enabled %}<a href="/ask" class="topbar-exit" title="Ask your data (reasoning search)">Ask ↗</a>{% endif %}
       <a href="/projects" class="topbar-exit">Exit</a>
     </div>
   </header>
@@ -947,6 +949,17 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
     </div>
 
     <!-- Library: list saved ontologies, load/view/delete -->
+    {% if search_enabled %}
+    <div class="step-panel" id="step-ask">
+      <div class="step-title">Ask
+        <a class="help-pill" href="/help" target="_blank" rel="noopener" title="Reasoning search">ⓘ How it works</a>
+      </div>
+      <div class="step-subtitle">Ontology-grounded reasoning search over your connected data — cited, reasoned answers.</div>
+      <iframe src="/ask" title="Ask console" loading="lazy"
+              style="width:100%;height:72vh;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)"></iframe>
+    </div>
+    {% endif %}
+
     <div class="step-panel" id="step-library">
       <div class="step-title">Ontology Library</div>
       <div class="step-subtitle">All ontologies you've saved — load any one back into the wizard, or open it in the read-only viewer.</div>
@@ -1897,7 +1910,7 @@ const STEP_LABEL   = {
   relationships:'Relationships', 'log-discovery':'Log Discovery',
   cqs:'Competency Questions', rules:'Rules & Reasoning', generate:'Generate',
   evolve:'Evolution Review', comply:'Compliance Dashboard', retrieve:'Vector Retrieval',
-  settings:'Settings',
+  settings:'Settings', ask:'Ask',
 };
 function _syncPhaseRail(name) {
   const phase  = PHASE_OF[name] || null;

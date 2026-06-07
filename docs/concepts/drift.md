@@ -26,7 +26,7 @@ production data  ──►  drift-monitor  ──►  ObservationRecord
 Two steps — `drift-monitor` itself isn't on PyPI yet (it's installed straight from the [`synaptixs/infodrift`](https://github.com/synaptixs/infodrift) repository), and PyPI policy bans `pip install` from pulling git+VCS URLs through a published package, so we keep the two halves separate:
 
 ```bash
-pip install 'ontomesh[drift]'                                            # the PyPI half: drain3 + glue
+pip install 'ontoforge[drift]'                                            # the PyPI half: drain3 + glue
 pip install git+https://github.com/synaptixs/infodrift.git@develop       # drift-monitor itself
 ```
 

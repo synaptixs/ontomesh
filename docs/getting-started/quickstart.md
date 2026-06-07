@@ -57,7 +57,7 @@ output/
 ## 4 · Verify SHACL passes
 
 ```bash
-docker exec ontomesh ontomesh --phase 3
+docker exec ontomesh ontoforge --phase 3
 # →  ✓ SHACL validation passed.  0 violations, 0 warnings.
 ```
 

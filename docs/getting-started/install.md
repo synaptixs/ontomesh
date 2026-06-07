@@ -45,10 +45,10 @@ docker buildx imagetools inspect ghcr.io/synaptixs/ontomesh:3.7.0 \
     PyPI publish lands in 3.7.1.  Track at [issue #44](https://github.com/synaptixs/ontomesh/issues).
 
 ```bash
-pip install ontomesh                 # core only — small footprint
-pip install 'ontomesh[wizard]'       # adds Flask + the wizard UI
-pip install 'ontomesh[wizard,postgres,runtime]'   # production-ish
-ontomesh-wizard                       # launches the wizard
+pip install ontoforge                 # core only — small footprint
+pip install 'ontoforge[wizard]'       # adds Flask + the wizard UI
+pip install 'ontoforge[wizard,postgres,runtime]'   # production-ish
+ontoforge-wizard                       # launches the wizard
 ```
 
 ## 3. From source (for contributors)
@@ -59,7 +59,7 @@ cd ontomesh
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[wizard,test]"
 pytest tests/ -q              # 297+ tests should pass
-ontomesh-wizard               # starts the wizard at :5051
+ontoforge-wizard               # starts the wizard at :5051
 ```
 
 ## Optional extras

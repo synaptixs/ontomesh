@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" data-theme="twilight">
+<head>
+  <meta charset="utf-8">
+  <title>Ask — Ontoforge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='brand/favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);
+         background-image:radial-gradient(1000px 560px at 85% -12%,var(--accent-soft),transparent);
+         -webkit-font-smoothing:antialiased}
+    .top{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .brand{font-family:var(--tight);font-weight:800;font-size:17px}
+    .brand b{color:var(--accent)}
+    .seg{font-size:12px;color:var(--muted);background:var(--surface-2);border:1px solid var(--border);padding:4px 10px;border-radius:var(--radius-pill)}
+    .wrap{max-width:880px;margin:0 auto;padding:32px 24px 80px}
+    .ask{display:flex;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow-2)}
+    .ask input,.ask select{font:inherit;font-size:15px;background:var(--bg);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:10px 12px}
+    .ask input[name=q]{flex:1}
+    .ask button{font:inherit;font-weight:700;color:var(--on-accent);background:var(--accent);border:none;border-radius:var(--radius-pill);padding:10px 20px;cursor:pointer}
+    .row2{display:flex;gap:10px;margin-top:10px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+    .ans{margin-top:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:none}
+    .ah{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .ah h2{font-family:var(--tight);font-size:15px}
+    .badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);margin-left:auto;background:var(--accent-soft);color:var(--accent);border:1px solid var(--border)}
+    .ab{padding:18px;line-height:1.6}
+    .ab p{margin-bottom:12px}
+    .infer{background:var(--accent-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin:8px 0;font-size:13.5px}
+    .infer b{color:var(--accent)}
+    .sql{background:#0f1b30;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;font-family:var(--mono);font-size:12px;color:#cbd5e1;overflow-x:auto}
+    .src,.trace{border-top:1px solid var(--border);padding:12px 18px;font-size:12.5px}
+    .src h4,.trace h4{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+    .src li,.trace li{font-family:var(--mono);font-size:11.5px;color:var(--text-2);list-style:none;padding:3px 0}
+    .src li.inf{color:var(--accent)}
+    .err{color:var(--danger);margin-top:16px;font-size:14px;display:none}
+    .hint{font-size:12px;color:var(--muted);margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <span class="brand">onto<b>forge</b></span>
+    <span class="seg">Ask · reasoning search</span>
+  </div>
+  <div class="wrap">
+    <form class="ask" id="ask-form">
+      <input name="q" placeholder="Ask your data… e.g. which customers are at risk, and why?" autocomplete="off">
+      <input name="flavor" placeholder="flavor" value="network-ops" size="14">
+      <select name="provider"><option value="ollama">Ollama</option><option value="openai">OpenAI</option></select>
+      <button type="submit">Reason →</button>
+    </form>
+    <div class="row2">
+      <span>Read-only · ontology-grounded · tier ≤
+        <select name="max_tier" form="ask-form" style="font:inherit;font-size:12px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:2px 6px">
+          <option>Internal</option><option>Confidential</option><option>Restricted</option><option>Public</option>
+        </select>
+      </span>
+    </div>
+    <p class="hint" id="hint">Answers cite their sources and show the query that ran.</p>
+
+    <div class="err" id="err"></div>
+    <div class="ans" id="ans">
+      <div class="ah"><h2>Answer</h2><span class="badge" id="badge"></span></div>
+      <div class="ab"><p id="answer"></p><div class="infer" id="infer" style="display:none"></div></div>
+      <div class="trace" id="exec" style="display:none"><h4>Executed query</h4><div class="sql" id="sql"></div></div>
+      <div class="src" id="srcwrap" style="display:none"><h4>Sources</h4><ul id="src"></ul></div>
+      <div class="trace" id="trwrap" style="display:none"><h4>Reasoning trace</h4><ul id="trace"></ul></div>
+    </div>
+  </div>
+
+  <script>
+  const form = document.getElementById('ask-form');
+  const $ = id => document.getElementById(id);
+  function showErr(m){ $('err').textContent = m; $('err').style.display='block'; $('hint').textContent=''; }
+  function appendStage(s){
+    const li = document.createElement('li');
+    let x = '';
+    if (s.rows !== undefined) x += ` · ${s.rows} rows`;
+    if (s.derived !== undefined) x += ` · ${s.derived} derived`;
+    if (s.count !== undefined) x += ` · ${s.count} recalled`;
+    if (s.replans) x += ` · replan ${s.replans}`;
+    li.textContent = '• ' + s.stage + x;
+    $('trace').appendChild(li);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const body = { question: fd.get('q'), flavor: fd.get('flavor'),
+                   provider: fd.get('provider'), max_tier: fd.get('max_tier') };
+    // reset; show the card with a LIVE trace while the stream runs
+    $('err').style.display='none';
+    $('answer').textContent=''; $('badge').textContent='reasoning…';
+    $('infer').style.display='none'; $('exec').style.display='none'; $('srcwrap').style.display='none';
+    $('trace').innerHTML=''; $('trwrap').style.display='block'; $('ans').style.display='block';
+    $('hint').textContent = 'Streaming the reasoning trace…';
+    try {
+      const r = await fetch('/api/search/stream', {method:'POST',
+        headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      if (!r.ok || !r.body) {
+        let msg = 'error ' + r.status;
+        try { msg = (await r.json()).error || msg; } catch (_) {}
+        showErr(msg); return;
+      }
+      const reader = r.body.getReader(), dec = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream:true });
+        let i;
+        while ((i = buf.indexOf('\n\n')) >= 0) {
+          const frame = buf.slice(0, i); buf = buf.slice(i + 2);
+          const ev = (frame.match(/^event: (.*)$/m) || [])[1];
+          const dl = (frame.match(/^data: (.*)$/m) || [])[1];
+          if (!dl) continue;
+          let data; try { data = JSON.parse(dl); } catch (_) { continue; }
+          if (ev === 'stage') appendStage(data);
+          else if (ev === 'answer') render(data);
+          else if (ev === 'error') showErr(data.error || 'search failed');
+        }
+      }
+      $('hint').textContent = 'Answers cite their sources and show the query that ran.';
+    } catch (ex) { showErr(String(ex)); }
+  });
+
+  function render(d) {
+    $('answer').textContent = d.answer || '(no answer)';
+    $('badge').textContent = `${d.status} · ${Math.round((d.confidence||0)*100)}% · ${d.provider||''}`;
+    const inf = d.inferred || [];
+    if (inf.length) { $('infer').style.display='block';
+      $('infer').innerHTML = '<b>Inferred</b> (derived via rules): ' +
+        inf.map(i => `${i.fact[0]}(${i.fact.slice(1).join(', ')}) <span style="color:var(--muted)">← ${i.rule}</span>`).join('; ');
+    } else $('infer').style.display='none';
+    if (d.executed_query) { $('exec').style.display='block'; $('sql').textContent = d.executed_query; }
+    const cites = d.citations || [];
+    if (cites.length) { $('srcwrap').style.display='block';
+      $('src').innerHTML = cites.map(c => `<li class="${c.inferred?'inf':''}">${c.iri}${c.source_table?'  ['+c.source_table+']':''}${c.inferred?'  (inferred)':''}</li>`).join('');
+    } else $('srcwrap').style.display='none';
+    const tr = d.trace || [];
+    if (tr.length) { $('trwrap').style.display='block';
+      $('trace').innerHTML = tr.map(t => `<li>${t.stage}${t.rows!==undefined?` · ${t.rows} rows`:''}${t.derived!==undefined?` · ${t.derived} derived`:''}${t.replans?` · replan ${t.replans}`:''}</li>`).join('');
+    } else $('trwrap').style.display='none';
+    $('ans').style.display='block';
+  }
+  </script>
+</body>
+</html>

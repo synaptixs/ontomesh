@@ -50,7 +50,7 @@ display, JetBrains Mono for code.
 Sections, in order: sticky nav (wordmark + Product/Docs/Projects/GitHub + a green
 "Open the wizard →" CTA); a hero (kicker pill, big "The ontology mesh for
 GraphRAG." headline with "GraphRAG" in green, one-line subhead, primary CTA + a
-`pip install ontomesh` code pill, and an abstract mesh-graph SVG illustration in
+`pip install ontoforge` code pill, and an abstract mesh-graph SVG illustration in
 navy with green threads); an open-standards trust strip (OWL 2, SHACL, SPARQL,
 JSON-LD, SKOS, Datalog); a 3-card "What you can build" grid; a 3-step "How it
 works" flow (Discover → Model & validate → Generate & ship); and a navy final

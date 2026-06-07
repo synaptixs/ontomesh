@@ -123,17 +123,17 @@ def test_on_starting_hook_prints_banner(conf):
 
 
 def test_proc_name_set_to_ontomesh(conf):
-    """`top` / `ps` should say `ontomesh-wizard`, not the default
+    """`top` / `ps` should say `ontoforge-wizard`, not the default
     `gunicorn: master [...]` blob, so the team can spot it
     quickly."""
-    assert conf.proc_name == "ontomesh-wizard"
+    assert conf.proc_name == "ontoforge-wizard"
 
 
 # ── Pyproject ───────────────────────────────────────────────────────
 
 
 def test_gunicorn_in_wizard_extra():
-    """`pip install ontomesh[wizard]` must pull in gunicorn so the
+    """`pip install ontoforge[wizard]` must pull in gunicorn so the
     Dockerfile's ENTRYPOINT works after install -e ."""
     py = (ROOT / "pyproject.toml").read_text()
     # Find the wizard extra and assert gunicorn is in it.

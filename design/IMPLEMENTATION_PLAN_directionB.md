@@ -40,7 +40,7 @@
 1. Confirm branch: `git branch --show-current` → `feat/ux-ui-uplift`. Working tree
    clean except the `design/` mockups.
 2. Run the wizard locally to capture a **before** baseline:
-   `python wizard/app.py --port 5051` (or `ontomesh-wizard --port 5051`).
+   `python wizard/app.py --port 5051` (or `ontoforge-wizard --port 5051`).
 3. Screenshot the current wizard (each of the 4 phases' first step), landing, and
    `/projects` in the existing light + dark themes. These are the regression
    reference.

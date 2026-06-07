@@ -16,12 +16,12 @@
 #   gcloud run services replace deploy/cloudrun.yaml --region us-central1
 #
 # Get the public URL:
-#   gcloud run services describe ontomesh --region us-central1 \
+#   gcloud run services describe ontoforge --region us-central1 \
 #     --format="value(status.url)"
 #
 # Cloud SQL Postgres pairing (recommended for production):
 #   gcloud sql instances create ontomesh-db --database-version=POSTGRES_16 ...
-#   gcloud sql databases create ontomesh --instance=ontomesh-db
+#   gcloud sql databases create ontoforge --instance=ontomesh-db
 #   # then update the env block below with the connection string:
 #   #   ONTOMESH_DB_URL=postgresql://user:pass@/dbname?host=/cloudsql/INSTANCE_CONNECTION_NAME
 

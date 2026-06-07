@@ -1,18 +1,19 @@
-# Publish Ontomesh to PyPI on every `v*.*.*` tag.
+# Publish Ontoforge to PyPI on every `v*.*.*` tag.
 #
 # Uses PyPI **Trusted Publishing** (OIDC) — no API tokens, no secrets.
 # The first run requires a one-time pypi.org configuration step:
 #
 #   1. Create the project on pypi.org if it doesn't exist:
 #        https://pypi.org/manage/account/publishing/
-#   2. Add a new "pending publisher":
-#        PyPI Project Name:  ontomesh
+#   2. Add a new "pending publisher" — note the TWO environments this
+#      workflow uses (one per job); the environment MUST match exactly:
+#        PyPI Project Name:  ontoforge
 #        Owner:              synaptixs
-#        Repository name:    ontomesh
+#        Repository name:    ontomesh        (repo slug unchanged)
 #        Workflow name:      publish-pypi.yml
-#        Environment name:   pypi
-#   3. Optional but recommended — add the same config on test.pypi.org
-#      so we can publish release candidates to TestPyPI first.
+#        Environment name:   pypi            (for the PyPI job)
+#   3. On test.pypi.org add the same, but Environment name: testpypi
+#      (the TestPyPI job runs in the `testpypi` environment).
 #
 # Once configured, every `v*.*.*` tag triggers this workflow and PyPI
 # accepts the upload based on the matching OIDC identity.
@@ -86,8 +87,8 @@ jobs:
           python -m venv /tmp/smoke
           /tmp/smoke/bin/pip install --upgrade pip
           /tmp/smoke/bin/pip install dist/*.whl
-          /tmp/smoke/bin/python -c "import ontomesh; print('version:', ontomesh.__version__)"
-          /tmp/smoke/bin/python -c "import ontomesh; assert ontomesh.__version__ != 'unknown'"
+          /tmp/smoke/bin/python -c "import ontoforge; print('version:', ontoforge.__version__)"
+          /tmp/smoke/bin/python -c "import ontoforge; assert ontoforge.__version__ != 'unknown'"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -106,7 +107,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
     environment:
       name: pypi
-      url:  https://pypi.org/project/ontomesh/
+      url:  https://pypi.org/project/ontoforge/
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -130,7 +131,7 @@ jobs:
     if:      github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
     environment:
       name: testpypi
-      url:  https://test.pypi.org/project/ontomesh/
+      url:  https://test.pypi.org/project/ontoforge/
     steps:
       - uses: actions/download-artifact@v4
         with:
