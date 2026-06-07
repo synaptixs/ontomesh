@@ -1,79 +1,39 @@
 # Reasoning search
 
-Ontology-grounded **reasoning search** turns a natural-language question into a
-**cited, reasoned answer** over your connected database. Instead of guessing your
-schema, it plans over the generated **ontology**, executes **safe, read-only**
-queries, and (from Phase 2) applies OWL-RL/Datalog **inference** — returning an
-answer with provenance for every claim. It runs **locally (Ollama)** or in the
-**cloud (OpenAI)**.
+!!! info "Coming soon"
+    Ontology-grounded **reasoning search** is in active development and not yet
+    part of a released version. The API and CLI below are a preview of what's
+    coming — they may change before launch. Watch the
+    [repository](https://github.com/synaptixs/ontomesh) for the release.
 
-!!! note "Status"
-    Single-hop search is available behind the `ONTOMESH_SEARCH` flag. Multi-hop
-    traversal and rule-based inference land in a later release.
+Ask your database a question in plain English and get a **cited, reasoned
+answer** — grounded in the ontology Ontoforge generates from your data, executed
+**safely** (read-only) against live records, and runs **locally (Ollama)** or in
+the **cloud (OpenAI)**.
 
-## SDK
+## What it will do
 
-```python
-from runtime.reasoning_search import search
+- **Plan over the ontology, not raw columns** — the model can only reference
+  classes and properties that exist, so it can't invent tables or fields.
+- **Reason, not just retrieve** — derive non-obvious facts (impact, eligibility,
+  classification) via OWL-RL/Datalog rules, each with `prov:wasDerivedFrom` lineage.
+- **Multi-hop** across real relationships in your model.
+- **Cite everything** — every claim maps to a source record; the executed query
+  is always shown.
+- **Stay safe** — read-only, allow-listed, sensitivity-tier gated; safe to point
+  at a live database.
 
-ans = search(
-    "Which customers are Platinum?",
-    flavor="network-ops",
-    db_path="db/demo.db",
-    providers="ollama",        # or "openai", or {"planner": "openai", ...}
-    max_tier="Internal",       # sensitivity ceiling
-)
+## A taste
 
-print(ans.answer)              # synthesized, grounded answer
-print(ans.executed_query)      # the read-only SQL that ran (transparency)
-for c in ans.citations:        # every claim is traceable
-    print(c.iri, c.source_table, "(inferred)" if c.inferred else "")
-print(ans.confidence, ans.status)   # status: ok | empty | blocked | ungrounded
-```
+> *"Which customers are at risk from the degraded core router crt-07, and why?"*
+> → derives the impacted customers by walking `Resource → Service → Customer`,
+> cross-checks open alarms, and cites each source.
 
-Or via the runtime client (reuses its adapter + database):
+> *"Which enrolled subjects are now ineligible after their latest labs — and why?"*
+> → re-checks each subject's latest results against the trial's eligibility
+> criteria, flags violations with audit-grade lineage, and keeps PHI on-host.
 
-```python
-from runtime.client import RuntimeClient
-client = RuntimeClient(db_path="db/demo.db", adapter="ollama")
-ans = client.search("Which customers are Platinum?", "network-ops")
-```
+---
 
-### `ReasonedAnswer`
-
-| Field | Meaning |
-|---|---|
-| `answer` | the synthesized natural-language answer |
-| `plan` | the ontology-validated query plan |
-| `results` | the retrieved records |
-| `citations` | `Citation(iri, label, source_table, inferred)` per source |
-| `inferred` | derived facts + `prov:wasDerivedFrom` lineage (Phase 2) |
-| `confidence` | 0.0–1.0 |
-| `executed_query` | the read-only SQL actually run |
-| `trace` | stage-by-stage reasoning trace |
-| `status` | `ok` · `empty` · `blocked` (tier) · `ungrounded` |
-
-## CLI
-
-```bash
-ontoforge search "which customers are platinum?" --flavor network-ops --db db/demo.db
-ontoforge search "…" --flavor clinical-research --provider openai --max-tier Confidential --json
-```
-
-## Safety
-
-Generated queries are safe by construction:
-
-- **Read-only** — single `SELECT` only; DDL/DML rejected; SQLite opened `mode=ro`
-  with `PRAGMA query_only` and a statement timeout.
-- **Allow-listed** — only the flavor's mapped tables/columns can be queried.
-- **Sensitivity tiers** — columns/classes above your `max_tier` are withheld
-  (`blocked`); unknown tiers fail closed.
-- **De-identification** — flagged columns can be masked before results leave the host.
-
-## How it works
-
-`understand → plan → execute → reason → synthesize → verify`. The ontology is the
-planner's controlled vocabulary, so it cannot reference entities that don't exist —
-the core guardrail against hallucinated columns. See the architecture overview in
-the project design notes.
+*Want early access or to shape the design? Open a discussion on the
+[repo](https://github.com/synaptixs/ontomesh/discussions).*

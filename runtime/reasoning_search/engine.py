@@ -26,6 +26,7 @@ from ._loaders import controlled_vocab, load_flavor, load_mapping
 from .planner import PlanValidationError
 from .planner import plan as _plan
 from .query_compiler import CompileError, compile_sql
+from .reasoner import parse_rule, reason
 from .safety import SafetyError, deidentify, enforce_limit, safe_execute, tier_ok
 from .structured_output import Adapter
 
@@ -88,13 +89,20 @@ _SYNTH_SYSTEM = (
 )
 
 
-def _synthesize(adapter: Adapter, question: str, rows: list[dict]) -> str:
+def _synthesize(adapter: Adapter, question: str, rows: list[dict],
+                inferred: list[dict] | None = None) -> str:
+    inferred_txt = (
+        f"\n\nDerived facts (inferred via rules — cite as derived): "
+        f"{json.dumps(inferred, default=str)[:2000]}" if inferred else ""
+    )
     payload = {
         "system": _SYNTH_SYSTEM,
         "messages": [{"role": "user", "content": (
             f"Question: {question}\n\n"
-            f"Records (JSON): {json.dumps(rows, default=str)[:6000]}\n\n"
-            "Write a short, direct answer grounded in these records."
+            f"Records (JSON): {json.dumps(rows, default=str)[:6000]}"
+            f"{inferred_txt}\n\n"
+            "Write a short, direct answer grounded in these records and any "
+            "derived facts. Make clear which conclusions are derived."
         )}],
         "token_budget": 600,
         "payload_id": "reasoning-search-synth",
@@ -123,6 +131,9 @@ def search(
     mapping_path: str | None = None,
     limit: int = 200,
     timeout_ms: int = 5000,
+    rules: list[str] | None = None,
+    extra_facts: list | None = None,
+    max_replans: int = 1,
 ) -> ReasonedAnswer:
     """Run ontology-grounded reasoning search and return a `ReasonedAnswer`.
 
@@ -165,14 +176,53 @@ def search(
             f"I couldn't ground that question in the ontology: {exc}",
             "ungrounded", provider_label, trace)
 
-    # 4. Execute (read-only, guarded).
+    # 4. Execute (read-only, guarded) — with a light agentic re-plan on empty.
     rows = safe_execute(db_path, sql, params, timeout_ms=timeout_ms) if db_path else []
+    replans = 0
+    while not rows and db_path and replans < max_replans:
+        replans += 1
+        trace.append({"stage": "replan", "n": replans, "reason": "no rows; broadening"})
+        try:
+            the_plan = _plan(
+                question + " (the previous query returned no rows — relax or drop "
+                "non-essential filters)", vocab=vocab, adapter=llm)
+            sql, params = compile_sql(the_plan, mapping=mapping,
+                                      allowed_tables=allowed_tables, limit=limit, max_tier=max_tier)
+            sql = enforce_limit(sql, limit)
+        except (PlanValidationError, CompileError, SafetyError):
+            break
+        rows = safe_execute(db_path, sql, params, timeout_ms=timeout_ms)
     if deid_columns:
         rows = deidentify(rows, deid_columns)
-    trace.append({"stage": "execute", "sql": sql, "params": params, "rows": len(rows)})
+    trace.append({"stage": "execute", "sql": sql, "params": params,
+                  "rows": len(rows), "replans": replans})
+
+    # 4b. Reason — derive facts over the result subgraph (+ any relationship facts).
+    inferred: list[dict] = []
+    inferred_cites: list[Citation] = []
+    if rules:
+        facts: list = list(extra_facts or [])
+        for i, row in enumerate(rows):
+            key = str(row.get("id", i))
+            facts.append((the_plan.primary_class, key))
+            for col, val in row.items():
+                facts.append((col, key, str(val)))
+        try:
+            res = reason(facts, [parse_rule(r) for r in rules])
+            for f in res.derived:
+                rule_name, support = res.provenance[f]
+                inferred.append({"fact": list(f), "rule": rule_name,
+                                 "derived_from": [list(s) for s in support]})
+                inferred_cites.append(Citation(
+                    iri="prov:Derived/" + "/".join(map(str, f)),
+                    label=f"{f[0]}(" + ", ".join(map(str, f[1:])) + ")",
+                    inferred=True))
+            trace.append({"stage": "reason", "derived": len(res.derived)})
+        except ValueError as exc:
+            trace.append({"stage": "reason", "error": str(exc)})
 
     # 5. Synthesize.
-    answer = _synthesize(llm, question, rows)
+    answer = _synthesize(llm, question, rows, inferred)
     trace.append({"stage": "synthesize", "chars": len(answer)})
 
     table = mapping.table_for(the_plan.primary_class) or ""
@@ -180,7 +230,7 @@ def search(
         Citation(iri=f"{the_plan.primary_class}/{row.get('id', i)}",
                  label=str(next(iter(row.values()), "")), source_table=table)
         for i, row in enumerate(rows[:k])
-    ]
+    ] + inferred_cites
 
     return ReasonedAnswer(
         answer=answer,
@@ -188,7 +238,8 @@ def search(
               "filters": [vars(f) for f in the_plan.filters]},
         results=rows,
         citations=citations,
-        confidence=0.85 if rows else 0.3,
+        inferred=inferred,
+        confidence=0.85 if rows else (0.5 if inferred else 0.3),
         executed_query=sql,
         trace=trace,
         provider=str(provider_label),
