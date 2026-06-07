@@ -57,7 +57,7 @@ WORKDIR /app
 COPY . .
 
 # Install core + wizard extra in one shot.  Editable so console scripts
-# (ontomesh, ontoforge-wizard, ontoforge-onboard) land on PATH and the
+# (ontoforge, ontoforge-wizard, ontoforge-onboard) land on PATH and the
 # python files stay readable for debugging.
 RUN pip install --upgrade pip \
  && pip install -e ".[wizard]"

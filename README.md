@@ -11,27 +11,6 @@
 
 ---
 
-## Screenshots
-
-A guided, navy + lime-green **Twilight** workspace that walks you from a domain to a
-generated ontology in four phases — Define → Enrich → Build → After:
-
-![Ontomesh wizard — Domain Identity step, Twilight theme](docs/assets/screenshots/wizard-twilight.png)
-
-The marketing landing page:
-
-![Ontomesh landing page](docs/assets/screenshots/landing-twilight.png)
-
-Every run emits a branded HTML report — competency-question results, governance
-scorecard, semantic-loss analysis, and orphan-class checks:
-
-![Ontomesh run report](docs/assets/screenshots/report-branded.png)
-
-> Ships with three themes — **Twilight** (default), **Mono**, and **Light** —
-> switchable from the wizard's “All steps” drawer.
-
----
-
 ## What's in the image
 
 | | |
@@ -62,6 +41,25 @@ docker run -d --name ontomesh \
 ```
 
 Then open **http://localhost:5051** in your browser.
+
+## Screenshots
+
+A guided, navy + lime-green **Twilight** workspace that walks you from a domain to a
+generated ontology in four phases — Define → Enrich → Build → After:
+
+![Ontomesh wizard — Domain Identity step, Twilight theme](docs/assets/screenshots/wizard-twilight.png)
+
+The marketing landing page:
+
+![Ontomesh landing page](docs/assets/screenshots/landing-twilight.png)
+
+Every run emits a branded HTML report — competency-question results, governance
+scorecard, semantic-loss analysis, and orphan-class checks:
+
+![Ontomesh run report](docs/assets/screenshots/report-branded.png)
+
+> Ships with three themes — **Twilight** (default), **Mono**, and **Light** —
+> switchable from the wizard's “All steps” drawer.
 
 ## What you get
 
@@ -127,4 +125,4 @@ Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/synaptix
 
 ---
 
-*Ontomesh v3.7.0 · Apache-2.0 · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 297+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.7.1 · Apache-2.0 · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 297+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
