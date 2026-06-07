@@ -2114,6 +2114,58 @@ def serve_output(subdir: str, filename: str):
     return send_file(full_path, as_attachment=False)
 
 
+# ── Reasoning search (Ontoforge) — flag-gated; ships dark until GA ───────────
+# Enable with ONTOFORGE_SEARCH=1. db defaults to ONTOFORGE_DB or db/demo.db.
+ONTOFORGE_SEARCH = os.environ.get("ONTOFORGE_SEARCH", "").lower() in ("1", "true", "yes", "on")
+SEARCH_DB = os.environ.get("ONTOFORGE_DB", os.path.join(ROOT, "db", "demo.db"))
+
+
+@app.route("/ask")
+def ask_console():
+    """End-user 'Ask' console for ontology-grounded reasoning search."""
+    if not ONTOFORGE_SEARCH:
+        return jsonify({"error": "reasoning search is not enabled"}), 404
+    from flask import render_template
+    return render_template("ask.html")
+
+
+@app.route("/api/search", methods=["POST"])
+def api_search():
+    """Run a reasoning search; return the ReasonedAnswer as JSON.
+
+    Body: {question, flavor, db?, provider?, max_tier?, k?}. Single-tenant for
+    now; access control is expected at the gateway. The engine itself is
+    read-only + sensitivity-tier gated.
+    """
+    if not ONTOFORGE_SEARCH:
+        return jsonify({"error": "reasoning search is not enabled"}), 404
+    body = request.get_json(silent=True) or {}
+    question = (body.get("question") or "").strip()
+    flavor = (body.get("flavor") or "").strip()
+    if not question or not flavor:
+        return jsonify({"error": "fields 'question' and 'flavor' are required"}), 400
+
+    import sys as _sys
+    if ROOT not in _sys.path:
+        _sys.path.insert(0, ROOT)
+    from dataclasses import asdict
+
+    from runtime.reasoning_search import search
+
+    try:
+        ans = search(
+            question,
+            flavor=flavor,
+            db_path=body.get("db") or SEARCH_DB,
+            providers=body.get("provider") or "ollama",
+            max_tier=body.get("max_tier") or "Internal",
+            k=int(body.get("k", 5)),
+        )
+    except Exception as exc:                                          # noqa: BLE001
+        return jsonify({"error": f"search failed: {exc}"}), 500
+    return jsonify(asdict(ans))
+
+
 # ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
