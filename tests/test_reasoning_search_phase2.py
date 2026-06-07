@@ -108,3 +108,35 @@ def test_no_rules_means_no_inferred(fx):
     ans = search("list", flavor="f", db_path=fx["db"], adapter=adapter,
                  flavors_dir=fx["flavors"], mapping_path=fx["mapping"])
     assert ans.inferred == []
+
+
+class FakeMemory:
+    def __init__(self, recalls): self._recalls = recalls; self.remembered = []
+    def recall(self, question, flavor=None): return self._recalls
+    def remember(self, rec): self.remembered.append(rec)
+
+
+def test_memory_recall_before_and_remember_after(fx):
+    """Engine consults memory.recall up front and memory.remember on completion."""
+    from runtime.reasoning_search import search
+
+    mem = FakeMemory([{"prior": "earlier question"}])
+    adapter = SeqAdapter(['{"intent":"i","classes":["Customer"],"filters":[]}'])
+    ans = search("list customers", flavor="f", db_path=fx["db"], adapter=adapter,
+                 flavors_dir=fx["flavors"], mapping_path=fx["mapping"], memory=mem)
+
+    assert any(t["stage"] == "recall" and t["count"] == 1 for t in ans.trace)
+    assert mem.remembered and mem.remembered[0]["question"] == "list customers"
+    assert mem.remembered[0]["status"] == "ok"
+
+
+def test_on_event_streams_each_stage(fx):
+    """on_event fires for every trace entry (drives SSE)."""
+    from runtime.reasoning_search import search
+
+    seen = []
+    adapter = SeqAdapter(['{"intent":"i","classes":["Customer"],"filters":[]}'])
+    search("list", flavor="f", db_path=fx["db"], adapter=adapter,
+           flavors_dir=fx["flavors"], mapping_path=fx["mapping"],
+           on_event=lambda e: seen.append(e["stage"]))
+    assert "plan" in seen and "execute" in seen and "synthesize" in seen

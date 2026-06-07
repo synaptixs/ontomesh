@@ -88,3 +88,36 @@ def test_ask_console_served_when_enabled(client, enabled):
     assert rv.status_code == 200
     body = rv.get_data(as_text=True)
     assert "ask-form" in body and "Reason" in body and 'id="answer"' in body
+
+
+# ── SSE streaming ────────────────────────────────────────────────────────────
+def test_search_stream_emits_stages_then_answer(client, enabled, monkeypatch):
+    import runtime.reasoning_search as rs
+
+    def streaming_search(question, **kw):
+        cb = kw.get("on_event")
+        if cb:
+            cb({"stage": "plan", "classes": ["Customer"]})
+            cb({"stage": "execute", "rows": 1})
+        return _fake_answer()
+
+    monkeypatch.setattr(rs, "search", streaming_search)
+    rv = client.post("/api/search/stream", json={"question": "q", "flavor": "f"})
+    assert rv.status_code == 200
+    assert rv.mimetype == "text/event-stream"
+    body = rv.get_data(as_text=True)
+    assert "event: stage" in body and '"stage": "plan"' in body
+    assert "event: answer" in body and "Acme is at risk." in body
+
+
+def test_stream_disabled_by_default(client):
+    assert client.post("/api/search/stream", json={"question": "x", "flavor": "f"}).status_code == 404
+
+
+# ── in-wizard link ───────────────────────────────────────────────────────────
+def test_wizard_hides_ask_link_by_default(client):
+    assert 'href="/ask"' not in client.get("/wizard").get_data(as_text=True)
+
+
+def test_wizard_shows_ask_link_when_enabled(client, enabled):
+    assert 'href="/ask"' in client.get("/wizard").get_data(as_text=True)

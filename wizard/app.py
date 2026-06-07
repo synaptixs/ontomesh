@@ -184,7 +184,7 @@ def _load_benchmark() -> dict:
 def wizard():
     """The interactive wizard — what used to live at ``/``."""
     from flask import render_template
-    return render_template("index.html")
+    return render_template("index.html", search_enabled=ONTOFORGE_SEARCH)
 
 
 # ── P1.4 — Project dashboard ──────────────────────────────────────────
@@ -2164,6 +2164,63 @@ def api_search():
     except Exception as exc:                                          # noqa: BLE001
         return jsonify({"error": f"search failed: {exc}"}), 500
     return jsonify(asdict(ans))
+
+
+@app.route("/api/search/stream", methods=["POST"])
+def api_search_stream():
+    """Stream the reasoning trace stage-by-stage (SSE), then a final answer.
+
+    Emits ``event: stage`` per pipeline step as it happens (via the engine's
+    on_event hook), then a single ``event: answer`` (or ``event: error``).
+    """
+    if not ONTOFORGE_SEARCH:
+        return jsonify({"error": "reasoning search is not enabled"}), 404
+    body = request.get_json(silent=True) or {}
+    question = (body.get("question") or "").strip()
+    flavor = (body.get("flavor") or "").strip()
+    if not question or not flavor:
+        return jsonify({"error": "fields 'question' and 'flavor' are required"}), 400
+
+    import json as _json
+    import queue as _queue
+    import sys as _sys
+    import threading
+    from dataclasses import asdict
+
+    from flask import Response
+
+    if ROOT not in _sys.path:
+        _sys.path.insert(0, ROOT)
+    from runtime.reasoning_search import search
+
+    q: _queue.Queue = _queue.Queue()
+
+    def _run():
+        try:
+            ans = search(
+                question, flavor=flavor, db_path=body.get("db") or SEARCH_DB,
+                providers=body.get("provider") or "ollama",
+                max_tier=body.get("max_tier") or "Internal",
+                k=int(body.get("k", 5)),
+                on_event=lambda e: q.put(("stage", e)),
+            )
+            q.put(("answer", asdict(ans)))
+        except Exception as exc:                                      # noqa: BLE001
+            q.put(("error", {"error": str(exc)}))
+        finally:
+            q.put(None)
+
+    threading.Thread(target=_run, daemon=True).start()
+
+    def _gen():
+        while True:
+            item = q.get()
+            if item is None:
+                break
+            event, data = item
+            yield f"event: {event}\ndata: {_json.dumps(data, default=str)}\n\n"
+
+    return Response(_gen(), mimetype="text/event-stream")
 
 
 # ── Main ───────────────────────────────────────────────────────────────────

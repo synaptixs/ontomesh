@@ -166,6 +166,7 @@
     </button>
     <div class="topbar-right">
       <span id="save-status" class="save-status"></span>
+      {% if search_enabled %}<a href="/ask" class="topbar-exit" title="Ask your data (reasoning search)">Ask ↗</a>{% endif %}
       <a href="/projects" class="topbar-exit">Exit</a>
     </div>
   </header>

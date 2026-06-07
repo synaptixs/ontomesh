@@ -134,6 +134,8 @@ def search(
     rules: list[str] | None = None,
     extra_facts: list | None = None,
     max_replans: int = 1,
+    on_event=None,
+    memory=None,
 ) -> ReasonedAnswer:
     """Run ontology-grounded reasoning search and return a `ReasonedAnswer`.
 
@@ -147,6 +149,25 @@ def search(
     provider_label = providers if isinstance(providers, str) else getattr(llm, "model_id", "")
     trace: list[dict[str, Any]] = []
 
+    def emit(entry: dict) -> None:
+        """Append to the trace and stream it (for SSE) via on_event."""
+        trace.append(entry)
+        if on_event:
+            try:
+                on_event(dict(entry))
+            except Exception:  # noqa: BLE001 - streaming must never break search
+                pass
+
+    # 0. Memory recall — surface prior related questions (AgentMemory or any
+    #    object exposing recall(question, flavor=...)).
+    if memory is not None:
+        try:
+            recalled = list(memory.recall(question, flavor=flavor) or [])
+        except Exception:  # noqa: BLE001
+            recalled = []
+        if recalled:
+            emit({"stage": "recall", "count": len(recalled)})
+
     # 1–3. Understand + Plan + Compile — graceful on can't-ground / tier block.
     try:
         flavor_cfg = load_flavor(flavor, flavors_dir)
@@ -155,7 +176,7 @@ def search(
         mapping = load_mapping(mapping_path)
 
         the_plan = _plan(question, vocab=vocab, adapter=llm)
-        trace.append({"stage": "plan", "classes": the_plan.classes,
+        emit({"stage": "plan", "classes": the_plan.classes,
                       "intent": the_plan.intent,
                       "filters": [vars(f) for f in the_plan.filters]})
 
@@ -171,7 +192,7 @@ def search(
                                   allowed_tables=allowed_tables, limit=limit, max_tier=max_tier)
         sql = enforce_limit(sql, limit)
     except (PlanValidationError, CompileError, SafetyError) as exc:
-        trace.append({"stage": "error", "detail": str(exc)})
+        emit({"stage": "error", "detail": str(exc)})
         return _terminal(
             f"I couldn't ground that question in the ontology: {exc}",
             "ungrounded", provider_label, trace)
@@ -181,7 +202,7 @@ def search(
     replans = 0
     while not rows and db_path and replans < max_replans:
         replans += 1
-        trace.append({"stage": "replan", "n": replans, "reason": "no rows; broadening"})
+        emit({"stage": "replan", "n": replans, "reason": "no rows; broadening"})
         try:
             the_plan = _plan(
                 question + " (the previous query returned no rows — relax or drop "
@@ -194,8 +215,8 @@ def search(
         rows = safe_execute(db_path, sql, params, timeout_ms=timeout_ms)
     if deid_columns:
         rows = deidentify(rows, deid_columns)
-    trace.append({"stage": "execute", "sql": sql, "params": params,
-                  "rows": len(rows), "replans": replans})
+    emit({"stage": "execute", "sql": sql, "params": params,
+          "rows": len(rows), "replans": replans})
 
     # 4b. Reason — derive facts over the result subgraph (+ any relationship facts).
     inferred: list[dict] = []
@@ -217,13 +238,21 @@ def search(
                     iri="prov:Derived/" + "/".join(map(str, f)),
                     label=f"{f[0]}(" + ", ".join(map(str, f[1:])) + ")",
                     inferred=True))
-            trace.append({"stage": "reason", "derived": len(res.derived)})
+            emit({"stage": "reason", "derived": len(res.derived)})
         except ValueError as exc:
-            trace.append({"stage": "reason", "error": str(exc)})
+            emit({"stage": "reason", "error": str(exc)})
 
     # 5. Synthesize.
     answer = _synthesize(llm, question, rows, inferred)
-    trace.append({"stage": "synthesize", "chars": len(answer)})
+    emit({"stage": "synthesize", "chars": len(answer)})
+
+    # 6. Remember — persist this turn for future recall.
+    if memory is not None:
+        try:
+            memory.remember({"question": question, "flavor": flavor,
+                             "answer": answer, "status": "ok" if rows else "empty"})
+        except Exception:  # noqa: BLE001
+            pass
 
     table = mapping.table_for(the_plan.primary_class) or ""
     citations = [
