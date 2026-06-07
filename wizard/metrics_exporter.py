@@ -15,6 +15,11 @@ needs to alert on:
     ontomesh_sse_subscribers                                  gauge
     ontomesh_drift_events_total{metric}                       counter
     ontomesh_pipeline_runs_total{phase}                       counter
+    ontomesh_search_requests_total{status, provider, cached}  counter
+    ontomesh_search_duration_seconds{provider}                histogram
+    ontomesh_search_result_rows_total                         counter
+    ontomesh_search_derived_facts_total                       counter
+    ontomesh_search_subgraph_triples_total                    counter
 
 The exporter is multi-worker safe via ``MultiProcessCollector``
 when gunicorn is running with workers > 1.  Set the env var
@@ -47,6 +52,11 @@ HTTP_REQUEST_LATENCY = None       # Histogram
 SSE_SUBSCRIBERS = None            # Gauge
 DRIFT_EVENTS_TOTAL = None         # Counter
 PIPELINE_RUNS_TOTAL = None        # Counter
+SEARCH_REQUESTS_TOTAL = None      # Counter — reasoning search
+SEARCH_LATENCY = None             # Histogram
+SEARCH_ROWS_TOTAL = None          # Counter
+SEARCH_DERIVED_TOTAL = None       # Counter
+SEARCH_TRIPLES_TOTAL = None       # Counter
 
 
 def _register_metrics():
@@ -54,6 +64,8 @@ def _register_metrics():
     multiple times during testing."""
     global HTTP_REQUESTS_TOTAL, HTTP_REQUEST_LATENCY, SSE_SUBSCRIBERS
     global DRIFT_EVENTS_TOTAL, PIPELINE_RUNS_TOTAL, _metrics_registered
+    global SEARCH_REQUESTS_TOTAL, SEARCH_LATENCY, SEARCH_ROWS_TOTAL
+    global SEARCH_DERIVED_TOTAL, SEARCH_TRIPLES_TOTAL
     if _metrics_registered:
         return
     from prometheus_client import Counter, Gauge, Histogram
@@ -88,6 +100,31 @@ def _register_metrics():
         "Toolkit pipeline-phase kickoffs, partitioned by phase "
         "(e.g. mine, reason, test, all).",
         labelnames=("phase",),
+    )
+    SEARCH_REQUESTS_TOTAL = Counter(
+        "ontomesh_search_requests_total",
+        "Reasoning-search requests, partitioned by status "
+        "(ok/empty/blocked/ungrounded/error), provider, and whether the "
+        "response was served from cache.",
+        labelnames=("status", "provider", "cached"),
+    )
+    SEARCH_LATENCY = Histogram(
+        "ontomesh_search_duration_seconds",
+        "End-to-end reasoning-search latency, partitioned by provider.",
+        labelnames=("provider",),
+        buckets=(0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0),
+    )
+    SEARCH_ROWS_TOTAL = Counter(
+        "ontomesh_search_result_rows_total",
+        "Total rows returned by reasoning searches.",
+    )
+    SEARCH_DERIVED_TOTAL = Counter(
+        "ontomesh_search_derived_facts_total",
+        "Total facts derived by the reasoner across searches.",
+    )
+    SEARCH_TRIPLES_TOTAL = Counter(
+        "ontomesh_search_subgraph_triples_total",
+        "Total subgraph triples materialized across searches.",
     )
     _metrics_registered = True
 
@@ -209,3 +246,19 @@ def observe_pipeline_run(phase: str) -> None:
     """Call from toolkit.py / the pipeline kickoff path."""
     if PIPELINE_RUNS_TOTAL is not None:
         PIPELINE_RUNS_TOTAL.labels(phase=phase).inc()
+
+
+def observe_search(*, status: str = "ok", provider: str = "", cached: bool = False,
+                   latency_seconds: float = 0.0, rows: int = 0, derived: int = 0,
+                   triples: int = 0) -> None:
+    """Call from the /api/search route once per request. No-op without prometheus."""
+    if SEARCH_REQUESTS_TOTAL is None:
+        return
+    SEARCH_REQUESTS_TOTAL.labels(
+        status=status or "ok", provider=provider or "unknown",
+        cached=str(bool(cached)).lower()).inc()
+    if not cached:
+        SEARCH_LATENCY.labels(provider=provider or "unknown").observe(latency_seconds)
+        SEARCH_ROWS_TOTAL.inc(rows)
+        SEARCH_DERIVED_TOTAL.inc(derived)
+        SEARCH_TRIPLES_TOTAL.inc(triples)

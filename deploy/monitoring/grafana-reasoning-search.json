@@ -1,0 +1,109 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "Prometheus scraping the Ontoforge wizard /metrics endpoint",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["ontoforge", "reasoning-search"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "",
+  "title": "Ontoforge — Reasoning Search",
+  "uid": "ontoforge-reasoning-search",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total searches",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "expr": "sum(ontomesh_search_requests_total)", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Cache hit ratio",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1, "color": { "mode": "thresholds" }, "thresholds": { "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 0.25 }, { "color": "green", "value": 0.5 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(ontomesh_search_requests_total{cached=\"true\"}[5m])) / clamp_min(sum(rate(ontomesh_search_requests_total[5m])), 1e-9)", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error rate (5m)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1, "color": { "mode": "thresholds" }, "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.05 }, { "color": "red", "value": 0.2 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(ontomesh_search_requests_total{status=\"error\"}[5m])) / clamp_min(sum(rate(ontomesh_search_requests_total[5m])), 1e-9)", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 latency",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "thresholds" }, "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 2 }, { "color": "red", "value": 5 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum(rate(ontomesh_search_duration_seconds_bucket[5m])) by (le))", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Search rate by status",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 20, "stacking": { "mode": "normal" } } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "expr": "sum by (status) (rate(ontomesh_search_requests_total[5m]))", "legendFormat": "{{status}}", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency quantiles by provider",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.50, sum(rate(ontomesh_search_duration_seconds_bucket[5m])) by (le, provider))", "legendFormat": "p50 {{provider}}", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum(rate(ontomesh_search_duration_seconds_bucket[5m])) by (le, provider))", "legendFormat": "p95 {{provider}}", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Reasoning output (rows / derived facts / triples)",
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        { "refId": "A", "expr": "rate(ontomesh_search_result_rows_total[5m])", "legendFormat": "rows/s", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
+        { "refId": "B", "expr": "rate(ontomesh_search_derived_facts_total[5m])", "legendFormat": "derived facts/s", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } },
+        { "refId": "C", "expr": "rate(ontomesh_search_subgraph_triples_total[5m])", "legendFormat": "subgraph triples/s", "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" } }
+      ]
+    }
+  ]
+}

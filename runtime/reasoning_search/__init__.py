@@ -7,5 +7,9 @@ See REASONING_SEARCH_DESIGN.local.md for the design and §11 task plan.
 """
 
 from .engine import Citation, ReasonedAnswer, search
+from .subgraph import Subgraph, Triple, build_subgraph, sparql
 
-__all__ = ["Citation", "ReasonedAnswer", "search"]
+__all__ = [
+    "Citation", "ReasonedAnswer", "search",
+    "Subgraph", "Triple", "build_subgraph", "sparql",
+]

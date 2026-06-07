@@ -2173,27 +2173,86 @@ def api_search():
 
     from runtime.reasoning_search import search
 
+    try:
+        from wizard.metrics_exporter import observe_search as _observe
+    except Exception:                                                # noqa: BLE001
+        def _observe(**_kw):                                          # type: ignore
+            return None
+
     db = body.get("db") or SEARCH_DB
     provider = body.get("provider") or "ollama"
     tier = body.get("max_tier") or "Internal"
     k = int(body.get("k", 5))
-    cache_key = (question, flavor, db, provider, tier, k)
+    materialize = bool(body.get("materialize"))
+    cache_key = (question, flavor, db, provider, tier, k, materialize)
 
     if SEARCH_CACHE_TTL > 0:
         hit = _SEARCH_CACHE.get(cache_key)
         if hit and (_time.monotonic() - hit[0]) < SEARCH_CACHE_TTL:
+            _observe(status=hit[1].get("status", "ok"), provider=provider, cached=True)
             return jsonify({**hit[1], "cached": True})
 
+    started = _time.monotonic()
     try:
         ans = search(question, flavor=flavor, db_path=db, providers=provider,
-                     max_tier=tier, k=k, memory=_build_memory())
+                     max_tier=tier, k=k, memory=_build_memory(), materialize=materialize)
     except Exception as exc:                                          # noqa: BLE001
+        _observe(status="error", provider=provider,
+                 latency_seconds=_time.monotonic() - started)
         return jsonify({"error": f"search failed: {exc}"}), 500
+
+    _observe(status=ans.status, provider=provider,
+             latency_seconds=_time.monotonic() - started,
+             rows=len(ans.results), derived=len(ans.inferred),
+             triples=(ans.subgraph or {}).get("count", 0))
 
     result = asdict(ans)
     if SEARCH_CACHE_TTL > 0:
         _SEARCH_CACHE[cache_key] = (_time.monotonic(), result)
     return jsonify(result)
+
+
+@app.route("/api/sparql", methods=["POST"])
+def api_sparql():
+    """Run a live SPARQL SELECT over a materialized result subgraph.
+
+    Body: ``{query, triples?}`` — if ``triples`` (as returned in a search
+    response's ``subgraph.triples``) is omitted, runs a fresh search with
+    ``{question, flavor, ...}`` and materializes its subgraph first.
+    """
+    if not ONTOFORGE_SEARCH:
+        return jsonify({"error": "reasoning search is not enabled"}), 404
+    body = request.get_json(silent=True) or {}
+    query = (body.get("query") or "").strip()
+    if not query:
+        return jsonify({"error": "field 'query' is required"}), 400
+
+    import sys as _sys
+    if ROOT not in _sys.path:
+        _sys.path.insert(0, ROOT)
+    from runtime.reasoning_search import Subgraph, Triple, search, sparql
+
+    triples = body.get("triples")
+    if triples is None:
+        question = (body.get("question") or "").strip()
+        flavor = (body.get("flavor") or "").strip()
+        if not question or not flavor:
+            return jsonify({"error": "provide 'triples', or 'question'+'flavor'"}), 400
+        try:
+            ans = search(question, flavor=flavor, db_path=body.get("db") or SEARCH_DB,
+                         providers=body.get("provider") or "ollama",
+                         max_tier=body.get("max_tier") or "Internal",
+                         k=int(body.get("k", 5)), materialize=True)
+        except Exception as exc:                                      # noqa: BLE001
+            return jsonify({"error": f"search failed: {exc}"}), 500
+        triples = (ans.subgraph or {}).get("triples", [])
+
+    graph = Subgraph(triples=[Triple(t[0], t[1], t[2], bool(t[3]) if len(t) > 3 else False)
+                              for t in triples])
+    try:
+        return jsonify(sparql(graph, query))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
 
 
 @app.route("/api/search/stream", methods=["POST"])
@@ -2232,6 +2291,7 @@ def api_search_stream():
                 providers=body.get("provider") or "ollama",
                 max_tier=body.get("max_tier") or "Internal",
                 k=int(body.get("k", 5)),
+                materialize=bool(body.get("materialize")),
                 on_event=lambda e: q.put(("stage", e)),
                 memory=_build_memory(),
             )
