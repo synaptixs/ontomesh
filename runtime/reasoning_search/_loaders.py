@@ -47,7 +47,35 @@ class Mapping:
         return self.class_table.get(owl_class)
 
     def column_for(self, owl_class: str, prop: str) -> tuple[str, str] | None:
-        return self.prop_col.get((owl_class, prop))
+        loc = self.resolve(owl_class, prop)
+        return (loc[1], loc[2]) if loc else None
+
+    def resolve(self, owl_class: str, prop: str) -> tuple[str, str, str] | None:
+        """Resolve a property to ``(canonical_prop, table, column)``.
+
+        Tries an exact match first, then a naming-convention-tolerant match so a
+        planner term like ``alarmState`` still resolves to the mapping's
+        ``hasAlarmState`` (the OWL property names are commonly ``has``/``is``
+        prefixed while flavor ``context_terms`` use the short form).
+        """
+        exact = self.prop_col.get((owl_class, prop))
+        if exact:
+            return (prop, exact[0], exact[1])
+        key = _norm_prop(prop)
+        for (c, p), (table, col) in self.prop_col.items():
+            if c == owl_class and _norm_prop(p) == key:
+                return (p, table, col)
+        return None
+
+
+def _norm_prop(prop: str) -> str:
+    """Normalize a property name for tolerant matching: lowercase, alnum-only,
+    drop a leading ``has``/``is`` prefix (camelCase OWL convention)."""
+    s = "".join(ch for ch in str(prop).lower() if ch.isalnum())
+    for pre in ("has", "is"):
+        if s.startswith(pre) and len(s) > len(pre) + 2:
+            return s[len(pre):]
+    return s
 
 
 def load_mapping(csv_path: str) -> Mapping:

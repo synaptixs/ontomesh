@@ -1,4 +1,4 @@
-# Ontomesh
+# Ontoforge
 
 **The ontology mesh for GraphRAG.** Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.
 
@@ -7,9 +7,48 @@
 
 ---
 
-![The Ontomesh wizard — a guided, four-phase modeling workspace](assets/screenshots/wizard-twilight.png)
+![The Ontoforge wizard — a guided, four-phase modeling workspace](assets/screenshots/wizard-twilight.png)
 
 *The guided wizard (Twilight theme) — Define → Enrich → Build → After. Also ships Mono and Light themes.*
+
+---
+
+## A guided tour
+
+From landing page to ontology-grounded **reasoning search**, in order.
+
+**1. Landing** — the marketing entry point.
+
+![Landing page, Twilight theme](assets/screenshots/landing-twilight.png)
+
+**2. Model your domain** — the Twilight wizard walks you from a domain to a
+generated ontology in four phases (Define → Enrich → Build → After).
+
+![Wizard — Domain Identity step](assets/screenshots/wizard-twilight.png)
+
+**3. Run report** — every run emits a branded HTML report: competency-question
+results, governance scorecard, semantic-loss analysis, and orphan-class checks.
+
+![Run report](assets/screenshots/report-branded.png)
+
+**4. Ask — pose a question** — the read-only, ontology-grounded **Ask** console.
+Pick a flavor and provider (Ollama / OpenAI), set your sensitivity-tier ceiling,
+and optionally build an RDF subgraph for live SPARQL.
+
+![Ask console — ready to reason](assets/screenshots/ask-01-ready.png)
+
+**5. Ask — a cited, reasoned answer** — the answer cites its sources, shows the
+read-only SQL that ran, materializes the result subgraph, and streams the full
+reasoning trace (plan → execute → relations → reason → synthesize).
+
+![Ask console — cited, reasoned answer with trace](assets/screenshots/ask-02-answer.png)
+
+**6. Ask — live SPARQL over the result subgraph** — interrogate exactly what
+grounded the answer with a SPARQL `SELECT` over the materialized RDF triples.
+
+![Ask console — live SPARQL over the result subgraph](assets/screenshots/ask-03-sparql.png)
+
+[:material-book-open-variant: Reasoning Search reference →](reference/search.md){ .md-button }
 
 ---
 

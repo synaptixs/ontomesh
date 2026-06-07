@@ -1,4 +1,4 @@
-# mkdocs-material configuration for the Ontomesh documentation site.
+# mkdocs-material configuration for the Ontoforge documentation site.
 #
 # Build locally:   mkdocs serve            (live-reload at http://127.0.0.1:8000)
 # Build static:    mkdocs build            (output to ./site)
@@ -11,7 +11,7 @@
 # When a custom domain lands (Stage 4c), set CNAME under docs/ and update
 # site_url + repo_url below.
 
-site_name:        Ontomesh
+site_name:        Ontoforge
 site_url:         https://synaptixs.github.io/ontomesh/
 site_description: The ontology mesh for GraphRAG — mine ontologies from logs, validate with SHACL, ship a hybrid retriever.
 site_author:      Synaptixs

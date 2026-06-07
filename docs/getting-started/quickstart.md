@@ -82,11 +82,16 @@ sensitive = g.query("""
 Or wire it into the SDK:
 
 ```python
-from ontomesh.sdk import RetrieverConfig, HybridRetriever
-cfg = RetrieverConfig.from_ontology("/data/output/ontology/enterprise.ttl")
-r   = HybridRetriever(cfg)
-r.search("active service order in retention period")
+from runtime import HybridRetriever
+
+r = HybridRetriever(flavor="retail", db_path="/data/db/enterprise.db")
+r.retrieve("active service order in retention period")
 ```
+
+!!! tip "Reasoning Search"
+    For ontology-grounded reasoning over a connected database — cited answers,
+    derived facts, and a live SPARQL subgraph — see
+    [Reasoning Search](../reference/search.md).
 
 ## Next steps
 

@@ -74,12 +74,12 @@ def compile_sql(
     where_parts: list[str] = []
     params: list = []
     for f in plan.filters:
-        loc = mapping.column_for(cls, f.prop)
+        loc = mapping.resolve(cls, f.prop)
         if not loc:
             raise CompileError(f"no column mapped for {cls}.{f.prop}")
-        if _gated(mapping.tier.get(f"{cls}.{f.prop}"), max_tier):
-            raise CompileError(f"filter on {cls}.{f.prop} exceeds tier ceiling {max_tier!r}")
-        _t, col = loc
+        canon_prop, _t, col = loc
+        if _gated(mapping.tier.get(f"{cls}.{canon_prop}"), max_tier):
+            raise CompileError(f"filter on {cls}.{canon_prop} exceeds tier ceiling {max_tier!r}")
         op = _SQL_OPS.get(f.op)
         if not op:
             raise CompileError(f"unsupported op {f.op!r}")

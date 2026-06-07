@@ -2,11 +2,11 @@
 
 !!! info "Stub — fills in over coming releases"
 
-    A focused overview of the OWL/SHACL/PROV-O/SKOS surface Ontomesh produces.
+    A focused overview of the OWL/SHACL/PROV-O/SKOS surface Ontoforge produces.
 
 ## Quick map
 
-| Construct | Role in Ontomesh |
+| Construct | Role in Ontoforge |
 |---|---|
 | `owl:Class` | Every domain entity is an OWL class |
 | `owl:ObjectProperty` | Relationships and events |
