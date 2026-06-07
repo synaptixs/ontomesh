@@ -114,6 +114,18 @@ def test_stream_disabled_by_default(client):
     assert client.post("/api/search/stream", json={"question": "x", "flavor": "f"}).status_code == 404
 
 
+# ── memory adapter ───────────────────────────────────────────────────────────
+def test_build_memory_adapter_shape():
+    """The AgentMemory adapter exposes recall()->list (not the raw @graph dict)."""
+    import app as app_module
+    mem = app_module._build_memory()
+    if mem is None:               # AgentMemory unavailable in this env — fine
+        return
+    assert hasattr(mem, "recall") and hasattr(mem, "remember")
+    assert isinstance(mem.recall("anything", flavor="f"), list)
+    assert mem.remember({"question": "x"}) is None
+
+
 # ── in-wizard link ───────────────────────────────────────────────────────────
 def test_wizard_hides_ask_link_by_default(client):
     assert 'href="/ask"' not in client.get("/wizard").get_data(as_text=True)

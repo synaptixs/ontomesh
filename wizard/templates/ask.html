@@ -74,20 +74,57 @@
   <script>
   const form = document.getElementById('ask-form');
   const $ = id => document.getElementById(id);
+  function showErr(m){ $('err').textContent = m; $('err').style.display='block'; $('hint').textContent=''; }
+  function appendStage(s){
+    const li = document.createElement('li');
+    let x = '';
+    if (s.rows !== undefined) x += ` · ${s.rows} rows`;
+    if (s.derived !== undefined) x += ` · ${s.derived} derived`;
+    if (s.count !== undefined) x += ` · ${s.count} recalled`;
+    if (s.replans) x += ` · replan ${s.replans}`;
+    li.textContent = '• ' + s.stage + x;
+    $('trace').appendChild(li);
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
     const body = { question: fd.get('q'), flavor: fd.get('flavor'),
                    provider: fd.get('provider'), max_tier: fd.get('max_tier') };
-    $('err').style.display='none'; $('ans').style.display='none';
-    $('hint').textContent = 'Reasoning…';
+    // reset; show the card with a LIVE trace while the stream runs
+    $('err').style.display='none';
+    $('answer').textContent=''; $('badge').textContent='reasoning…';
+    $('infer').style.display='none'; $('exec').style.display='none'; $('srcwrap').style.display='none';
+    $('trace').innerHTML=''; $('trwrap').style.display='block'; $('ans').style.display='block';
+    $('hint').textContent = 'Streaming the reasoning trace…';
     try {
-      const r = await fetch('/api/search', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-      const d = await r.json();
+      const r = await fetch('/api/search/stream', {method:'POST',
+        headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      if (!r.ok || !r.body) {
+        let msg = 'error ' + r.status;
+        try { msg = (await r.json()).error || msg; } catch (_) {}
+        showErr(msg); return;
+      }
+      const reader = r.body.getReader(), dec = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream:true });
+        let i;
+        while ((i = buf.indexOf('\n\n')) >= 0) {
+          const frame = buf.slice(0, i); buf = buf.slice(i + 2);
+          const ev = (frame.match(/^event: (.*)$/m) || [])[1];
+          const dl = (frame.match(/^data: (.*)$/m) || [])[1];
+          if (!dl) continue;
+          let data; try { data = JSON.parse(dl); } catch (_) { continue; }
+          if (ev === 'stage') appendStage(data);
+          else if (ev === 'answer') render(data);
+          else if (ev === 'error') showErr(data.error || 'search failed');
+        }
+      }
       $('hint').textContent = 'Answers cite their sources and show the query that ran.';
-      if (!r.ok) { $('err').textContent = d.error || ('error '+r.status); $('err').style.display='block'; return; }
-      render(d);
-    } catch (ex) { $('err').textContent = String(ex); $('err').style.display='block'; $('hint').textContent=''; }
+    } catch (ex) { showErr(String(ex)); }
   });
 
   function render(d) {

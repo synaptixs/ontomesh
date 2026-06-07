@@ -2120,6 +2120,36 @@ ONTOFORGE_SEARCH = os.environ.get("ONTOFORGE_SEARCH", "").lower() in ("1", "true
 SEARCH_DB = os.environ.get("ONTOFORGE_DB", os.path.join(ROOT, "db", "demo.db"))
 
 
+def _build_memory():
+    """Adapt AgentMemory to the engine's recall/remember hook, or return None.
+
+    AgentMemory.recall() returns a JSON-LD dict (with ``@graph``); the engine
+    expects an iterable, so we surface the @graph list. AgentMemory has no
+    ad-hoc write API yet, so remember() is a no-op (recall is the live value).
+    """
+    try:
+        import sys as _sys
+        if ROOT not in _sys.path:
+            _sys.path.insert(0, ROOT)
+        from runtime.memory import AgentMemory
+
+        mem = AgentMemory(SEARCH_DB)
+
+        class _Adapter:
+            def recall(self, question, flavor=None):
+                try:
+                    return (mem.recall(question, flavor=flavor, limit=5) or {}).get("@graph", [])
+                except Exception:  # noqa: BLE001
+                    return []
+
+            def remember(self, record):  # noqa: D401 - placeholder until writer is wired
+                return None
+
+        return _Adapter()
+    except Exception:  # noqa: BLE001 - memory is best-effort
+        return None
+
+
 @app.route("/ask")
 def ask_console():
     """End-user 'Ask' console for ontology-grounded reasoning search."""
@@ -2160,6 +2190,7 @@ def api_search():
             providers=body.get("provider") or "ollama",
             max_tier=body.get("max_tier") or "Internal",
             k=int(body.get("k", 5)),
+            memory=_build_memory(),
         )
     except Exception as exc:                                          # noqa: BLE001
         return jsonify({"error": f"search failed: {exc}"}), 500
@@ -2203,6 +2234,7 @@ def api_search_stream():
                 max_tier=body.get("max_tier") or "Internal",
                 k=int(body.get("k", 5)),
                 on_event=lambda e: q.put(("stage", e)),
+                memory=_build_memory(),
             )
             q.put(("answer", asdict(ans)))
         except Exception as exc:                                      # noqa: BLE001
