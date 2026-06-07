@@ -14,8 +14,17 @@ from __future__ import annotations
 
 from ._loaders import Mapping
 from .planner import Plan
+from .safety import tier_ok
 
 _SQL_OPS = {"=": "=", "!=": "!=", ">": ">", "<": "<", ">=": ">=", "<=": "<=", "like": "LIKE"}
+
+
+def _gated(element_tier: str | None, max_tier: str) -> bool:
+    """True if an explicitly-classified element exceeds ``max_tier``.
+
+    Missing tier info → not gated (only *declared* sensitive data is withheld).
+    """
+    return element_tier is not None and not tier_ok(element_tier, max_tier)
 
 
 class CompileError(ValueError):
@@ -35,11 +44,16 @@ def compile_sql(
     mapping: Mapping,
     allowed_tables: set[str],
     limit: int = 200,
+    max_tier: str = "Restricted",
 ) -> tuple[str, list]:
     """Compile a single-hop plan to ``(sql, params)``.
 
+    Columns/filters whose declared sensitivity tier exceeds ``max_tier`` are
+    excluded (columns) or rejected (filters).
+
     Raises:
-        CompileError: unmapped class, table not allow-listed, or bad identifier.
+        CompileError: unmapped class, table not allow-listed, bad identifier, or
+            a filter on a column above the tier ceiling.
     """
     cls = plan.primary_class
     table = mapping.table_for(cls)
@@ -49,11 +63,11 @@ def compile_sql(
         raise CompileError(f"table {table!r} is not allow-listed for this flavor")
     table = _safe_ident(table)
 
-    # Project the class's mapped columns (fall back to * if none mapped).
+    # Project the class's mapped columns, excluding any above the tier ceiling.
     cols = sorted(
         _safe_ident(col)
-        for (c, _prop), (_t, col) in mapping.prop_col.items()
-        if c == cls and _t == table
+        for (c, prop), (_t, col) in mapping.prop_col.items()
+        if c == cls and _t == table and not _gated(mapping.tier.get(f"{cls}.{prop}"), max_tier)
     )
     select_list = ", ".join(cols) if cols else "*"
 
@@ -63,6 +77,8 @@ def compile_sql(
         loc = mapping.column_for(cls, f.prop)
         if not loc:
             raise CompileError(f"no column mapped for {cls}.{f.prop}")
+        if _gated(mapping.tier.get(f"{cls}.{f.prop}"), max_tier):
+            raise CompileError(f"filter on {cls}.{f.prop} exceeds tier ceiling {max_tier!r}")
         _t, col = loc
         op = _SQL_OPS.get(f.op)
         if not op:

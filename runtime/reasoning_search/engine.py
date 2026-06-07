@@ -8,27 +8,31 @@ Pipeline — see REASONING_SEARCH_DESIGN.local.md §3/§11:
 
     understand → plan → execute → (reason) → synthesize → (verify)
 
-Phase 0 implements the single-hop slice: understand+plan (`planner`) → compile to
-read-only SQL (`query_compiler`) → execute → synthesize. The `reason` (OWL-RL/
-Datalog) and `verify` (SHACL) stages, multi-hop, and the agentic loop land in
-Phase 2 (§11 #19–#25). Feature-flagged via ``ONTOMESH_SEARCH``; ships dark.
+Phase 0 implemented the single-hop slice. Phase 1 (§11 #10–#13) adds the safety
+layer (read-only, allow-list, **sensitivity-tier gating**, de-identification),
+plus graceful **blocked / can't-ground / empty** states. The `reason`
+(OWL-RL/Datalog), `verify` (SHACL), multi-hop, and agentic loop land in Phase 2.
+Feature-flagged via ``ONTOMESH_SEARCH``; ships dark.
 """
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass, field
 from typing import Any
 
 from ._loaders import controlled_vocab, load_flavor, load_mapping
+from .planner import PlanValidationError
 from .planner import plan as _plan
-from .query_compiler import compile_sql
+from .query_compiler import CompileError, compile_sql
+from .safety import SafetyError, deidentify, enforce_limit, safe_execute, tier_ok
 from .structured_output import Adapter
 
 __all__ = ["Citation", "ReasonedAnswer", "search"]
 
 _THIS = os.path.dirname(os.path.abspath(__file__))
-_ROOT = os.path.dirname(os.path.dirname(_THIS))            # repo root
+_ROOT = os.path.dirname(os.path.dirname(_THIS))
 _DEFAULT_FLAVORS = os.path.join(_ROOT, "runtime", "flavors")
 _DEFAULT_MAPPING = os.path.join(_ROOT, "output", "mapping", "logical_physical_map.csv")
 
@@ -56,27 +60,10 @@ class ReasonedAnswer:
     executed_query: str = ""
     trace: list[dict[str, Any]] = field(default_factory=list)
     provider: str = ""
+    status: str = "ok"          # "ok" | "blocked" | "ungrounded" | "empty"
 
 
-# ── internal helpers ────────────────────────────────────────────────────────
-def _execute_readonly(db_path: str, sql: str, params: list) -> list[dict]:
-    """Execute a SELECT against a SQLite DB opened read-only (Phase 0).
-
-    Phase 1 (§11 #10) routes all backends through ``src/db_connector`` with the
-    full safety layer; for now SQLite ``mode=ro`` gives a hard read-only guard.
-    """
-    import sqlite3
-
-    if not sql.lstrip().upper().startswith("SELECT"):
-        raise RuntimeError("refusing to run a non-SELECT statement")
-    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-    con.row_factory = sqlite3.Row
-    try:
-        return [dict(r) for r in con.execute(sql, tuple(params)).fetchall()]
-    finally:
-        con.close()
-
-
+# ── helpers ──────────────────────────────────────────────────────────────────
 def _resolve_adapter(providers: str | dict | None):
     """Build an adapter from a provider name (lazy import). Tests inject instead."""
     name = providers if isinstance(providers, str) else (providers or {}).get("planner", "ollama")
@@ -102,27 +89,25 @@ _SYNTH_SYSTEM = (
 
 
 def _synthesize(adapter: Adapter, question: str, rows: list[dict]) -> str:
-    import json
-
     payload = {
         "system": _SYNTH_SYSTEM,
-        "messages": [
-            {
-                "role": "user",
-                "content": (
-                    f"Question: {question}\n\n"
-                    f"Records (JSON): {json.dumps(rows, default=str)[:6000]}\n\n"
-                    "Write a short, direct answer grounded in these records."
-                ),
-            }
-        ],
+        "messages": [{"role": "user", "content": (
+            f"Question: {question}\n\n"
+            f"Records (JSON): {json.dumps(rows, default=str)[:6000]}\n\n"
+            "Write a short, direct answer grounded in these records."
+        )}],
         "token_budget": 600,
         "payload_id": "reasoning-search-synth",
     }
     return adapter.complete(payload).strip()
 
 
-# ── public API ──────────────────────────────────────────────────────────────
+def _terminal(answer: str, status: str, provider: str, trace: list, **kw) -> ReasonedAnswer:
+    return ReasonedAnswer(answer=answer, status=status, confidence=0.0,
+                          provider=str(provider), trace=trace, **kw)
+
+
+# ── public API ────────────────────────────────────────────────────────────────
 def search(
     question: str,
     *,
@@ -131,49 +116,69 @@ def search(
     providers: str | dict[str, str] | None = "ollama",
     depth: str = "single_hop",
     k: int = 5,
+    max_tier: str = "Internal",
+    deid_columns: set[str] | None = None,
     adapter: Adapter | None = None,
     flavors_dir: str | None = None,
     mapping_path: str | None = None,
     limit: int = 200,
+    timeout_ms: int = 5000,
 ) -> ReasonedAnswer:
     """Run ontology-grounded reasoning search and return a `ReasonedAnswer`.
 
-    Phase 0: single-hop. ``adapter`` may be injected (tests / custom providers);
-    otherwise it is resolved from ``providers``. ``flavors_dir`` / ``mapping_path``
-    default to the repo's generated artifacts but can be pointed at fixtures.
+    Never raises for *expected* failure modes — returns a `ReasonedAnswer` with a
+    ``status`` of ``"blocked"`` (tier), ``"ungrounded"`` (can't map to ontology),
+    or ``"empty"`` (no rows). ``max_tier`` is the caller's access ceiling.
     """
     flavors_dir = flavors_dir or _DEFAULT_FLAVORS
     mapping_path = mapping_path or _DEFAULT_MAPPING
     llm = adapter or _resolve_adapter(providers)
     provider_label = providers if isinstance(providers, str) else getattr(llm, "model_id", "")
-
     trace: list[dict[str, Any]] = []
 
-    # 1–2. Understand + Plan (ontology-validated)
-    flavor_cfg = load_flavor(flavor, flavors_dir)
-    vocab = controlled_vocab(flavor_cfg)
-    allowed_tables = set(flavor_cfg.get("db_tables", []) or [])
-    the_plan = _plan(question, vocab=vocab, adapter=llm)
-    trace.append({"stage": "plan", "classes": the_plan.classes, "intent": the_plan.intent,
-                  "filters": [vars(f) for f in the_plan.filters]})
+    # 1–3. Understand + Plan + Compile — graceful on can't-ground / tier block.
+    try:
+        flavor_cfg = load_flavor(flavor, flavors_dir)
+        vocab = controlled_vocab(flavor_cfg)
+        allowed_tables = set(flavor_cfg.get("db_tables", []) or [])
+        mapping = load_mapping(mapping_path)
 
-    # 3. Execute (read-only, allow-listed)
-    mapping = load_mapping(mapping_path)
-    sql, params = compile_sql(the_plan, mapping=mapping, allowed_tables=allowed_tables, limit=limit)
-    rows = _execute_readonly(db_path, sql, params) if db_path else []
+        the_plan = _plan(question, vocab=vocab, adapter=llm)
+        trace.append({"stage": "plan", "classes": the_plan.classes,
+                      "intent": the_plan.intent,
+                      "filters": [vars(f) for f in the_plan.filters]})
+
+        ctier = mapping.tier.get(the_plan.primary_class)
+        if ctier and not tier_ok(ctier, max_tier):
+            return _terminal(
+                f"That question targets {the_plan.primary_class} data classified "
+                f"'{ctier}', above your access ceiling ('{max_tier}'). Request denied.",
+                "blocked", provider_label, trace,
+                plan={"classes": the_plan.classes, "intent": the_plan.intent})
+
+        sql, params = compile_sql(the_plan, mapping=mapping,
+                                  allowed_tables=allowed_tables, limit=limit, max_tier=max_tier)
+        sql = enforce_limit(sql, limit)
+    except (PlanValidationError, CompileError, SafetyError) as exc:
+        trace.append({"stage": "error", "detail": str(exc)})
+        return _terminal(
+            f"I couldn't ground that question in the ontology: {exc}",
+            "ungrounded", provider_label, trace)
+
+    # 4. Execute (read-only, guarded).
+    rows = safe_execute(db_path, sql, params, timeout_ms=timeout_ms) if db_path else []
+    if deid_columns:
+        rows = deidentify(rows, deid_columns)
     trace.append({"stage": "execute", "sql": sql, "params": params, "rows": len(rows)})
 
-    # 5. Synthesize (Phase 0 — reason/verify stages added in Phase 2)
+    # 5. Synthesize.
     answer = _synthesize(llm, question, rows)
     trace.append({"stage": "synthesize", "chars": len(answer)})
 
     table = mapping.table_for(the_plan.primary_class) or ""
     citations = [
-        Citation(
-            iri=f"{the_plan.primary_class}/{row.get('id', i)}",
-            label=str(next(iter(row.values()), "")),
-            source_table=table,
-        )
+        Citation(iri=f"{the_plan.primary_class}/{row.get('id', i)}",
+                 label=str(next(iter(row.values()), "")), source_table=table)
         for i, row in enumerate(rows[:k])
     ]
 
@@ -187,4 +192,5 @@ def search(
         executed_query=sql,
         trace=trace,
         provider=str(provider_label),
+        status="ok" if rows else "empty",
     )

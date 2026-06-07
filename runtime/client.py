@@ -352,6 +352,36 @@ class RuntimeClient:
             strategy=strategy,
         )
 
+    def search(
+        self,
+        question: str,
+        flavor: str,
+        *,
+        depth: str = "single_hop",
+        max_tier: str = "Internal",
+        k: int = 5,
+        **kwargs,
+    ):
+        """Ontology-grounded **reasoning search** — a cited, reasoned answer.
+
+        Convenience wrapper over :func:`runtime.reasoning_search.search` that
+        reuses this client's adapter and database. Returns a ``ReasonedAnswer``
+        (plan, results, citations, inferred facts, confidence, executed query,
+        trace).  Imported lazily to avoid an import cycle with the package init.
+        """
+        from runtime.reasoning_search import search as _reasoning_search
+
+        return _reasoning_search(
+            question,
+            flavor=flavor,
+            db_path=self._db_path,
+            adapter=self._adapter_instance,
+            depth=depth,
+            max_tier=max_tier,
+            k=k,
+            **kwargs,
+        )
+
     # ------------------------------------------------------------------
     # feature/monitordrift — drift context injection
     # ------------------------------------------------------------------

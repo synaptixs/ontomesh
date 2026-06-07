@@ -113,8 +113,8 @@ def test_pipeline_applies_parameterized_filter(fixtures):
     assert {r["sla_tier"] for r in ans.results} == {"Platinum"}
 
 
-def test_execute_readonly_refuses_writes(fixtures):
-    from runtime.reasoning_search.engine import _execute_readonly
+def test_safe_execute_refuses_writes(fixtures):
+    from runtime.reasoning_search.safety import SafetyError, safe_execute
 
-    with pytest.raises(RuntimeError):
-        _execute_readonly(fixtures["db"], "DELETE FROM customer", [])
+    with pytest.raises(SafetyError):
+        safe_execute(fixtures["db"], "DELETE FROM customer", [])

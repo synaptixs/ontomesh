@@ -28,6 +28,15 @@ def main() -> None:
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if here not in sys.path:
         sys.path.insert(0, here)
+
+    argv = sys.argv[1:]
+    # ``ontomesh search …`` routes to the reasoning-search CLI, leaving
+    # toolkit.py's flag surface untouched.
+    if argv and argv[0] == "search":
+        from runtime.reasoning_search.cli import run                  # noqa: E402
+
+        raise SystemExit(run(argv[1:]))
+
     # ``toolkit`` is at the repo root; importing it triggers no work,
     # the work happens in main().
     import toolkit                                                    # noqa: E402
