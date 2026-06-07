@@ -1,10 +1,10 @@
-"""``ontomesh-wizard`` console script — launches the Flask wizard.
+"""``ontoforge-wizard`` console script — launches the Flask wizard.
 
-Wires the ``ontomesh-wizard`` console script declared in
+Wires the ``ontoforge-wizard`` console script declared in
 ``pyproject.toml`` to ``wizard/app.py``'s ``main()`` so:
 
     pip install -e .
-    ontomesh-wizard --port 5051
+    ontoforge-wizard --port 5051
 
 works identically to the historical:
 
@@ -18,7 +18,7 @@ import sys
 
 
 def main() -> None:
-    """Console entry point for the ``ontomesh-wizard`` script."""
+    """Console entry point for the ``ontoforge-wizard`` script."""
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wizard_dir = os.path.join(here, "wizard")
     src_dir = os.path.join(here, "src")

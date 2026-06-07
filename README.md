@@ -41,7 +41,7 @@ scorecard, semantic-loss analysis, and orphan-class checks:
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
 | **Runtime user** | non-root `ontomesh` (uid `10001`) |
-| **Process** | single-process Flask via the `ontomesh-wizard` console script |
+| **Process** | single-process Flask via the `ontoforge-wizard` console script |
 | **Default port** | `5051` (configurable via `ONTOMESH_PORT`) |
 | **Persistent data** | `/data` (mount a volume here) |
 | **Healthcheck** | `GET /health` every 30 s |

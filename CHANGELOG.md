@@ -55,12 +55,12 @@ Five-phase deployment line plus the first internal-share workflow.
 - **Internal-share workflow** — `.github/workflows/publish-image.yml` builds and pushes to GHCR on every `v*.*.*` tag + manual dispatch. GHA layer cache. (P2.5)
 - **Package-page README** rewritten to a focused image-reference doc (what's in the box, ports, env vars, endpoints). Long developer docs moved into `deploy/`, `docs/`, source repo. (P2.5.1)
 - **Tester-feedback issue form** at `.github/ISSUE_TEMPLATE/tester-feedback.yml` for structured bug / friction / idea reports. (P2.6)
-- **Boot banner** now reads "Ontomesh — the ontology mesh for GraphRAG · v3.6.0-dev" with the public surface URLs and active DB URL surfaced; version is pulled from `ontomesh.__version__` so it auto-tracks future bumps.
+- **Boot banner** now reads "Ontomesh — the ontology mesh for GraphRAG · v3.6.0-dev" with the public surface URLs and active DB URL surfaced; version is pulled from `ontoforge.__version__` so it auto-tracks future bumps.
 
 ### Changed
 
 - Package on PyPI renamed `ontology-toolkit` → `ontomesh`. Legacy import aliases are kept for one release.
-- Console scripts: `ontomesh`, `ontomesh-wizard`, `ontomesh-onboard` are now the canonical entry points; the legacy `ontology-toolkit` / `ontology-onboard` aliases remain.
+- Console scripts: `ontomesh`, `ontoforge-wizard`, `ontoforge-onboard` are now the canonical entry points; the legacy `ontology-toolkit` / `ontology-onboard` aliases remain.
 - README on `main` no longer reflects v1.5 — it now mirrors `develop`.
 
 ---

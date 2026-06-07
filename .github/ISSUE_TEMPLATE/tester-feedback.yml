@@ -60,7 +60,7 @@ body:
     id: image-tag
     attributes:
       label: Image tag
-      description: Which Ontomesh tag are you running?  Run `docker inspect ontomesh-wizard --format='{{.Config.Image}}'` if you're not sure.
+      description: Which Ontomesh tag are you running?  Run `docker inspect ontoforge-wizard --format='{{.Config.Image}}'` if you're not sure.
       placeholder: "ghcr.io/synaptixs/ontomesh:3.6.0-dev"
     validations:
       required: false
@@ -95,7 +95,7 @@ body:
     id: logs
     attributes:
       label: Container logs (last ~30 lines)
-      description: If the bug is a crash or 500, paste the tail of `docker logs ontomesh-wizard` here.  Triple-backtick wraps appreciated.
+      description: If the bug is a crash or 500, paste the tail of `docker logs ontoforge-wizard` here.  Triple-backtick wraps appreciated.
       render: shell
     validations:
       required: false

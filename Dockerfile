@@ -7,7 +7,7 @@
 #                producing a populated /opt/venv we can copy to runtime.
 #   • runtime  is python:3.12-slim with only the runtime venv, the
 #                application source, and a non-root user.  The image
-#                runs `ontomesh-wizard` and serves on $ONTOMESH_PORT
+#                runs `ontoforge-wizard` and serves on $ONTOMESH_PORT
 #                (default 5051).
 #
 # Build:
@@ -57,7 +57,7 @@ WORKDIR /app
 COPY . .
 
 # Install core + wizard extra in one shot.  Editable so console scripts
-# (ontomesh, ontomesh-wizard, ontomesh-onboard) land on PATH and the
+# (ontomesh, ontoforge-wizard, ontoforge-onboard) land on PATH and the
 # python files stay readable for debugging.
 RUN pip install --upgrade pip \
  && pip install -e ".[wizard]"
@@ -107,7 +107,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 # Multi-worker, multi-threaded gunicorn (P3.1).
 #
 # We invoke gunicorn directly instead of going through the
-# `ontomesh-wizard` console script — gunicorn manages its own
+# `ontoforge-wizard` console script — gunicorn manages its own
 # argument parsing via the config file, so an extra Python layer
 # would only get in the way.
 #

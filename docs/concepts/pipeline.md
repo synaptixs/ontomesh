@@ -45,9 +45,9 @@ Enrichment phases (L4–L13):
 CLI:
 
 ```bash
-ontomesh --phase 1            # Domain
-ontomesh --phase all          # Run 1–8 end to end
-ontomesh --phase 3            # Just regenerate SHACL
+ontoforge --phase 1            # Domain
+ontoforge --phase all          # Run 1–8 end to end
+ontoforge --phase 3            # Just regenerate SHACL
 ```
 
 ## Enrichment phases (L4–L13)
@@ -55,10 +55,10 @@ ontomesh --phase 3            # Just regenerate SHACL
 Optional. Only relevant when you have log data.
 
 ```bash
-ontomesh --phase mine         # L4 (Drain3)
-ontomesh --phase sequence     # L5 (HMM)
-ontomesh --phase causality    # L6 (Granger)
-ontomesh --phase all-mining   # L4 through L13
+ontoforge --phase mine         # L4 (Drain3)
+ontoforge --phase sequence     # L5 (HMM)
+ontoforge --phase causality    # L6 (Granger)
+ontoforge --phase all-mining   # L4 through L13
 ```
 
 Each enrichment phase emits a JSON-LD ObservationRecord that the wizard's Evolution phase consumes to propose ontology changes.

@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ontomesh"
+name = "ontoforge"
 version = "3.7.1-dev"
 description = "Ontomesh — the ontology mesh for GraphRAG. Mine ontologies from logs, validate with SHACL, ship a hybrid retriever."
 readme = "README.md"
@@ -88,7 +88,7 @@ oci       = ["oci>=2.126.0"]
 # `drift-monitor` itself is not yet on PyPI — it lives at
 # github.com/synaptixs/infodrift and is installed as a follow-on step:
 #
-#     pip install 'ontomesh[drift]'
+#     pip install 'ontoforge[drift]'
 #     pip install git+https://github.com/synaptixs/infodrift.git@develop
 #
 # PyPI rejects direct git+URL dependencies as part of its
@@ -118,7 +118,7 @@ wizard   = [
 discover = ["spacy>=3.7.4"]
 neptune  = ["boto3>=1.35.0"]
 # (P2.3 — see the `postgres` extra under "Database drivers" above —
-# psycopg3 ships in there too so a single `pip install ontomesh[postgres]`
+# psycopg3 ships in there too so a single `pip install ontoforge[postgres]`
 # enables both schema introspection and the wizard's pg-backed store.)
 
 # P3.2 — Redis-backed SSE bus.  Required when running multi-worker
@@ -162,9 +162,9 @@ all = [
 [project.scripts]
 # Canonical Ontomesh console scripts.  These are the entry points the
 # landing page and README promise; pip install -e . wires them up.
-ontomesh         = "ontomesh.cli:main"
-ontomesh-wizard  = "ontomesh.wizard_entry:main"
-ontomesh-onboard = "ontomesh.onboard_entry:main"
+ontoforge        = "ontoforge.cli:main"
+ontoforge-wizard  = "ontoforge.wizard_entry:main"
+ontoforge-onboard = "ontoforge.onboard_entry:main"
 # Legacy aliases kept for one release so existing automation and
 # documentation snippets keep working.
 ontology-toolkit = "toolkit:main"
@@ -185,7 +185,7 @@ py-modules = ["toolkit", "onboard"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "ontomesh*",
+    "ontoforge*",
     "runtime*",
     "compliance*",
     "federation*",

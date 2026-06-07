@@ -72,7 +72,7 @@ access_log_format = '%(h)s %(t)s "%(r)s" %(s)s %(L)s "%(f)s"'
 
 # ── Process naming ───────────────────────────────────────────────────
 
-proc_name = "ontomesh-wizard"
+proc_name = "ontoforge-wizard"
 
 # ── Pre-flight banner ────────────────────────────────────────────────
 
@@ -82,8 +82,8 @@ def on_starting(server):                                              # noqa: AR
     production analogue of the Flask dev-server boot banner in
     wizard/app.py:main()."""
     try:
-        import ontomesh
-        ver = ontomesh.__version__
+        import ontoforge
+        ver = ontoforge.__version__
     except Exception:                                                 # noqa: BLE001
         ver = "unknown"
     print(

@@ -1,10 +1,10 @@
-"""``ontomesh search`` — CLI surface for reasoning search (§11 #15).
+"""``ontoforge search`` — CLI surface for reasoning search (§11 #15).
 
 Invoked by the ``ontomesh`` console shim when the first arg is ``search``; it
 does not touch ``toolkit.py``'s flag surface.
 
-    ontomesh search "which customers are platinum?" --flavor network-ops --db db/demo.db
-    ontomesh search "…" --flavor clinical-research --provider openai --json
+    ontoforge search "which customers are platinum?" --flavor network-ops --db db/demo.db
+    ontoforge search "…" --flavor clinical-research --provider openai --json
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from dataclasses import asdict
 def run(argv: list[str]) -> int:
     """Parse args, run a search, print the result. Returns a shell exit code."""
     p = argparse.ArgumentParser(
-        prog="ontomesh search",
+        prog="ontoforge search",
         description="Ontology-grounded reasoning search over a connected database.",
     )
     p.add_argument("question", help="natural-language question")

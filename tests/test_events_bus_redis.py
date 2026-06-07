@@ -195,7 +195,7 @@ def test_concurrent_publishes_from_threads_arrive(bus):
 
 
 def test_redis_extra_in_pyproject():
-    """`pip install ontomesh[redis]` must pull in the redis driver."""
+    """`pip install ontoforge[redis]` must pull in the redis driver."""
     py = (ROOT / "pyproject.toml").read_text()
     import re
     m = re.search(r"^redis\s*=\s*\[(.+?)\]", py, re.MULTILINE)

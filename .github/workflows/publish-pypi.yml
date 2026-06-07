@@ -86,8 +86,8 @@ jobs:
           python -m venv /tmp/smoke
           /tmp/smoke/bin/pip install --upgrade pip
           /tmp/smoke/bin/pip install dist/*.whl
-          /tmp/smoke/bin/python -c "import ontomesh; print('version:', ontomesh.__version__)"
-          /tmp/smoke/bin/python -c "import ontomesh; assert ontomesh.__version__ != 'unknown'"
+          /tmp/smoke/bin/python -c "import ontoforge; print('version:', ontoforge.__version__)"
+          /tmp/smoke/bin/python -c "import ontoforge; assert ontoforge.__version__ != 'unknown'"
 
       - uses: actions/upload-artifact@v4
         with:

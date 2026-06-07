@@ -56,8 +56,8 @@ ans = client.search("Which customers are Platinum?", "network-ops")
 ## CLI
 
 ```bash
-ontomesh search "which customers are platinum?" --flavor network-ops --db db/demo.db
-ontomesh search "…" --flavor clinical-research --provider openai --max-tier Confidential --json
+ontoforge search "which customers are platinum?" --flavor network-ops --db db/demo.db
+ontoforge search "…" --flavor clinical-research --provider openai --max-tier Confidential --json
 ```
 
 ## Safety

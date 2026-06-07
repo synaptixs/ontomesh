@@ -16,7 +16,7 @@ event.  Two backends ship:
   published on any worker are received by subscribers on every
   worker AND every replica.  Required for multi-worker gunicorn
   and multi-replica k8s; pulled in by the ``[redis]`` extra
-  (``pip install ontomesh[redis]``).
+  (``pip install ontoforge[redis]``).
 
 The choice is per-process; switching backends needs a restart.
 If ``ONTOMESH_REDIS_URL`` is set but the redis package isn't

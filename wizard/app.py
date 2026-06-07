@@ -51,7 +51,7 @@ SESSION_FILE = os.path.join(ROOT, ".wizard_session.json")
 TEMPLATES_DIR = os.path.join(ROOT, "templates")
 # P2.3 — Database URL.  Defaults to local SQLite for back-compat;
 # set ONTOMESH_DB_URL=postgresql://user:pass@host/db to use Postgres
-# (requires ``pip install ontomesh[postgres]``).
+# (requires ``pip install ontoforge[postgres]``).
 ONTOLOGIES_DB = os.environ.get(
     "ONTOMESH_DB_URL",
     os.path.join(ROOT, "db", "ontologies.db"),
@@ -290,7 +290,7 @@ def _version_string() -> str:
     try:
         if HERE not in sys.path:
             sys.path.insert(0, HERE)
-        from ontomesh import __version__                              # noqa: E402
+        from ontoforge import __version__                              # noqa: E402
         return __version__
     except Exception:                                                 # noqa: BLE001
         return "unknown"
@@ -2122,7 +2122,7 @@ def main():
     try:
         if HERE not in sys.path:
             sys.path.insert(0, HERE)
-        from ontomesh import __version__ as _version
+        from ontoforge import __version__ as _version
     except Exception:                                                 # noqa: BLE001
         _version = "unknown"
 

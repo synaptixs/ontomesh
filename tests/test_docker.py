@@ -8,7 +8,7 @@ the rules the team agreed on:
 - Slim Python base.
 - Non-root final user (uid 10001).
 - HEALTHCHECK declared and hits /health.
-- ENTRYPOINT runs the ``ontomesh-wizard`` console script (not a raw
+- ENTRYPOINT runs the ``ontoforge-wizard`` console script (not a raw
   ``python wizard/app.py``) so the install surface and the runtime
   surface stay in sync.
 - .dockerignore excludes the obvious context-bloaters.
@@ -184,5 +184,5 @@ def test_console_scripts_match_dockerfile_entrypoint():
     py = (ROOT / "pyproject.toml").read_text()
     # Whitespace before `=` may vary; check for the script name
     # followed by '=' allowing any spaces in between.
-    assert re.search(r"\bontomesh-wizard\s*=\s*\"", py), \
-        "ontomesh-wizard not declared in [project.scripts]"
+    assert re.search(r"\bontoforge-wizard\s*=\s*\"", py), \
+        "ontoforge-wizard not declared in [project.scripts]"

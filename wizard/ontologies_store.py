@@ -21,7 +21,7 @@ Every public function takes a ``db`` argument that can be either:
       "postgresql://user:pass@host/dbname"
 
 The Postgres path is opt-in:
-    pip install ontomesh[postgres]
+    pip install ontoforge[postgres]
     export ONTOMESH_DB_URL=postgresql://ontomesh:secret@db:5432/ontomesh
 
 The SQLite path is the historical default and stays the only
@@ -189,7 +189,7 @@ def _connect(db: str) -> _ConnWrap:
         except ImportError as exc:                                    # pragma: no cover
             raise RuntimeError(
                 "Postgres backend requested but psycopg isn't installed. "
-                "Run: pip install ontomesh[postgres]"
+                "Run: pip install ontoforge[postgres]"
             ) from exc
         import psycopg                                                # noqa: F811
         conn = psycopg.connect(url)

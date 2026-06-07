@@ -96,7 +96,7 @@ def test_tokens_css_defines_brand_layer():
 
 def test_pyproject_renamed_to_ontomesh():
     py = (ROOT / "pyproject.toml").read_text()
-    assert 'name = "ontomesh"' in py
+    assert 'name = "ontoforge"' in py
     assert 'version = "3.7.1-dev"' in py
 
 

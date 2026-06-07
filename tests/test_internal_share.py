@@ -254,7 +254,7 @@ def test_readme_mentions_entrypoint_script():
     ENTRYPOINT runs — that's the bridge between `docker run` and
     "you can also run it locally with pip"."""
     text = README.read_text()
-    assert "ontomesh-wizard" in text, \
+    assert "ontoforge-wizard" in text, \
         "README doesn't name the wizard entrypoint script"
 
 

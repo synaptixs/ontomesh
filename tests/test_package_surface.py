@@ -8,7 +8,7 @@ Verifies that:
     importable ``main()`` callables (no PyPI/CI environment needed —
     just that the shim functions don't ImportError).
 3.  The landing page no longer makes promises the codebase can't
-    keep (no ``pip install ontomesh`` as the primary install path;
+    keep (no ``pip install ontoforge`` as the primary install path;
     no fabricated ``HybridRetriever`` import; no invented benchmark
     numbers).
 4.  The benchmark runner produced ``benchmarks/last-run.json`` and
@@ -35,15 +35,15 @@ pytest.importorskip("flask")
 
 
 def test_ontomesh_package_imports():
-    import ontomesh
-    assert ontomesh.__version__.startswith("3.7"), \
-        f"unexpected version {ontomesh.__version__!r}"
+    import ontoforge
+    assert ontoforge.__version__.startswith("3.7"), \
+        f"unexpected version {ontoforge.__version__!r}"
 
 
 @pytest.mark.parametrize("modpath,attr", [
-    ("ontomesh.cli",            "main"),
-    ("ontomesh.wizard_entry",   "main"),
-    ("ontomesh.onboard_entry",  "main"),
+    ("ontoforge.cli",            "main"),
+    ("ontoforge.wizard_entry",   "main"),
+    ("ontoforge.onboard_entry",  "main"),
 ])
 def test_console_script_entrypoints_importable(modpath, attr):
     """The functions referenced from pyproject.toml's
@@ -56,12 +56,12 @@ def test_console_script_entrypoints_importable(modpath, attr):
 
 def test_pyproject_declares_ontomesh_console_scripts():
     py = (ROOT / "pyproject.toml").read_text()
-    for cmd in ("ontomesh ",
-                "ontomesh-wizard ",
-                "ontomesh-onboard "):
+    for cmd in ("ontoforge ",
+                "ontoforge-wizard ",
+                "ontoforge-onboard "):
         assert cmd in py, f"console script {cmd.strip()!r} not declared"
     # And the package is included in the build.
-    assert '"ontomesh*"' in py
+    assert '"ontoforge*"' in py
 
 
 # ── Benchmark ─────────────────────────────────────────────────────────
@@ -99,12 +99,12 @@ def landing_body():
 
 
 def test_landing_no_longer_promises_unreleased_pypi(landing_body):
-    """``pip install ontomesh`` from PyPI doesn't exist yet.  It MAY
+    """``pip install ontoforge`` from PyPI doesn't exist yet.  It MAY
     appear in the 'coming in v3.6' note, but MUST NOT be the primary
     install instruction in the hero install pill."""
-    # The install pill should now say 'git clone' rather than 'pip install ontomesh'.
+    # The install pill should now say 'git clone' rather than 'pip install ontoforge'.
     pill_segment = landing_body.split('class="install"', 1)[1].split('</code>', 1)[0]
-    assert "pip install ontomesh" not in pill_segment, \
+    assert "pip install ontoforge" not in pill_segment, \
         "install pill should NOT promise PyPI install yet"
     assert "git clone" in pill_segment
 
@@ -125,7 +125,7 @@ def test_landing_uses_real_cli_commands(landing_body):
     # ontomesh CLI with --db flag (across the span boundary).
     assert "</span> --db" in landing_body
     # The wizard launcher.
-    assert "ontomesh-wizard" in landing_body
+    assert "ontoforge-wizard" in landing_body
     # And the log-mining phase.
     assert "--phase log" in landing_body
 

@@ -107,7 +107,7 @@ def test_landing_install_snippet_present(client):
     body = client.get("/").get_data(as_text=True)
     assert "git clone" in body
     assert "pip install -e ." in body
-    assert "ontomesh-wizard" in body
+    assert "ontoforge-wizard" in body
 
 
 # ── A11y baseline ─────────────────────────────────────────────────────

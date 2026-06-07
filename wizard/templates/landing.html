@@ -84,7 +84,7 @@
         </div>
         <p class="install-note">
           Currently source-install only.
-          <code>pip install ontomesh</code> from PyPI lands in v3.6.
+          <code>pip install ontoforge</code> from PyPI lands in v3.6.
         </p>
       </div>
       <!-- Hero illustration: stylized mesh with floating nodes -->
@@ -271,13 +271,13 @@ git clone https://github.com/synaptixs/ontomesh.git
 <span class="kw">cd</span> ontology &amp;&amp; pip install -e .
 
 <span class="c"># 2. Generate the full OWL / SHACL / JSON-LD bundle from a SQLite DB</span>
-<span class="kw">ontomesh</span> --db db/demo.db --out ./output
+<span class="kw">ontoforge</span> --db db/demo.db --out ./output
 
 <span class="c"># 3. Or launch the interactive wizard at http://localhost:5051</span>
-<span class="kw">ontomesh-wizard</span> --port 5051
+<span class="kw">ontoforge-wizard</span> --port 5051
 
 <span class="c"># 4. Mine candidates from raw logs (phases L4–L13)</span>
-<span class="kw">ontomesh</span> --phase log --db db/demo.db --out ./output</pre>
+<span class="kw">ontoforge</span> --phase log --db db/demo.db --out ./output</pre>
       <p class="alt-cta">
         Prefer to point and click?
         <a href="/wizard">Open the wizard →</a>

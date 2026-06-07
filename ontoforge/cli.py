@@ -1,11 +1,11 @@
-"""``ontomesh`` console script — the headless pipeline CLI.
+"""``ontoforge`` console script — the headless pipeline CLI.
 
-Wires the ``ontomesh`` console script declared in ``pyproject.toml``
+Wires the ``ontoforge`` console script declared in ``pyproject.toml``
 to the existing ``toolkit.py`` ``main()`` function so:
 
     pip install -e .
-    ontomesh --phase reason
-    ontomesh --db custom.db --out ./out
+    ontoforge --phase reason
+    ontoforge --db custom.db --out ./out
 
 works identically to the historical:
 
@@ -14,7 +14,7 @@ works identically to the historical:
 
 We deliberately do NOT duplicate argument parsing — ``toolkit.py``
 owns the flag surface.  The shim is sys.argv-transparent: whatever
-you pass after ``ontomesh`` reaches argparse in toolkit.py untouched.
+you pass after ``ontoforge`` reaches argparse in toolkit.py untouched.
 """
 
 from __future__ import annotations
@@ -24,13 +24,13 @@ import sys
 
 
 def main() -> None:
-    """Console entry point for the ``ontomesh`` script."""
+    """Console entry point for the ``ontoforge`` script."""
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if here not in sys.path:
         sys.path.insert(0, here)
 
     argv = sys.argv[1:]
-    # ``ontomesh search …`` routes to the reasoning-search CLI, leaving
+    # ``ontoforge search …`` routes to the reasoning-search CLI, leaving
     # toolkit.py's flag surface untouched.
     if argv and argv[0] == "search":
         from runtime.reasoning_search.cli import run                  # noqa: E402

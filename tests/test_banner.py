@@ -32,7 +32,7 @@ def _capture_banner():
     buf = StringIO()
     with mock.patch.object(app.app, "run") as _, \
          mock.patch.object(sys, "stdout", buf), \
-         mock.patch.object(sys, "argv", ["ontomesh-wizard", "--port", "5099"]):
+         mock.patch.object(sys, "argv", ["ontoforge-wizard", "--port", "5099"]):
         app.main()
     return buf.getvalue()
 
@@ -51,8 +51,8 @@ def test_banner_shows_canonical_tagline():
 
 
 def test_banner_shows_current_version():
-    """Version is pulled from ontomesh.__version__ so it can't drift."""
-    from ontomesh import __version__
+    """Version is pulled from ontoforge.__version__ so it can't drift."""
+    from ontoforge import __version__
     out = _capture_banner()
     assert __version__ in out
 
@@ -68,7 +68,7 @@ def test_banner_lists_all_surfaces():
 def test_banner_argparse_description_matches():
     """``--help`` output must also say Ontomesh, not Ontology Toolkit."""
     import app
-    with mock.patch.object(sys, "argv", ["ontomesh-wizard", "--help"]):
+    with mock.patch.object(sys, "argv", ["ontoforge-wizard", "--help"]):
         buf = StringIO()
         with mock.patch.object(sys, "stdout", buf), \
              mock.patch.object(app.app, "run"):

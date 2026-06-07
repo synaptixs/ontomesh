@@ -39,7 +39,7 @@
     ```bash
     git clone https://github.com/synaptixs/ontomesh.git
     cd ontomesh && pip install -e ".[wizard]"
-    ontomesh-wizard
+    ontoforge-wizard
     ```
 
 ## Trust signals
