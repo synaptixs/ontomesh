@@ -133,3 +133,38 @@ def test_wizard_hides_ask_link_by_default(client):
 
 def test_wizard_shows_ask_link_when_enabled(client, enabled):
     assert 'href="/ask"' in client.get("/wizard").get_data(as_text=True)
+
+
+def test_wizard_embeds_ask_step_when_enabled(client, enabled):
+    body = client.get("/wizard").get_data(as_text=True)
+    assert 'data-step="ask"' in body and 'id="step-ask"' in body and 'src="/ask"' in body
+
+
+def test_wizard_no_ask_step_by_default(client):
+    assert 'id="step-ask"' not in client.get("/wizard").get_data(as_text=True)
+
+
+# ── caching ──────────────────────────────────────────────────────────────────
+def test_search_caches_identical_requests(client, enabled, monkeypatch):
+    import app as app_module
+    app_module._SEARCH_CACHE.clear()
+    monkeypatch.setattr(app_module, "SEARCH_CACHE_TTL", 60.0)
+
+    calls = {"n": 0}
+
+    def counting_search(question, **kw):
+        calls["n"] += 1
+        return _fake_answer()
+
+    import runtime.reasoning_search as rs
+    monkeypatch.setattr(rs, "search", counting_search)
+
+    payload = {"question": "who is at risk?", "flavor": "network-ops"}
+    r1 = client.post("/api/search", json=payload)
+    r2 = client.post("/api/search", json=payload)            # served from cache
+    r3 = client.post("/api/search", json={"question": "different?", "flavor": "network-ops"})
+
+    assert r1.status_code == r2.status_code == 200
+    assert calls["n"] == 2                                    # 1st + 3rd ran; 2nd cached
+    assert r2.get_json().get("cached") is True
+    assert "cached" not in r1.get_json()

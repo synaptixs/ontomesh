@@ -46,12 +46,19 @@ class ReasonResult:
 _ATOM = re.compile(r"([A-Za-z_]\w*)\s*\(([^)]*)\)")
 
 
+def _strip_quotes(term: str) -> str:
+    """Strip surrounding quotes from a constant term (variables have none)."""
+    if len(term) >= 2 and term[0] in "\"'" and term[-1] == term[0]:
+        return term[1:-1]
+    return term
+
+
 def _parse_atom(s: str) -> Atom:
     m = _ATOM.fullmatch(s.strip())
     if not m:
         raise ValueError(f"bad atom: {s!r}")
     pred = m.group(1)
-    args = [a.strip() for a in m.group(2).split(",") if a.strip()]
+    args = [_strip_quotes(a.strip()) for a in m.group(2).split(",") if a.strip()]
     return (pred, *args)
 
 

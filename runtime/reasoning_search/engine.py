@@ -115,6 +115,53 @@ def _terminal(answer: str, status: str, provider: str, trace: list, **kw) -> Rea
                           provider=str(provider), trace=trace, **kw)
 
 
+def _load_fk_facts(db_path: str, table: str | None, rows: list[dict]) -> list:
+    """Auto-load 1-hop neighbour facts via the table's foreign keys (Phase 4 #1).
+
+    For each FK (from_col → ref_table.to_col), fetch the referenced rows for the
+    result set and emit their facts keyed by the FK value — so reasoner rules can
+    chain across the relationship without manually supplied edges. Read-only;
+    schema identifiers come from SQLite PRAGMA (not user input).
+    """
+    import sqlite3
+
+    if not table or not table.isidentifier():
+        return []
+    facts: list = []
+    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    con.row_factory = sqlite3.Row
+    try:
+        try:
+            fks = con.execute(f"PRAGMA foreign_key_list({table})").fetchall()
+        except sqlite3.Error:
+            return []
+        for fk in fks:
+            ref_table, from_col, to_col = fk["table"], fk["from"], (fk["to"] or "id")
+            if not (str(ref_table).isidentifier() and str(from_col).isidentifier()
+                    and str(to_col).isidentifier()):
+                continue
+            seen: set = set()
+            for row in rows:
+                fv = row.get(from_col)
+                if fv is None or fv in seen:
+                    continue
+                seen.add(fv)
+                try:
+                    nbrs = con.execute(
+                        f"SELECT * FROM {ref_table} WHERE {to_col} = ? LIMIT 5", (fv,)
+                    ).fetchall()
+                except sqlite3.Error:
+                    continue
+                for nb in nbrs:
+                    key = str(fv)
+                    facts.append((ref_table, key))
+                    for c, v in dict(nb).items():
+                        facts.append((c, key, str(v)))
+    finally:
+        con.close()
+    return facts
+
+
 # ── public API ────────────────────────────────────────────────────────────────
 def search(
     question: str,
@@ -136,6 +183,7 @@ def search(
     max_replans: int = 1,
     on_event=None,
     memory=None,
+    auto_relations: bool = False,
 ) -> ReasonedAnswer:
     """Run ontology-grounded reasoning search and return a `ReasonedAnswer`.
 
@@ -228,6 +276,10 @@ def search(
             facts.append((the_plan.primary_class, key))
             for col, val in row.items():
                 facts.append((col, key, str(val)))
+        if auto_relations and db_path:
+            fk_facts = _load_fk_facts(db_path, mapping.table_for(the_plan.primary_class), rows)
+            facts += fk_facts
+            emit({"stage": "relations", "neighbor_facts": len(fk_facts)})
         try:
             res = reason(facts, [parse_rule(r) for r in rules])
             for f in res.derived:

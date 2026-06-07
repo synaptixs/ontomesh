@@ -2118,34 +2118,24 @@ def serve_output(subdir: str, filename: str):
 # Enable with ONTOFORGE_SEARCH=1. db defaults to ONTOFORGE_DB or db/demo.db.
 ONTOFORGE_SEARCH = os.environ.get("ONTOFORGE_SEARCH", "").lower() in ("1", "true", "yes", "on")
 SEARCH_DB = os.environ.get("ONTOFORGE_DB", os.path.join(ROOT, "db", "demo.db"))
+# Phase 4: TTL response cache for /api/search (seconds; 0 disables).
+SEARCH_CACHE_TTL = float(os.environ.get("ONTOFORGE_CACHE_TTL", "60"))
+_SEARCH_CACHE: dict = {}
 
 
 def _build_memory():
-    """Adapt AgentMemory to the engine's recall/remember hook, or return None.
+    """Persistent recall/remember for searches (SearchMemory), or None.
 
-    AgentMemory.recall() returns a JSON-LD dict (with ``@graph``); the engine
-    expects an iterable, so we surface the @graph list. AgentMemory has no
-    ad-hoc write API yet, so remember() is a no-op (recall is the live value).
+    SearchMemory is a self-contained SQLite log: recall() returns recent prior
+    turns; remember() persists the current turn — a full round-trip. Best-effort.
     """
     try:
         import sys as _sys
         if ROOT not in _sys.path:
             _sys.path.insert(0, ROOT)
-        from runtime.memory import AgentMemory
+        from runtime.reasoning_search.memory import SearchMemory
 
-        mem = AgentMemory(SEARCH_DB)
-
-        class _Adapter:
-            def recall(self, question, flavor=None):
-                try:
-                    return (mem.recall(question, flavor=flavor, limit=5) or {}).get("@graph", [])
-                except Exception:  # noqa: BLE001
-                    return []
-
-            def remember(self, record):  # noqa: D401 - placeholder until writer is wired
-                return None
-
-        return _Adapter()
+        return SearchMemory(SEARCH_DB)
     except Exception:  # noqa: BLE001 - memory is best-effort
         return None
 
@@ -2176,25 +2166,34 @@ def api_search():
         return jsonify({"error": "fields 'question' and 'flavor' are required"}), 400
 
     import sys as _sys
+    import time as _time
     if ROOT not in _sys.path:
         _sys.path.insert(0, ROOT)
     from dataclasses import asdict
 
     from runtime.reasoning_search import search
 
+    db = body.get("db") or SEARCH_DB
+    provider = body.get("provider") or "ollama"
+    tier = body.get("max_tier") or "Internal"
+    k = int(body.get("k", 5))
+    cache_key = (question, flavor, db, provider, tier, k)
+
+    if SEARCH_CACHE_TTL > 0:
+        hit = _SEARCH_CACHE.get(cache_key)
+        if hit and (_time.monotonic() - hit[0]) < SEARCH_CACHE_TTL:
+            return jsonify({**hit[1], "cached": True})
+
     try:
-        ans = search(
-            question,
-            flavor=flavor,
-            db_path=body.get("db") or SEARCH_DB,
-            providers=body.get("provider") or "ollama",
-            max_tier=body.get("max_tier") or "Internal",
-            k=int(body.get("k", 5)),
-            memory=_build_memory(),
-        )
+        ans = search(question, flavor=flavor, db_path=db, providers=provider,
+                     max_tier=tier, k=k, memory=_build_memory())
     except Exception as exc:                                          # noqa: BLE001
         return jsonify({"error": f"search failed: {exc}"}), 500
-    return jsonify(asdict(ans))
+
+    result = asdict(ans)
+    if SEARCH_CACHE_TTL > 0:
+        _SEARCH_CACHE[cache_key] = (_time.monotonic(), result)
+    return jsonify(result)
 
 
 @app.route("/api/search/stream", methods=["POST"])
