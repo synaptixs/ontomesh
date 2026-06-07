@@ -82,6 +82,23 @@ def _mapping():
     return m
 
 
+def test_mapping_resolve_tolerates_has_prefix_naming():
+    """A short planner term resolves to the mapping's has-/is-prefixed property."""
+    from runtime.reasoning_search._loaders import Mapping
+
+    m = Mapping()
+    m.prop_col[("Alarm", "hasAlarmState")] = ("tmf_alarm", "alarm_state")
+    m.prop_col[("Resource", "isActive")] = ("tmf_resource", "is_active")
+    # exact still wins
+    assert m.resolve("Alarm", "hasAlarmState") == ("hasAlarmState", "tmf_alarm", "alarm_state")
+    # tolerant: short form -> canonical
+    assert m.resolve("Alarm", "alarmState") == ("hasAlarmState", "tmf_alarm", "alarm_state")
+    assert m.column_for("Alarm", "alarm_state") == ("tmf_alarm", "alarm_state")
+    assert m.resolve("Resource", "active") == ("isActive", "tmf_resource", "is_active")
+    # genuinely unknown still misses
+    assert m.resolve("Alarm", "nonsense") is None
+
+
 def test_compiler_basic_select():
     from runtime.reasoning_search.planner import Plan
     from runtime.reasoning_search.query_compiler import compile_sql

@@ -1,6 +1,6 @@
 # Drift monitoring
 
-Ontomesh integrates with [`drift-monitor`](https://github.com/synaptixs/infodrift) for production drift surveillance.
+Ontoforge integrates with [`drift-monitor`](https://github.com/synaptixs/infodrift) for production drift surveillance.
 
 ## How it composes
 
@@ -8,7 +8,7 @@ Ontomesh integrates with [`drift-monitor`](https://github.com/synaptixs/infodrif
 production data  ──►  drift-monitor  ──►  ObservationRecord
                                             │
                                             ▼
-                                       Ontomesh L10
+                                       Ontoforge L10
                                             │
                                             ▼
                                        Evolution proposal

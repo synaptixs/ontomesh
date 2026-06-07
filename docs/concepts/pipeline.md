@@ -1,6 +1,6 @@
 # Pipeline phases
 
-Ontomesh's pipeline is a linear sequence of phases. Each is independently runnable from the CLI and emits artefacts the next phase reads.
+Ontoforge's pipeline is a linear sequence of phases. Each is independently runnable from the CLI and emits artefacts the next phase reads.
 
 ```
 Build phases (1–8):

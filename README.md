@@ -42,24 +42,43 @@ docker run -d --name ontomesh \
 
 Then open **http://localhost:5051** in your browser.
 
-## Screenshots
+## Screenshots — a guided tour
 
-A guided, navy + lime-green **Twilight** workspace that walks you from a domain to a
-generated ontology in four phases — Define → Enrich → Build → After:
+A walkthrough from landing page to ontology-grounded **reasoning search**, in order.
 
-![Ontomesh wizard — Domain Identity step, Twilight theme](docs/assets/screenshots/wizard-twilight.png)
+**1. Landing** — the marketing entry point.
 
-The marketing landing page:
+![Landing page, Twilight theme](docs/assets/screenshots/landing-twilight.png)
 
-![Ontomesh landing page](docs/assets/screenshots/landing-twilight.png)
+**2. Model your domain** — a guided, navy + lime-green **Twilight** wizard that walks
+you from a domain to a generated ontology in four phases — Define → Enrich → Build → After.
 
-Every run emits a branded HTML report — competency-question results, governance
-scorecard, semantic-loss analysis, and orphan-class checks:
+![Wizard — Domain Identity step, Twilight theme](docs/assets/screenshots/wizard-twilight.png)
 
-![Ontomesh run report](docs/assets/screenshots/report-branded.png)
+**3. Run report** — every run emits a branded HTML report: competency-question
+results, governance scorecard, semantic-loss analysis, and orphan-class checks.
 
-> Ships with three themes — **Twilight** (default), **Mono**, and **Light** —
-> switchable from the wizard's “All steps” drawer.
+![Run report](docs/assets/screenshots/report-branded.png)
+
+**4. Ask — pose a question** — the read-only, ontology-grounded **Ask** console.
+Pick a flavor and provider (Ollama / OpenAI), set your sensitivity-tier ceiling,
+and optionally build an RDF subgraph for live SPARQL.
+
+![Ask console — ready to reason](docs/assets/screenshots/ask-01-ready.png)
+
+**5. Ask — a cited, reasoned answer** — the answer cites its sources, shows the
+exact read-only SQL that ran, materializes the result subgraph, and streams the
+full reasoning trace (plan → execute → relations → reason → synthesize).
+
+![Ask console — cited, reasoned answer with trace](docs/assets/screenshots/ask-02-answer.png)
+
+**6. Ask — live SPARQL over the result subgraph** — interrogate exactly what
+grounded the answer with a SPARQL `SELECT` against the materialized RDF triples.
+
+![Ask console — live SPARQL over the result subgraph](docs/assets/screenshots/ask-03-sparql.png)
+
+> The wizard ships three themes — **Twilight** (default), **Mono**, and **Light** —
+> switchable from the “All steps” drawer.
 
 ## What you get
 

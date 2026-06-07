@@ -1,6 +1,6 @@
 # Concepts
 
-The mental model behind Ontomesh — why each phase exists and how they compose.
+The mental model behind Ontoforge — why each phase exists and how they compose.
 
 <div class="grid cards" markdown>
 
@@ -14,7 +14,7 @@ The mental model behind Ontomesh — why each phase exists and how they compose.
 
     ---
 
-    How Ontomesh represents classes, properties, events, sensitivity tiers, and PROV-O lineage.
+    How Ontoforge represents classes, properties, events, sensitivity tiers, and PROV-O lineage.
 
 -   :material-text-search:{ .lg .middle } &nbsp; **[Log mining](log-mining.md)**
 

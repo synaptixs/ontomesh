@@ -11,7 +11,7 @@ docker compose up -d
 What you get:
 
 - **Caddy** terminating TLS with auto-issued Let's Encrypt certs
-- **Ontomesh** wizard on the `ontomesh` service
+- **Ontoforge** wizard on the `ontomesh` service
 - **Redis** (opt-in `--profile redis`) for multi-worker SSE
 - **Postgres** (opt-in `--profile postgres`) for the saved-ontologies store
 
