@@ -88,6 +88,23 @@ def test_auto_relations_enables_cross_table_reasoning(fk_fx):
     assert any(t["stage"] == "relations" for t in ans.trace)
 
 
+def test_materialize_builds_subgraph_with_fk_edges(fk_fx):
+    from runtime.reasoning_search import search
+
+    adapter = SeqAdapter(['{"intent":"i","classes":["Order"],"filters":[]}'])
+    ans = search("orders", flavor="f", db_path=fk_fx["db"], adapter=adapter,
+                 flavors_dir=fk_fx["flavors"], mapping_path=fk_fx["mapping"],
+                 materialize=True)
+    sg = ans.subgraph
+    assert sg and sg["count"] > 0
+    trips = {(t[0], t[1], t[2], t[3]) for t in sg["triples"]}
+    assert ("Order/1", "rdf:type", "Order", True) in trips
+    # FK edge order -> customer materialized even without rules
+    assert any(t[1] == "customer_id" and t[3] for t in sg["triples"])
+    assert any(t[0].startswith("customer/") and t[1] == "sla_tier" for t in sg["triples"])
+    assert any(t["stage"] == "materialize" for t in ans.trace)
+
+
 def test_auto_relations_off_means_no_cross_table(fk_fx):
     from runtime.reasoning_search import search
 

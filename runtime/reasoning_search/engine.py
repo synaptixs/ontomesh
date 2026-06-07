@@ -62,6 +62,7 @@ class ReasonedAnswer:
     trace: list[dict[str, Any]] = field(default_factory=list)
     provider: str = ""
     status: str = "ok"          # "ok" | "blocked" | "ungrounded" | "empty"
+    subgraph: dict[str, Any] = field(default_factory=dict)  # RDF view when materialize=True
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -115,19 +116,20 @@ def _terminal(answer: str, status: str, provider: str, trace: list, **kw) -> Rea
                           provider=str(provider), trace=trace, **kw)
 
 
-def _load_fk_facts(db_path: str, table: str | None, rows: list[dict]) -> list:
-    """Auto-load 1-hop neighbour facts via the table's foreign keys (Phase 4 #1).
+def _fk_neighbors(db_path: str, table: str | None, rows: list[dict]) -> list[dict]:
+    """Resolve 1-hop FK-neighbour rows for the result set (Phase 4 #1).
 
-    For each FK (from_col → ref_table.to_col), fetch the referenced rows for the
-    result set and emit their facts keyed by the FK value — so reasoner rules can
-    chain across the relationship without manually supplied edges. Read-only;
-    schema identifiers come from SQLite PRAGMA (not user input).
+    For each FK (from_col → ref_table.to_col) declared on ``table``, fetch the
+    referenced rows. Returns structured edges — ``{subject_key, from_col,
+    ref_table, ref_key, row}`` — consumed both by the reasoner (as facts) and by
+    subgraph materialization (as edges). Read-only; identifiers come from SQLite
+    PRAGMA (schema), never from user input.
     """
     import sqlite3
 
     if not table or not table.isidentifier():
         return []
-    facts: list = []
+    out: list[dict] = []
     con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
     try:
@@ -140,12 +142,10 @@ def _load_fk_facts(db_path: str, table: str | None, rows: list[dict]) -> list:
             if not (str(ref_table).isidentifier() and str(from_col).isidentifier()
                     and str(to_col).isidentifier()):
                 continue
-            seen: set = set()
-            for row in rows:
+            for i, row in enumerate(rows):
                 fv = row.get(from_col)
-                if fv is None or fv in seen:
+                if fv is None:
                     continue
-                seen.add(fv)
                 try:
                     nbrs = con.execute(
                         f"SELECT * FROM {ref_table} WHERE {to_col} = ? LIMIT 5", (fv,)
@@ -153,12 +153,25 @@ def _load_fk_facts(db_path: str, table: str | None, rows: list[dict]) -> list:
                 except sqlite3.Error:
                     continue
                 for nb in nbrs:
-                    key = str(fv)
-                    facts.append((ref_table, key))
-                    for c, v in dict(nb).items():
-                        facts.append((c, key, str(v)))
+                    out.append({"subject_key": str(row.get("id", i)), "from_col": from_col,
+                                "ref_table": ref_table, "ref_key": str(fv), "row": dict(nb)})
     finally:
         con.close()
+    return out
+
+
+def _facts_from_neighbors(neighbors: list[dict]) -> list:
+    """Flatten FK-neighbour rows into reasoner facts keyed by the FK value."""
+    facts: list = []
+    seen: set = set()
+    for nb in neighbors:
+        key = nb["ref_key"]
+        if key in seen:
+            continue
+        seen.add(key)
+        facts.append((nb["ref_table"], key))
+        for c, v in (nb.get("row") or {}).items():
+            facts.append((c, key, str(v)))
     return facts
 
 
@@ -184,6 +197,7 @@ def search(
     on_event=None,
     memory=None,
     auto_relations: bool = False,
+    materialize: bool = False,
 ) -> ReasonedAnswer:
     """Run ontology-grounded reasoning search and return a `ReasonedAnswer`.
 
@@ -266,6 +280,13 @@ def search(
     emit({"stage": "execute", "sql": sql, "params": params,
           "rows": len(rows), "replans": replans})
 
+    # 4a. Resolve FK-neighbour edges once — shared by the reasoner and the
+    #     materialized subgraph.
+    neighbors: list[dict] = []
+    if (auto_relations or materialize) and db_path and rows:
+        neighbors = _fk_neighbors(db_path, mapping.table_for(the_plan.primary_class), rows)
+        emit({"stage": "relations", "neighbor_rows": len(neighbors)})
+
     # 4b. Reason — derive facts over the result subgraph (+ any relationship facts).
     inferred: list[dict] = []
     inferred_cites: list[Citation] = []
@@ -276,10 +297,8 @@ def search(
             facts.append((the_plan.primary_class, key))
             for col, val in row.items():
                 facts.append((col, key, str(val)))
-        if auto_relations and db_path:
-            fk_facts = _load_fk_facts(db_path, mapping.table_for(the_plan.primary_class), rows)
-            facts += fk_facts
-            emit({"stage": "relations", "neighbor_facts": len(fk_facts)})
+        if auto_relations and neighbors:
+            facts += _facts_from_neighbors(neighbors)
         try:
             res = reason(facts, [parse_rule(r) for r in rules])
             for f in res.derived:
@@ -293,6 +312,16 @@ def search(
             emit({"stage": "reason", "derived": len(res.derived)})
         except ValueError as exc:
             emit({"stage": "reason", "error": str(exc)})
+
+    # 4c. Materialize — build the RDF result subgraph (rows + FK edges + derived).
+    subgraph: dict[str, Any] = {}
+    if materialize:
+        from .subgraph import build_subgraph
+
+        sg = build_subgraph(rows, primary_class=the_plan.primary_class,
+                            fk_neighbors=neighbors, inferred=inferred)
+        subgraph = sg.to_dict()
+        emit({"stage": "materialize", "triples": subgraph.get("count", 0)})
 
     # 5. Synthesize.
     answer = _synthesize(llm, question, rows, inferred)
@@ -325,4 +354,5 @@ def search(
         trace=trace,
         provider=str(provider_label),
         status="ok" if rows else "empty",
+        subgraph=subgraph,
     )

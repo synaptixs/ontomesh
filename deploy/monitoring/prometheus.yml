@@ -1,0 +1,23 @@
+# Prometheus scrape config for the Ontoforge wizard.
+#
+# The wizard exposes Prometheus metrics at GET /metrics (wired by
+# wizard/metrics_exporter.py). Reasoning-search metrics (ontomesh_search_*) are
+# included there when ONTOFORGE_SEARCH is enabled.
+#
+#   prometheus --config.file=deploy/monitoring/prometheus.yml
+#
+# Then point Grafana at this Prometheus and import
+# deploy/monitoring/grafana-reasoning-search.json.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: ontoforge-wizard
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - localhost:5000        # the wizard (adjust host:port for your deploy)
+        labels:
+          service: ontoforge

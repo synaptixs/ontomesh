@@ -168,3 +168,58 @@ def test_search_caches_identical_requests(client, enabled, monkeypatch):
     assert calls["n"] == 2                                    # 1st + 3rd ran; 2nd cached
     assert r2.get_json().get("cached") is True
     assert "cached" not in r1.get_json()
+
+
+# ── live SPARQL over the subgraph ─────────────────────────────────────────────
+def _materialized_answer():
+    from runtime.reasoning_search import ReasonedAnswer, build_subgraph
+    sg = build_subgraph([{"id": 1, "name": "Acme"}], primary_class="Customer").to_dict()
+    return ReasonedAnswer(answer="ok", results=[{"id": 1, "name": "Acme"}],
+                          status="ok", subgraph=sg, provider="ollama")
+
+
+def test_search_returns_subgraph_when_materialize(client, enabled, monkeypatch):
+    import app as app_module
+    app_module._SEARCH_CACHE.clear()
+    import runtime.reasoning_search as rs
+    captured = {}
+
+    def cap(question, **kw):
+        captured.update(kw)
+        return _materialized_answer()
+
+    monkeypatch.setattr(rs, "search", cap)
+    rv = client.post("/api/search", json={"question": "q", "flavor": "f", "materialize": True})
+    assert rv.status_code == 200
+    assert captured.get("materialize") is True
+    assert rv.get_json()["subgraph"]["count"] > 0
+
+
+def test_sparql_route_queries_supplied_triples(client, enabled):
+    triples = [["Customer/1", "rdf:type", "Customer", True],
+               ["Customer/1", "name", "Acme", False]]
+    rv = client.post("/api/sparql", json={
+        "query": "SELECT ?s ?n WHERE { ?s rdf:type Customer . ?s name ?n }",
+        "triples": triples})
+    assert rv.status_code == 200
+    d = rv.get_json()
+    assert d["rows"] == [{"?s": "Customer/1", "?n": "Acme"}]
+
+
+def test_sparql_route_rejects_bad_query(client, enabled):
+    rv = client.post("/api/sparql", json={"query": "DELETE WHERE { ?s ?p ?o }",
+                                          "triples": [["a", "b", "c", False]]})
+    assert rv.status_code == 400
+
+
+def test_sparql_disabled_by_default(client):
+    assert client.post("/api/sparql", json={"query": "x", "triples": []}).status_code == 404
+
+
+# ── metrics (graceful without prometheus_client) ──────────────────────────────
+def test_observe_search_is_safe_without_prometheus():
+    import importlib
+    me = importlib.import_module("wizard.metrics_exporter")
+    # Should never raise even if prometheus handles are unregistered.
+    me.observe_search(status="ok", provider="ollama", latency_seconds=0.1,
+                      rows=3, derived=1, triples=5, cached=False)
