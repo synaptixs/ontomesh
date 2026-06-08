@@ -946,9 +946,10 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
       </div>
       <div class="step-nav-footer">
         <button class="btn btn-ghost" onclick="goStep('rules')">← Back</button>
-        <span class="nav-hint">Phase 3 of 3 · Build · Last step. Run the pipeline above, then save to the Library.</span>
+        <span class="nav-hint">Phase 3 of 3 · Build · Run the pipeline above, then continue to post-generation review.</span>
         <div class="nav-right">
           <button class="btn btn-ghost" onclick="goStep('library')">View Library →</button>
+          <button class="btn btn-primary" onclick="goStep('evolve')">Continue → Evolution Review</button>
         </div>
       </div>
     </div>
@@ -1139,6 +1140,13 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
         </div>
         <div id="ev-detail"></div>
       </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('generate')">← Back</button>
+        <span class="nav-hint">After generation · Review evolution proposals, then continue to compliance.</span>
+        <div class="nav-right">
+          <button class="btn btn-primary" onclick="goStep('comply')">Continue → Compliance Dashboard</button>
+        </div>
+      </div>
     </div>
 
     <!-- Compliance Dashboard (Workstream 4) -->
@@ -1237,6 +1245,13 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
           </ul>
         </div>
         <div id="cmp-gap"></div>
+      </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('evolve')">← Back</button>
+        <span class="nav-hint">After generation · Check regulatory coverage, then continue to retrieval.</span>
+        <div class="nav-right">
+          <button class="btn btn-primary" onclick="goStep('retrieve')">Continue → Vector Retrieval</button>
+        </div>
       </div>
     </div>
 
@@ -1352,6 +1367,13 @@ python toolkit.py --phase sequence --log-path /path/to/logs/</pre>
           <button class="btn btn-ghost" onclick="vecBenchmarkLoad()">Load latest run</button>
         </div>
         <div id="vec-benchmark" style="overflow-x:auto">Click run to compare UNFILTERED_VECTOR vs ONTOLOGY_BOUNDED vs PURE_SPARQL.</div>
+      </div>
+      <div class="step-nav-footer">
+        <button class="btn btn-ghost" onclick="goStep('comply')">← Back</button>
+        <span class="nav-hint">After generation · Last step — explore retrieval, then save or load from the Library.</span>
+        <div class="nav-right">
+          <button class="btn btn-primary" onclick="goStep('library')">Done → Library</button>
+        </div>
       </div>
     </div>
 
