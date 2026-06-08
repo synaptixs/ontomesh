@@ -922,17 +922,48 @@
     background: rgba(255,255,255,0.16);
   }
 
-  /* Log Discovery 'Pipeline at a glance' cards use inline light-pastel
-     gradients with var(--text) inside (a light/twilight artifact). Under
-     glass --text flips light and vanishes on the pale fill, so frost the
-     card and force legible light text. The inline coloured top-border has
-     higher specificity than this rule, so the per-stage category colour
-     survives as the cue. (Proper fix: tokenise the inline styles.) */
+  /* ── Log Discovery · 'Pipeline at a glance' stage cards ──────────────────
+     Tokenised (was inline light-pastel gradients + var(--text), which made
+     the body text vanish on the pale fill in BOTH Twilight and Glass — the
+     ink flipped light but the card stayed light). Now --ld carries the
+     per-stage category colour and --ld-ink the card text, so it reads in
+     every theme. Light/Mono keep the original pastels; Glass frosts the card
+     and brightens --ld so the label + top-border survive on the dark frost. */
+  .ld-stage {
+    --ld:       var(--accent);
+    --ld-bg:    var(--surface-2);
+    --ld-ink:   #1f2937;     /* dark ink — cards are light pastel off-glass */
+    --ld-ink-2: #4b5563;
+    background: var(--ld-bg);
+    border-radius: 8px; padding: 12px;
+    border-top: 3px solid var(--ld);
+  }
+  .ld-stage-icon  { font-size: 20px; line-height: 1; }
+  .ld-stage-label { font-size: 11px; color: var(--ld); font-weight: 600;
+                    text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+  .ld-stage-desc  { font-size: 12px; color: var(--ld-ink); margin-top: 4px; line-height: 1.35; }
+  .ld-stage-desc code { font-size: 11px; }
+  .ld-stage-cmd   { font-size: 10px; color: var(--ld-ink-2); margin-top: 6px;
+                    font-family: var(--mono); }
+
+  .ld-stage--mine   { --ld: #4338ca; --ld-bg: linear-gradient(135deg,#eef2ff,#e0e7ff); }
+  .ld-stage--seq    { --ld: #0891b2; --ld-bg: linear-gradient(135deg,#ecfeff,#cffafe); }
+  .ld-stage--rev    { --ld: #d97706; --ld-bg: linear-gradient(135deg,#fef3c7,#fde68a); }
+  .ld-stage--gen    { --ld: #059669; --ld-bg: linear-gradient(135deg,#dcfce7,#bbf7d0); }
+  .ld-stage--reason { --ld: #9333ea; --ld-bg: linear-gradient(135deg,#f3e8ff,#e9d5ff); }
+  .ld-stage--ask    { --ld: #db2777; --ld-bg: linear-gradient(135deg,#fce7f3,#fbcfe8); }
+
+  /* Glass: frost the card, flip the ink light, brighten the category colour. */
   [data-theme="glass"] .ld-stage {
-    background: rgba(255,255,255,0.10) !important;
+    --ld-bg:    rgba(255,255,255,0.10);
+    --ld-ink:   var(--text);
+    --ld-ink-2: var(--text-2);
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
   }
-  [data-theme="glass"] .ld-stage,
-  [data-theme="glass"] .ld-stage * { color: var(--text) !important; }
-  [data-theme="glass"] .ld-stage code { color: var(--text-2) !important; }
+  [data-theme="glass"] .ld-stage--mine   { --ld: #a5b4fc; }
+  [data-theme="glass"] .ld-stage--seq    { --ld: #67e8f9; }
+  [data-theme="glass"] .ld-stage--rev    { --ld: #fcd34d; }
+  [data-theme="glass"] .ld-stage--gen    { --ld: #6ee7b7; }
+  [data-theme="glass"] .ld-stage--reason { --ld: #d8b4fe; }
+  [data-theme="glass"] .ld-stage--ask    { --ld: #f9a8d4; }

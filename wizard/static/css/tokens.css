@@ -211,6 +211,7 @@
       radial-gradient(560px 560px at 96% 18%,  rgba(47,123,209,0.38), transparent 70%),
       radial-gradient(460px 460px at 46% 112%, rgba(57,181,160,0.36), transparent 70%);
     filter: blur(50px); opacity: 0.5;
+    will-change: transform;          /* promote the animated blob to its own layer */
     animation: glass-bg-drift 26s ease-in-out infinite;
   }
   @keyframes glass-bg-drift {
@@ -220,4 +221,19 @@
   }
   @media (prefers-reduced-motion: reduce) {
     [data-theme="glass"] body::before { animation: none; }
+  }
+
+  /* Honour the OS "reduce transparency" preference (and reduce GPU load):
+     drop the frost to opaque navy surfaces and hide the animated backdrop —
+     the same degradation as the no-backdrop-filter fallback, but user-driven.
+     Surfaces go opaque, so the per-page backdrop-filter blur becomes a no-op
+     with nothing left to show through. */
+  @media (prefers-reduced-transparency: reduce) {
+    [data-theme="glass"] {
+      --surface:       #1b2747;
+      --surface-2:     #243a63;
+      --surface-hover: #2a3a63;
+    }
+    [data-theme="glass"] body { background: #0a1326; }
+    [data-theme="glass"] body::before { display: none; }
   }

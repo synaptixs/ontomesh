@@ -413,46 +413,48 @@
       <div style="margin-bottom:14px">
         <h3 style="margin:0 0 8px 4px; font-size:14px">Pipeline at a glance</h3>
         <div style="display:grid; grid-template-columns: repeat(5, 1fr) auto; gap:0; align-items:stretch">
-          <!-- Stage cards alternate with arrow cells via wrapper divs -->
-          <div class="ld-stage" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff); border-radius:8px; padding:12px; border-top:3px solid #4338ca">
-            <div style="font-size:20px;line-height:1">📂</div>
-            <div style="font-size:11px;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Mine</div>
-            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35"><b>Drain</b> clusters log lines into templates; typed slots; <b>PMI</b> entity graph; <b>Granger</b> causality gate</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase mine</div>
+          <!-- Stage cards alternate with arrow cells via wrapper divs.
+               Colour + ink are tokenised in wizard.css (.ld-stage--*) so the
+               category colour survives every theme incl. glass. -->
+          <div class="ld-stage ld-stage--mine">
+            <div class="ld-stage-icon">📂</div>
+            <div class="ld-stage-label">Mine</div>
+            <div class="ld-stage-desc"><b>Drain</b> clusters log lines into templates; typed slots; <b>PMI</b> entity graph; <b>Granger</b> causality gate</div>
+            <div class="ld-stage-cmd">--phase mine</div>
           </div>
           <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted-2)">→</div>
-          <div class="ld-stage" style="background:linear-gradient(135deg,#ecfeff,#cffafe); border-radius:8px; padding:12px; border-top:3px solid #0891b2">
-            <div style="font-size:20px;line-height:1">📈</div>
-            <div style="font-size:11px;color:#0891b2;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Sequence</div>
-            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">Per-service <b>HMM</b> over trajectories; anomalous sequences surface as event candidates</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase sequence</div>
+          <div class="ld-stage ld-stage--seq">
+            <div class="ld-stage-icon">📈</div>
+            <div class="ld-stage-label">Sequence</div>
+            <div class="ld-stage-desc">Per-service <b>HMM</b> over trajectories; anomalous sequences surface as event candidates</div>
+            <div class="ld-stage-cmd">--phase sequence</div>
           </div>
           <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted-2)">→</div>
-          <div class="ld-stage" style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:8px; padding:12px; border-top:3px solid #d97706">
-            <div style="font-size:20px;line-height:1">👁️</div>
-            <div style="font-size:11px;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Review</div>
-            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35"><b>You are here.</b> Approve / reject / edit / merge proposals so they flow into your session</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">Step 5 (this screen)</div>
+          <div class="ld-stage ld-stage--rev">
+            <div class="ld-stage-icon">👁️</div>
+            <div class="ld-stage-label">Review</div>
+            <div class="ld-stage-desc"><b>You are here.</b> Approve / reject / edit / merge proposals so they flow into your session</div>
+            <div class="ld-stage-cmd">Step 5 (this screen)</div>
           </div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px">
-          <div class="ld-stage" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0); border-radius:8px; padding:12px; border-top:3px solid #059669">
-            <div style="font-size:20px;line-height:1">🛠️</div>
-            <div style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Generate</div>
-            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">RCA-shaped ontology with <code style="font-size:11px">:CausalEvent · :hasCause · :rootCause</code> taxonomy</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase 2</div>
+          <div class="ld-stage ld-stage--gen">
+            <div class="ld-stage-icon">🛠️</div>
+            <div class="ld-stage-label">Generate</div>
+            <div class="ld-stage-desc">RCA-shaped ontology with <code>:CausalEvent · :hasCause · :rootCause</code> taxonomy</div>
+            <div class="ld-stage-cmd">--phase 2</div>
           </div>
-          <div class="ld-stage" style="background:linear-gradient(135deg,#f3e8ff,#e9d5ff); border-radius:8px; padding:12px; border-top:3px solid #9333ea">
-            <div style="font-size:20px;line-height:1">🧠</div>
-            <div style="font-size:11px;color:#9333ea;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Reason</div>
-            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">Materialise derived <code style="font-size:11px">:hasCause</code> + <code style="font-size:11px">:triggers</code> with <code style="font-size:11px">prov:wasDerivedFrom</code> lineage</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">--phase reason</div>
+          <div class="ld-stage ld-stage--reason">
+            <div class="ld-stage-icon">🧠</div>
+            <div class="ld-stage-label">Reason</div>
+            <div class="ld-stage-desc">Materialise derived <code>:hasCause</code> + <code>:triggers</code> with <code>prov:wasDerivedFrom</code> lineage</div>
+            <div class="ld-stage-cmd">--phase reason</div>
           </div>
-          <div class="ld-stage" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8); border-radius:8px; padding:12px; border-top:3px solid #db2777">
-            <div style="font-size:20px;line-height:1">💬</div>
-            <div style="font-size:11px;color:#db2777;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px">Ask</div>
-            <div style="font-size:12px;color:var(--text);margin-top:4px;line-height:1.35">Insights preset <i>"what caused this event?"</i> answers from the materialised graph</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:monospace">/api/insights/rca</div>
+          <div class="ld-stage ld-stage--ask">
+            <div class="ld-stage-icon">💬</div>
+            <div class="ld-stage-label">Ask</div>
+            <div class="ld-stage-desc">Insights preset <i>"what caused this event?"</i> answers from the materialised graph</div>
+            <div class="ld-stage-cmd">/api/insights/rca</div>
           </div>
         </div>
       </div>
