@@ -61,17 +61,27 @@ def test_workflow_logs_into_ghcr(workflow):
     job = workflow["jobs"]["build-and-push"]
     steps = job["steps"]
     login_steps = [s for s in steps if "login-action" in (s.get("uses") or "")]
-    assert len(login_steps) == 1, \
-        f"expected exactly one docker login step, got {len(login_steps)}"
-    login = login_steps[0]
-    # Either the literal "ghcr.io" or an env-var reference is fine
-    # — just ensure the registry isn't pointing at Docker Hub.
-    registry = login["with"]["registry"]
+    assert login_steps, "no docker login step found"
+    # The GHCR login is the one authenticating with the GitHub-issued token.
+    # A Docker Hub mirror login may also be present (P5.5) — that's fine, as
+    # long as it's optional (guarded by a conditional) so the core publish
+    # still runs when those secrets aren't configured.
+    ghcr_logins = [s for s in login_steps
+                   if "secrets.GITHUB_TOKEN" in (s["with"].get("password") or "")]
+    assert len(ghcr_logins) == 1, \
+        f"expected exactly one GHCR login (GitHub token), got {len(ghcr_logins)}"
+    login = ghcr_logins[0]
     text = WORKFLOW.read_text()
     assert "ghcr.io" in text, "workflow doesn't push to ghcr.io"
-    assert "docker.io" not in registry.lower() or "ghcr" in text
-    # GitHub-issued token, not a PAT — keeps the workflow self-contained.
-    assert "secrets.GITHUB_TOKEN" in login["with"]["password"]
+    # The GHCR login's registry must not point at Docker Hub.
+    assert "docker.io" not in (login["with"].get("registry") or "").lower()
+    # Any extra (non-GHCR) login must be conditional so the workflow is
+    # self-contained without external registry secrets.
+    for s in login_steps:
+        if s is not login:
+            assert s.get("if"), (
+                f"non-GHCR login step '{s.get('name')}' should be conditional "
+                "so the publish still works without those secrets")
 
 
 def test_workflow_targets_ontomesh_image(workflow):

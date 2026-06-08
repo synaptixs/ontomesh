@@ -651,7 +651,9 @@ def test_yaml_relationship_parser_handles_real_template_sentences():
     structured {from_entity, label, to_entity} dicts."""
     from wizard import app as wapp
     c = wapp.app.test_client()
-    names = c.get('/api/templates').get_json()['templates']
+    # Use 'all' — the full shipped catalogue. ('templates'/'visible' is the
+    # user-personalised "show on Step 1" subset, which defaults to empty.)
+    names = c.get('/api/templates').get_json()['all']
     assert names, "no templates registered"
     for n in names:
         j = c.get('/api/template/' + n).get_json()
