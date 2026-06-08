@@ -127,6 +127,16 @@ grounded the answer with a SPARQL `SELECT` over the materialized RDF triples.
 
 </div>
 
+## What's new in 3.8.0
+
+- :material-brain: **Reasoning Search** — ask your database in plain English and get a
+  cited, ontology-grounded answer with a live SPARQL subgraph. See
+  [Reasoning Search](reference/search.md). (Flag-gated: `ONTOFORGE_SEARCH=1`.)
+- :material-package-variant: First PyPI release under the **`ontoforge`** name
+  (`pip install ontoforge`); GHCR image path unchanged.
+- :material-chart-box: Prometheus `ontomesh_search_*` metrics + a bundled Grafana
+  dashboard (`deploy/monitoring/`).
+
 ## What's new in 3.7.0
 
 - :material-license: Apache-2.0 licence + NOTICE + SECURITY.md + Contributor Covenant CoC
