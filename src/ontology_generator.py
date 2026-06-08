@@ -13,7 +13,7 @@ No external dependencies.
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 from db_introspector import (
     DBIntrospector, TableModel, ColumnModel,
@@ -21,7 +21,7 @@ from db_introspector import (
 )
 
 VERSION = "1.0.0"
-NOW = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+NOW = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 PREFIXES = f"""\
 @prefix :     <{BASE_IRI}> .

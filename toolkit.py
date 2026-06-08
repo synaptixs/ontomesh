@@ -27,7 +27,7 @@ import os
 import json
 import argparse
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 
 # ── Path setup ───────────────────────────────────────────────────────────
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -832,7 +832,7 @@ def main():
     parser.add_argument("--industry", default="Enterprise", help="Industry label for output")
     args = parser.parse_args()
 
-    start = datetime.utcnow()
+    start = datetime.now(timezone.utc)
     banner(f"Ontology Engineering Toolkit  |  {args.industry}  |  {start.strftime('%Y-%m-%d %H:%M UTC')}")
 
     os.makedirs(args.out, exist_ok=True)
@@ -1632,7 +1632,7 @@ def main():
     for fn, fargs in phases[args.phase]:
         fn(*fargs)
 
-    elapsed = (datetime.utcnow() - start).total_seconds()
+    elapsed = (datetime.now(timezone.utc) - start).total_seconds()
     print(f"\n{'='*62}")
     print(f"  ✓ Pipeline complete in {elapsed:.1f}s")
     print(f"  Output directory: {args.out}/")

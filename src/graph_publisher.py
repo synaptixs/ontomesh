@@ -130,7 +130,7 @@ def _sign_neptune_request(endpoint: str, query: str,
                            region: str, access_key: str,
                            secret_key: str, session_token: str = "") -> dict:
     """AWS SigV4 signing for Neptune SPARQL Update endpoint."""
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     amz_date  = now.strftime("%Y%m%dT%H%M%SZ")
     date_stamp = now.strftime("%Y%m%d")
     service   = "neptune-db"
@@ -339,7 +339,7 @@ def generate_publish_summary(results: dict, out_path: str, store: str, endpoint:
     summary = {
         "store": store,
         "endpoint": endpoint,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "artifacts": results,
         "total": len(results),
         "succeeded": sum(1 for r in results.values() if r["ok"]),

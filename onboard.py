@@ -36,7 +36,7 @@ import re
 import textwrap
 import argparse
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Optional, Tuple
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -245,7 +245,7 @@ class DomainSession:
         self.cqs: List[str] = []
         self.out_dir            = ""
         self.db_path            = ""
-        self.created_at         = datetime.utcnow().isoformat() + "Z"
+        self.created_at         = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     def to_dict(self) -> dict:
         return {

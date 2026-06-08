@@ -8,7 +8,7 @@ Generates a self-contained HTML summary report of all toolkit outputs.
 import os
 import csv
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def _read_csv(path: str) -> list:
@@ -42,9 +42,10 @@ def _score_bar(score: int) -> str:
 
 
 def generate_report(output_base: str):
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     reports_dir = os.path.join(output_base, "reports")
     mapping_dir = os.path.join(output_base, "mapping")
+    os.makedirs(reports_dir, exist_ok=True)
 
     cq_results   = _read_csv(os.path.join(reports_dir, "cq_test_results.csv"))
     gov_scores   = _read_csv(os.path.join(reports_dir, "governance_scorecard.csv"))
