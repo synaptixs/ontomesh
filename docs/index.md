@@ -3,7 +3,7 @@
 **The ontology mesh for GraphRAG.** Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.
 
 [:material-rocket-launch: Get started](getting-started/index.md){ .md-button .md-button--primary }
-[:material-github: View on GitHub](https://github.com/synaptixs/ontomesh){ .md-button }
+[:material-package-variant: Install from PyPI](getting-started/install.md){ .md-button }
 
 ---
 
@@ -73,11 +73,10 @@ grounded the answer with a SPARQL `SELECT` over the materialized RDF triples.
     open http://localhost:5051
     ```
 
-=== "From source"
+=== "PyPI"
 
     ```bash
-    git clone https://github.com/synaptixs/ontomesh.git
-    cd ontomesh && pip install -e ".[wizard]"
+    pip install 'ontoforge[wizard]'
     ontoforge-wizard
     ```
 

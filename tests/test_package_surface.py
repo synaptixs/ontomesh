@@ -98,15 +98,14 @@ def landing_body():
     return rv.get_data(as_text=True)
 
 
-def test_landing_no_longer_promises_unreleased_pypi(landing_body):
-    """``pip install ontoforge`` from PyPI doesn't exist yet.  It MAY
-    appear in the 'coming in v3.6' note, but MUST NOT be the primary
-    install instruction in the hero install pill."""
-    # The install pill should now say 'git clone' rather than 'pip install ontoforge'.
+def test_landing_install_pill_uses_pip_not_git(landing_body):
+    """Distribution is via PyPI and the published container image.  The
+    hero install pill must lead with ``pip install`` and must NOT point
+    users at a git checkout."""
     pill_segment = landing_body.split('class="install"', 1)[1].split('</code>', 1)[0]
-    assert "pip install ontoforge" not in pill_segment, \
-        "install pill should NOT promise PyPI install yet"
-    assert "git clone" in pill_segment
+    assert "pip install" in pill_segment, \
+        "install pill should promise the PyPI install"
+    assert "git clone" not in pill_segment
 
 
 def test_landing_drops_fabricated_hybrid_retriever(landing_body):

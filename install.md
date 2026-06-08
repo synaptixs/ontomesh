@@ -17,12 +17,16 @@ How to install the toolkit, point it at a database, and get a working ontology. 
 **Python:** 3.10 or later.
 
 ```bash
-git clone https://github.com/synaptixs/ontomesh.git
-cd ontomesh
-pip install -r requirements-core.txt
+pip install ontoforge
 ```
 
-That's it. ~50 MB, no compile, no API keys. The toolkit now runs against any SQLite database. For PostgreSQL / MySQL / Oracle / SQL Server / DB2, also install the matching driver — see §4 below.
+Or run the published container image — no Python install required:
+
+```bash
+docker run --rm -p 5051:5051 ghcr.io/synaptixs/ontomesh:latest
+```
+
+That's it. ~50 MB, no compile, no API keys. The toolkit runs against any SQLite database. For PostgreSQL / MySQL / Oracle / SQL Server / DB2, also install the matching driver — see §4 below.
 
 ### Optional add-ons (install only when you need them)
 

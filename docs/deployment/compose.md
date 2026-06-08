@@ -3,8 +3,7 @@
 The [`compose.yml`](https://github.com/synaptixs/ontomesh/blob/main/compose.yml) at the repo root brings up the wizard behind Caddy with automatic TLS.
 
 ```bash
-git clone https://github.com/synaptixs/ontomesh.git
-cd ontomesh
+curl -O https://raw.githubusercontent.com/synaptixs/ontomesh/main/compose.yml
 docker compose up -d
 ```
 

@@ -1,6 +1,6 @@
 # Integration guide — get value in 5 minutes, not 5 days
 
-The shortest path from *clone the repo* to *running ontology against your data*. If you read nothing else in this repository, read this. Deeper reference lives in [install.md](../install.md) and the docs in this directory.
+The shortest path from *pip install* to *running ontology against your data*. If you read nothing else in this repository, read this. Deeper reference lives in [install.md](../install.md) and the docs in this directory.
 
 ## Contents
 
@@ -17,13 +17,11 @@ The shortest path from *clone the repo* to *running ontology against your data*.
 Three commands, one bundled SQLite database, no API keys, no driver compiles.
 
 ```bash
-# 1. Clone + minimum dependencies (~50 MB, no compile)
-git clone https://github.com/synaptixs/ontomesh.git
-cd ontomesh
-pip install -r requirements-core.txt
+# 1. Install (~50 MB, no compile)
+pip install ontoforge
 
 # 2. Run the full pipeline against the bundled retail demo DB
-python3 toolkit.py --db db/demo.db --out output/demo
+ontoforge --db db/demo.db --out output/demo
 
 # 3. Open the report
 open output/demo/reports/toolkit_report.html

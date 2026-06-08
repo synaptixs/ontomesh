@@ -17,9 +17,6 @@ site_description: The ontology mesh for GraphRAG — mine ontologies from logs, 
 site_author:      Synaptixs
 copyright:        Apache-2.0 · &copy; Synaptixs
 
-repo_name:        synaptixs/ontomesh
-repo_url:         https://github.com/synaptixs/ontomesh
-edit_uri:         edit/develop/docs/
 
 # Source: all Markdown lives under docs/.  The site is generated into ./site
 # (gitignored).
@@ -103,8 +100,6 @@ plugins:
 
 extra:
   social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/synaptixs/ontomesh
     - icon: fontawesome/brands/docker
       link: https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh
   version:
@@ -145,7 +140,6 @@ nav:
   - Releases:
       - Release notes: release-notes.md
   - Project:
-      - GitHub:        https://github.com/synaptixs/ontomesh
       - Container:     https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh
       - Discussions:   https://github.com/synaptixs/ontomesh/discussions
       - Issues:        https://github.com/synaptixs/ontomesh/issues

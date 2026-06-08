@@ -47,7 +47,7 @@ lime-green (#7dc242 / #8fd14f) as a single SCARCE accent used only for the
 primary CTA and the active/mesh-thread elements. Fonts: Inter + Inter Tight for
 display, JetBrains Mono for code.
 
-Sections, in order: sticky nav (wordmark + Product/Docs/Projects/GitHub + a green
+Sections, in order: sticky nav (wordmark + Product/Docs/Projects + a green
 "Open the wizard →" CTA); a hero (kicker pill, big "The ontology mesh for
 GraphRAG." headline with "GraphRAG" in green, one-line subhead, primary CTA + a
 `pip install ontoforge` code pill, and an abstract mesh-graph SVG illustration in
