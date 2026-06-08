@@ -148,6 +148,9 @@
         <button type="button" class="theme-btn" data-theme-name="light" onclick="setTheme('light')" title="Light theme">
           <span class="theme-icon">☀</span><span>Light</span>
         </button>
+        <button type="button" class="theme-btn" data-theme-name="glass" onclick="setTheme('glass')" title="Liquid Glass theme">
+          <span class="theme-icon">✨</span><span>Glass</span>
+        </button>
       </div>
     </div>
   </aside>
@@ -1706,7 +1709,7 @@ const TEMPLATE_ICONS = {
 // first visit — system prefers-color-scheme no longer forces a theme. The
 // graph view re-reads CSS vars on each draw, so node/edge colours follow the
 // active theme automatically.
-const THEMES = ['twilight', 'mono', 'light'];
+const THEMES = ['twilight', 'mono', 'light', 'glass'];
 // Migrate the pre-uplift theme name: the old 'dark' palette is now Twilight.
 const THEME_ALIASES = { dark: 'twilight' };
 

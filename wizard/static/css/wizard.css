@@ -56,9 +56,11 @@
      monochrome. Replaces the old invert() filter hack. */
   .wm-dark { display: none; }
   [data-theme="twilight"] .wm-light,
-  [data-theme="dark"]     .wm-light { display: none; }
+  [data-theme="dark"]     .wm-light,
+  [data-theme="glass"]    .wm-light { display: none; }
   [data-theme="twilight"] .wm-dark,
-  [data-theme="dark"]     .wm-dark  { display: block; }
+  [data-theme="dark"]     .wm-dark,
+  [data-theme="glass"]    .wm-dark  { display: block; }
   [data-theme="mono"] .wm-light { filter: grayscale(1) contrast(1.05); }
   /* Legacy fallbacks kept so any unconverted markup still renders. */
   .sidebar-logo span { font-size: 11px; color: var(--muted-2); display: block;
@@ -861,3 +863,100 @@
     .nav-drawer, .nav-scrim, .phases .pdot,
     .drawer-toggle, .topbar-exit { transition: none !important; }
   }
+
+  /* ════════════════════════════════════════════════════════════════
+     LIQUID GLASS — wizard (Phase 2)
+     The glass token block (tokens.css) already makes var(--surface)
+     translucent, so chrome + cards go see-through the moment glass is
+     active. Here we add the backdrop they refract and the blur itself.
+     Reversible: it's all scoped to [data-theme="glass"].
+     ════════════════════════════════════════════════════════════════ */
+
+  /* Live backdrop. .main/.app must go transparent so the fixed blob layer
+     shows through and the frosted surfaces have something to refract. */
+  [data-theme="glass"] body {
+    background:
+      radial-gradient(120% 90% at 88% -8%,  #16264a 0%, transparent 55%),
+      radial-gradient(110% 80% at -8% 108%, #0c2030 0%, transparent 50%),
+      linear-gradient(160deg, #0a1326, #070d1c);
+    background-attachment: fixed;
+  }
+  [data-theme="glass"] .main { background: transparent; }
+  [data-theme="glass"] body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(440px 440px at 6% 2%,   rgba(125,194,66,0.40), transparent 70%),
+      radial-gradient(560px 560px at 96% 18%, rgba(47,123,209,0.38), transparent 70%),
+      radial-gradient(460px 460px at 46% 112%, rgba(57,181,160,0.36), transparent 70%);
+    filter: blur(52px); opacity: 0.5;
+    animation: wiz-glass-drift 26s ease-in-out infinite;
+  }
+  /* Chrome + content sit above the backdrop. */
+  [data-theme="glass"] .app { position: relative; z-index: 1; background: transparent; }
+  @keyframes wiz-glass-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(26px, 20px) scale(1.05); }
+    66%      { transform: translate(-20px, 12px) scale(0.97); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-theme="glass"] body::before { animation: none; }
+  }
+
+  /* Frost the chrome + the primary content surfaces. */
+  [data-theme="glass"] .topbar,
+  [data-theme="glass"] .action-bar,
+  [data-theme="glass"] .nav-drawer,
+  [data-theme="glass"] .card,
+  [data-theme="glass"] .modal,
+  [data-theme="glass"] .toast,
+  [data-theme="glass"] .template-card,
+  [data-theme="glass"] .rel-graph-wrap,
+  [data-theme="glass"] #pipeline-log {
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+
+  /* Specular top-rim on the larger panels. */
+  [data-theme="glass"] .card,
+  [data-theme="glass"] .modal {
+    position: relative;
+  }
+  [data-theme="glass"] .card::before,
+  [data-theme="glass"] .modal::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 1px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(90deg, transparent,
+                                rgba(255,255,255,0.5), transparent);
+    pointer-events: none;
+  }
+
+  /* Nested list items inside a frosted .card: bump opacity so they read as
+     distinct sub-panels instead of stacking transparency into mud. No extra
+     blur (the parent card already frosts the backdrop) — keeps GPU cost down. */
+  [data-theme="glass"] .item-card,
+  [data-theme="glass"] .cq-item,
+  [data-theme="glass"] .rel-item,
+  [data-theme="glass"] .vec-example,
+  [data-theme="glass"] .card-proposal {
+    background: rgba(255,255,255,0.10);
+  }
+  [data-theme="glass"] .item-card:hover,
+  [data-theme="glass"] .cq-item:hover,
+  [data-theme="glass"] .rel-item:hover {
+    background: rgba(255,255,255,0.16);
+  }
+
+  /* Log Discovery 'Pipeline at a glance' cards use inline light-pastel
+     gradients with var(--text) inside (a light/twilight artifact). Under
+     glass --text flips light and vanishes on the pale fill, so frost the
+     card and force legible light text. The inline coloured top-border has
+     higher specificity than this rule, so the per-stage category colour
+     survives as the cue. (Proper fix: tokenise the inline styles.) */
+  [data-theme="glass"] .ld-stage {
+    background: rgba(255,255,255,0.10) !important;
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+  [data-theme="glass"] .ld-stage,
+  [data-theme="glass"] .ld-stage * { color: var(--text) !important; }
+  [data-theme="glass"] .ld-stage code { color: var(--text-2) !important; }
