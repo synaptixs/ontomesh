@@ -57,13 +57,16 @@ img { max-width: 100%; display: block; }
    Twilight canvas. Mono shows the Light asset desaturated. */
 .wm-dark { display: none; }
 [data-theme="twilight"] .wm-light,
-[data-theme="dark"]     .wm-light { display: none; }
+[data-theme="dark"]     .wm-light,
+[data-theme="glass"]    .wm-light { display: none; }
 [data-theme="twilight"] .wm-dark,
-[data-theme="dark"]     .wm-dark  { display: block; }
+[data-theme="dark"]     .wm-dark,
+[data-theme="glass"]    .wm-dark  { display: block; }
 [data-theme="mono"] .wm-light { filter: grayscale(1) contrast(1.05); }
 /* The footer mark is the navy lattice — lighten it on the dark canvas. */
 [data-theme="twilight"] .footer-mark,
-[data-theme="dark"] .footer-mark { filter: brightness(0) invert(0.82); }
+[data-theme="dark"] .footer-mark,
+[data-theme="glass"] .footer-mark { filter: brightness(0) invert(0.82); }
 .nav-links {
   display: flex; align-items: center; gap: 28px;
   list-style: none; padding: 0; margin: 0;
@@ -408,4 +411,86 @@ img { max-width: 100%; display: block; }
 }
 .footer a:hover, .footer a:focus-visible {
   color: var(--accent); text-decoration: none;
+}
+
+/* ── Theme toggle (nav) ─────────────────────────────────────────
+   Small opt-in control to flip Liquid Glass on/off. Default stays
+   Twilight; choice persists to localStorage (shared with the wizard). */
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  color: var(--text-2);
+  padding: 7px 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .12s, color .12s, background .12s;
+}
+.theme-toggle:hover, .theme-toggle:focus-visible {
+  color: var(--accent); border-color: var(--accent);
+  outline: none;
+}
+.theme-toggle[aria-pressed="true"] {
+  color: var(--accent); border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LIQUID GLASS — landing (Phase 1)
+   Surfaces already use var(--surface)/var(--border); the glass token
+   block makes those translucent, so here we only add the backdrop the
+   frost refracts and the backdrop-filter blur itself. No structural
+   changes — toggling [data-theme="glass"] is fully reversible.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Live, colourful backdrop the frost sits over (fixed, behind content). */
+[data-theme="glass"] body {
+  background:
+    radial-gradient(120% 90% at 85% -10%, #16264a 0%, transparent 55%),
+    radial-gradient(110% 80% at -5% 110%, #0c2030 0%, transparent 50%),
+    linear-gradient(160deg, #0a1326, #070d1c);
+  background-attachment: fixed;
+}
+[data-theme="glass"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(420px 420px at 8% 4%,  rgba(125,194,66,0.42), transparent 70%),
+    radial-gradient(520px 520px at 92% 22%, rgba(47,123,209,0.40), transparent 70%),
+    radial-gradient(440px 440px at 42% 108%, rgba(57,181,160,0.38), transparent 70%);
+  filter: blur(48px);
+  opacity: 0.55;
+  animation: glass-drift 24s ease-in-out infinite;
+}
+@keyframes glass-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(28px, 22px) scale(1.05); }
+  66%      { transform: translate(-22px, 14px) scale(0.97); }
+}
+
+/* The frosted surfaces. var(--glass-blur) only exists in the glass theme. */
+[data-theme="glass"] .kicker,
+[data-theme="glass"] .install,
+[data-theme="glass"] .trust-row code,
+[data-theme="glass"] .card,
+[data-theme="glass"] .steps > li:not(.arrow),
+[data-theme="glass"] .end-cta {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* Specular top rim — the "lit glass edge" — on the larger panels. */
+[data-theme="glass"] .card,
+[data-theme="glass"] .steps > li:not(.arrow),
+[data-theme="glass"] .end-cta {
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="glass"] .card::before,
+[data-theme="glass"] .steps > li:not(.arrow)::before,
+[data-theme="glass"] .end-cta::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg, transparent,
+                              rgba(255,255,255,0.55), transparent);
+  pointer-events: none;
 }

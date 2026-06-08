@@ -134,3 +134,61 @@
     --brand-bg-soft: #f5f5f5;
     --on-brand:      #ffffff;
   }
+
+  /* ────────── GLASS ── Liquid-glass: translucent frosted surfaces ──────────
+     A DARK-NATIVE material. Surfaces become translucent and gain a blur via
+     `backdrop-filter` (applied per-surface in landing.css / wizard.css), over
+     a live gradient backdrop. Light themes are intentionally NOT glass — on a
+     light canvas frost washes out and hairlines vanish (see the
+     wizard-glass-light-challenge mockup), so we keep glass to the dark palette.
+     The two glass-only tokens (--glass-blur / --glass-shadow) are consumed by
+     the backdrop-filter rules; everything else mirrors Twilight so all
+     existing var(--surface)/var(--border) components glass-ify for free. */
+  [data-theme="glass"] {
+    --bg:            #0a1326;
+    --surface:       rgba(255,255,255,0.07);
+    --surface-2:     rgba(255,255,255,0.12);
+    --surface-hover: rgba(255,255,255,0.16);
+    --border:        rgba(255,255,255,0.16);
+    --border-strong: rgba(255,255,255,0.28);
+    --accent:        #9ed75a;        /* lime, slightly lifted for glass */
+    --accent-hover:  #b6f27c;
+    --accent-soft:   rgba(158,215,90,0.16);
+    --accent-2:      #7da6e0;
+    --success:       #5fd07a;
+    --success-soft:  rgba(95,208,122,0.16);
+    --warn:          #fbbf24;
+    --warn-soft:     rgba(251,191,36,0.16);
+    --danger:        #f87171;
+    --danger-soft:   rgba(248,113,113,0.16);
+    --text:          #eef2f9;
+    --text-2:        #b6c4da;
+    --muted:         #8294b4;
+    --muted-2:       #647e9c;
+    --on-accent:     #07210a;         /* dark ink on the lime fill */
+    --brand:         #eef2f9;
+    --brand-deep:    #c9d6ea;
+    --brand-mesh:    #9ed75a;
+    --brand-bg-soft: rgba(255,255,255,0.07);
+    --on-brand:      #07210a;
+    /* glass material */
+    --glass-blur:    saturate(180%) blur(22px);
+    --glass-shadow:  0 1px 0 rgba(255,255,255,0.20) inset,
+                     0 -1px 0 rgba(255,255,255,0.04) inset,
+                     0 18px 50px rgba(3,8,20,0.45);
+    --shadow-1:      var(--glass-shadow);
+    --shadow-2:      var(--glass-shadow);
+    --shadow-modal:  0 28px 70px rgba(0,0,0,0.60),
+                     0 1px 0 rgba(255,255,255,0.18) inset;
+  }
+
+  /* Fallback: where backdrop-filter is unsupported, translucent surfaces would
+     be unreadable see-through. Make them opaque navy so glass degrades to a
+     solid dark theme instead of breaking. */
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    [data-theme="glass"] {
+      --surface:       #1b2747;
+      --surface-2:     #243a63;
+      --surface-hover: #2a3a63;
+    }
+  }

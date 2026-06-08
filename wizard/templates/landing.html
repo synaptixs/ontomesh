@@ -39,6 +39,9 @@
     <ul class="nav-links" role="list">
       <li><a href="/projects">Projects</a></li>
       <li><a href="/help">Docs</a></li>
+      <li><button id="glass-toggle" type="button" class="theme-toggle"
+                  aria-pressed="false" onclick="toggleGlass()"
+                  title="Toggle the Liquid Glass theme">✨ Glass</button></li>
       <li><a href="/wizard" class="btn btn-primary">Open the wizard →</a></li>
     </ul>
   </nav>
@@ -309,5 +312,29 @@ pip install <span class="s">'ontoforge[wizard]'</span>
       </ul>
     </div>
   </footer>
+
+  <script>
+    // Theme persistence — shared key with the wizard ('wizard-theme').
+    // Default is Twilight; Glass is opt-in via the nav toggle. Honour any
+    // theme the visitor already chose (incl. mono/light set in the wizard).
+    (function () {
+      var KEY = 'wizard-theme';
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch (_) {}
+      if (stored) { document.body.setAttribute('data-theme', stored); }
+      var btn = document.getElementById('glass-toggle');
+      if (btn) {
+        btn.setAttribute('aria-pressed',
+          document.body.getAttribute('data-theme') === 'glass');
+      }
+      window.toggleGlass = function () {
+        var cur = document.body.getAttribute('data-theme');
+        var next = (cur === 'glass') ? 'twilight' : 'glass';
+        document.body.setAttribute('data-theme', next);
+        try { localStorage.setItem(KEY, next); } catch (_) {}
+        if (btn) { btn.setAttribute('aria-pressed', next === 'glass'); }
+      };
+    })();
+  </script>
 </body>
 </html>
