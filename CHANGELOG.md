@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [3.8.0] — 2026-06-07 · Reasoning Search + Ontoforge
+
+First PyPI release under the **`ontoforge`** package name (`pip install ontoforge`). The GitHub repo (`synaptixs/ontomesh`) and GHCR image path (`ghcr.io/synaptixs/ontomesh`) are unchanged; only the pip/console-script name and the docs-site brand move to Ontoforge.
+
+### Added
+
+- **Reasoning Search** — ontology-grounded, LLM-powered search over a connected database. Plans over the ontology vocabulary, executes safe **read-only** SQL (allow-listed, sensitivity-tier gated), derives facts via a forward-chaining Datalog reasoner with `prov:wasDerivedFrom` lineage, auto-loads foreign-key neighbours for multi-hop reasoning, and returns **cited** answers. Surfaces: SDK (`from runtime.reasoning_search import search`), CLI (`ontoforge search`), HTTP (`POST /api/search` + SSE `/api/search/stream`), and the `/ask` console (embedded as a wizard step). Local (Ollama) or cloud (OpenAI). **Flag-gated behind `ONTOFORGE_SEARCH` (default-off).**
+- **Live SPARQL subgraph** — materializes the result subgraph as RDF (Turtle + nodes/edges view) and runs a dependency-free minimal SPARQL `SELECT` over it; `POST /api/sparql` + an Ask-console "Build RDF subgraph" toggle.
+- **Search observability** — `ontomesh_search_*` Prometheus metrics (requests, latency, rows, derived facts, triples) on the existing `/metrics`; a bundled Grafana dashboard + Prometheus scrape config in `deploy/monitoring/`.
+- **Persistent search memory** + a TTL response cache for `/api/search`.
+
+### Changed
+
+- **Package + console scripts renamed** `ontomesh` → `ontoforge` (`ontoforge`, `ontoforge-wizard`, `ontoforge-onboard`). Repo slug and GHCR image name unchanged.
+- **Docs site** rebranded to Ontoforge (URL `synaptixs.github.io/ontomesh/` unchanged).
+
+### Fixed
+
+- Property resolution is now naming-convention tolerant: a planner term like `alarmState` resolves to the mapping's `hasAlarmState`, so real-LLM queries ground reliably (`Mapping.resolve()`).
+
 ## [3.7.0] — 2026-06-05 · Public release
 
 First public release on PyPI + GHCR (public).  Consolidates the 3.7.0-dev and 3.7.1-dev preview cuts into one tagged release under the new `synaptixs/ontomesh` namespace and Apache-2.0 licence.
@@ -159,6 +179,7 @@ Accessibility, design tokens, live drift, per-phase help.
 
 ---
 
+[3.8.0]: https://github.com/synaptixs/ontomesh/compare/v3.7.1...v3.8.0
 [3.7.0]: https://github.com/synaptixs/ontomesh/compare/v3.6.0-dev...v3.7.0
 [3.6.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.5.0-dev...v3.6.0-dev
 [3.5.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.4.0-dev...v3.5.0-dev

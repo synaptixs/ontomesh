@@ -4,7 +4,7 @@ Three supported installation paths, in order from "least effort" to "most custom
 
 ## 1. Docker (fastest path to running)
 
-The published image at `ghcr.io/synaptixs/ontomesh:3.7.0` is multi-arch (`linux/amd64` + `linux/arm64`), runs as a non-root user, and bundles every default extra needed to open the wizard.
+The published image at `ghcr.io/synaptixs/ontomesh:3.8.0` is multi-arch (`linux/amd64` + `linux/arm64`), runs as a non-root user, and bundles every default extra needed to open the wizard.
 
 ```bash
 # Ephemeral (resets when the container stops):
@@ -26,7 +26,7 @@ Then open **http://localhost:5051**.
 The image is cosign-signed by GitHub Actions OIDC — anyone can verify, offline:
 
 ```bash
-cosign verify ghcr.io/synaptixs/ontomesh:3.7.0 \
+cosign verify ghcr.io/synaptixs/ontomesh:3.8.0 \
   --certificate-identity-regexp='^https://github.com/synaptixs/ontomesh' \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 ```
@@ -34,15 +34,13 @@ cosign verify ghcr.io/synaptixs/ontomesh:3.7.0 \
 The image also ships an SPDX SBOM and SLSA provenance attestation as OCI artefacts:
 
 ```bash
-docker buildx imagetools inspect ghcr.io/synaptixs/ontomesh:3.7.0 \
+docker buildx imagetools inspect ghcr.io/synaptixs/ontomesh:3.8.0 \
   --format '{{ json .SBOM }}'
 ```
 
-## 2. From PyPI (when published)
+## 2. From PyPI
 
-!!! info "Coming soon"
-
-    PyPI publish lands in 3.7.1.  Track at [issue #44](https://github.com/synaptixs/ontomesh/issues).
+Published to PyPI as [`ontoforge`](https://pypi.org/project/ontoforge/) from 3.8.0.
 
 ```bash
 pip install ontoforge                 # core only — small footprint

@@ -36,7 +36,7 @@ pytest.importorskip("flask")
 
 def test_ontomesh_package_imports():
     import ontoforge
-    assert ontoforge.__version__.startswith("3.7"), \
+    assert ontoforge.__version__.startswith("3.8"), \
         f"unexpected version {ontoforge.__version__!r}"
 
 
