@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="twilight">
 <head>
   <meta charset="utf-8">
   <title>Projects — Ontomesh</title>
@@ -41,9 +41,11 @@
     .brand-wordmark { height: 32px; }
     .wm-dark { display: none; }
     [data-theme="twilight"] .wm-light,
-    [data-theme="dark"]     .wm-light { display: none; }
+    [data-theme="dark"]     .wm-light,
+    [data-theme="glass"]    .wm-light { display: none; }
     [data-theme="twilight"] .wm-dark,
-    [data-theme="dark"]     .wm-dark  { display: block; }
+    [data-theme="dark"]     .wm-dark,
+    [data-theme="glass"]    .wm-dark  { display: block; }
     [data-theme="mono"] .wm-light { filter: grayscale(1) contrast(1.05); }
     .nav-links { display: flex; align-items: center; gap: 28px;
                  list-style: none; padding: 0; margin: 0; }
@@ -202,9 +204,33 @@
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; }
     }
+
+    /* ── Liquid Glass (Phase 3) — backdrop shared from tokens.css; frost this
+       page's surfaces. Tokens go translucent in glass, so these become frost. */
+    [data-theme="glass"] .kpi,
+    [data-theme="glass"] .project,
+    [data-theme="glass"] .chip,
+    [data-theme="glass"] .filter-bar input,
+    [data-theme="glass"] .empty {
+      -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    }
+    [data-theme="glass"] .kpi,
+    [data-theme="glass"] .project { position: relative; overflow: hidden; }
+    [data-theme="glass"] .kpi::before,
+    [data-theme="glass"] .project::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+      pointer-events: none;
+    }
   </style>
 </head>
-<body data-theme="twilight">
+<body>
+  <script>
+    // Honour the theme chosen in the wizard/landing (shared 'wizard-theme' key);
+    // default stays Twilight. Runs before paint to avoid a flash.
+    (function(){ try{ var t=localStorage.getItem('wizard-theme');
+      if(t){ document.documentElement.setAttribute('data-theme', t); } }catch(_){}})();
+  </script>
   <a href="#main" class="skip-link">Skip to content</a>
 
   <!-- ── Nav ──────────────────────────────────────────────────── -->

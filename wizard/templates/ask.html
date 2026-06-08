@@ -50,9 +50,27 @@
     .qres table{border-collapse:collapse;font-size:12px;width:100%}
     .qres th,.qres td{border:1px solid var(--border);padding:4px 8px;text-align:left;font-family:var(--mono)}
     .qres th{color:var(--muted);font-weight:600}
+
+    /* ── Liquid Glass (Phase 3) — backdrop is shared from tokens.css; here we
+       just frost this page's surfaces. Tokens go translucent in the glass
+       theme, so .top/.ask/.ans become frost the moment glass is active. */
+    [data-theme="glass"] .top,
+    [data-theme="glass"] .ask,
+    [data-theme="glass"] .ans{
+      -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    }
+    [data-theme="glass"] .ans{position:relative}
+    [data-theme="glass"] .ans::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);pointer-events:none}
   </style>
 </head>
 <body>
+  <script>
+    // Honour the theme chosen in the wizard/landing (shared 'wizard-theme' key);
+    // default stays Twilight. Runs before paint to avoid a flash.
+    (function(){ try{ var t=localStorage.getItem('wizard-theme');
+      if(t){ document.documentElement.setAttribute('data-theme', t); } }catch(_){}})();
+  </script>
   <div class="top">
     <span class="brand">onto<b>forge</b></span>
     <span class="seg">Ask · reasoning search</span>

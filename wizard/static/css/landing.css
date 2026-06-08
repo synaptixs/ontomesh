@@ -444,29 +444,7 @@ img { max-width: 100%; display: block; }
    changes — toggling [data-theme="glass"] is fully reversible.
    ════════════════════════════════════════════════════════════════ */
 
-/* Live, colourful backdrop the frost sits over (fixed, behind content). */
-[data-theme="glass"] body {
-  background:
-    radial-gradient(120% 90% at 85% -10%, #16264a 0%, transparent 55%),
-    radial-gradient(110% 80% at -5% 110%, #0c2030 0%, transparent 50%),
-    linear-gradient(160deg, #0a1326, #070d1c);
-  background-attachment: fixed;
-}
-[data-theme="glass"] body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(420px 420px at 8% 4%,  rgba(125,194,66,0.42), transparent 70%),
-    radial-gradient(520px 520px at 92% 22%, rgba(47,123,209,0.40), transparent 70%),
-    radial-gradient(440px 440px at 42% 108%, rgba(57,181,160,0.38), transparent 70%);
-  filter: blur(48px);
-  opacity: 0.55;
-  animation: glass-drift 24s ease-in-out infinite;
-}
-@keyframes glass-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(28px, 22px) scale(1.05); }
-  66%      { transform: translate(-22px, 14px) scale(0.97); }
-}
+/* Backdrop (gradient + drifting blobs) is shared from tokens.css. */
 
 /* The frosted surfaces. var(--glass-blur) only exists in the glass theme. */
 [data-theme="glass"] .kicker,

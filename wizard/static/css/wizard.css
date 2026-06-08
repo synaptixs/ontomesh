@@ -872,35 +872,11 @@
      Reversible: it's all scoped to [data-theme="glass"].
      ════════════════════════════════════════════════════════════════ */
 
-  /* Live backdrop. .main/.app must go transparent so the fixed blob layer
-     shows through and the frosted surfaces have something to refract. */
-  [data-theme="glass"] body {
-    background:
-      radial-gradient(120% 90% at 88% -8%,  #16264a 0%, transparent 55%),
-      radial-gradient(110% 80% at -8% 108%, #0c2030 0%, transparent 50%),
-      linear-gradient(160deg, #0a1326, #070d1c);
-    background-attachment: fixed;
-  }
-  [data-theme="glass"] .main { background: transparent; }
-  [data-theme="glass"] body::before {
-    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(440px 440px at 6% 2%,   rgba(125,194,66,0.40), transparent 70%),
-      radial-gradient(560px 560px at 96% 18%, rgba(47,123,209,0.38), transparent 70%),
-      radial-gradient(460px 460px at 46% 112%, rgba(57,181,160,0.36), transparent 70%);
-    filter: blur(52px); opacity: 0.5;
-    animation: wiz-glass-drift 26s ease-in-out infinite;
-  }
-  /* Chrome + content sit above the backdrop. */
-  [data-theme="glass"] .app { position: relative; z-index: 1; background: transparent; }
-  @keyframes wiz-glass-drift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%      { transform: translate(26px, 20px) scale(1.05); }
-    66%      { transform: translate(-20px, 12px) scale(0.97); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    [data-theme="glass"] body::before { animation: none; }
-  }
+  /* Backdrop (gradient + drifting blobs) is shared from tokens.css. .main/.app
+     go transparent so that fixed blob layer shows through and the frosted
+     surfaces have something to refract. */
+  [data-theme="glass"] .main,
+  [data-theme="glass"] .app { background: transparent; }
 
   /* Frost the chrome + the primary content surfaces. */
   [data-theme="glass"] .topbar,

@@ -192,3 +192,32 @@
       --surface-hover: #2a3a63;
     }
   }
+
+  /* Glass backdrop — SHARED across every page that loads tokens.css (landing,
+     wizard, ask, projects). The per-page surface blur (backdrop-filter on
+     cards/chrome) stays in each page's own CSS since class names differ; only
+     this live backdrop is shared so it isn't copy-pasted four times. */
+  [data-theme="glass"] body {
+    background:
+      radial-gradient(120% 90% at 86% -9%,  #16264a 0%, transparent 55%),
+      radial-gradient(110% 80% at -6% 109%, #0c2030 0%, transparent 50%),
+      linear-gradient(160deg, #0a1326, #070d1c);
+    background-attachment: fixed;
+  }
+  [data-theme="glass"] body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(440px 440px at 6% 2%,    rgba(125,194,66,0.40), transparent 70%),
+      radial-gradient(560px 560px at 96% 18%,  rgba(47,123,209,0.38), transparent 70%),
+      radial-gradient(460px 460px at 46% 112%, rgba(57,181,160,0.36), transparent 70%);
+    filter: blur(50px); opacity: 0.5;
+    animation: glass-bg-drift 26s ease-in-out infinite;
+  }
+  @keyframes glass-bg-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(26px, 20px) scale(1.05); }
+    66%      { transform: translate(-20px, 12px) scale(0.97); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-theme="glass"] body::before { animation: none; }
+  }

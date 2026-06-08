@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="twilight">
 <head>
   <meta charset="utf-8">
   <title>Ontomesh — the ontology mesh for GraphRAG</title>
@@ -23,7 +23,7 @@
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/landing.css') }}">
 </head>
-<body data-theme="twilight">
+<body>
   <a href="#main" class="skip-link">Skip to content</a>
 
   <!-- ── Nav ──────────────────────────────────────────────────────── -->
@@ -319,18 +319,19 @@ pip install <span class="s">'ontoforge[wizard]'</span>
     // theme the visitor already chose (incl. mono/light set in the wizard).
     (function () {
       var KEY = 'wizard-theme';
+      var root = document.documentElement;
       var stored = null;
       try { stored = localStorage.getItem(KEY); } catch (_) {}
-      if (stored) { document.body.setAttribute('data-theme', stored); }
+      if (stored) { root.setAttribute('data-theme', stored); }
       var btn = document.getElementById('glass-toggle');
       if (btn) {
         btn.setAttribute('aria-pressed',
-          document.body.getAttribute('data-theme') === 'glass');
+          root.getAttribute('data-theme') === 'glass');
       }
       window.toggleGlass = function () {
-        var cur = document.body.getAttribute('data-theme');
+        var cur = root.getAttribute('data-theme');
         var next = (cur === 'glass') ? 'twilight' : 'glass';
-        document.body.setAttribute('data-theme', next);
+        root.setAttribute('data-theme', next);
         try { localStorage.setItem(KEY, next); } catch (_) {}
         if (btn) { btn.setAttribute('aria-pressed', next === 'glass'); }
       };
