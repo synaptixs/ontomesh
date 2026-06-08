@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Light-theme glass: the challenge (Log Discovery)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* light theme ink (from tokens.css :root) */
+    --ink:#14284a; --ink-2:#33415c; --muted:#5b687e;
+    --green:#5aa430; --green-deep:#4c8c28;
+    --indigo:#4338ca; --cyan:#0e7490; --teal:#0f766e; --purple:#9333ea; --amber:#b45309; --rose:#db2777; --red:#dc2626;
+    --font:'Inter',system-ui,sans-serif; --tight:'Inter Tight',var(--font); --mono:'JetBrains Mono',monospace;
+    --pill:999px; --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:#eef2f6;position:relative;overflow-x:hidden;min-height:100vh;padding-bottom:60px}
+  /* LIGHT, pastel, COLOURFUL backdrop — this is the crux: a light page gives
+     frosted glass almost no tonal contrast to work with, and any colour behind
+     it bleeds straight through. */
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:linear-gradient(160deg,#f3f6fb,#e7edf5)}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5}
+  .b1{width:540px;height:540px;left:-90px;top:-60px;background:radial-gradient(circle,#a9c3ff,transparent 70%)}
+  .b2{width:600px;height:600px;right:-130px;top:60px;background:radial-gradient(circle,#ffd9a8,transparent 70%)}
+  .b3{width:520px;height:520px;left:34%;bottom:-200px;background:radial-gradient(circle,#bdf3d6,transparent 70%)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
+
+  header.page{text-align:center;padding:46px 0 8px}
+  .eyebrow{font-size:12px;font-weight:700;color:var(--green-deep);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+  h1{font-family:var(--tight);font-weight:800;font-size:34px;letter-spacing:-.03em;margin-bottom:12px}
+  .lead{font-size:15px;color:var(--ink-2);max-width:64ch;margin:0 auto}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:34px}
+  .col{position:relative}
+  .col-h{display:flex;align-items:center;gap:10px;font-family:var(--tight);font-weight:800;font-size:16px;margin:0 4px 12px}
+  .pillbad{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 10px;border-radius:var(--pill)}
+  .bad{background:#fde2e1;color:#b91c1c;border:1px solid #f6b7b4}
+  .good{background:#dcf5cb;color:#3f6e1f;border:1px solid #b6e08c}
+
+  /* ───────────── the screen rendered in each treatment ───────────── */
+  .panel{border-radius:var(--radius);padding:18px;position:relative;overflow:hidden}
+
+  /* (A) NAÏVE FROST — just blur + translucent white, light ink. Looks airy in
+     isolation but: text contrast collapses, the white hairline border vanishes,
+     and the colourful chips/bars behind go muddy. */
+  .naive{
+    background:rgba(255,255,255,.34);
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 10px 30px rgba(20,40,74,.08);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  }
+  .naive .ld-title,.naive .cand-title{color:#48566e}      /* washed, ~3:1 — fails WCAG AA */
+  .naive .meta,.naive .sub{color:#7f8aa0}
+  .naive .chip{opacity:.6;mix-blend-mode:multiply}        /* colour muddies into the frost */
+  .naive .btn{opacity:.85}
+  .naive .badge-pii{background:rgba(220,38,38,.45);color:#fff;mix-blend-mode:multiply}
+
+  /* (B) TUNED TINT RECIPE — opaque-enough fill, vibrancy via saturate, a DARK
+     hairline (not white), a near-solid backplate for body text, and colour
+     accents kept fully opaque so they never bleed. */
+  .tuned{
+    background:rgba(255,255,255,.74);
+    border:1px solid rgba(20,40,74,.12);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 12px 34px rgba(20,40,74,.12);
+    -webkit-backdrop-filter:blur(22px) saturate(150%);backdrop-filter:blur(22px) saturate(150%);
+  }
+
+  /* shared inner layout (legibility differences come only from the wrapper) */
+  .ld-title{font-family:var(--tight);font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .ld-sub{font-size:12px;margin-bottom:14px}
+  .tuned .ld-title{color:var(--ink)} .tuned .ld-sub{color:var(--ink-2)}
+
+  /* mini pipeline chips */
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;padding:5px 11px;border-radius:var(--pill)}
+  .c-mine{background:var(--indigo)} .c-seq{background:var(--cyan)} .c-rev{background:var(--amber)} .c-gen{background:var(--green-deep)}
+  .flow .ar{color:var(--muted);font-size:13px}
+
+  /* candidate row */
+  .cand{border-radius:12px;padding:14px;border-left:4px solid var(--purple)}
+  .tuned .cand{background:#fff;border:1px solid var(--border,#e4e9f1);border-left:4px solid var(--purple)} /* solid backplate */
+  .naive .cand{background:rgba(255,255,255,.30);border:1px solid rgba(255,255,255,.5);border-left:4px solid rgba(147,51,234,.5)}
+  .cand-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .kind{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#fff;background:var(--purple);padding:3px 10px;border-radius:var(--pill)}
+  .code{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .badge-pii{font-size:10px;font-weight:700;background:var(--red);color:#fff;padding:3px 9px;border-radius:var(--pill)}
+  .cand-title{font-family:var(--tight);font-weight:700;font-size:15px;margin:2px 0 4px}
+  .tuned .cand-title{color:var(--ink)}
+  .cand-desc{font-size:12px;color:var(--ink-2)}
+  .naive .cand-desc{color:#7f8aa0}
+  .metrics{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0;font-size:11px;font-family:var(--mono)}
+  .metrics b{color:var(--ink)} .naive .metrics{color:#8390a6}
+  .conf{margin:8px 0 12px}
+  .conf .lab{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;font-weight:600}
+  .bar{height:8px;border-radius:var(--pill);background:#e6ebf3;overflow:hidden}
+  .naive .bar{background:rgba(255,255,255,.4)}
+  .bar i{display:block;height:100%;width:88%;border-radius:var(--pill);background:linear-gradient(90deg,#5aa430,#7dc242)}
+  .naive .bar i{opacity:.55}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:8px 14px;border-radius:var(--pill);border:1px solid transparent;cursor:pointer;color:#fff}
+  .b-app{background:#16a34a} .b-rej{background:var(--red)} .b-edit{background:#2563eb;}
+  .b-merge{background:#7c3aed}
+
+  /* annotation pins */
+  .pin{position:absolute;z-index:5;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;
+    background:#fff;border-radius:var(--pill);padding:5px 11px;box-shadow:0 6px 18px rgba(20,40,74,.18)}
+  .pin .n{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:800;flex:none}
+  .pin.x .n{background:var(--red)} .pin.ok .n{background:#16a34a}
+  .pin.x{color:#b91c1c} .pin.ok{color:#3f6e1f}
+
+  /* recipe spec */
+  .recipe{margin-top:34px;border-radius:var(--radius);padding:24px;background:#fff;border:1px solid #e4e9f1;box-shadow:0 12px 34px rgba(20,40,74,.08)}
+  .recipe h2{font-family:var(--tight);font-size:20px;font-weight:800;margin-bottom:6px}
+  .recipe .sub{font-size:13px;color:var(--ink-2);margin-bottom:18px}
+  .rtable{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:0;font-size:12.5px;border:1px solid #e4e9f1;border-radius:12px;overflow:hidden}
+  .rtable .rh{background:#f4f7fb;font-weight:700;padding:11px 14px;color:var(--ink)}
+  .rtable .rc{padding:11px 14px;border-top:1px solid #eef2f7;color:var(--ink-2)}
+  .rtable .rc.k{color:var(--ink);font-weight:600}
+  .rtable code{font-family:var(--mono);font-size:11px;background:#f1f4f9;padding:1px 5px;border-radius:5px;color:#334}
+  .x-mark{color:var(--red);font-weight:700} .ok-mark{color:#16a34a;font-weight:700}
+  .ribbon{position:fixed;top:14px;right:14px;border-radius:var(--pill);color:#3f6e1f;font-family:var(--mono);font-size:11px;padding:6px 12px;z-index:50;background:#dcf5cb;border:1px solid #b6e08c}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}.rtable{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="ribbon">MOCKUP · Light glass · challenge</div>
+
+<div class="wrap">
+  <header class="page">
+    <p class="eyebrow">Log Discovery · Review</p>
+    <h1>Light-theme glass needs its own tint recipe</h1>
+    <p class="lead">Dark glass works because the frost sits over deep tones — plenty of contrast, colour reads as glow. The light theme inverts every assumption: the same recipe washes out, hairlines vanish, and the colourful Log-Discovery candidate cards bleed through the frost. Same screen, two treatments.</p>
+  </header>
+
+  <div class="cols">
+    <!-- ── (A) NAÏVE FROST ─────────────────────────────────────────── -->
+    <div class="col">
+      <div class="col-h"><span class="pillbad bad">✕ NAÏVE FROST</span> blur + translucent white, dark ink</div>
+      <div class="pin x" style="top:78px;right:-6px"><span class="n">1</span> Title ~3:1 · fails AA</div>
+      <div class="pin x" style="top:250px;right:-6px"><span class="n">2</span> Colour bleeds → muddy</div>
+      <div class="pin x" style="bottom:96px;left:-6px"><span class="n">3</span> White hairline invisible</div>
+      <div class="panel naive">
+        <div class="ld-title">🔎 Review candidates <span class="ld-sub" style="margin:0">· 23 proposals</span></div>
+        <div class="flow">
+          <span class="chip c-mine">📂 Mine</span><span class="ar">→</span>
+          <span class="chip c-seq">📈 Sequence</span><span class="ar">→</span>
+          <span class="chip c-rev">👁 Review · here</span><span class="ar">→</span>
+          <span class="chip c-gen">🛠 Generate</span>
+        </div>
+        <div class="cand">
+          <div class="cand-head">
+            <span class="kind">⚡ Causal edge</span>
+            <span class="code">LOG_CAUSAL_EDGE</span>
+            <span class="badge-pii">⚑ PII · Confidential</span>
+          </div>
+          <div class="cand-title">HeartbeatTimeout → SessionDrop</div>
+          <div class="cand-desc">Directed edge that passed all three gates: PMI, temporal ordering, and Granger. Becomes a SPARQL CONSTRUCT for <code>:hasCause</code>.</div>
+          <div class="metrics"><span>PMI <b>4.2</b></span><span>Granger <b>p&lt;0.01</b></span><span>consequence <b>CRITICAL</b></span></div>
+          <div class="conf"><div class="lab">Confidence × consequence</div><div class="bar"><i></i></div></div>
+          <div class="actions">
+            <span class="btn b-app">✓ Approve</span><span class="btn b-rej">✕ Reject</span>
+            <span class="btn b-edit">✎ Edit</span><span class="btn b-merge">🔀 Merge</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── (B) TUNED TINT RECIPE ───────────────────────────────────── -->
+    <div class="col">
+      <div class="col-h"><span class="pillbad good">✓ TUNED TINT</span> opaque fill · dark hairline · backplate</div>
+      <div class="pin ok" style="top:78px;right:-6px"><span class="n">1</span> Ink on solid plate · 8:1</div>
+      <div class="pin ok" style="top:250px;right:-6px"><span class="n">2</span> Accents stay opaque</div>
+      <div class="pin ok" style="bottom:96px;left:-6px"><span class="n">3</span> Dark 12% hairline reads</div>
+      <div class="panel tuned">
+        <div class="ld-title">🔎 Review candidates <span class="ld-sub" style="margin:0">· 23 proposals</span></div>
+        <div class="flow">
+          <span class="chip c-mine">📂 Mine</span><span class="ar">→</span>
+          <span class="chip c-seq">📈 Sequence</span><span class="ar">→</span>
+          <span class="chip c-rev">👁 Review · here</span><span class="ar">→</span>
+          <span class="chip c-gen">🛠 Generate</span>
+        </div>
+        <div class="cand">
+          <div class="cand-head">
+            <span class="kind">⚡ Causal edge</span>
+            <span class="code">LOG_CAUSAL_EDGE</span>
+            <span class="badge-pii">⚑ PII · Confidential</span>
+          </div>
+          <div class="cand-title">HeartbeatTimeout → SessionDrop</div>
+          <div class="cand-desc">Directed edge that passed all three gates: PMI, temporal ordering, and Granger. Becomes a SPARQL CONSTRUCT for <code>:hasCause</code>.</div>
+          <div class="metrics"><span>PMI <b>4.2</b></span><span>Granger <b>p&lt;0.01</b></span><span>consequence <b>CRITICAL</b></span></div>
+          <div class="conf"><div class="lab">Confidence × consequence</div><div class="bar"><i></i></div></div>
+          <div class="actions">
+            <span class="btn b-app">✓ Approve</span><span class="btn b-rej">✕ Reject</span>
+            <span class="btn b-edit">✎ Edit</span><span class="btn b-merge">🔀 Merge</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── recipe spec ──────────────────────────────────────────────── -->
+  <div class="recipe">
+    <h2>The light-theme tint recipe</h2>
+    <p class="sub">What has to change between the dark glass token block and a light one — it is not a colour swap, it is a different material.</p>
+    <div class="rtable">
+      <div class="rh">Property</div><div class="rh">Dark glass (works)</div><div class="rh">Light glass (the fix)</div>
+      <div class="rc k">Fill opacity</div><div class="rc"><code>rgba(255,255,255,.07)</code> — frost glows</div><div class="rc"><span class="ok-mark">↑</span> <code>rgba(255,255,255,.74)</code> — near-opaque or text drowns</div>
+      <div class="rc k">Body-text surface</div><div class="rc">text straight on glass is fine</div><div class="rc">needs a <b>solid backplate</b> (<code>#fff</code> card) under dense copy</div>
+      <div class="rc k">Hairline border</div><div class="rc"><code>rgba(255,255,255,.16)</code> light-on-dark</div><div class="rc">flip to <b>dark</b> <code>rgba(20,40,74,.12)</code> — white is invisible on light</div>
+      <div class="rc k">Specular highlight</div><div class="rc">bright top inset rim sells the edge</div><div class="rc">barely visible — lean on the <b>shadow</b> for depth instead</div>
+      <div class="rc k">Colour accents</div><div class="rc">translucent reads as neon glow</div><div class="rc">keep chips/badges <b>fully opaque</b> — translucency muddies on light</div>
+      <div class="rc k">saturate()</div><div class="rc"><code>180%</code> — punchy</div><div class="rc">dial to <code>~140–150%</code> — high sat looks garish over pastels</div>
+      <div class="rc k">Text contrast</div><div class="rc">light ink easily clears AA</div><div class="rc"><span class="x-mark">risk</span> mid-grey on frost lands ~3:1 — must hit <code>#14284a</code> ink</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

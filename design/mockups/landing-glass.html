@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Liquid Glass (landing mockup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     LIQUID-GLASS mockup. Same brand as Direction A (navy ink, lime
+     accent) but surfaces become translucent frosted panels over a
+     deep, colourful backdrop. The blur needs something vivid behind
+     it — hence the drifting mesh blobs. Text on glass goes LIGHT for
+     contrast (the classic glass-vibrancy look).
+     ────────────────────────────────────────────────────────────── */
+  :root{
+    --ink:#eaf1ff; --ink-2:rgba(234,241,255,.78); --muted:rgba(234,241,255,.55);
+    --green:#9ed75a; --green-deep:#7dc242; --green-soft:rgba(158,215,90,.16);
+    --navy:#0a1326; --navy-deep:#070d1c;
+    --radius:20px; --radius-sm:13px; --pill:999px;
+    --font:'Inter',system-ui,sans-serif; --tight:'Inter Tight',var(--font); --mono:'JetBrains Mono',monospace;
+
+    /* glass material tokens */
+    --glass-fill:rgba(255,255,255,.07);
+    --glass-fill-strong:rgba(255,255,255,.12);
+    --glass-border:rgba(255,255,255,.16);
+    --glass-blur:saturate(180%) blur(22px);
+    /* layered shadow + inner specular highlight = the "lit edge" */
+    --glass-shadow:
+      0 1px 0 rgba(255,255,255,.20) inset,        /* top specular rim   */
+      0 -1px 0 rgba(255,255,255,.04) inset,       /* bottom soft rim     */
+      0 18px 50px rgba(3,8,20,.45);               /* drop / depth        */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background:var(--navy-deep);
+    position:relative;overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 32px;position:relative;z-index:2}
+
+  /* ── Backdrop: drifting colour blobs the glass refracts ───────── */
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:
+        radial-gradient(120% 90% at 80% -10%, #16264a 0%, transparent 55%),
+        radial-gradient(110% 80% at 0% 110%, #0c2030 0%, transparent 50%),
+        linear-gradient(160deg,#0a1326,#070d1c);}
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite}
+  .b1{width:520px;height:520px;left:-80px;top:-60px;background:radial-gradient(circle,#7dc242,transparent 70%)}
+  .b2{width:600px;height:600px;right:-120px;top:120px;background:radial-gradient(circle,#2f7bd1,transparent 70%);animation-delay:-7s}
+  .b3{width:480px;height:480px;left:30%;bottom:-160px;background:radial-gradient(circle,#39b5a0,transparent 70%);animation-delay:-13s}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0) scale(1)}
+    33%{transform:translate(40px,30px) scale(1.08)}
+    66%{transform:translate(-30px,20px) scale(.96)}
+  }
+  /* subtle film grain so flat areas don't band */
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  @media(prefers-reduced-motion:reduce){.blob{animation:none}}
+
+  /* ── THE GLASS PRIMITIVE ──────────────────────────────────────── */
+  .glass{
+    background:var(--glass-fill);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+    -webkit-backdrop-filter:var(--glass-blur);
+    backdrop-filter:var(--glass-blur);
+  }
+  /* Fallback: if backdrop-filter is unsupported, use an opaque tint
+     so panels stay legible instead of see-through. */
+  @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+    .glass{background:rgba(18,30,56,.92)}
+  }
+
+  /* nav — a floating glass pill */
+  .navbar{position:sticky;top:16px;z-index:30;margin:16px auto 0;max-width:1160px;padding:0 16px}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 20px;border-radius:var(--pill)}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--tight);font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .logo{width:28px;height:28px;border-radius:9px;background:linear-gradient(160deg,#1d3a6e,#0a1326);display:grid;place-items:center;box-shadow:0 1px 0 rgba(255,255,255,.18) inset}
+  .logo span{color:var(--green);font-weight:800;font-size:15px;font-family:var(--tight)}
+  .navlinks{display:flex;align-items:center;gap:28px;font-weight:500;font-size:14px;color:var(--ink-2)}
+  .navlinks a:hover{color:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;border-radius:var(--pill);padding:11px 20px;border:1px solid transparent;cursor:pointer;transition:.18s}
+  .btn-primary{background:linear-gradient(160deg,var(--green),var(--green-deep));color:#07210a;
+    box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 6px 18px rgba(125,194,66,.4)}
+  .btn-primary:hover{transform:translateY(-1px);filter:brightness(1.05)}
+  .btn-glass{color:#fff;border-color:var(--glass-border);background:var(--glass-fill-strong);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+  .btn-glass:hover{background:rgba(255,255,255,.18)}
+  .btn-lg{padding:15px 28px;font-size:15px}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:72px 0 44px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#dff3c4;
+    padding:7px 14px;border-radius:var(--pill);letter-spacing:.01em;margin-bottom:24px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+  h1{font-family:var(--tight);font-weight:800;font-size:60px;line-height:1.03;letter-spacing:-.035em;margin-bottom:20px;
+    color:#fff;text-shadow:0 1px 30px rgba(0,0,0,.3)}
+  h1 em{font-style:normal;background:linear-gradient(120deg,#b6f27c,#7dc242);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:19px;color:var(--ink-2);max-width:32ch;margin-bottom:32px}
+  .cta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .install{font-family:var(--mono);font-size:13px;color:var(--ink);border-radius:var(--pill);padding:12px 18px}
+  .install b{color:var(--green)}
+
+  /* hero art lives inside a glass card so the mesh refracts through it */
+  .artcard{border-radius:var(--radius);padding:22px;display:grid;place-items:center;position:relative;overflow:hidden}
+  .artcard::after{content:"";position:absolute;inset:0;border-radius:inherit;
+    background:linear-gradient(140deg,rgba(255,255,255,.18),transparent 40%);pointer-events:none}
+  .artcard svg{width:100%;max-width:400px;position:relative;z-index:1}
+
+  /* trust chips */
+  .trust{text-align:center;padding:30px 0 60px}
+  .trust p{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:18px;font-weight:600}
+  .trust ul{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;list-style:none}
+  .trust li{font-family:var(--mono);font-size:12.5px;color:var(--ink);border-radius:var(--pill);padding:8px 15px}
+
+  /* sections */
+  section.band{padding:72px 0;position:relative;z-index:2}
+  .eyebrow{font-size:13px;font-weight:700;color:var(--green);letter-spacing:.02em;text-transform:uppercase;margin-bottom:12px}
+  h2{font-family:var(--tight);font-weight:800;font-size:40px;letter-spacing:-.03em;line-height:1.1;max-width:18ch;color:#fff}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:44px}
+  .card{border-radius:var(--radius);padding:28px;transition:.22s;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)} /* top specular line */
+  .card:hover{transform:translateY(-4px);background:var(--glass-fill-strong);border-color:rgba(158,215,90,.4)}
+  .cicon{width:46px;height:46px;border-radius:14px;background:var(--green-soft);display:grid;place-items:center;color:var(--green);margin-bottom:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,.25) inset}
+  .card h3{font-family:var(--tight);font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px;color:#fff}
+  .card p{font-size:14.5px;color:var(--ink-2)}
+  .stat{margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  /* steps */
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:44px;border-radius:var(--radius);overflow:hidden}
+  .flowstep{padding:32px 28px;border-right:1px solid var(--glass-border)}
+  .flowstep:last-child{border-right:none}
+  .sn{width:36px;height:36px;border-radius:var(--pill);background:linear-gradient(160deg,#1d3a6e,#0a1326);color:var(--green);font-family:var(--tight);font-weight:800;display:grid;place-items:center;margin-bottom:16px;box-shadow:0 1px 0 rgba(255,255,255,.2) inset}
+  .flowstep h3{font-family:var(--tight);font-size:18px;font-weight:700;margin-bottom:8px;color:#fff}
+  .flowstep p{font-size:14px;color:var(--ink-2)}
+
+  /* end cta */
+  .end{border-radius:26px;padding:64px 48px;text-align:center;margin:32px 0 72px;position:relative;overflow:hidden;
+    background:linear-gradient(160deg,rgba(125,194,66,.22),rgba(47,123,209,.14)),var(--glass-fill-strong)}
+  .end::after{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(255,255,255,.22),transparent 35%);pointer-events:none}
+  .end h2{color:#fff;margin:0 auto 14px;max-width:22ch}
+  .end p{color:var(--ink-2);max-width:46ch;margin:0 auto 28px;font-size:16px}
+
+  footer{padding:32px 0;color:var(--muted);font-size:13px;position:relative;z-index:2;border-top:1px solid var(--glass-border)}
+  .fwrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .ribbon{position:fixed;top:14px;right:14px;border-radius:var(--pill);color:var(--green);font-family:var(--mono);font-size:11px;padding:6px 12px;z-index:50}
+
+  @media(max-width:860px){.hero,.cards,.flow{grid-template-columns:1fr}.artcard{display:none}h1{font-size:44px}}
+</style>
+</head>
+<body>
+
+<!-- backdrop the glass refracts -->
+<div class="bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="grain"></div>
+
+<div class="ribbon glass">MOCKUP · Liquid Glass</div>
+
+<div class="navbar">
+  <nav class="glass">
+    <div class="brand"><span class="logo"><span>om</span></span> Ontomesh</div>
+    <div class="navlinks">
+      <a href="#">Product</a><a href="#">Docs</a><a href="#">Projects</a>
+      <a href="#" class="btn btn-primary">Open the wizard →</a>
+    </div>
+  </nav>
+</div>
+
+<header class="wrap">
+  <div class="hero">
+    <div>
+      <span class="kicker glass"><span class="dot"></span> v3.7 · gunicorn · Prometheus · cosign · SBOM</span>
+      <h1>The ontology mesh<br>for <em>GraphRAG.</em></h1>
+      <p class="sub">Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.</p>
+      <div class="cta-row">
+        <a href="#" class="btn btn-primary btn-lg">Open the wizard →</a>
+        <code class="install glass">$ pip install <b>ontoforge</b></code>
+      </div>
+    </div>
+    <div class="artcard glass">
+      <svg viewBox="0 0 400 400">
+        <defs><radialGradient id="g" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#9ed75a" stop-opacity=".30"/>
+          <stop offset="100%" stop-color="#9ed75a" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="200" cy="200" r="180" fill="url(#g)"/>
+        <g fill="none" stroke-width="1.5" stroke-linecap="round">
+          <path d="M120 80 L280 80 L340 200 L280 320 L120 320 L60 200 Z" stroke="#cdd9ec" stroke-opacity=".5"/>
+          <path d="M120 80 L280 320" stroke="#9ed75a" stroke-opacity=".85" stroke-width="2"/>
+          <path d="M280 80 L120 320" stroke="#9ed75a" stroke-opacity=".85" stroke-width="2"/>
+          <path d="M60 200 L340 200" stroke="#cdd9ec" stroke-opacity=".35"/>
+          <path d="M200 200 L120 80M200 200 L280 80M200 200 L340 200M200 200 L280 320M200 200 L120 320M200 200 L60 200" stroke="#cdd9ec" stroke-opacity=".4"/>
+        </g>
+        <g fill="#dde7f5"><circle cx="120" cy="80" r="7"/><circle cx="280" cy="80" r="7"/><circle cx="340" cy="200" r="7"/><circle cx="280" cy="320" r="7"/><circle cx="120" cy="320" r="7"/><circle cx="60" cy="200" r="7"/></g>
+        <circle cx="200" cy="200" r="12" fill="#9ed75a"/>
+        <circle cx="200" cy="200" r="22" fill="none" stroke="#9ed75a" stroke-opacity=".5" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="trust wrap">
+  <p>Built on open standards</p>
+  <ul>
+    <li class="glass">OWL 2</li><li class="glass">SHACL</li><li class="glass">SPARQL</li>
+    <li class="glass">JSON-LD</li><li class="glass">SKOS</li><li class="glass">Datalog</li>
+    <li class="glass">SQLite / Postgres</li>
+  </ul>
+</div>
+
+<section class="band wrap">
+  <p class="eyebrow">What you can build</p>
+  <h2>Three things you'd otherwise hand-craft for months.</h2>
+  <div class="cards">
+    <div class="card glass">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 17l9 4 9-4"/></svg></div>
+      <h3>Generate a full ontology from a schema.</h3>
+      <p>Point Ontomesh at a database. It introspects the schema, lifts it through OWL 2 / SHACL / JSON-LD, runs the reasoner, and emits a bundle with full lineage.</p>
+      <p class="stat">316 MB DB · 4.2 s · 142 classes, 1.1k properties</p>
+    </div>
+    <div class="card glass">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <h3>Validate with SHACL. Reason with Datalog.</h3>
+      <p>Shapes catch data-quality issues before production. Datalog rules derive new facts with full provenance. Every run emits a diffable materialisation report.</p>
+      <p class="stat">38 SHACL shapes · SWRL · Datalog (Rulewerk)</p>
+    </div>
+    <div class="card glass">
+      <div class="cicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+      <h3>Mine candidates from raw logs.</h3>
+      <p>Log Discovery mines templates with online clustering, surfaces candidate entities and events, and gates causal edges — you review one candidate at a time.</p>
+      <p class="stat">L4 templates · L8 regimes · L11 causal DAG</p>
+    </div>
+  </div>
+</section>
+
+<section class="band wrap">
+  <p class="eyebrow">How it works</p>
+  <h2>From raw signal to graph-grounded RAG, in three steps.</h2>
+  <div class="flow glass">
+    <div class="flowstep"><div class="sn">1</div><h3>Discover</h3><p>Point Ontomesh at logs or a schema. Candidates surface with confidence, provenance, and a one-click accept.</p></div>
+    <div class="flowstep"><div class="sn">2</div><h3>Model &amp; validate</h3><p>Add SHACL shapes and Datalog rules. The reasoner materialises derived triples; the CQ runner gives you regression coverage.</p></div>
+    <div class="flowstep"><div class="sn">3</div><h3>Generate &amp; ship</h3><p>One click emits OWL Turtle, SHACL, JSON-LD, and bindings — plus a hybrid retriever ready for your RAG stack.</p></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="end glass">
+    <h2>Stop hand-crafting ontologies for your RAG stack.</h2>
+    <p>Open the wizard, load a sample domain — telecom, healthcare, e-commerce — and watch a real ontology and retriever fall out the other end in under a minute.</p>
+    <a href="#" class="btn btn-primary btn-lg">Open the wizard →</a>
+  </div>
+</div>
+
+<footer><div class="wrap fwrap">
+  <span>Ontomesh v3.7 · Built for engineers building GraphRAG.</span>
+  <span>Wizard · Docs</span>
+</div></footer>
+</body>
+</html>

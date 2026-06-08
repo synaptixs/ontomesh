@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Reasoning Search (mockup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#16213d;--bg-2:#1b294a;--surface:#1f2d50;--surface-2:#273a63;
+    --ink:#eef2f9;--ink-2:#b6c4da;--muted:#7d8cab;
+    --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.18);
+    --green:#8fd14f;--green-deep:#7dc242;--green-soft:rgba(143,209,79,.14);
+    --amber:#fbbf24;--cyan:#7da6e0;--navy-line:#2b3e66;
+    --radius:16px;--radius-sm:11px;--pill:999px;
+    --font:'Inter',system-ui,sans-serif;--tight:'Inter Tight',var(--font);--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;
+       background-image:radial-gradient(1100px 600px at 85% -12%,rgba(143,209,79,.07),transparent)}
+  .top{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(22,33,61,.85);backdrop-filter:blur(10px);z-index:5}
+  .logo{width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center;font-family:var(--tight);font-weight:800;font-size:13px}
+  .logo b{color:#14284a}.logo b i{color:#7dc242;font-style:normal}
+  .brand{font-family:var(--tight);font-weight:800;font-size:17px}
+  .seg{margin-left:8px;font-size:12px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:4px 10px;border-radius:var(--pill)}
+  .top .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .prov{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--pill);padding:3px}
+  .prov button{font:inherit;font-size:12px;color:var(--muted);background:transparent;border:none;border-radius:var(--pill);padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .prov button.on{background:var(--surface);color:var(--green);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:30px 24px 80px;display:grid;grid-template-columns:1fr 300px;gap:24px}
+  .main{min-width:0}
+
+  /* ── Ask box ── */
+  .ask{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:8px 8px 8px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+  .ask .q{flex:1;font-size:16px;color:var(--ink);font-weight:500}
+  .ask .q .cursor{display:inline-block;width:2px;height:18px;background:var(--green);margin-left:2px;vertical-align:-3px;animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .btn-reason{font:inherit;font-weight:700;font-size:14px;color:#15203a;background:var(--green);border:none;border-radius:var(--pill);padding:11px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px rgba(143,209,79,.3)}
+  .chips{display:flex;gap:8px;margin:14px 2px 0;flex-wrap:wrap}
+  .chip{font-size:12px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--pill);padding:6px 12px;display:flex;align-items:center;gap:6px}
+  .chip.on{color:var(--green);border-color:rgba(143,209,79,.35);background:var(--green-soft)}
+  .chip .k{font-size:10px;color:var(--muted)}
+
+  /* ── Answer card ── */
+  .answer{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-top:22px;overflow:hidden}
+  .ahead{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .ahead h2{font-family:var(--tight);font-size:15px;font-weight:700}
+  .badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--pill);display:flex;align-items:center;gap:6px}
+  .badge.ok{color:var(--green);background:var(--green-soft);border:1px solid rgba(143,209,79,.3)}
+  .badge.used{color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);margin-left:auto}
+  .abody{padding:20px}
+  .abody p{font-size:15px;line-height:1.65;color:var(--ink);margin-bottom:14px}
+  sup.cite{color:var(--green);font-weight:700;font-size:11px;cursor:pointer;padding:0 1px}
+  .risk{color:var(--amber);font-weight:600}
+
+  .infer{display:flex;gap:12px;background:var(--green-soft);border:1px solid rgba(143,209,79,.3);border-radius:var(--radius-sm);padding:14px 16px;margin:6px 0 18px}
+  .infer .ic{width:30px;height:30px;border-radius:8px;background:var(--green);color:#15203a;display:grid;place-items:center;flex-shrink:0;font-size:15px}
+  .infer .t{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em}
+  .infer p{font-size:13.5px;color:var(--ink-2);margin:3px 0 0}
+  .infer code{font-family:var(--mono);font-size:12px;color:var(--green);background:rgba(0,0,0,.18);padding:1px 6px;border-radius:4px}
+
+  /* trace */
+  .trace{border-top:1px solid var(--line);background:var(--bg-2)}
+  .tr-h{padding:12px 20px;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.05em}
+  .step{display:flex;gap:14px;padding:0 20px 4px}
+  .rail{display:flex;flex-direction:column;align-items:center}
+  .node{width:22px;height:22px;border-radius:50%;background:var(--green);color:#15203a;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
+  .line{width:2px;flex:1;background:var(--navy-line);margin:2px 0}
+  .step:last-child .line{display:none}
+  .sc{padding-bottom:16px}
+  .sc h4{font-size:13px;font-weight:600;margin-bottom:3px}
+  .sc p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .sc code,.sc .tag{font-family:var(--mono);font-size:11.5px}
+  .sc .tag{color:var(--cyan)}
+  .sql{background:#0f1b30;border:1px solid var(--navy-line);border-radius:8px;padding:10px 12px;margin-top:7px;font-family:var(--mono);font-size:11.5px;color:#cbd5e1;line-height:1.6;overflow-x:auto}
+  .sql .kw{color:var(--green)}.sql .c{color:var(--muted)}
+
+  /* sources */
+  .src{border-top:1px solid var(--line);padding:14px 20px}
+  .src h4{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+  .srow{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .srow:last-child{border-bottom:none}
+  .sn{width:18px;height:18px;border-radius:5px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0}
+  .srow .iri{font-family:var(--mono);color:var(--ink)}
+  .srow .tbl{color:var(--muted);margin-left:auto;font-family:var(--mono);font-size:11px}
+
+  /* right rail: ontology path */
+  .rail2{position:sticky;top:84px;align-self:start}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .panel h3{font-family:var(--tight);font-size:13px;font-weight:700;margin-bottom:4px}
+  .panel .sub{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .opath{display:flex;flex-direction:column;gap:0}
+  .oc{display:flex;align-items:center;gap:10px}
+  .ocd{width:11px;height:11px;border-radius:50%;border:2px solid var(--green);background:var(--green-soft)}
+  .oc .nm{font-size:12.5px;font-weight:600}
+  .oc .nm small{display:block;color:var(--muted);font-weight:400;font-family:var(--mono);font-size:10.5px}
+  .oedge{margin-left:4px;border-left:2px dashed var(--navy-line);height:24px;padding-left:18px;display:flex;align-items:center}
+  .oedge span{font-family:var(--mono);font-size:10.5px;color:var(--cyan)}
+  .legend{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.7}
+  .legend b{color:var(--ink-2)}
+  .ribbon{position:fixed;top:12px;right:16px;background:var(--green);color:#15203a;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--pill);z-index:50}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}.rail2{display:none}}
+</style>
+</head>
+<body>
+<div class="ribbon">MOCKUP · Reasoning Search</div>
+
+<div class="top">
+  <span class="logo"><b>f<i>i</i>b</b></span>
+  <span class="brand">Ontomesh</span>
+  <span class="seg">Ask · network-ops</span>
+  <div class="right">
+    <div class="prov" title="LLM provider">
+      <button class="on"><span class="dot"></span>Ollama · llama3.1</button>
+      <button>OpenAI</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="main">
+    <!-- Ask box -->
+    <div class="ask">
+      <span class="q">Which customers are at risk from the degraded core router crt-07, and why?<span class="cursor"></span></span>
+      <button class="btn-reason">Reason →</button>
+    </div>
+    <div class="chips">
+      <span class="chip on">✓ Ontology-bounded</span>
+      <span class="chip on">✓ Multi-hop</span>
+      <span class="chip on">✓ Inference (OWL-RL + Datalog)</span>
+      <span class="chip">Read-only <span class="k">· tier ≤ Internal</span></span>
+    </div>
+
+    <!-- Answer -->
+    <div class="answer">
+      <div class="ahead">
+        <h2>Answer</h2>
+        <span class="badge ok">● High confidence · grounded in 7 records + 2 inferred facts</span>
+        <span class="badge used">⚡ 1.8s · 3 hops</span>
+      </div>
+
+      <div class="abody">
+        <p><b>3 customers are at risk</b>, all served through the degraded router
+        <code style="font-family:var(--mono);font-size:13px">crt-07</code>:
+        <b>Acme Telecom</b><sup class="cite">1</sup>, <b>Northwind Logistics</b><sup class="cite">2</sup>,
+        and <b>Vega Media</b><sup class="cite">3</sup>. The router currently carries
+        <span class="risk">2 active alarms</span> (one Critical)<sup class="cite">4,5</sup> and its
+        downstream latency KPI breached threshold 14 min ago<sup class="cite">6</sup>.
+        Acme is the highest priority — it has a <span class="risk">Platinum SLA</span> and no redundant path<sup class="cite">7</sup>.</p>
+
+        <div class="infer">
+          <div class="ic">⚙</div>
+          <div>
+            <span class="t">Inferred — not stored in the database</span>
+            <p>Customer&nbsp;<b>impact</b> was <b>derived</b>, not looked up:
+            <code>impacts(Customer) ⟸ consumes(Customer, Service) ∧ hosts(Resource, Service) ∧ degraded(Resource)</code>
+            — an OWL-RL/Datalog rule walked the ontology from the router to the customers. Full
+            <code>prov:wasDerivedFrom</code> lineage attached.</p>
+          </div>
+        </div>
+
+        <!-- Reasoning trace -->
+        <div class="trace" style="margin:0 -20px -20px;border-radius:0">
+          <div class="tr-h">🧠 Reasoning trace <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— how the answer was built (click to collapse)</span></div>
+
+          <div class="step"><div class="rail"><div class="node">1</div><div class="line"></div></div>
+            <div class="sc"><h4>Understand</h4><p>Mapped the question to ontology terms:
+            <span class="tag">Resource</span> <span class="tag">Service</span> <span class="tag">Customer</span> <span class="tag">Alarm</span> · intent = <b>impact analysis</b>.</p></div></div>
+
+          <div class="step"><div class="rail"><div class="node">2</div><div class="line"></div></div>
+            <div class="sc"><h4>Plan</h4><p>3-hop traversal <code>Resource → Service → Customer</code> + join open <span class="tag">Alarm</span>s and the latency KPI window. Plan validated against the ontology — no unknown terms.</p></div></div>
+
+          <div class="step"><div class="rail"><div class="node">3</div><div class="line"></div></div>
+            <div class="sc"><h4>Execute <span style="color:var(--muted);font-weight:400">— read-only, allow-listed, LIMIT 200</span></h4>
+            <p>Compiled the logical plan to SQL via the logical↔physical map and ran it live:</p>
+            <div class="sql"><span class="c">-- crt-07 → services → customers (+ active alarms)</span><br>
+<span class="kw">SELECT</span> c.name, c.sla_tier, a.severity<br>
+<span class="kw">FROM</span> tmf_resource r<br>
+<span class="kw">JOIN</span> svc_binding b <span class="kw">ON</span> b.resource_id = r.id<br>
+<span class="kw">JOIN</span> tmf_service s <span class="kw">ON</span> s.id = b.service_id<br>
+<span class="kw">JOIN</span> customer c <span class="kw">ON</span> c.id = s.customer_id<br>
+<span class="kw">LEFT JOIN</span> tmf_alarm a <span class="kw">ON</span> a.resource_id = r.id <span class="kw">AND</span> a.state='active'<br>
+<span class="kw">WHERE</span> r.id = <span style="color:var(--amber)">:rid</span> <span class="c">-- crt-07</span></div></div></div>
+
+          <div class="step"><div class="rail"><div class="node">4</div><div class="line"></div></div>
+            <div class="sc"><h4>Reason</h4><p>Ran OWL-RL + Datalog over the result subgraph → derived <code style="font-family:var(--mono);font-size:11.5px;color:var(--green)">impacts(Acme)</code>, <code style="font-family:var(--mono);font-size:11.5px;color:var(--green)">impacts(Northwind)</code>, <code style="font-family:var(--mono);font-size:11.5px;color:var(--green)">impacts(Vega)</code>; flagged Acme via the <b>no-redundant-path</b> rule.</p></div></div>
+
+          <div class="step"><div class="rail"><div class="node">5</div></div>
+            <div class="sc"><h4>Synthesize &amp; verify</h4><p>Composed the answer with citations; SHACL-checked the claims; cached to the agent memory for recall.</p></div></div>
+        </div>
+      </div>
+
+      <!-- Sources -->
+      <div class="src">
+        <h4>Sources · every claim is traceable</h4>
+        <div class="srow"><span class="sn">1</span><span class="iri">tmf:Customer/acme</span><span style="color:var(--ink-2)">Acme Telecom · Platinum</span><span class="tbl">customer</span></div>
+        <div class="srow"><span class="sn">4</span><span class="iri">tmf:Alarm/al-9920</span><span style="color:var(--ink-2)">Critical · LinkDown</span><span class="tbl">tmf_alarm</span></div>
+        <div class="srow"><span class="sn">6</span><span class="iri">tmf:Observation/kpi-lat-crt07</span><span style="color:var(--ink-2)">p95 latency breach</span><span class="tbl">observation</span></div>
+        <div class="srow"><span class="sn">⚙</span><span class="iri">prov:Derived/impacts-acme</span><span style="color:var(--green)">inferred via rule R-12</span><span class="tbl">materialised</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right rail: ontology path -->
+  <aside class="rail2">
+    <div class="panel">
+      <h3>Ontology path traversed</h3>
+      <p class="sub">The route the reasoner walked — your model, not guessed columns.</p>
+      <div class="opath">
+        <div class="oc"><span class="ocd"></span><span class="nm">Resource <small>crt-07 · degraded</small></span></div>
+        <div class="oedge"><span>tmf:hosts →</span></div>
+        <div class="oc"><span class="ocd"></span><span class="nm">Service <small>3 bound services</small></span></div>
+        <div class="oedge"><span>tmf:consumedBy →</span></div>
+        <div class="oc"><span class="ocd"></span><span class="nm">Customer <small>3 impacted</small></span></div>
+        <div class="oedge"><span>+ tmf:affectedBy →</span></div>
+        <div class="oc"><span class="ocd" style="border-color:var(--amber);background:rgba(251,191,36,.15)"></span><span class="nm">Alarm <small>2 active · 1 critical</small></span></div>
+      </div>
+      <div class="legend">
+        <b>Why trust it?</b><br>
+        • Plan validated against the ontology — no hallucinated tables.<br>
+        • SQL was read-only + allow-listed + tier-gated.<br>
+        • 5 of 7 facts retrieved; 2 <b>inferred</b> with lineage.<br>
+        • Same engine answers via SDK / CLI / API.
+      </div>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

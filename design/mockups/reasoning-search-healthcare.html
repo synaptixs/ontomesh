@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Reasoning Search · Clinical Research (mockup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#16213d;--bg-2:#1b294a;--surface:#1f2d50;--surface-2:#273a63;
+    --ink:#eef2f9;--ink-2:#b6c4da;--muted:#7d8cab;
+    --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.18);
+    --green:#8fd14f;--green-deep:#7dc242;--green-soft:rgba(143,209,79,.14);
+    --amber:#fbbf24;--cyan:#7da6e0;--navy-line:#2b3e66;
+    --radius:16px;--radius-sm:11px;--pill:999px;
+    --font:'Inter',system-ui,sans-serif;--tight:'Inter Tight',var(--font);--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;
+       background-image:radial-gradient(1100px 600px at 85% -12%,rgba(143,209,79,.07),transparent)}
+  .top{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(22,33,61,.85);backdrop-filter:blur(10px);z-index:5}
+  .logo{width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center;font-family:var(--tight);font-weight:800;font-size:13px}
+  .logo b{color:#14284a}.logo b i{color:#7dc242;font-style:normal}
+  .brand{font-family:var(--tight);font-weight:800;font-size:17px}
+  .seg{margin-left:8px;font-size:12px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:4px 10px;border-radius:var(--pill)}
+  .top .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .phi{font-size:11px;font-weight:600;color:var(--cyan);background:rgba(125,166,224,.12);border:1px solid rgba(125,166,224,.3);padding:5px 11px;border-radius:var(--pill);display:flex;align-items:center;gap:6px}
+  .prov{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--pill);padding:3px}
+  .prov button{font:inherit;font-size:12px;color:var(--muted);background:transparent;border:none;border-radius:var(--pill);padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .prov button.on{background:var(--surface);color:var(--green);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:30px 24px 80px;display:grid;grid-template-columns:1fr 300px;gap:24px}
+  .main{min-width:0}
+  .ask{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:8px 8px 8px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+  .ask .q{flex:1;font-size:16px;color:var(--ink);font-weight:500}
+  .ask .q .cursor{display:inline-block;width:2px;height:18px;background:var(--green);margin-left:2px;vertical-align:-3px;animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .btn-reason{font:inherit;font-weight:700;font-size:14px;color:#15203a;background:var(--green);border:none;border-radius:var(--pill);padding:11px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px rgba(143,209,79,.3)}
+  .chips{display:flex;gap:8px;margin:14px 2px 0;flex-wrap:wrap}
+  .chip{font-size:12px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--pill);padding:6px 12px;display:flex;align-items:center;gap:6px}
+  .chip.on{color:var(--green);border-color:rgba(143,209,79,.35);background:var(--green-soft)}
+  .chip.lock{color:var(--cyan);border-color:rgba(125,166,224,.35);background:rgba(125,166,224,.1)}
+  .chip .k{font-size:10px;color:var(--muted)}
+
+  .answer{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-top:22px;overflow:hidden}
+  .ahead{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .ahead h2{font-family:var(--tight);font-size:15px;font-weight:700}
+  .badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--pill);display:flex;align-items:center;gap:6px}
+  .badge.ok{color:var(--green);background:var(--green-soft);border:1px solid rgba(143,209,79,.3)}
+  .badge.used{color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);margin-left:auto}
+  .abody{padding:20px}
+  .abody p{font-size:15px;line-height:1.65;color:var(--ink);margin-bottom:14px}
+  sup.cite{color:var(--green);font-weight:700;font-size:11px;cursor:pointer;padding:0 1px}
+  .risk{color:var(--amber);font-weight:600}
+  .infer{display:flex;gap:12px;background:var(--green-soft);border:1px solid rgba(143,209,79,.3);border-radius:var(--radius-sm);padding:14px 16px;margin:6px 0 18px}
+  .infer .ic{width:30px;height:30px;border-radius:8px;background:var(--green);color:#15203a;display:grid;place-items:center;flex-shrink:0;font-size:15px}
+  .infer .t{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em}
+  .infer p{font-size:13.5px;color:var(--ink-2);margin:3px 0 0}
+  .infer code{font-family:var(--mono);font-size:12px;color:var(--green);background:rgba(0,0,0,.18);padding:1px 6px;border-radius:4px}
+
+  .trace{border-top:1px solid var(--line);background:var(--bg-2)}
+  .tr-h{padding:12px 20px;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.05em}
+  .step{display:flex;gap:14px;padding:0 20px 4px}
+  .rail{display:flex;flex-direction:column;align-items:center}
+  .node{width:22px;height:22px;border-radius:50%;background:var(--green);color:#15203a;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
+  .line{width:2px;flex:1;background:var(--navy-line);margin:2px 0}
+  .step:last-child .line{display:none}
+  .sc{padding-bottom:16px}
+  .sc h4{font-size:13px;font-weight:600;margin-bottom:3px}
+  .sc p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .sc code,.sc .tag{font-family:var(--mono);font-size:11.5px}
+  .sc .tag{color:var(--cyan)}
+  .sql{background:#0f1b30;border:1px solid var(--navy-line);border-radius:8px;padding:10px 12px;margin-top:7px;font-family:var(--mono);font-size:11.5px;color:#cbd5e1;line-height:1.6;overflow-x:auto}
+  .sql .kw{color:var(--green)}.sql .c{color:var(--muted)}
+
+  .src{border-top:1px solid var(--line);padding:14px 20px}
+  .src h4{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+  .srow{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .srow:last-child{border-bottom:none}
+  .sn{width:18px;height:18px;border-radius:5px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0}
+  .srow .iri{font-family:var(--mono);color:var(--ink)}
+  .srow .tbl{color:var(--muted);margin-left:auto;font-family:var(--mono);font-size:11px}
+
+  .rail2{position:sticky;top:84px;align-self:start}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .panel h3{font-family:var(--tight);font-size:13px;font-weight:700;margin-bottom:4px}
+  .panel .sub{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .opath{display:flex;flex-direction:column;gap:0}
+  .oc{display:flex;align-items:center;gap:10px}
+  .ocd{width:11px;height:11px;border-radius:50%;border:2px solid var(--green);background:var(--green-soft)}
+  .oc .nm{font-size:12.5px;font-weight:600}
+  .oc .nm small{display:block;color:var(--muted);font-weight:400;font-family:var(--mono);font-size:10.5px}
+  .oedge{margin-left:4px;border-left:2px dashed var(--navy-line);height:24px;padding-left:18px;display:flex;align-items:center}
+  .oedge span{font-family:var(--mono);font-size:10.5px;color:var(--cyan)}
+  .legend{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.7}
+  .legend b{color:var(--ink-2)}
+  .ribbon{position:fixed;top:12px;right:16px;background:var(--green);color:#15203a;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--pill);z-index:50}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}.rail2{display:none}}
+</style>
+</head>
+<body>
+<div class="ribbon">MOCKUP · Clinical Research</div>
+
+<div class="top">
+  <span class="logo"><b>f<i>i</i>b</b></span>
+  <span class="brand">Ontomesh</span>
+  <span class="seg">Ask · clinical-research</span>
+  <div class="right">
+    <span class="phi">🔒 PHI-safe · de-identified</span>
+    <div class="prov" title="LLM provider">
+      <button class="on"><span class="dot"></span>Ollama · on-prem (no PHI egress)</button>
+      <button>OpenAI</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="main">
+    <div class="ask">
+      <span class="q">Which enrolled subjects in NCT-04471 are now likely ineligible after their latest labs — and why?<span class="cursor"></span></span>
+      <button class="btn-reason">Reason →</button>
+    </div>
+    <div class="chips">
+      <span class="chip on">✓ Ontology-bounded</span>
+      <span class="chip on">✓ Multi-hop</span>
+      <span class="chip on">✓ Inference (OWL-RL + Datalog)</span>
+      <span class="chip lock">🔒 PHI-gated · tier ≤ Restricted</span>
+    </div>
+
+    <div class="answer">
+      <div class="ahead">
+        <h2>Answer</h2>
+        <span class="badge ok">● High confidence · grounded in 9 records + 4 inferred</span>
+        <span class="badge used">⚡ 2.3s · 2 hops · 128 subjects scanned</span>
+      </div>
+
+      <div class="abody">
+        <p><b>4 of 128 enrolled subjects now violate an eligibility criterion</b> after their most-recent labs:</p>
+        <p style="margin-top:-4px">
+        • <b>S-0192</b><sup class="cite">1</sup> — eGFR fell to <span class="risk">48 mL/min</span>, below criterion <b>EC-7</b> (renal: eGFR ≥ 60)<sup class="cite">2,3</sup>.<br>
+        • <b>S-0457</b><sup class="cite">4</sup> — ALT at <span class="risk">3.4× ULN</span>, breaching <b>EC-11</b> (hepatic: ALT ≤ 3× ULN)<sup class="cite">5</sup>.<br>
+        • <b>S-0631</b>, <b>S-0884</b><sup class="cite">6,7</sup> — ANC below the haematologic floor (EC-4).</p>
+        <p>S-0192 is the most urgent — the renal breach is also a <span class="risk">reportable protocol deviation</span> and the subject has a dosing visit scheduled tomorrow<sup class="cite">8</sup>.</p>
+
+        <div class="infer">
+          <div class="ic">⚙</div>
+          <div>
+            <span class="t">Inferred — computed, not a stored flag</span>
+            <p>Ineligibility was <b>derived</b> by checking each subject's latest lab against the trial's criteria:
+            <code>ineligible(S) ⟸ enrolledIn(S, Study) ∧ hasCriterion(Study, C) ∧ latestLab(S, L) ∧ violates(L, C)</code>
+            — full <code>prov:wasDerivedFrom</code> lineage attached for the GCP / 21 CFR Part 11 audit trail.</p>
+          </div>
+        </div>
+
+        <div class="trace" style="margin:0 -20px -20px;border-radius:0">
+          <div class="tr-h">🧠 Reasoning trace <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— how the answer was built</span></div>
+
+          <div class="step"><div class="rail"><div class="node">1</div><div class="line"></div></div>
+            <div class="sc"><h4>Understand</h4><p>Mapped to ontology terms:
+            <span class="tag">Subject</span> <span class="tag">Study</span> <span class="tag">EligibilityCriterion</span> <span class="tag">LabResult</span> · intent = <b>eligibility re-check</b>.</p></div></div>
+
+          <div class="step"><div class="rail"><div class="node">2</div><div class="line"></div></div>
+            <div class="sc"><h4>Plan</h4><p>For each enrolled <span class="tag">Subject</span>: join the study's <span class="tag">EligibilityCriterion</span>s against the subject's <b>latest</b> <span class="tag">LabResult</span>. Plan validated against the ontology.</p></div></div>
+
+          <div class="step"><div class="rail"><div class="node">3</div><div class="line"></div></div>
+            <div class="sc"><h4>Execute <span style="color:var(--muted);font-weight:400">— read-only · PHI-gated · de-identified IDs only</span></h4>
+            <p>Compiled to SQL via the logical↔physical map; ran live against the clinical DB:</p>
+            <div class="sql"><span class="c">-- enrolled subjects whose latest labs violate eligibility</span><br>
+<span class="kw">SELECT</span> s.subject_code, c.code, l.analyte, l.value, l.unit<br>
+<span class="kw">FROM</span> enrollment e<br>
+<span class="kw">JOIN</span> subject s <span class="kw">ON</span> s.id = e.subject_id<br>
+<span class="kw">JOIN</span> study st <span class="kw">ON</span> st.id = e.study_id<br>
+<span class="kw">JOIN</span> eligibility_criterion c <span class="kw">ON</span> c.study_id = st.id<br>
+<span class="kw">JOIN</span> lab_result l <span class="kw">ON</span> l.subject_id = s.id <span class="kw">AND</span> l.is_latest = 1<br>
+<span class="kw">WHERE</span> st.nct_id = <span style="color:var(--amber)">:nct</span> <span class="kw">AND</span> e.status='enrolled'</div></div></div>
+
+          <div class="step"><div class="rail"><div class="node">4</div><div class="line"></div></div>
+            <div class="sc"><h4>Reason</h4><p>OWL-RL + Datalog evaluated <code style="font-family:var(--mono);font-size:11.5px;color:var(--green)">violates(L, C)</code> per analyte → derived <code style="font-family:var(--mono);font-size:11.5px;color:var(--green)">ineligible(S-0192…)</code>; the <b>protocol-deviation</b> rule escalated S-0192.</p></div></div>
+
+          <div class="step"><div class="rail"><div class="node">5</div></div>
+            <div class="sc"><h4>Synthesize &amp; verify</h4><p>Composed the cited answer; SHACL-validated each claim against the protocol shape; logged to the audit memory.</p></div></div>
+        </div>
+      </div>
+
+      <div class="src">
+        <h4>Sources · audit-traceable</h4>
+        <div class="srow"><span class="sn">1</span><span class="iri">cr:Subject/s-0192</span><span style="color:var(--ink-2)">de-identified · arm B</span><span class="tbl">subject</span></div>
+        <div class="srow"><span class="sn">2</span><span class="iri">cr:Criterion/EC-7</span><span style="color:var(--ink-2)">renal · eGFR ≥ 60</span><span class="tbl">eligibility_criterion</span></div>
+        <div class="srow"><span class="sn">3</span><span class="iri">cr:LabResult/egfr-s0192-0420</span><span style="color:var(--ink-2)">48 mL/min · 2026-04-20</span><span class="tbl">lab_result</span></div>
+        <div class="srow"><span class="sn">⚙</span><span class="iri">prov:Derived/ineligible-s0192</span><span style="color:var(--green)">inferred via rule R-7 (renal)</span><span class="tbl">materialised</span></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="rail2">
+    <div class="panel">
+      <h3>Ontology path traversed</h3>
+      <p class="sub">Eligibility re-checked against your protocol model — not guessed columns.</p>
+      <div class="opath">
+        <div class="oc"><span class="ocd"></span><span class="nm">Subject <small>128 enrolled</small></span></div>
+        <div class="oedge"><span>cr:enrolledIn →</span></div>
+        <div class="oc"><span class="ocd"></span><span class="nm">Study <small>NCT-04471</small></span></div>
+        <div class="oedge"><span>cr:hasCriterion →</span></div>
+        <div class="oc"><span class="ocd"></span><span class="nm">EligibilityCriterion <small>EC-4 / EC-7 / EC-11</small></span></div>
+        <div class="oedge"><span>vs cr:latestLab →</span></div>
+        <div class="oc"><span class="ocd" style="border-color:var(--amber);background:rgba(251,191,36,.15)"></span><span class="nm">LabResult <small>4 violations</small></span></div>
+      </div>
+      <div class="legend">
+        <b>Why trust it (clinical)?</b><br>
+        • No PHI leaves the host — local model, de-identified IDs.<br>
+        • Plan validated against the protocol ontology.<br>
+        • Read-only + tier ≤ Restricted; no writes to the EDC.<br>
+        • Every flag has <b>prov</b> lineage — GCP / Part 11 audit.<br>
+        • Same engine via SDK / CLI / API.
+      </div>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

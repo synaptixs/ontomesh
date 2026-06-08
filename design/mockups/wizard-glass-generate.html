@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ontomesh — Liquid Glass · Generate ontology</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#eaf1ff; --ink-2:rgba(234,241,255,.78); --muted:rgba(234,241,255,.52);
+    --green:#9ed75a; --green-deep:#7dc242; --green-soft:rgba(158,215,90,.16);
+    --amber:#fbbf24; --navy:#0a1326; --navy-deep:#070d1c;
+    --radius:18px; --radius-sm:13px; --pill:999px;
+    --font:'Inter',system-ui,sans-serif; --tight:'Inter Tight',var(--font); --mono:'JetBrains Mono',monospace;
+    --glass-fill:rgba(255,255,255,.07);
+    --glass-fill-strong:rgba(255,255,255,.12);
+    --glass-border:rgba(255,255,255,.16);
+    --glass-blur:saturate(180%) blur(22px);
+    --glass-shadow:0 1px 0 rgba(255,255,255,.20) inset,0 -1px 0 rgba(255,255,255,.04) inset,0 18px 50px rgba(3,8,20,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;background:var(--navy-deep);position:relative;overflow-x:hidden;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
+
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:
+        radial-gradient(120% 90% at 85% -10%, #16264a 0%, transparent 55%),
+        radial-gradient(110% 80% at -5% 110%, #0c2030 0%, transparent 50%),
+        linear-gradient(160deg,#0a1326,#070d1c);}
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;mix-blend-mode:screen;animation:drift 24s ease-in-out infinite}
+  .b1{width:520px;height:520px;left:-100px;top:-80px;background:radial-gradient(circle,#7dc242,transparent 70%)}
+  .b2{width:620px;height:620px;right:-140px;top:80px;background:radial-gradient(circle,#2f7bd1,transparent 70%);animation-delay:-8s}
+  .b3{width:460px;height:460px;left:35%;bottom:-180px;background:radial-gradient(circle,#39b5a0,transparent 70%);animation-delay:-15s}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,30px) scale(1.07)}66%{transform:translate(-30px,18px) scale(.96)}}
+  @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+  @media(prefers-reduced-motion:reduce){.blob,.run-dot{animation:none}}
+
+  .glass{background:var(--glass-fill);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+  @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){.glass{background:rgba(18,30,56,.92)}}
+
+  .navbar{position:sticky;top:16px;z-index:30;margin:16px auto 0;max-width:1040px;padding:0 14px}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 11px 18px;border-radius:var(--pill)}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--tight);font-weight:800;font-size:18px;letter-spacing:-.02em}
+  .logo{width:27px;height:27px;border-radius:9px;background:linear-gradient(160deg,#1d3a6e,#0a1326);display:grid;place-items:center;box-shadow:0 1px 0 rgba(255,255,255,.18) inset}
+  .logo span{color:var(--green);font-weight:800;font-size:14px;font-family:var(--tight)}
+  .navmeta{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;border-radius:var(--pill);padding:11px 20px;border:1px solid transparent;cursor:pointer;transition:.18s}
+  .btn-primary{background:linear-gradient(160deg,var(--green),var(--green-deep));color:#07210a;box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 6px 18px rgba(125,194,66,.4)}
+  .btn-primary:hover{transform:translateY(-1px);filter:brightness(1.05)}
+  .btn-ghost{color:#fff;border-color:var(--glass-border);background:var(--glass-fill-strong)}
+  .btn-ghost:hover{background:rgba(255,255,255,.16)}
+  .btn-lg{padding:14px 26px;font-size:15px}
+
+  .stepper{display:flex;gap:8px;align-items:center;margin:26px auto 0;padding:8px 10px;border-radius:var(--pill);width:max-content}
+  .stepper .s{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:6px 14px;border-radius:var(--pill);font-weight:600}
+  .stepper .s.done{color:var(--green)}
+  .stepper .s.active{color:#07210a;background:linear-gradient(160deg,var(--green),var(--green-deep));box-shadow:0 1px 0 rgba(255,255,255,.4) inset}
+  .stepper .s .n{font-family:var(--tight);font-weight:800}
+  .stepper .sep{width:16px;height:1px;background:var(--glass-border)}
+
+  header.page{text-align:center;padding:34px 0 6px}
+  .eyebrow{font-size:12px;font-weight:700;color:var(--green);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+  h1{font-family:var(--tight);font-weight:800;font-size:38px;letter-spacing:-.03em;color:#fff;margin-bottom:12px}
+  .lead{font-size:15px;color:var(--ink-2);max-width:56ch;margin:0 auto}
+
+  .card{border-radius:var(--radius);padding:22px 24px;margin-top:18px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent)}
+  .card h3{font-family:var(--tight);font-size:16px;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+
+  /* preflight checklist */
+  .pf{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:18px}
+  .pf li{display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--ink-2)}
+  .pf .ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+  .pf .ok .ic{background:var(--green-soft);color:var(--green);border:1px solid rgba(158,215,90,.45)}
+  .pf .warn .ic{background:rgba(251,191,36,.14);color:var(--amber);border:1px solid rgba(251,191,36,.4)}
+  .pf b{color:#fff;font-weight:600}
+  .runrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .run-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.3s ease-in-out infinite}
+  .runrow .meta{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+
+  /* phase chips */
+  .chips{display:flex;gap:9px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--green-soft);border:1px solid rgba(158,215,90,.35);padding:7px 13px;border-radius:var(--pill)}
+  .chip .d{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .chip.run{color:#dff3c4;border-color:rgba(158,215,90,.6);background:rgba(158,215,90,.22)}
+  .chip.run .d{animation:pulse 1.3s ease-in-out infinite}
+  .chip.todo{color:var(--muted);background:rgba(255,255,255,.05);border-color:var(--glass-border)}
+  .chip.todo .d{background:var(--muted)}
+
+  /* live log */
+  .log{font-family:var(--mono);font-size:12.5px;line-height:1.75;border-radius:var(--radius-sm);padding:16px 18px;
+    background:rgba(4,9,20,.55);border:1px solid var(--glass-border);max-height:230px;overflow:hidden}
+  .log .ok{color:var(--green)} .log .dim{color:var(--muted)} .log .hl{color:#cfe9ff} .log .run{color:var(--amber)}
+  .log .cur::after{content:"▋";color:var(--green);animation:pulse 1s steps(1) infinite}
+
+  /* score + artifacts */
+  .twocol{display:grid;grid-template-columns:230px 1fr;gap:18px;margin-top:18px}
+  .score{border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .ring{--p:86;width:128px;height:128px;border-radius:50%;display:grid;place-items:center;margin-bottom:12px;
+    background:conic-gradient(var(--green) calc(var(--p)*1%),rgba(255,255,255,.10) 0);}
+  .ring .inner{width:100px;height:100px;border-radius:50%;background:rgba(8,14,28,.6);display:grid;place-items:center;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .ring .num{font-family:var(--tight);font-weight:800;font-size:30px;color:#fff;line-height:1}
+  .ring .den{font-size:12px;color:var(--muted)}
+  .score .lbl{font-size:13px;color:var(--ink-2)} .score .lbl b{color:var(--green)}
+  .arts{border-radius:var(--radius);padding:14px 8px}
+  .arts h3{padding:6px 14px}
+  .art{display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:10px;font-size:13px;transition:.15s;cursor:pointer}
+  .art:hover{background:var(--glass-fill-strong)}
+  .art .fi{width:30px;height:30px;border-radius:8px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:13px;flex:none;box-shadow:0 1px 0 rgba(255,255,255,.2) inset}
+  .art .nm{color:#fff;font-family:var(--mono);font-size:12px} .art .ds{color:var(--muted);font-size:11.5px;margin-left:auto}
+
+  .step-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 22px;border-radius:var(--radius);margin:18px 0 56px}
+  .step-nav .hint{font-size:12.5px;color:var(--ink-2)} .step-nav .hint b{color:#fff}
+  .ribbon{position:fixed;top:14px;right:14px;border-radius:var(--pill);color:var(--green);font-family:var(--mono);font-size:11px;padding:6px 12px;z-index:50}
+  @media(max-width:820px){.twocol{grid-template-columns:1fr}h1{font-size:30px}.stepper{display:none}}
+</style>
+</head>
+<body>
+<div class="bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="ribbon glass">MOCKUP · Glass · Generate</div>
+
+<div class="navbar">
+  <nav class="glass">
+    <div class="brand"><span class="logo"><span>om</span></span> Ontomesh</div>
+    <span class="navmeta">Smart Building Ops · Step 8 of 8</span>
+    <a href="#" class="btn btn-ghost">Save &amp; exit</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <div class="stepper glass">
+    <span class="s done"><span class="n">✓</span> Define</span>
+    <span class="sep"></span>
+    <span class="s done"><span class="n">✓</span> Enrich</span>
+    <span class="sep"></span>
+    <span class="s active"><span class="n">3</span> Build</span>
+    <span class="sep"></span>
+    <span class="s"><span class="n">4</span> After</span>
+  </div>
+
+  <header class="page">
+    <p class="eyebrow">Build · generate</p>
+    <h1>Generate ontology</h1>
+    <p class="lead">Run the toolkit pipeline to emit OWL, SHACL, JSON-LD, and SKOS, run the SPARQL competency-question tests, and write the governance report. Nothing in your input is changed.</p>
+  </header>
+
+  <!-- Pre-flight + run -->
+  <div class="card glass">
+    <h3>Pre-flight check &amp; run</h3>
+    <ul class="pf">
+      <li class="ok"><span class="ic">✓</span><span><b>Domain name</b> — Smart Building Operations</span></li>
+      <li class="ok"><span class="ic">✓</span><span><b>Base IRI</b> — https://acme.example/onto/sbo#</span></li>
+      <li class="ok"><span class="ic">✓</span><span><b>14 entities</b> · <b>9 events</b> · <b>11 relationships</b> defined</span></li>
+      <li class="warn"><span class="ic">!</span><span><b>4 competency questions</b> — add 1–2 more to clear the quality gate (recommended, not required)</span></li>
+    </ul>
+    <div class="runrow">
+      <a href="#" class="btn btn-primary btn-lg"><span class="run-dot"></span> Running pipeline…</a>
+      <span class="meta">phase 3 of 7 · 00:04 elapsed</span>
+    </div>
+  </div>
+
+  <!-- Phase toggles -->
+  <div class="card glass">
+    <h3>Pipeline phases <span style="font-weight:500;font-size:12px;color:var(--muted)">— all selected</span></h3>
+    <div class="chips">
+      <span class="chip"><span class="d"></span> 1 · Foundation</span>
+      <span class="chip"><span class="d"></span> 2 · OWL Modeling</span>
+      <span class="chip run"><span class="d"></span> 3 · SHACL</span>
+      <span class="chip todo"><span class="d"></span> 4 · Mapping</span>
+      <span class="chip todo"><span class="d"></span> 5 · JSON-LD</span>
+      <span class="chip todo"><span class="d"></span> Test</span>
+      <span class="chip todo"><span class="d"></span> Report</span>
+    </div>
+  </div>
+
+  <!-- Live log -->
+  <div class="card glass">
+    <h3>Pipeline output</h3>
+    <div class="log">
+      <div><span class="dim">$</span> ontoforge --session smart-building-ops --out output/</div>
+      <div><span class="ok">✓</span> Phase 1 · Foundation     <span class="dim">— 14 classes, 1,212 properties inventoried</span></div>
+      <div><span class="ok">✓</span> Phase 2 · OWL Modeling   <span class="dim">— enterprise.ttl · events.ttl · provenance.ttl</span></div>
+      <div><span class="run">▸</span> Phase 3 · SHACL          <span class="hl">generating node shapes…</span> <span class="cur"></span></div>
+      <div><span class="dim">  Test · Report queued</span></div>
+    </div>
+  </div>
+
+  <!-- Score + artifacts (post-run preview) -->
+  <div class="twocol">
+    <div class="score glass">
+      <div class="ring"><div class="inner"><div><div class="num">86</div><div class="den">/ 100</div></div></div></div>
+      <div class="lbl">Governance score<br><b>29 / 34 criteria</b> · gate passed</div>
+    </div>
+    <div class="arts glass">
+      <h3>Generated artifacts</h3>
+      <div class="art"><span class="fi">🌐</span><span class="nm">toolkit_report.html</span><span class="ds">governance · CQ pass rate</span></div>
+      <div class="art"><span class="fi">🦉</span><span class="nm">enterprise.ttl</span><span class="ds">OWL 2 ontology</span></div>
+      <div class="art"><span class="fi">🔷</span><span class="nm">enterprise-shapes.ttl</span><span class="ds">38 SHACL shapes</span></div>
+      <div class="art"><span class="fi">{ }</span><span class="nm">enterprise-context.json</span><span class="ds">JSON-LD context</span></div>
+      <div class="art"><span class="fi">📚</span><span class="nm">vocab.skos.ttl</span><span class="ds">SKOS vocabulary</span></div>
+    </div>
+  </div>
+
+  <div class="step-nav glass">
+    <a href="#" class="btn btn-ghost">← Back · Rules</a>
+    <span class="hint">Phase 3 of 3 · <b>Build</b> · run finishes, then save to the Library</span>
+    <a href="#" class="btn btn-primary">💾 Save to Library</a>
+  </div>
+</div>
+</body>
+</html>
