@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [3.9.0] — 2026-06-22 · Liquid Glass theme
+
+### Added
+
+- **Liquid Glass theme** — an opt-in, dark-native UI theme: translucent frosted surfaces (`backdrop-filter`) over a live gradient backdrop, with specular edge highlights. Selectable from the wizard's theme picker (Twilight · Mono · Light · **Glass**) and a toggle on the marketing landing; the choice persists across the wizard, landing, Ask console, and Projects via the shared `wizard-theme` key. Built on the existing `[data-theme]` token system, so it's fully reversible.
+- **Accessibility fallbacks for glass** — `@supports`-guarded opaque surfaces where `backdrop-filter` is unsupported; `prefers-reduced-transparency` drops the frost to opaque navy and hides the animated backdrop; `prefers-reduced-motion` stops the backdrop animation. Light/Mono themes intentionally stay flat (glass is dark-only).
+
+### Changed
+
+- **Distribution surface is pip + Docker** — removed GitHub/`git clone` from the live UI and user-facing docs in favour of `pip install 'ontoforge[wizard]'` and the published `ghcr.io/synaptixs/ontomesh` image. Contributor/security/changelog references to the repo are kept.
+- **Wizard navigation** — connected **Build → After-generation** into one continuous linear flow: the Generate step now leads to Evolution Review, and the three post-generation steps gained standard Back/Continue navigation. Log Discovery's "Pipeline at a glance" cards were tokenised (fixes a latent Twilight contrast bug and lets the category colours survive under glass).
+
+### Fixed
+
+- **Report phase crash** — `generate_report()` now creates `output/reports/` before writing, fixing a `FileNotFoundError` when the report phase ran before a phase that created the directory.
+- Migrated all `datetime.utcnow()` calls to timezone-aware `datetime.now(timezone.utc)` (the deprecated API is scheduled for removal).
+
+### Internal
+
+- Stopped tracking generated artifacts already covered by `.gitignore` (`db/enterprise.db`, `output/reports/*`, `**/__pycache__/*.pyc`).
+- Fixed two stale test assertions (template-registration key, GHCR login-step count) for a clean CI gate — full suite at 1006 passing.
+
+---
+
 ## [3.8.0] — 2026-06-07 · Reasoning Search + Ontoforge
 
 First PyPI release under the **`ontoforge`** package name (`pip install ontoforge`). The GitHub repo (`synaptixs/ontomesh`) and GHCR image path (`ghcr.io/synaptixs/ontomesh`) are unchanged; only the pip/console-script name and the docs-site brand move to Ontoforge.
@@ -179,6 +203,7 @@ Accessibility, design tokens, live drift, per-phase help.
 
 ---
 
+[3.9.0]: https://github.com/synaptixs/ontomesh/compare/v3.8.0...v3.9.0
 [3.8.0]: https://github.com/synaptixs/ontomesh/compare/v3.7.1...v3.8.0
 [3.7.0]: https://github.com/synaptixs/ontomesh/compare/v3.6.0-dev...v3.7.0
 [3.6.0-dev]: https://github.com/synaptixs/ontomesh/compare/v3.5.0-dev...v3.6.0-dev

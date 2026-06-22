@@ -28,5 +28,5 @@ SDK callers don't get tied to internals during the v3.x line.
 
 from __future__ import annotations
 
-__version__ = "3.8.0"
+__version__ = "3.9.0"
 __all__ = ["__version__"]

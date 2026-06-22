@@ -6,7 +6,7 @@ Set one env var to switch from SQLite to Postgres:
 docker run -d --name ontomesh \
   -p 5051:5051 \
   -e ONTOMESH_DB_URL=postgresql://user:pass@host:5432/ontomesh \
-  ghcr.io/synaptixs/ontomesh:3.8.0
+  ghcr.io/synaptixs/ontomesh:3.9.0
 ```
 
 The wizard's saved-ontologies store, preferences, and session state all migrate transparently.  Both backends share the same wire schema.

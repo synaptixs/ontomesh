@@ -35,9 +35,13 @@ pytest.importorskip("flask")
 
 
 def test_ontomesh_package_imports():
-    import ontoforge
-    assert ontoforge.__version__.startswith("3.8"), \
-        f"unexpected version {ontoforge.__version__!r}"
+    import ontoforge, re, pathlib
+    # Version-agnostic: the package __version__ must match pyproject.toml's
+    # declared version (catches a forgotten bump in either file on release).
+    txt = (pathlib.Path(__file__).resolve().parent.parent / "pyproject.toml").read_text()
+    declared = re.search(r'^version\s*=\s*"([^"]+)"', txt, re.M).group(1)
+    assert ontoforge.__version__ == declared, \
+        f"ontoforge.__version__ {ontoforge.__version__!r} != pyproject {declared!r}"
 
 
 @pytest.mark.parametrize("modpath,attr", [

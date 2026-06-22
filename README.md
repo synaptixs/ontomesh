@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| **Image** | `ghcr.io/synaptixs/ontomesh:3.8.0` (and `:latest`) |
+| **Image** | `ghcr.io/synaptixs/ontomesh:3.9.0` (and `:latest`) |
 | **Size** | ~316 MB compressed |
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
@@ -144,4 +144,4 @@ Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/synaptix
 
 ---
 
-*Ontomesh v3.8.0 · Apache-2.0 · Reasoning Search · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 1000+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.9.0 · Apache-2.0 · Liquid Glass theme · Reasoning Search · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 1000+ tests · Docker, Compose, Fly.io, Render, Cloud Run*

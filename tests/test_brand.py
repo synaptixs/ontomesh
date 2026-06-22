@@ -95,9 +95,13 @@ def test_tokens_css_defines_brand_layer():
 
 
 def test_pyproject_renamed_to_ontomesh():
+    import re
     py = (ROOT / "pyproject.toml").read_text()
     assert 'name = "ontoforge"' in py
-    assert 'version = "3.8.0"' in py
+    # Version-agnostic: a semver version must be declared (its value is checked
+    # for consistency with the package in test_package_surface).
+    assert re.search(r'^version = "\d+\.\d+\.\d+', py, re.M), \
+        "pyproject is missing a semver version line"
 
 
 # ── Flask wiring ──────────────────────────────────────────────────────
