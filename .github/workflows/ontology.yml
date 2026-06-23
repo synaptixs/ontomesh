@@ -184,6 +184,12 @@ jobs:
           name: ontology-artifacts
           path: ${{ env.OUT_PATH }}
 
+      # The DB is generated (gitignored), not committed — this job runs in a
+      # fresh checkout, so rebuild it from db/schema.sql + db/seed.sql before
+      # the CQ tests query it. (The `generate` job gets it via `--phase 1`.)
+      - name: Seed database (from db/schema.sql + db/seed.sql)
+        run: python -c "from toolkit import setup_db; setup_db('${{ env.DB_PATH }}')"
+
       - name: Run CQ tests + governance scoring
         run: python toolkit.py --phase test --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
 
