@@ -1897,7 +1897,26 @@ function goStep(name) {
 // keyboard IIFE above still drive it). The phase rail up top gives novices
 // orientation. _syncPhaseRail() is called at the end of goStep(), so the rail
 // always reflects the active step with zero changes to the navigation engine.
+// On wide screens the step list is docked as a persistent rail (CSS), so the
+// drawer toggle/scrim/aria-hidden don't apply; on narrow screens it's the
+// slide-in drawer. Keep the a11y state in sync across the breakpoint.
+const _railMQ = window.matchMedia('(min-width: 1024px)');
+function _syncRailMode() {
+  const d = document.getElementById('nav-drawer');
+  if (!d) return;
+  if (_railMQ.matches) {                    // docked desktop rail — always visible
+    d.classList.remove('open');
+    d.setAttribute('aria-hidden', 'false');
+    document.getElementById('nav-scrim')?.classList.remove('open');
+  } else if (!d.classList.contains('open')) {
+    d.setAttribute('aria-hidden', 'true');  // mobile drawer, closed by default
+  }
+}
+_railMQ.addEventListener('change', _syncRailMode);
+_syncRailMode();
+
 function toggleNavDrawer(force) {
+  if (_railMQ.matches) return;              // docked on desktop — nothing to toggle
   const d = document.getElementById('nav-drawer');
   const s = document.getElementById('nav-scrim');
   const t = document.getElementById('drawer-toggle');

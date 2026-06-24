@@ -825,6 +825,33 @@
   .nav-drawer-foot { border-top: 1px solid var(--border); padding: 12px 16px;
                      display: flex; flex-direction: column; gap: 10px; }
 
+  /* ── Persistent step rail (desktop) ──────────────────────────────────────
+     On wide screens, dock the "All steps" drawer as an always-visible left
+     rail instead of a slide-in overlay, so every step is reachable at a
+     glance. Below the breakpoint it stays the fixed drawer + scrim + toggle
+     (unchanged). Pure CSS re-layout of the existing #nav-drawer markup —
+     goStep / active-highlight / theme picker all keep working. */
+  @media (min-width: 1024px) {
+    .app {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr auto;
+    }
+    .nav-drawer {
+      position: static; transform: none; z-index: auto;
+      width: auto; max-width: none; box-shadow: none;
+      grid-column: 1; grid-row: 1 / -1;
+    }
+    .topbar     { grid-column: 2; grid-row: 1; }
+    .phase-rail { grid-column: 2; grid-row: 2; }
+    .main       { grid-column: 2; grid-row: 3; }
+    .action-bar { grid-column: 2; grid-row: 4; }
+    /* Docked: the toggle, the drawer's close button, and the scrim are moot. */
+    .drawer-toggle,
+    .nav-drawer-close,
+    .nav-scrim { display: none !important; }
+  }
+
   /* ── Focus area: centre the step content ─────────────────────────────── */
   .main > .step-panel { max-width: 880px; margin-left: auto; margin-right: auto; }
 
