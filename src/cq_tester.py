@@ -149,10 +149,256 @@ COMPETENCY_QUESTIONS = [
 ]
 
 
+# ── Artifact inspection helpers ──────────────────────────────────────────
+# Phase 0 (ONTOLOGY_ROADMAP.md): several governance criteria used to pass a
+# score *literal* — they returned 4/5 or 5/5 on every run, for every
+# ontology, forever, regardless of what was generated. Each of those claims
+# is about a file the toolkit emits, so each is measurable. These helpers
+# read the artifact instead of asserting a number.
+#
+# A criterion that cannot be measured is worth less than no criterion at
+# all, because it inflates the average and hides the ones that can.
+
+def _artifact_dir(output_dir: str, *parts: str) -> str:
+    """Resolve a path under the run's output dir (…/reports/.. → …)."""
+    root = os.path.dirname(output_dir.rstrip(os.sep)) if output_dir else ""
+    return os.path.join(root, *parts)
+
+
+def _parse_ttl(path: str):
+    """Parse a Turtle file. Returns an rdflib Graph, or None if unusable."""
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        import rdflib
+    except ImportError:
+        return None
+    try:
+        g = rdflib.Graph()
+        g.parse(path, format="turtle")
+        return g
+    except Exception:
+        # A file that does not parse is not a usable artifact. Scoring it as
+        # present-and-correct is exactly the failure Phase 0 removes.
+        return None
+
+
+def _load_json(path: str):
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        import json
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _band(value, thresholds) -> int:
+    """Map a value to a 0-5 score via ascending (threshold, score) pairs."""
+    score = 0
+    for threshold, banded in thresholds:
+        if value >= threshold:
+            score = banded
+    return score
+
+
+def _count_owl_classes(graph) -> int:
+    if graph is None:
+        return 0
+    import rdflib
+    return len(set(graph.subjects(rdflib.RDF.type, rdflib.OWL.Class)))
+
+
+def _typed_object_properties(graph) -> Tuple[int, int]:
+    """(total object properties, those with a concrete non-owl:Thing range)."""
+    if graph is None:
+        return (0, 0)
+    import rdflib
+    props = set(graph.subjects(rdflib.RDF.type, rdflib.OWL.ObjectProperty))
+    typed = 0
+    for p in props:
+        ranges = set(graph.objects(p, rdflib.RDFS.range))
+        if ranges and rdflib.OWL.Thing not in ranges:
+            typed += 1
+    return (len(props), typed)
+
+
+def _count_nodeshapes(graph) -> int:
+    if graph is None:
+        return 0
+    import rdflib
+    sh = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+    return len(set(graph.subjects(rdflib.RDF.type, sh.NodeShape)))
+
+
+def _count_shape_targets(graph) -> int:
+    if graph is None:
+        return 0
+    import rdflib
+    sh = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+    return len(set(graph.objects(None, sh.targetClass)))
+
+
+def _has_bounded_confidence(graph) -> bool:
+    """True when a SHACL property shape numerically bounds a confidence value."""
+    if graph is None:
+        return False
+    import rdflib
+    sh = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+    bounds = (sh.minInclusive, sh.maxInclusive)
+    for shape in set(graph.subjects(sh.path, None)):
+        paths = " ".join(str(p) for p in graph.objects(shape, sh.path)).lower()
+        if "confidence" not in paths:
+            continue
+        if any(next(graph.objects(shape, b), None) is not None for b in bounds):
+            return True
+    return False
+
+
+def _count_skos_concepts(graph) -> int:
+    if graph is None:
+        return 0
+    import rdflib
+    skos = rdflib.Namespace("http://www.w3.org/2004/02/skos/core#")
+    return len(set(graph.subjects(rdflib.RDF.type, skos.Concept)))
+
+
+def _count_context_terms(context_json) -> int:
+    if not isinstance(context_json, dict):
+        return 0
+    ctx = context_json.get("@context")
+    return len(ctx) if isinstance(ctx, dict) else 0
+
+
+def _mcp_semantic_binding(mcp_json) -> Tuple[int, int]:
+    """(tool count, tools referencing a JSON-LD context IRI)."""
+    if mcp_json is None:
+        return (0, 0)
+    tools = mcp_json
+    if isinstance(mcp_json, dict):
+        for key in ("mcp_tools", "tools", "definitions"):
+            if isinstance(mcp_json.get(key), list):
+                tools = mcp_json[key]
+                break
+    if not isinstance(tools, list):
+        return (0, 0)
+    # A tool is semantically bound when it points at the JSON-LD context or
+    # names its OWL class — whether via a literal "@context" key or the
+    # "x-semantic-context" / "x-ontology-class" extensions this generator
+    # emits. Testing only for "@context" would understate a real binding.
+    markers = ("@context", "x-semantic-context", "x-ontology-class")
+    bound = 0
+    for t in tools:
+        if not isinstance(t, dict):
+            continue
+        flat = _flatten_json(t)
+        if any(m in flat for m in markers):
+            bound += 1
+    return (len(tools), bound)
+
+
+def _flatten_json(obj) -> str:
+    """Flatten an object to a string so nested @context refs are detectable."""
+    try:
+        import json
+        return json.dumps(obj)
+    except Exception:
+        return str(obj)
+
+
+def _mapping_class_coverage(path: str, graph) -> Tuple[int, int]:
+    """(ontology classes present in the mapping workbook, total OWL classes).
+
+    Row *count* says nothing about coverage — a workbook can have more rows
+    than the ontology has entities and still miss classes entirely. Match on
+    class names instead.
+    """
+    total = _count_owl_classes(graph)
+    if not path or not os.path.isfile(path) or graph is None:
+        return (0, total)
+    import rdflib
+    ont_classes = {str(c).rsplit("/", 1)[-1].rsplit("#", 1)[-1]
+                   for c in graph.subjects(rdflib.RDF.type, rdflib.OWL.Class)
+                   if isinstance(c, rdflib.URIRef)}
+    try:
+        with open(path, newline="") as f:
+            mapped = {(r.get("ontology_class") or "").strip()
+                      for r in csv.DictReader(f)}
+    except OSError:
+        return (0, total)
+    return (len(ont_classes & mapped), total)
+
+
+_CQ_SPARQL_PREFIXES = "\n".join([
+    "PREFIX :     <https://ontology.example.com/enterprise/>",
+    "PREFIX owl:  <http://www.w3.org/2002/07/owl#>",
+    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
+    "PREFIX prov: <http://www.w3.org/ns/prov#>",
+    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>",
+    "",
+])
+
+
+def _load_cq_ontology(output_dir: str):
+    """Merge the generated ontology graphs so CQ SPARQL has something to hit."""
+    ont_dir = _artifact_dir(output_dir, "ontology")
+    try:
+        import rdflib
+    except ImportError:
+        return None
+    merged = rdflib.Graph()
+    found = False
+    for fname in ("enterprise.ttl", "events.ttl", "provenance.ttl"):
+        g = _parse_ttl(os.path.join(ont_dir, fname))
+        if g is not None:
+            found = True
+            for triple in g:
+                merged.add(triple)
+    return merged if found else None
+
+
+def _run_cq_sparql(graph, cq) -> Tuple[int, str]:
+    """Execute a CQ's SPARQL against the ontology. Returns (rows, status).
+
+    Status mirrors the SQL side: PASS when the row count matches
+    `expected_non_empty`, FAIL when it does not, ERROR on a bad query, and
+    N/A when no ontology graph could be loaded.
+    """
+    if graph is None:
+        return (0, "N/A")
+    query = cq.get("sparql_equiv", "").strip()
+    if not query:
+        return (0, "N/A")
+    try:
+        rows = list(graph.query(_CQ_SPARQL_PREFIXES + query))
+    except Exception:
+        return (0, "ERROR")
+    ok = (len(rows) > 0) == cq["expected_non_empty"]
+    return (len(rows), "PASS" if ok else "FAIL")
+
+
+
+
 # ── Governance Checklist Scoring ─────────────────────────────────────────
 
-def _score_governance(conn, tables: list) -> List[Dict]:
+def _score_governance(conn, tables: list, output_dir: str = "") -> List[Dict]:
     scores = []
+
+    # Artifacts this scorecard makes claims about. Loaded once; a missing or
+    # unparseable artifact scores low rather than being assumed present.
+    _ont_dir    = _artifact_dir(output_dir, "ontology")
+    _shapes_dir = _artifact_dir(output_dir, "shapes")
+    _vocab_dir  = _artifact_dir(output_dir, "vocab")
+    _map_dir    = _artifact_dir(output_dir, "mapping")
+
+    g_ontology = _parse_ttl(os.path.join(_ont_dir, "enterprise.ttl"))
+    g_shapes   = _parse_ttl(os.path.join(_shapes_dir, "enterprise-shapes.ttl"))
+    g_gate     = _parse_ttl(os.path.join(_shapes_dir, "agent-gate.ttl"))
+    g_skos     = _parse_ttl(os.path.join(_vocab_dir, "enterprise-skos.ttl"))
+    _jsonld_dir = _artifact_dir(output_dir, "jsonld")
+    j_context  = _load_json(os.path.join(_jsonld_dir, "enterprise-context.json"))
+    j_mcp      = _load_json(os.path.join(_jsonld_dir, "mcp-tool-definitions.json"))
 
     def qn(sql):
         try:
@@ -187,22 +433,33 @@ def _score_governance(conn, tables: list) -> List[Dict]:
           f"{table_count} entities modeled with labels and descriptions from metadata.",
           "ontology_generator.py output")
     fk_count = qn("SELECT COUNT(*) FROM ontology_metadata WHERE target_type='COLUMN' AND column_name LIKE '%_id'")
+    # Measured, not asserted: an object property whose range is owl:Thing is
+    # not "typed and explicit" — it carries no constraint at all.
+    _obj_props = _typed_object_properties(g_ontology)
+    _obj_total, _obj_typed = _obj_props
+    _typed_pct = round(_obj_typed / max(_obj_total, 1) * 100)
     check("Explicit key relationships", "Relationships",
           "Are important relationships typed and explicit?",
-          4,
-          "FK columns mapped to typed OWL ObjectProperties with domain/range.",
-          "ontology_generator.py: _object_property_block")
+          _band(_typed_pct, [(0, 0), (50, 2), (75, 3), (90, 4), (100, 5)]),
+          f"{_obj_typed}/{_obj_total} object properties ({_typed_pct}%) have a "
+          f"concrete rdfs:range; the remainder are ranged at owl:Thing.",
+          "output/ontology/enterprise.ttl")
     event_tables = qn("SELECT COUNT(*) FROM ontology_metadata WHERE is_event_class=1")
     check("Event representation", "Events",
           "Are meaningful domain events explicitly modeled?",
           4 if event_tables >= 1 else 1,
           f"{event_tables} event table(s) produce OWL DomainEvent subclass hierarchy.",
           "events.ttl generated")
+    _classes    = _count_owl_classes(g_ontology)
+    _nodeshapes = _count_nodeshapes(g_shapes)
+    _shape_pct  = round(_nodeshapes / max(_classes, 1) * 100)
     check("Structural constraints", "Validation",
           "Are SHACL or equivalent constraints defined for required properties and types?",
-          4,
-          "SHACL NodeShapes generated for every class. Agent acceptance gate deployed.",
-          "enterprise-shapes.ttl, agent-gate.ttl")
+          0 if g_shapes is None else
+          _band(_shape_pct, [(0, 1), (40, 2), (70, 3), (90, 4), (100, 5)]),
+          ("enterprise-shapes.ttl missing or unparseable." if g_shapes is None
+           else f"{_nodeshapes} SHACL NodeShapes for {_classes} OWL classes ({_shape_pct}%)."),
+          "output/shapes/enterprise-shapes.ttl")
     obs_prov = qn("SELECT COUNT(*) FROM observations WHERE recorded_by IS NOT NULL AND observed_at IS NOT NULL")
     total_obs = qn("SELECT COUNT(*) FROM observations")
     prov_pct = round(obs_prov / max(total_obs, 1) * 100)
@@ -211,36 +468,71 @@ def _score_governance(conn, tables: list) -> List[Dict]:
           4 if prov_pct >= 90 else 3,
           f"{prov_pct}% of observations carry recorded_by + observed_at.",
           f"{obs_prov}/{total_obs} observations have provenance")
+    _conf_bounded = _has_bounded_confidence(g_shapes) or _has_bounded_confidence(g_gate)
     check("Confidence and evidence", "Provenance",
           "Can confidence scores and evidence artifacts be attached where needed?",
-          4,
-          "confidence_score and source_ref modeled. SHACL shape enforces 0.0-1.0 range.",
-          "ObservationAcceptanceGate in agent-gate.ttl")
+          4 if _conf_bounded else 1,
+          ("A SHACL shape bounds the confidence score to a numeric range."
+           if _conf_bounded else
+           "No SHACL shape constrains confidence to a 0.0-1.0 range."),
+          "output/shapes/enterprise-shapes.ttl, agent-gate.ttl")
+    # This scored 4/5 via a substring count on a file that does not parse.
+    # An unparseable vocabulary is not a vocabulary.
+    _skos_concepts = _count_skos_concepts(g_skos)
     check("Taxonomy vs ontology separation", "Vocabulary",
           "Are vocabularies separated from logical semantics using SKOS or equivalent?",
-          4, "SKOS ConceptScheme generated separately from OWL ontology.", "enterprise-skos.ttl")
+          0 if g_skos is None else _band(_skos_concepts, [(0, 1), (1, 2), (10, 3), (50, 4)]),
+          ("enterprise-skos.ttl is missing or does not parse as Turtle."
+           if g_skos is None else
+           f"SKOS ConceptScheme parses with {_skos_concepts} skos:Concept entries."),
+          "output/vocab/enterprise-skos.ttl")
+    _mapped_classes, _total_classes = _mapping_class_coverage(
+        os.path.join(_map_dir, "logical_physical_map.csv"), g_ontology)
+    _map_pct = round(_mapped_classes / max(_total_classes, 1) * 100)
     check("Logical to physical traceability", "Mapping",
           "Can logical concepts be mapped to physical tables files APIs or streams?",
-          4, "CSV mapping workbook generated covering every class, data property, and object property.",
-          "logical_physical_map.csv")
+          _band(_map_pct, [(0, 0), (40, 2), (70, 3), (90, 4), (100, 5)]),
+          f"{_mapped_classes}/{_total_classes} OWL classes ({_map_pct}%) appear in "
+          f"the logical-physical mapping workbook.",
+          "output/mapping/logical_physical_map.csv")
     loss_count = qn("SELECT COUNT(*) FROM semantic_loss_log WHERE resolved=0")
+    # `loss_count >= 0` is true for every possible count — this was a
+    # hardcoded 4 wearing a conditional. Score the backlog, not its existence.
+    _loss_total = qn("SELECT COUNT(*) FROM semantic_loss_log")
     check("Semantic loss detection", "Mapping",
           "Does the process detect where physical implementation flattens domain meaning?",
-          4 if loss_count >= 0 else 3,
-          f"Automated semantic loss detection produced {loss_count} findings.",
-          "semantic_loss_report.csv")
+          1 if _loss_total == 0 else
+          (5 if loss_count == 0 else _band(-loss_count, [(-1000, 2), (-20, 3), (-5, 4)])),
+          f"{_loss_total} semantic-loss findings detected, {loss_count} unresolved.",
+          "output/mapping/semantic_loss_report.csv")
+    _ctx_terms = _count_context_terms(j_context)
     check("Exchange readiness", "Interoperability",
           "Is there a canonical machine-readable representation such as JSON-LD?",
-          5, "JSON-LD context with full term definitions generated. Sample payloads included.",
-          "enterprise-context.json, sample-*.json")
+          0 if j_context is None else _band(_ctx_terms, [(0, 1), (1, 2), (25, 3), (100, 4), (250, 5)]),
+          ("enterprise-context.json is missing or is not valid JSON."
+           if j_context is None else
+           f"JSON-LD @context parses with {_ctx_terms} term definitions."),
+          "output/jsonld/enterprise-context.json")
+    _mcp_tools, _mcp_bound = _mcp_semantic_binding(j_mcp)
+    _bound_pct = round(_mcp_bound / max(_mcp_tools, 1) * 100)
     check("Multi-agent interpretability", "Interoperability",
           "Can multiple agents interpret tasks, entities, and outcomes consistently?",
-          4, "MCP tool definitions reference JSON-LD context IRI for semantic binding.",
-          "mcp-tool-definitions.json")
+          0 if j_mcp is None else
+          _band(_bound_pct, [(0, 1), (50, 2), (80, 3), (100, 4)]),
+          ("mcp-tool-definitions.json is missing or is not valid JSON."
+           if j_mcp is None else
+           f"{_mcp_bound}/{_mcp_tools} MCP tool definitions ({_bound_pct}%) bind to "
+           f"a JSON-LD context IRI."),
+          "output/jsonld/mcp-tool-definitions.json")
+    _gate_shapes  = _count_nodeshapes(g_gate)
+    _gate_targets = _count_shape_targets(g_gate)
     check("Boundary validation", "Interoperability",
           "Are inbound and outbound exchanged payloads validated before trust or action?",
-          4, "SHACL agent acceptance gate defined for ObservationRecord and Agent classes.",
-          "agent-gate.ttl")
+          0 if g_gate is None else
+          (1 if _gate_targets == 0 else _band(_gate_shapes, [(1, 3), (2, 4), (5, 5)])),
+          ("agent-gate.ttl is missing or does not parse as Turtle." if g_gate is None
+           else f"{_gate_shapes} acceptance NodeShapes bound to {_gate_targets} target classes."),
+          "output/shapes/agent-gate.ttl")
 
     # ── NEW: Phase 1 S5 — additional 17 criteria ─────────────────────────
 
@@ -631,7 +923,16 @@ def run_cq_tests(intro, output_dir: str) -> List[Dict]:
     results = []
     passed = failed = 0
 
+    # Phase 0: the `sparql_equiv` on every CQ used to be written to CSV and
+    # never executed — what ran was the SQL twin, against SQLite. That
+    # validates the *database*, not the ontology, while the report implied
+    # the ontology had answered. Both are now executed and reported
+    # separately, so the gap between them is visible rather than assumed.
+    ont_graph = _load_cq_ontology(output_dir)
+
     print(f"\n  Running {len(COMPETENCY_QUESTIONS)} competency question tests...")
+    if ont_graph is None:
+        print("    ⚠ Ontology graph unavailable — SPARQL column will read N/A.")
 
     for cq in COMPETENCY_QUESTIONS:
         try:
@@ -650,22 +951,35 @@ def run_cq_tests(intro, output_dir: str) -> List[Dict]:
             sample = str(e)
             failed += 1
 
+        sparql_rows, sparql_status = _run_cq_sparql(ont_graph, cq)
+
         result = {
             "cq_id": cq["id"],
             "priority": cq["priority"],
             "status": status,
+            "sql_status": status,
+            "sparql_status": sparql_status,
             "question": cq["question"],
             "sparql_equiv": cq["sparql_equiv"],
             "row_count": row_count,
+            "sparql_row_count": sparql_rows,
             "sample_result": sample[:120],
             "validates": cq["validates"],
         }
         results.append(result)
         icon = "✓" if status == "PASS" else "✗"
-        print(f"    {icon} {cq['id']} [{cq['priority']:8s}] {status:5s}  "
-              f"rows={row_count}  — {cq['question'][:60]}")
+        print(f"    {icon} {cq['id']} [{cq['priority']:8s}] SQL={status:5s} "
+              f"SPARQL={sparql_status:7s}  rows={row_count}/{sparql_rows}"
+              f"  — {cq['question'][:44]}")
 
+    sparql_answered = sum(1 for r in results if r["sparql_status"] == "PASS")
     print(f"  CQ Tests: {passed} passed, {failed} failed of {len(COMPETENCY_QUESTIONS)} total")
+    print(f"    SQL (database) answered: {passed}/{len(COMPETENCY_QUESTIONS)}   "
+          f"SPARQL (ontology) answered: {sparql_answered}/{len(COMPETENCY_QUESTIONS)}")
+    if sparql_answered < passed:
+        print("    ⚠ The database answers more competency questions than the "
+              "ontology does.\n      That gap is the ABox gap — see "
+              "ONTOLOGY_ROADMAP.md Phase 4.")
 
     # Write CQ results
     cq_path = os.path.join(output_dir, "cq_test_results.csv")
@@ -676,7 +990,7 @@ def run_cq_tests(intro, output_dir: str) -> List[Dict]:
     print(f"  ✓ CQ test results       → {cq_path}")
 
     # Governance scorecard
-    scores = _score_governance(intro.conn, [])
+    scores = _score_governance(intro.conn, [], output_dir)
     gov_path = os.path.join(output_dir, "governance_scorecard.csv")
     with open(gov_path, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(scores[0].keys()))

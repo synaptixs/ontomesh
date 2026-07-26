@@ -232,12 +232,18 @@ def run_sparql_cq_tests(ontology_dir: str, output_dir: str) -> List[Dict]:
     backend_fn = _run_oxigraph if _oxigraph_cmd() else _run_rdflib
     backend_name = "Oxigraph" if _oxigraph_cmd() else "rdflib"
 
-    # Detect whether the ontology contains ABox (instance) data by checking
-    # if any Turtle file has individual declarations (rdf:type triples with
-    # non-class objects). Generated enterprise.ttl is TBox-only; instance
-    # data lives in the relational DB. In TBox-only mode, a query that
-    # returns 0 rows with no error is treated as PASS-STRUCTURAL — the
-    # SPARQL is syntactically valid and the ontology parsed correctly.
+    # Detect whether the ontology contains ABox (instance) data.
+    #
+    # This is reported, but it does NOT affect scoring. It used to: a
+    # TBox-only ontology scored every zero-row query as "PASS-STRUCTURAL",
+    # which meant all 43 competency questions passed while returning no
+    # rows — the suite proved only that rdflib could parse a file. That
+    # converted "we have no instance data" into a green check and hid
+    # every modelling defect underneath it.
+    #
+    # A competency question that returns nothing has not been answered.
+    # See ONTOLOGY_ROADMAP.md Phase 0 (this change) and Phase 4, which
+    # supplies the ABox that lets these tests genuinely pass.
     has_abox = False
     for ttl in turtle_paths:
         try:
@@ -274,21 +280,21 @@ def run_sparql_cq_tests(ontology_dir: str, output_dir: str) -> List[Dict]:
             failed += 1
         else:
             row_count = len(res["rows"])
-            if not has_abox and cq["expected_non_empty"] and row_count == 0:
-                # TBox-only: query valid + ontology parsed = structural PASS
-                status = "PASS-STRUCTURAL"
-                sample = "(TBox-only — no instance data in ontology)"
+            passed_test = (row_count > 0) == cq["expected_non_empty"]
+            status = "PASS" if passed_test else "FAIL"
+            if res["rows"]:
+                sample = str(res["rows"][0])[:120]
+            elif not has_abox and cq["expected_non_empty"]:
+                # Explain the failure without excusing it.
+                sample = "(no rows — ontology is TBox-only; needs an ABox)"
+            else:
+                sample = "(empty)"
+            if passed_test:
                 passed += 1
             else:
-                passed_test = (row_count > 0) == cq["expected_non_empty"]
-                status = "PASS" if passed_test else "FAIL"
-                sample = str(res["rows"][0])[:120] if res["rows"] else "(empty)"
-                if passed_test:
-                    passed += 1
-                else:
-                    failed += 1
+                failed += 1
 
-        icon = "✓" if status in ("PASS", "PASS-STRUCTURAL") else ("~" if status == "SKIPPED" else "✗")
+        icon = "✓" if status == "PASS" else ("~" if status == "SKIPPED" else "✗")
         print(f"    {icon} {cq['id']} [{cq['priority']:8s}] {status:7s}  "
               f"rows={row_count}  — {cq['question'][:55]}")
 
