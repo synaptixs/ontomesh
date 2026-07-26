@@ -9,8 +9,7 @@
 <https://ontology.example.com/vocab/enterprise/>
   a skos:ConceptScheme ;
   skos:prefLabel "Enterprise Domain Vocabulary" ;
-  rdfs:comment "Controlled vocabulary for the enterprise domain ontology. "
-               "Covers preferred labels, synonyms, and deprecated terms." ;
+  rdfs:comment "Controlled vocabulary for the enterprise domain ontology. Covers preferred labels, synonyms, and deprecated terms." ;
   dcterms:creator "Ontology Toolkit — Auto-generated from ontology_metadata" .
 
 
@@ -284,13 +283,6 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :EventSubscription .
 
-:TmfExportJobConcept
-  a skos:Concept ;
-  skos:prefLabel "Tmf Export Job" ;
-  skos:definition "Vocabulary concept for Tmf Export Job." ;
-  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
-  skos:exactMatch :TmfExportJob .
-
 :GeographicSiteConcept
   a skos:Concept ;
   skos:prefLabel "Geographic Site" ;
@@ -301,13 +293,6 @@
   skos:definition "A structured physical site record (data centre, cell tower, pop) per TMF674." ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :GeographicSite .
-
-:TmfImportJobConcept
-  a skos:Concept ;
-  skos:prefLabel "Tmf Import Job" ;
-  skos:definition "Vocabulary concept for Tmf Import Job." ;
-  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
-  skos:exactMatch :TmfImportJob .
 
 :NetworkSliceProfileConcept
   a skos:Concept ;
@@ -499,13 +484,6 @@
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
   skos:exactMatch :ServiceSpecification .
 
-:TmfTaskConcept
-  a skos:Concept ;
-  skos:prefLabel "Tmf Task" ;
-  skos:definition "Vocabulary concept for Tmf Task." ;
-  skos:inScheme <https://ontology.example.com/vocab/enterprise/> ;
-  skos:exactMatch :TmfTask .
-
 :TroubleTicketConcept
   a skos:Concept ;
   skos:prefLabel "Trouble Ticket" ;
@@ -538,22 +516,22 @@
   skos:prefLabel "Agent Agent Type Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:AgentAgentTypeHuman
+:AgentAgentTypeHUMAN
   a skos:Concept ;
   skos:prefLabel "Human" ;
   skos:notation "HUMAN" ;
   skos:inScheme :AgentAgentTypeScheme .
-:AgentAgentTypeAiAgent
+:AgentAgentTypeAIAGENT
   a skos:Concept ;
   skos:prefLabel "Ai Agent" ;
   skos:notation "AI_AGENT" ;
   skos:inScheme :AgentAgentTypeScheme .
-:AgentAgentTypeSensor
+:AgentAgentTypeSENSOR
   a skos:Concept ;
   skos:prefLabel "Sensor" ;
   skos:notation "SENSOR" ;
   skos:inScheme :AgentAgentTypeScheme .
-:AgentAgentTypeSystem
+:AgentAgentTypeSYSTEM
   a skos:Concept ;
   skos:prefLabel "System" ;
   skos:notation "SYSTEM" ;
@@ -564,12 +542,12 @@
   skos:prefLabel "Asset Asset Status Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:AssetStatusActive
+:AssetStatusACTIVE
   a skos:Concept ;
   skos:prefLabel "Active" ;
   skos:notation "ACTIVE" ;
   skos:inScheme :AssetStatusScheme .
-:AssetStatusUnderMaintenance
+:AssetStatusUNDERMAINTENANCE
   a skos:Concept ;
   skos:prefLabel "Under Maintenance" ;
   skos:notation "UNDER_MAINTENANCE" ;
@@ -580,22 +558,22 @@
   skos:prefLabel "Domain Event Event Type Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:DomainEventEventTypeComplianceAudit
+:DomainEventEventTypeCOMPLIANCEAUDIT
   a skos:Concept ;
   skos:prefLabel "Compliance Audit" ;
   skos:notation "COMPLIANCE_AUDIT" ;
   skos:inScheme :DomainEventEventTypeScheme .
-:DomainEventEventTypeIncident
+:DomainEventEventTypeINCIDENT
   a skos:Concept ;
   skos:prefLabel "Incident" ;
   skos:notation "INCIDENT" ;
   skos:inScheme :DomainEventEventTypeScheme .
-:DomainEventEventTypeInspection
+:DomainEventEventTypeINSPECTION
   a skos:Concept ;
   skos:prefLabel "Inspection" ;
   skos:notation "INSPECTION" ;
   skos:inScheme :DomainEventEventTypeScheme .
-:DomainEventEventTypeMaintenance
+:DomainEventEventTypeMAINTENANCE
   a skos:Concept ;
   skos:prefLabel "Maintenance" ;
   skos:notation "MAINTENANCE" ;
@@ -606,12 +584,12 @@
   skos:prefLabel "Domain Event Status Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:DomainEventStatusCompleted
+:DomainEventStatusCOMPLETED
   a skos:Concept ;
   skos:prefLabel "Completed" ;
   skos:notation "COMPLETED" ;
   skos:inScheme :DomainEventStatusScheme .
-:DomainEventStatusInProgress
+:DomainEventStatusINPROGRESS
   a skos:Concept ;
   skos:prefLabel "In Progress" ;
   skos:notation "IN_PROGRESS" ;
@@ -622,17 +600,17 @@
   skos:prefLabel "Domain Event Outcome Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:DomainEventOutcomeResolved
+:DomainEventOutcomeRESOLVED
   a skos:Concept ;
   skos:prefLabel "Resolved" ;
   skos:notation "RESOLVED" ;
   skos:inScheme :DomainEventOutcomeScheme .
-:DomainEventOutcomeCompliant
+:DomainEventOutcomeCOMPLIANT
   a skos:Concept ;
   skos:prefLabel "Compliant" ;
   skos:notation "COMPLIANT" ;
   skos:inScheme :DomainEventOutcomeScheme .
-:DomainEventOutcomePass
+:DomainEventOutcomePASS
   a skos:Concept ;
   skos:prefLabel "Pass" ;
   skos:notation "PASS" ;
@@ -643,17 +621,17 @@
   skos:prefLabel "Event Participants Participation Role Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:EventParticipantsParticipationRoleInitiator
+:EventParticipantsParticipationRoleINITIATOR
   a skos:Concept ;
   skos:prefLabel "Initiator" ;
   skos:notation "INITIATOR" ;
   skos:inScheme :EventParticipantsParticipationRoleScheme .
-:EventParticipantsParticipationRoleObserver
+:EventParticipantsParticipationRoleOBSERVER
   a skos:Concept ;
   skos:prefLabel "Observer" ;
   skos:notation "OBSERVER" ;
   skos:inScheme :EventParticipantsParticipationRoleScheme .
-:EventParticipantsParticipationRoleExecutor
+:EventParticipantsParticipationRoleEXECUTOR
   a skos:Concept ;
   skos:prefLabel "Executor" ;
   skos:notation "EXECUTOR" ;
@@ -664,12 +642,12 @@
   skos:prefLabel "Observation Derivation Method Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:ObservationRecordDerivationMethodMeasured
+:ObservationRecordDerivationMethodMEASURED
   a skos:Concept ;
   skos:prefLabel "Measured" ;
   skos:notation "MEASURED" ;
   skos:inScheme :ObservationRecordDerivationMethodScheme .
-:ObservationRecordDerivationMethodSynthesized
+:ObservationRecordDerivationMethodSYNTHESIZED
   a skos:Concept ;
   skos:prefLabel "Synthesized" ;
   skos:notation "SYNTHESIZED" ;
@@ -680,22 +658,22 @@
   skos:prefLabel "Policy Policy Type Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:PolicyPolicyTypeSla
+:PolicyPolicyTypeSLA
   a skos:Concept ;
   skos:prefLabel "Sla" ;
   skos:notation "SLA" ;
   skos:inScheme :PolicyPolicyTypeScheme .
-:PolicyPolicyTypeSecurity
+:PolicyPolicyTypeSECURITY
   a skos:Concept ;
   skos:prefLabel "Security" ;
   skos:notation "SECURITY" ;
   skos:inScheme :PolicyPolicyTypeScheme .
-:PolicyPolicyTypeCompliance
+:PolicyPolicyTypeCOMPLIANCE
   a skos:Concept ;
   skos:prefLabel "Compliance" ;
   skos:notation "COMPLIANCE" ;
   skos:inScheme :PolicyPolicyTypeScheme .
-:PolicyPolicyTypeOperational
+:PolicyPolicyTypeOPERATIONAL
   a skos:Concept ;
   skos:prefLabel "Operational" ;
   skos:notation "OPERATIONAL" ;
@@ -706,12 +684,12 @@
   skos:prefLabel "Policy Application Outcome Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:PolicyApplicationOutcomeCompliant
+:PolicyApplicationOutcomeCOMPLIANT
   a skos:Concept ;
   skos:prefLabel "Compliant" ;
   skos:notation "COMPLIANT" ;
   skos:inScheme :PolicyApplicationOutcomeScheme .
-:PolicyApplicationOutcomeNonCompliant
+:PolicyApplicationOutcomeNONCOMPLIANT
   a skos:Concept ;
   skos:prefLabel "Non Compliant" ;
   skos:notation "NON_COMPLIANT" ;
@@ -760,17 +738,17 @@
   skos:prefLabel "Event Subscription Event Type Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:EventSubscriptionEventTypeAlarmstatechange
+:EventSubscriptionEventTypeAlarmStateChange
   a skos:Concept ;
   skos:prefLabel "Alarmstatechange" ;
   skos:notation "AlarmStateChange" ;
   skos:inScheme :EventSubscriptionEventTypeScheme .
-:EventSubscriptionEventTypeKpithresholdbreach
+:EventSubscriptionEventTypeKPIThresholdBreach
   a skos:Concept ;
   skos:prefLabel "Kpithresholdbreach" ;
   skos:notation "KPIThresholdBreach" ;
   skos:inScheme :EventSubscriptionEventTypeScheme .
-:EventSubscriptionEventTypeServiceorderstatechange
+:EventSubscriptionEventTypeServiceOrderStateChange
   a skos:Concept ;
   skos:prefLabel "Serviceorderstatechange" ;
   skos:notation "ServiceOrderStateChange" ;
@@ -803,12 +781,12 @@
   skos:prefLabel "Performance Indicator Derivation Method Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:PerformanceIndicatorDerivationMethodMeasured
+:PerformanceIndicatorDerivationMethodMEASURED
   a skos:Concept ;
   skos:prefLabel "Measured" ;
   skos:notation "MEASURED" ;
   skos:inScheme :PerformanceIndicatorDerivationMethodScheme .
-:PerformanceIndicatorDerivationMethodSynthesized
+:PerformanceIndicatorDerivationMethodSYNTHESIZED
   a skos:Concept ;
   skos:prefLabel "Synthesized" ;
   skos:notation "SYNTHESIZED" ;
@@ -830,7 +808,7 @@
   skos:prefLabel "Service Problem Status Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:ServiceProblemStatusIn progress
+:ServiceProblemStatusInProgress
   a skos:Concept ;
   skos:prefLabel "In Progress" ;
   skos:notation "In Progress" ;
@@ -857,7 +835,7 @@
   skos:prefLabel "Trouble Ticket Status Values" ;
   skos:inScheme <https://ontology.example.com/vocab/enterprise/> .
 
-:TroubleTicketStatusIn progress
+:TroubleTicketStatusInProgress
   a skos:Concept ;
   skos:prefLabel "In Progress" ;
   skos:notation "In Progress" ;

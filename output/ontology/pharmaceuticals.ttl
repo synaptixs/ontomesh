@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Pharmaceuticals Ontology Module" ;
   rdfs:comment "Domain template for pharmaceutical manufacturers, CROs, and regulatory affairs teams. Covers drug product lifecycle from R&D through clinical trials, manufacturing, and pharmacovigilance. Aligned with IDMP (Identification of Medicinal Products, ISO 11616/11238/11239/11240/11615), EMA SPOR, ICH E2B(R3), and HL7 FHIR R4 MedicinalProduct resources." ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T15:22:11Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -21,8 +21,8 @@
   a owl:Class ;
   rdfs:label "Medicinal Product" ;
   rdfs:comment "A regulated pharmaceutical product with a marketing authorisation." ;
-  owl:equivalentClass <fhir:MedicinalProduct> ;
-  owl:equivalentClass <idmp:MedicinalProduct> ;
+  owl:equivalentClass <http://hl7.org/fhir/MedicinalProduct> ;
+  owl:equivalentClass <https://spor.ema.europa.eu/v1/lists/MedicinalProduct> ;
   :sensitivityTier :Public .
 
 :product_id
@@ -94,7 +94,7 @@
   a owl:Class ;
   rdfs:label "Active Substance" ;
   rdfs:comment "A chemical or biological substance with pharmacological activity." ;
-  owl:equivalentClass <idmp:Substance> ;
+  owl:equivalentClass <https://spor.ema.europa.eu/v1/lists/Substance> ;
   :sensitivityTier :Public .
 
 :substance_id
@@ -381,7 +381,7 @@
   a owl:Class ;
   rdfs:label "Adverse Event" ;
   rdfs:comment "An undesirable medical occurrence in a patient administered a medicinal product." ;
-  owl:equivalentClass <fhir:AdverseEvent> ;
+  owl:equivalentClass <http://hl7.org/fhir/AdverseEvent> ;
   :sensitivityTier :Confidential .
 
 :ae_id

@@ -191,6 +191,25 @@ def snake_to_label(s: str) -> str:
     return " ".join(w.capitalize() for w in s.split("_"))
 
 
+def value_to_local_name(s: str) -> str:
+    """Mint a Turtle-safe IRI local name from an arbitrary *data* value.
+
+    ``snake_to_camel`` splits on underscores only, which is fine for SQL
+    identifiers but not for column *values* — a status of "In Progress"
+    produced ``:TroubleTicketStatusIn progress``, an IRI containing a
+    space, which makes the whole file unparseable.
+
+    Splits on every non-alphanumeric run, so "In Progress", "in-progress"
+    and "in_progress" all mint ``InProgress``. Returns "" when the value
+    contains nothing usable, so callers can skip it rather than emit a
+    malformed IRI.
+    """
+    parts = [p for p in re.split(r"[^0-9A-Za-z]+", s or "") if p]
+    if not parts:
+        return ""
+    return "".join(p[:1].upper() + p[1:] for p in parts)
+
+
 # ── Introspector ─────────────────────────────────────────────────────────
 
 class DBIntrospector:

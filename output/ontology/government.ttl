@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Government & Public Sector Ontology Module" ;
   rdfs:comment "Domain template for government agencies, municipalities, and public sector organisations. Aligned with W3C DCAT v3, INSPIRE Directive (EU), and FOAF for agent descriptions. Suitable for open data portals, regulatory compliance, public service delivery, and e-government." ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T15:22:11Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -21,7 +21,7 @@
   a owl:Class ;
   rdfs:label "Citizen" ;
   rdfs:comment "A natural person interacting with government services." ;
-  owl:equivalentClass <foaf:Person> ;
+  owl:equivalentClass <http://xmlns.com/foaf/0.1/Person> ;
   :sensitivityTier :Restricted .
 
 :citizen_id
@@ -71,7 +71,7 @@
   a owl:Class ;
   rdfs:label "Government Agency" ;
   rdfs:comment "A government body, ministry, department, or regulatory authority." ;
-  owl:equivalentClass <org:Organization> ;
+  owl:equivalentClass <http://www.w3.org/ns/org#Organization> ;
   :sensitivityTier :Public .
 
 :agency_id
@@ -307,7 +307,7 @@
   a owl:Class ;
   rdfs:label "Open Data Dataset" ;
   rdfs:comment "A published government dataset available via an open data portal." ;
-  owl:equivalentClass <dcat:Dataset> ;
+  owl:equivalentClass <http://www.w3.org/ns/dcat#Dataset> ;
   :sensitivityTier :Public .
 
 :dataset_id
@@ -394,7 +394,7 @@
   a owl:Class ;
   rdfs:label "Geographic Feature" ;
   rdfs:comment "A spatial entity in INSPIRE — administrative boundary, building, infrastructure." ;
-  owl:equivalentClass <inspire:SpatialObject> ;
+  owl:equivalentClass <https://inspire.ec.europa.eu/vocab/SpatialObject> ;
   :sensitivityTier :Public .
 
 :feature_id

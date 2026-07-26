@@ -17,7 +17,8 @@ from datetime import datetime, timezone
 from typing import Dict, List
 from db_introspector import (
     DBIntrospector, TableModel, ColumnModel,
-    BASE_IRI, SHAPES_IRI, VOCAB_IRI, snake_to_lower_camel, snake_to_camel
+    BASE_IRI, SHAPES_IRI, VOCAB_IRI, snake_to_lower_camel, snake_to_camel,
+    value_to_local_name,
 )
 
 VERSION = "1.0.0"
@@ -190,14 +191,25 @@ def _base_classes() -> str:
 """
 
 
+# Classes declared by _base_classes(). A table whose name transliterates to
+# one of these shadows the built-in — e.g. a `domain_events` table yields
+# :DomainEvent, which was then given `rdfs:subClassOf :DomainEvent`, a
+# self-referential axiom that makes the class its own superclass.
+_BASE_CLASS_NAMES = frozenset({"DomainEntity", "DomainEvent", "ObservationRecord"})
+
+
 def _class_block(t: TableModel) -> str:
     parent = ":DomainEvent" if t.is_event_class else ":DomainEntity"
     lines = [
         f":{t.class_name}",
         f"  a owl:Class ;",
-        f"  rdfs:subClassOf {parent} ;",
-        f'  rdfs:label "{_str(t.effective_label)}" ;',
     ]
+    # Never assert a class as its own superclass. When a table shadows a
+    # base class the built-in declaration already carries the hierarchy,
+    # so the parent link is simply omitted here.
+    if f":{t.class_name}" != parent:
+        lines.append(f"  rdfs:subClassOf {parent} ;")
+    lines.append(f'  rdfs:label "{_str(t.effective_label)}" ;')
     if t.description:
         lines.append(f'  rdfs:comment "{_str(t.description)}" ;')
     lines.append(f"  :sensitivityTier :{t.sensitivity_tier} ;")
@@ -321,8 +333,15 @@ def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
         distinct = intro.get_distinct_values(et.name, "event_type")
         siblings: List[str] = []
         for val in distinct:
-            class_name = snake_to_camel(val.lower()) + "Event"
-            if class_name in seen:
+            # Guard against non-values reaching the TBox. A CSV header row
+            # loaded as data put the literal string "event_type" in the
+            # column, which minted an :EventTypeEvent class describing
+            # nothing. Skip the column's own name and blank/NULL sentinels.
+            normalised = (val or "").strip().lower()
+            if normalised in ("", "event_type", "null", "none", "n/a", "-"):
+                continue
+            class_name = value_to_local_name(val) + "Event"
+            if class_name == "Event" or class_name in seen:
                 continue
             seen.add(class_name)
             siblings.append(class_name)

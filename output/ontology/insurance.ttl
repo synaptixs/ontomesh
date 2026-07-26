@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Insurance Ontology Module" ;
   rdfs:comment "Domain template for P&C, life, health, and specialty insurance carriers. Covers policy lifecycle, underwriting, claims management, reinsurance, and regulatory reporting. Aligned with ACORD (Association for Cooperative Operations Research and Development) standards." ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T15:22:11Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -21,7 +21,7 @@
   a owl:Class ;
   rdfs:label "Insurance Policy" ;
   rdfs:comment "A contract between an insurer and a policyholder providing coverage for specified risks." ;
-  owl:equivalentClass <acord:Policy> ;
+  owl:equivalentClass <https://www.acord.org/vocab/Policy> ;
   :sensitivityTier :Confidential .
 
 :policy_id
@@ -218,7 +218,7 @@
   a owl:Class ;
   rdfs:label "Insurance Claim" ;
   rdfs:comment "A formal request by a policyholder for payment after a covered loss." ;
-  owl:equivalentClass <acord:Claim> ;
+  owl:equivalentClass <https://www.acord.org/vocab/Claim> ;
   :sensitivityTier :Confidential .
 
 :claim_id

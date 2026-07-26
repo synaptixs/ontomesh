@@ -55,8 +55,35 @@ def _is_derived(path: str) -> bool:
     return any(m in base for m in _DERIVED_MARKERS)
 
 
+def _nested_run_dirs(output_dir: str) -> List[str]:
+    """Sibling *runs* nested inside the output dir (e.g. output/demo/).
+
+    A run directory is identified by having its own `ontology/` subdir.
+    These are independent generations against different databases; folding
+    them into one corpus would count a single defect once per run and make
+    the metric depend on which demos happen to be on disk. CI generates
+    exactly one run, so the gate measures exactly one run.
+    """
+    nested = []
+    try:
+        for entry in sorted(os.listdir(output_dir)):
+            candidate = os.path.join(output_dir, entry)
+            if os.path.isdir(candidate) and os.path.isdir(
+                os.path.join(candidate, "ontology")
+            ):
+                nested.append(os.path.abspath(candidate))
+    except OSError:
+        pass
+    return nested
+
+
 def _turtle_files(output_dir: str) -> List[str]:
-    return sorted(glob.glob(os.path.join(output_dir, "**", "*.ttl"), recursive=True))
+    excluded = tuple(d + os.sep for d in _nested_run_dirs(output_dir))
+    found = glob.glob(os.path.join(output_dir, "**", "*.ttl"), recursive=True)
+    return sorted(
+        p for p in found
+        if not os.path.abspath(p).startswith(excluded)
+    )
 
 
 def _parse_all(paths: List[str]) -> Tuple[Dict[str, rdflib.Graph], List[Tuple[str, str]]]:

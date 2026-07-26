@@ -136,10 +136,40 @@ def generate_sql_schema(tmpl: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _build_prefix_map(tmpl: dict[str, Any]) -> dict[str, str]:
+    """Flatten a template's `external_alignments:` into {prefix: namespace}.
+
+    The YAML carries this map (``[{idmp: https://…}, {fhir: http://…}]``)
+    but nothing read it, so CURIEs like ``fhir:MedicinalProduct`` were
+    written verbatim inside angle brackets.
+    """
+    prefix_map: dict[str, str] = {}
+    for entry in tmpl.get("external_alignments") or []:
+        if isinstance(entry, dict):
+            for prefix, namespace in entry.items():
+                if prefix and namespace:
+                    prefix_map[str(prefix)] = str(namespace)
+    return prefix_map
+
+
+def _expand_curie(value: str, prefix_map: dict[str, str]) -> str | None:
+    """Expand ``prefix:local`` to an absolute IRI, or None if impossible."""
+    if not value:
+        return None
+    if value.startswith(("http://", "https://", "urn:")):
+        return value
+    prefix, sep, local = value.partition(":")
+    if not sep or prefix not in prefix_map:
+        return None
+    return f"{prefix_map[prefix]}{local}"
+
+
 def generate_owl_module(tmpl: dict[str, Any]) -> str:
     industry  = tmpl.get("industry", "unknown")
     label     = tmpl.get("label", industry)
     base_iri  = tmpl.get("base_iri", f"{BASE_IRI}{industry}/")
+    prefix_map = _build_prefix_map(tmpl)
+    unexpanded: list[str] = []
     prefixes  = f"""\
 @prefix :      <{BASE_IRI}> .
 @prefix ind:   <{base_iri}> .
@@ -184,7 +214,15 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
         if ent_desc:
             lines.append(f'  rdfs:comment "{ent_desc}" ;')
         for eq in equiv_items:
-            lines.append(f"  owl:equivalentClass <{eq}> ;")
+            expanded = _expand_curie(eq, prefix_map)
+            if expanded is None:
+                # An unexpandable CURIE would ship as <fhir:MedicinalProduct>
+                # — an IRI with an unregistered scheme that dereferences to
+                # nothing and misrepresents the ontology as standards-aligned.
+                # Drop it and say so rather than emit it.
+                unexpanded.append(eq)
+                continue
+            lines.append(f"  owl:equivalentClass <{expanded}> ;")
         lines.append(f"  :sensitivityTier :{tier} .")
         lines.append("")
 
@@ -210,6 +248,17 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
                 lines.append(f'  rdfs:comment "{desc}" ;')
             lines.append(f"  :sensitivityTier :{tier} .")
             lines.append("")
+
+    if unexpanded:
+        lines.append(
+            "# ── Dropped alignments ─────────────────────────────────────\n"
+            "# These CURIEs had no matching prefix under the template's\n"
+            "# `external_alignments:` map, so no absolute IRI could be\n"
+            "# formed. Add the prefix to the template and re-run."
+        )
+        for curie in sorted(set(unexpanded)):
+            lines.append(f"#   {curie}")
+        lines.append("")
 
     return "\n".join(lines)
 

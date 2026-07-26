@@ -6,14 +6,14 @@
 
 | Metric | Count |
 |--------|-------|
-| OWL classes | 58 |
-| Data properties | 533 |
-| Object properties | 105 |
-| **Total axioms (est.)** | **696** |
+| OWL classes | 55 |
+| Data properties | 498 |
+| Object properties | 100 |
+| **Total axioms (est.)** | **653** |
 
 ## Decision rationale
 
-Axiom count 696 is within EL limits and no DL constructs detected — OWL 2 EL profile is sufficient. ELK reasoner recommended.
+Axiom count 653 is within EL limits and no DL constructs detected — OWL 2 EL profile is sufficient. ELK reasoner recommended.
 
 ## Profile decision rules
 
@@ -21,6 +21,9 @@ Axiom count 696 is within EL limits and no DL constructs detected — OWL 2 EL p
 |------|---------|--------|
 | Role chains present | `owl:propertyChainAxiom` in ontology | OWL 2 DL |
 | Nominals present | `owl:oneOf` in ontology | OWL 2 DL |
+| Inverse properties | `owl:inverseOf` in ontology | OWL 2 DL |
+| Symmetric properties | `owl:SymmetricProperty` in ontology | OWL 2 DL |
+| Inverse-functional properties | `owl:InverseFunctionalProperty` in ontology | OWL 2 DL |
 | Axiom count > 50 000 | Large schema | OWL 2 EL |
 | Default | No complex constructs, ≤ 50 000 axioms | OWL 2 EL |
 

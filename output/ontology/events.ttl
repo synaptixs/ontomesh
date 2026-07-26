@@ -15,37 +15,33 @@
 
 # ── Event Subclass Hierarchy ────────────────────────────────────────
 
-:ComplianceAuditEvent
+:COMPLIANCEAUDITEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
   rdfs:label "Compliance Audit Event" ;
   rdfs:comment "Subclass of DomainEvent for event_type = COMPLIANCE_AUDIT." ;
   :sensitivityTier :Internal .
 
-:IncidentEvent
+:INCIDENTEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
   rdfs:label "Incident Event" ;
   rdfs:comment "Subclass of DomainEvent for event_type = INCIDENT." ;
   :sensitivityTier :Internal .
 
-:InspectionEvent
+:INSPECTIONEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
   rdfs:label "Inspection Event" ;
   rdfs:comment "Subclass of DomainEvent for event_type = INSPECTION." ;
   :sensitivityTier :Internal .
 
-:MaintenanceEvent
+:MAINTENANCEEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
   rdfs:label "Maintenance Event" ;
   rdfs:comment "Subclass of DomainEvent for event_type = MAINTENANCE." ;
   :sensitivityTier :Internal .
 
-:EventTypeEvent
-  a owl:Class ;
-  rdfs:subClassOf :PolicyApplication ;
-  rdfs:label "Event Type Event" ;
-  rdfs:comment "Subclass of PolicyApplication for event_type = event_type." ;
-  :sensitivityTier :Internal .
+[] a owl:AllDisjointClasses ;
+   owl:members ( :COMPLIANCEAUDITEvent :INCIDENTEvent :INSPECTIONEvent :MAINTENANCEEvent ) .

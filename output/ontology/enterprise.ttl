@@ -14,7 +14,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T15:20:27Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -106,7 +106,6 @@
 
 :DomainEvent
   a owl:Class ;
-  rdfs:subClassOf :DomainEvent ;
   rdfs:label "Domain Event" ;
   rdfs:comment "A significant occurrence in the domain that changes state or produces evidence." ;
   :sensitivityTier :Internal ;
@@ -353,12 +352,6 @@
   skos:altLabel "Hub Subscription" ;
   rdfs:isDefinedBy "CQ-002"  .
 
-:TmfExportJob
-  a owl:Class ;
-  rdfs:subClassOf :DomainEntity ;
-  rdfs:label "Tmf Export Job" ;
-  :sensitivityTier :Internal  .
-
 :GeographicSite
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
@@ -371,12 +364,6 @@
   skos:altLabel "Data Centre" ;
   skos:altLabel "Cell Site" ;
   rdfs:isDefinedBy "CQ-001, CQ-002"  .
-
-:TmfImportJob
-  a owl:Class ;
-  rdfs:subClassOf :DomainEntity ;
-  rdfs:label "Tmf Import Job" ;
-  :sensitivityTier :Internal  .
 
 :NetworkSliceProfile
   a owl:Class ;
@@ -607,12 +594,6 @@
   skos:altLabel "Service Catalog Entry" ;
   rdfs:isDefinedBy "CQ-003"  .
 
-:TmfTask
-  a owl:Class ;
-  rdfs:subClassOf :DomainEntity ;
-  rdfs:label "Tmf Task" ;
-  :sensitivityTier :Internal  .
-
 :TroubleTicket
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
@@ -745,6 +726,14 @@
   rdfs:label "Created At" ;
   rdfs:domain :AssetType ;
   rdfs:range xsd:dateTime ;
+  :sensitivityTier :Internal .
+
+:hasExternalId
+  a owl:DatatypeProperty ;
+  rdfs:label "External Identifier" ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Identifier used in external systems (e.g. OSS/BSS, NMS)." ;
   :sensitivityTier :Internal .
 
 :hasName
@@ -1500,6 +1489,20 @@
 :hasPrimaryCq
   a owl:DatatypeProperty ;
   rdfs:label "Primary Cq" ;
+  rdfs:domain :OntologyEvolutionProposals ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasSourceLogPath
+  a owl:DatatypeProperty ;
+  rdfs:label "Source Log Path" ;
+  rdfs:domain :OntologyEvolutionProposals ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasEvidenceSample
+  a owl:DatatypeProperty ;
+  rdfs:label "Evidence Sample" ;
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -2601,91 +2604,6 @@
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
-:hasContentType
-  a owl:DatatypeProperty ;
-  rdfs:label "Content Type" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasQuery
-  a owl:DatatypeProperty ;
-  rdfs:label "Query" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasPath
-  a owl:DatatypeProperty ;
-  rdfs:label "Path" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasUrl
-  a owl:DatatypeProperty ;
-  rdfs:label "Url" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreationDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Creation Date" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasCompletionDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Completion Date" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasErrorLog
-  a owl:DatatypeProperty ;
-  rdfs:label "Error Log" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasHref
-  a owl:DatatypeProperty ;
-  rdfs:label "Href" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasBaseType
-  a owl:DatatypeProperty ;
-  rdfs:label "Base Type" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSchemaLocation
-  a owl:DatatypeProperty ;
-  rdfs:label "Schema Location" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasSiteIri
   a owl:DatatypeProperty ;
   rdfs:label "Site Iri" ;
@@ -2775,91 +2693,6 @@
   a owl:DatatypeProperty ;
   rdfs:label "Updated At" ;
   rdfs:domain :GeographicSite ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasContentType
-  a owl:DatatypeProperty ;
-  rdfs:label "Content Type" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasSourceUri
-  a owl:DatatypeProperty ;
-  rdfs:label "Source Uri" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreationDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Creation Date" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasCompletionDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Completion Date" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasErrorLog
-  a owl:DatatypeProperty ;
-  rdfs:label "Error Log" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasPath
-  a owl:DatatypeProperty ;
-  rdfs:label "Path" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasUrl
-  a owl:DatatypeProperty ;
-  rdfs:label "Url" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasHref
-  a owl:DatatypeProperty ;
-  rdfs:label "Href" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasBaseType
-  a owl:DatatypeProperty ;
-  rdfs:label "Base Type" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSchemaLocation
-  a owl:DatatypeProperty ;
-  rdfs:label "Schema Location" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :TmfImportJob ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -4192,106 +4025,6 @@
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
-:hasTaskType
-  a owl:DatatypeProperty ;
-  rdfs:label "Task Type" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreationDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Creation Date" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasCompletionDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Completion Date" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasPercentProgress
-  a owl:DatatypeProperty ;
-  rdfs:label "Percent Progress" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:integer ;
-  :sensitivityTier :Internal .
-
-:hasTaskResourceRef
-  a owl:DatatypeProperty ;
-  rdfs:label "Task Resource Ref" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasTaskError
-  a owl:DatatypeProperty ;
-  rdfs:label "Task Error" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasRelatedEntityType
-  a owl:DatatypeProperty ;
-  rdfs:label "Related Entity Type" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasRequestedBy
-  a owl:DatatypeProperty ;
-  rdfs:label "Requested By" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasHref
-  a owl:DatatypeProperty ;
-  rdfs:label "Href" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasBaseType
-  a owl:DatatypeProperty ;
-  rdfs:label "Base Type" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSchemaLocation
-  a owl:DatatypeProperty ;
-  rdfs:label "Schema Location" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasTicketIri
   a owl:DatatypeProperty ;
   rdfs:label "Ticket Iri" ;
@@ -4504,59 +4237,52 @@
 # ── Object Properties ───────────────────────────────────────────────
 
 :agentOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agent Id" ;
   rdfs:domain :AgentRoles ;
   rdfs:range :Agent ;
   owl:minCardinality 1  .
 
 :roleOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Role Id" ;
   rdfs:domain :AgentRoles ;
   rdfs:range :Role ;
   owl:minCardinality 1  .
 
 :scopeAsset
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Scope Asset Id" ;
   rdfs:domain :AgentRoles ;
   rdfs:range :Asset  .
 
 :orgOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Org Id" ;
   rdfs:domain :Agent ;
   rdfs:range :Organization  .
 
 :parentOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Type Id" ;
   rdfs:domain :AssetType ;
   rdfs:range :AssetType  .
 
-:externalOf
-  a owl:ObjectProperty ;
-  rdfs:label "External Identifier" ;
-  rdfs:domain :Asset ;
-  rdfs:range owl:Thing ;
-  rdfs:comment "Identifier used in external systems (e.g. OSS/BSS, NMS)."  .
-
 :assetOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Type Id" ;
   rdfs:domain :Asset ;
   rdfs:range :AssetType ;
   owl:minCardinality 1  .
 
 :ownerOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Owner Org Id" ;
   rdfs:domain :Asset ;
   rdfs:range :Organization  .
 
 :operatorOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Operator Org Id" ;
   rdfs:domain :Asset ;
   rdfs:range :Organization  .
@@ -4576,19 +4302,19 @@
   owl:minCardinality 1  .
 
 :assetOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Id" ;
   rdfs:domain :DomainEvent ;
   rdfs:range :Asset  .
 
 :initiatedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Initiated By" ;
   rdfs:domain :DomainEvent ;
   rdfs:range :Agent  .
 
 :policyOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Policy Id" ;
   rdfs:domain :DomainEvent ;
   rdfs:range :Policy  .
@@ -4601,21 +4327,21 @@
   owl:minCardinality 1  .
 
 :indexName
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Index Name" ;
   rdfs:domain :EmbeddingRecords ;
   rdfs:range :EmbeddingIndexes ;
   owl:minCardinality 1  .
 
 :eventOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Event Id" ;
   rdfs:domain :EventParticipants ;
   rdfs:range :DomainEvent ;
   owl:minCardinality 1  .
 
 :agentOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agent Id" ;
   rdfs:domain :EventParticipants ;
   rdfs:range :Agent ;
@@ -4636,7 +4362,7 @@
   owl:minCardinality 1  .
 
 :partnerOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Partner Id" ;
   rdfs:domain :FederationQueryLog ;
   rdfs:range :FederationPartners  .
@@ -4649,25 +4375,25 @@
   owl:minCardinality 1  .
 
 :partnerOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Partner Id" ;
   rdfs:domain :FederationTrustLedger ;
   rdfs:range :FederationPartners  .
 
 :assetOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Id" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range :Asset  .
 
 :eventOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Event Id" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range :DomainEvent  .
 
 :recordedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Recorded By" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range :Agent ;
@@ -4686,45 +4412,51 @@
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range owl:Thing  .
 
-:proposalOf
+:evidenceTemplate
   a owl:ObjectProperty ;
+  rdfs:label "Evidence Template Id" ;
+  rdfs:domain :OntologyEvolutionProposals ;
+  rdfs:range owl:Thing  .
+
+:proposalOf
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Proposal Id" ;
   rdfs:domain :OntologyVersionLedger ;
   rdfs:range :OntologyEvolutionProposals  .
 
 :parentOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Org Id" ;
   rdfs:domain :Organization ;
   rdfs:range :Organization  .
 
 :governingOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Governing Org Id" ;
   rdfs:domain :Policy ;
   rdfs:range :Organization  .
 
 :policyOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Policy Id" ;
   rdfs:domain :PolicyApplication ;
   rdfs:range :Policy ;
   owl:minCardinality 1  .
 
 :eventOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Event Id" ;
   rdfs:domain :PolicyApplication ;
   rdfs:range :DomainEvent  .
 
 :assetOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Id" ;
   rdfs:domain :PolicyApplication ;
   rdfs:range :Asset  .
 
 :appliedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Applied By" ;
   rdfs:domain :PolicyApplication ;
   rdfs:range :Agent ;
@@ -4745,7 +4477,7 @@
   owl:minCardinality 1  .
 
 :payloadOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Payload Id" ;
   rdfs:domain :RuntimeGrounding ;
   rdfs:range :RuntimePayload  .
@@ -4764,37 +4496,37 @@
   rdfs:range owl:Thing  .
 
 :partyA
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Party A Id" ;
   rdfs:domain :Agreement ;
   rdfs:range :Party  .
 
 :partyB
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Party B Id" ;
   rdfs:domain :Agreement ;
   rdfs:range :Party  .
 
 :sourceResource
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Source Resource Id" ;
   rdfs:domain :Alarm ;
   rdfs:range :Resource  .
 
 :rootCauseAlarm
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Root Cause Alarm Id" ;
   rdfs:domain :Alarm ;
   rdfs:range :Alarm  .
 
 :raisedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Raised By Id" ;
   rdfs:domain :Alarm ;
   rdfs:range :Party  .
 
 :acknowledgedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Acknowledged By Id" ;
   rdfs:domain :Alarm ;
   rdfs:range :Party  .
@@ -4814,71 +4546,57 @@
   owl:minCardinality 1  .
 
 :assignedTo
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Assigned To Id" ;
   rdfs:domain :ConflictEvent ;
   rdfs:range :Party  .
 
 :resolvedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resolved By Id" ;
   rdfs:domain :ConflictEvent ;
   rdfs:range :Party  .
 
 :partyOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Party Id" ;
   rdfs:domain :CustomerAccount ;
   rdfs:range :Party ;
   owl:minCardinality 1  .
 
 :customerAccount
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Customer Account Id" ;
   rdfs:domain :CustomerBill ;
   rdfs:range :CustomerAccount ;
   owl:minCardinality 1  .
 
 :subscriberParty
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Subscriber Party Id" ;
   rdfs:domain :EventSubscription ;
   rdfs:range :Party  .
 
-:exportJob
-  a owl:ObjectProperty ;
-  rdfs:label "Export Job Id" ;
-  rdfs:domain :TmfExportJob ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
 :placeOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Place Id" ;
   rdfs:domain :GeographicSite ;
   rdfs:range :GeographicLocation  .
 
 :ownerParty
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Owner Party Id" ;
   rdfs:domain :GeographicSite ;
   rdfs:range :Party  .
 
-:importJob
-  a owl:ObjectProperty ;
-  rdfs:label "Import Job Id" ;
-  rdfs:domain :TmfImportJob ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
 :resourceOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resource Id" ;
   rdfs:domain :NetworkSliceProfile ;
   rdfs:range :Resource  .
 
 :agreementOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agreement Id" ;
   rdfs:domain :NetworkSliceProfile ;
   rdfs:range :Agreement  .
@@ -4891,116 +4609,116 @@
   owl:minCardinality 1  .
 
 :placeOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Place Id" ;
   rdfs:domain :Party ;
   rdfs:range :GeographicLocation  .
 
 :partyOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Party Id" ;
   rdfs:domain :PartyRole ;
   rdfs:range :Party ;
   owl:minCardinality 1  .
 
 :resourceOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resource Id" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range :Resource  .
 
 :serviceOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Id" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range :Service  .
 
 :recordedByParty
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Recorded By Party Id" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range :Party  .
 
 :parentPlace
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Place Id" ;
   rdfs:domain :GeographicLocation ;
   rdfs:range :GeographicLocation  .
 
 :productOffering
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Product Offering Id" ;
   rdfs:domain :Product ;
   rdfs:range :ProductOffering  .
 
 :parentProduct
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Product Id" ;
   rdfs:domain :Product ;
   rdfs:range :Product  .
 
 :realisingService
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Realising Service Id" ;
   rdfs:domain :Product ;
   rdfs:range :Service  .
 
 :productSpec
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Product Spec Id" ;
   rdfs:domain :ProductOffering ;
   rdfs:range :ProductSpecification  .
 
 :requestedProductOffering
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Requested Product Offering Id" ;
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range :ProductOffering  .
 
 :customerAccount
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Customer Account Id" ;
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range :CustomerAccount  .
 
 :installAddress
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Install Address Id" ;
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range :GeographicLocation  .
 
 :customerAccount
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Customer Account Id" ;
   rdfs:domain :ProductOrder ;
   rdfs:range :CustomerAccount  .
 
 :productOffering
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Product Offering Id" ;
   rdfs:domain :ProductOrder ;
   rdfs:range :ProductOffering  .
 
 :submittedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Submitted By Id" ;
   rdfs:domain :ProductOrder ;
   rdfs:range :Party  .
 
 :resourceSpec
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resource Spec Id" ;
   rdfs:domain :Resource ;
   rdfs:range :ResourceSpecification  .
 
 :parentResource
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Resource Id" ;
   rdfs:domain :Resource ;
   rdfs:range :Resource  .
 
 :placeOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Place Id" ;
   rdfs:domain :Resource ;
   rdfs:range :GeographicLocation  .
@@ -5012,148 +4730,129 @@
   rdfs:range owl:Thing  .
 
 :resourceOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resource Id" ;
   rdfs:domain :ResourceRelationship ;
   rdfs:range :Resource ;
   owl:minCardinality 1  .
 
 :relatedResource
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Related Resource Id" ;
   rdfs:domain :ResourceRelationship ;
   rdfs:range :Resource ;
   owl:minCardinality 1  .
 
 :serviceSpec
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Spec Id" ;
   rdfs:domain :Service ;
   rdfs:range :ServiceSpecification  .
 
 :parentService
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Service Id" ;
   rdfs:domain :Service ;
   rdfs:range :Service  .
 
 :realisingResource
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Realising Resource Id" ;
   rdfs:domain :Service ;
   rdfs:range :Resource  .
 
 :productOrder
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Product Order Id" ;
   rdfs:domain :ServiceOrder ;
   rdfs:range :ProductOrder  .
 
 :serviceSpec
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Spec Id" ;
   rdfs:domain :ServiceOrder ;
   rdfs:range :ServiceSpecification  .
 
 :submittedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Submitted By Id" ;
   rdfs:domain :ServiceOrder ;
   rdfs:range :Party  .
 
 :serviceOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Id" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range :Service  .
 
 :alarmOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Alarm Id" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range :Alarm  .
 
 :raisedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Raised By Id" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range :Party  .
 
 :resolvedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resolved By Id" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range :Party  .
 
 :serviceOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Id" ;
   rdfs:domain :ServiceQualityReport ;
   rdfs:range :Service  .
 
 :agreementOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agreement Id" ;
   rdfs:domain :ServiceQualityReport ;
   rdfs:range :Agreement  .
 
 :submittedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Submitted By Id" ;
   rdfs:domain :ServiceQualityReport ;
   rdfs:range :Party  .
 
-:taskOf
-  a owl:ObjectProperty ;
-  rdfs:label "Task Id" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
-:relatedEntity
-  a owl:ObjectProperty ;
-  rdfs:label "Related Entity Id" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range owl:Thing  .
-
-:externalOf
-  a owl:ObjectProperty ;
-  rdfs:label "External Id" ;
-  rdfs:domain :TmfTask ;
-  rdfs:range owl:Thing  .
-
 :affectedResource
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Affected Resource Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Resource  .
 
 :affectedService
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Affected Service Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Service  .
 
 :relatedAlarm
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Related Alarm Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Alarm  .
 
 :raisedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Raised By Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Party  .
 
 :assignedTo
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Assigned To Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Party  .
 
 :resolvedBy
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resolved By Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Party  .

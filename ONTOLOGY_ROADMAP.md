@@ -98,7 +98,28 @@ The toolkit was reporting **100% regulatory coverage**, with three regulations a
 
 ---
 
-## Phase 1 · Fix the broken artifacts
+## Phase 1 · Fix the broken artifacts ✅ **DELIVERED**
+
+*Branch `phase0/ontology-quality-gates` · 2026-07-26*
+
+| Metric | Before | After |
+|---|---|---|
+| `turtle_parse_failures` | 3 | **0** |
+| `malformed_iris` | 20 | **0** |
+| `alignment_subjects_unbound` | 37 | **1** |
+| self-subclass axioms | 1 | **0** |
+| `:EventTypeEvent` phantom class | present | **absent** |
+
+All 23 emitted Turtle files parse. 43 of 44 alignment axioms now bind to an entity that actually exists (the one holdout, `refersToResource`, is listed in-file rather than emitted against a dangling IRI).
+
+**Two corrections to the Phase 0 baseline, found while measuring this phase.** Both were flaws in my own gate, not in the toolkit:
+
+1. **The gate counted three independent runs as one corpus.** `output/demo/` and `output/demo-5g/` are separate generations against different databases; folding them in counted each defect up to three times and made the metric depend on which demos happened to be on disk. CI generates exactly one run, so the baseline and CI would have measured different things. The gate now excludes nested run directories (identified by having their own `ontology/` subdir).
+2. **The baseline was captured from a database polluted by prior phase runs.** Phases create their own tables (`tmf_*`, `runtime_*`, `log_*`), which later introspection picks up as domain classes — the live DB had 64 tables against 23 in `schema.sql`. The baseline is now taken after rebuilding via `setup_db()`, matching the CI path.
+
+Net effect of both: the corpus is 23 files rather than 68, and the Phase 2/3/4 figures re-based accordingly (`multi_domain_properties` 131 → 105, `worst_domain_count` 48 → 43, `object_properties_ranged_at_thing` 21 → 14). Those are scope corrections, not improvements — the underlying defects are untouched and still owned by Phase 2.
+
+> **Reproducibility note for later phases:** ontology content depends on which phases have previously run against the database, because phases create tables that subsequent introspection picks up. Re-baseline only from a clean `setup_db()` state.
 
 **Goal:** everything the toolkit emits is well-formed and resolves.
 

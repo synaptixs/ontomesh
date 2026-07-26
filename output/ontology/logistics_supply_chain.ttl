@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Logistics & Supply Chain Ontology Module" ;
   rdfs:comment "Domain template for freight, warehousing, last-mile delivery, and supply chain visibility. Suitable for 3PL providers, e-commerce fulfillment, cold chain, and customs/trade compliance." ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T15:22:11Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -21,7 +21,7 @@
   a owl:Class ;
   rdfs:label "Shipment" ;
   rdfs:comment "A collection of goods being transported from origin to destination." ;
-  owl:equivalentClass <schema:ParcelDelivery> ;
+  owl:equivalentClass <https://schema.org/ParcelDelivery> ;
   :sensitivityTier :Internal .
 
 :shipment_id
@@ -112,7 +112,7 @@
   a owl:Class ;
   rdfs:label "Package" ;
   rdfs:comment "An individual physical container within a shipment." ;
-  owl:equivalentClass <gs1:Logistic_Unit> ;
+  owl:equivalentClass <https://www.gs1.org/voc/Logistic_Unit> ;
   :sensitivityTier :Internal .
 
 :package_id
@@ -295,7 +295,7 @@
   a owl:Class ;
   rdfs:label "Customer Order" ;
   rdfs:comment "A customer purchase order that triggers fulfilment and shipment creation." ;
-  owl:equivalentClass <schema:Order> ;
+  owl:equivalentClass <https://schema.org/Order> ;
   :sensitivityTier :Confidential .
 
 :order_id
@@ -358,7 +358,7 @@
   a owl:Class ;
   rdfs:label "Inventory Item" ;
   rdfs:comment "A SKU held in a facility at a point in time." ;
-  owl:equivalentClass <gs1:Product> ;
+  owl:equivalentClass <https://www.gs1.org/voc/Product> ;
   :sensitivityTier :Internal .
 
 :inventory_id

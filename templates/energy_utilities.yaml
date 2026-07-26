@@ -11,6 +11,9 @@ version: "1.0.0"
 base_iri: "https://ontology.example.com/energy/"
 external_alignments:
   - iec_cim: "http://iec.ch/TC57/CIM100#"
+  # Entities below reference this namespace as `cim:`; both spellings are
+  # declared so the CURIEs resolve to an absolute IRI at generation time.
+  - cim: "http://iec.ch/TC57/CIM100#"
   - nerc: "http://www.nerc.com/vocab/"
   - inspire: "https://inspire.ec.europa.eu/vocab/"
 
