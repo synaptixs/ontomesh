@@ -188,6 +188,16 @@ def collect(output_dir: str) -> Dict[str, Any]:
     thing_ranges = _count_predicate_objects(authored, rdflib.RDFS.range, owl_ns.Thing)
     cq_returning, cq_failing, cq_total = _cq_rows(output_dir)
 
+    # Phase 5 capabilities. Counted as instances, not declarations: a
+    # vocabulary nothing uses is the failure mode this roadmap exists to
+    # remove, so the metric tracks reified records rather than classes.
+    prov_ns = rdflib.Namespace("http://www.w3.org/ns/prov#")
+    ns = rdflib.Namespace("https://ontology.example.com/enterprise/")
+    prov_chains = _count_predicate_objects(authored, rdflib.RDF.type, ns.DerivationActivity)
+    temporal_extents = _count_predicate_objects(authored, rdflib.RDF.type, ns.TemporalExtent)
+    quantity_values = _count_predicate_objects(authored, rdflib.RDF.type, ns.QuantityValue)
+    participations = _count_predicate_objects(authored, rdflib.RDF.type, ns.Participation)
+
     metrics = {
         "turtle_parse_failures":       len(failures),
         "multi_domain_properties":     multi_count,
@@ -198,6 +208,10 @@ def collect(output_dir: str) -> Dict[str, Any]:
         "owl_restrictions":            restrictions,
         "cq_tests_returning_rows":     cq_returning,
         "cq_tests_failing":            cq_failing,
+        "prov_chains":                 prov_chains,
+        "temporal_extents":            temporal_extents,
+        "quantity_values":             quantity_values,
+        "participations":              participations,
     }
     detail = {
         "turtle_files_scanned": len(paths),
@@ -218,6 +232,10 @@ DIRECTIONS: Dict[str, str] = {
     "owl_restrictions":            HIGHER_IS_BETTER,
     "cq_tests_returning_rows":     HIGHER_IS_BETTER,
     "cq_tests_failing":            LOWER_IS_BETTER,
+    "prov_chains":                 HIGHER_IS_BETTER,
+    "temporal_extents":            HIGHER_IS_BETTER,
+    "quantity_values":             HIGHER_IS_BETTER,
+    "participations":              HIGHER_IS_BETTER,
 }
 
 # Metrics that must reach zero before the roadmap phase that owns them closes.
@@ -231,6 +249,10 @@ PHASE_OWNER = {
     "owl_restrictions":            "Phase 3",
     "cq_tests_returning_rows":     "Phase 4",
     "cq_tests_failing":            "Phase 4",
+    "prov_chains":                 "Phase 4",
+    "temporal_extents":            "Phase 5",
+    "quantity_values":             "Phase 5",
+    "participations":              "Phase 5",
 }
 
 

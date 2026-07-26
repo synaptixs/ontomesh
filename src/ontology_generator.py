@@ -531,6 +531,162 @@ def _disjoint_class_groups(tables: List[TableModel]) -> str:
     return "\n".join(out)
 
 
+DIMENSION_PREFIXES = PREFIXES + """\
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+"""
+
+
+def _temporal_patterns() -> str:
+    """OWL-Time alignment and an explicit bitemporal distinction.
+
+    The ontology had no temporal model at all: no intervals, no Allen
+    relations, and — more consequentially — no separation between *when a
+    fact was true* and *when the system recorded it*. Every timestamp was
+    an undifferentiated xsd:dateTime, so "the policy was effective from
+    March" and "we entered the policy in June" were indistinguishable.
+
+    The source supports the distinction: `valid_from` / `effective_from` /
+    `effective_until` carry valid time, while `created_at` carries
+    transaction time. Declaring the two axes lets a consumer ask
+    as-of questions — which is what runtime/temporal_queries/TQ-03
+    (a bi-temporal SPARQL template) was written for and has never had a
+    vocabulary to run against.
+    """
+    return """\
+# ── Temporal Model (OWL-Time) ─────────────────────────────────────────
+:TemporalExtent
+  a owl:Class ;
+  rdfs:subClassOf time:TemporalEntity ;
+  rdfs:label "Temporal Extent" ;
+  rdfs:comment "The period over which a fact is asserted to hold." ;
+  :sensitivityTier :Internal .
+
+# ── Valid time — when the fact was true in the world ──────────────────
+:validFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "valid from" ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "Start of the period during which the fact holds in the modelled world. Distinct from when it was recorded." ;
+  :sensitivityTier :Internal .
+
+:validUntil
+  a owl:DatatypeProperty ;
+  rdfs:label "valid until" ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "End of the period during which the fact holds. Absent means still valid." ;
+  :sensitivityTier :Internal .
+
+:hasValidityPeriod
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf time:hasTime ;
+  rdfs:label "has validity period" ;
+  rdfs:range :TemporalExtent ;
+  rdfs:comment "Links a record to the interval over which it holds." ;
+  :sensitivityTier :Internal .
+
+# ── Transaction time — when the system recorded it ────────────────────
+# prov:generatedAtTime already carries this on provenance-bearing records;
+# :recordedAt is its counterpart for records outside the PROV profile.
+:recordedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "recorded at" ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "When the assertion entered the system. Transaction time, not valid time." ;
+  :sensitivityTier :Internal .
+
+"""
+
+
+def _quantity_patterns() -> str:
+    """QUDT alignment for measured values.
+
+    Every numeric measurement was a bare xsd:decimal with no dimension,
+    unit, scale or quantity kind — so 15 and 15 were indistinguishable
+    whether they meant milliseconds or megawatts. The source records the
+    unit alongside the value (`unit_of_measure` sits next to
+    `numeric_value`); nothing carried it into the ontology.
+    """
+    return """\
+# ── Quantities and Units (QUDT) ───────────────────────────────────────
+:QuantityValue
+  a owl:Class ;
+  rdfs:subClassOf qudt:QuantityValue ;
+  rdfs:label "Quantity Value" ;
+  rdfs:comment "A numeric magnitude together with the unit it is expressed in. Reified so a measurement cannot be read without its unit." ;
+  :sensitivityTier :Internal .
+
+:hasQuantity
+  a owl:ObjectProperty ;
+  rdfs:label "has quantity" ;
+  rdfs:range :QuantityValue ;
+  rdfs:comment "Links a record to its measured value." ;
+  :sensitivityTier :Internal .
+
+:numericValue
+  a owl:DatatypeProperty ;
+  rdfs:subPropertyOf qudt:numericValue ;
+  rdfs:domain :QuantityValue ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "numeric value" ;
+  :sensitivityTier :Internal .
+
+:unitOfMeasure
+  a owl:DatatypeProperty ;
+  rdfs:domain :QuantityValue ;
+  rdfs:range xsd:string ;
+  rdfs:label "unit of measure" ;
+  rdfs:comment "Unit symbol as recorded at source. Map to a qudt:Unit IRI where the vocabulary is known." ;
+  :sensitivityTier :Internal .
+
+"""
+
+
+def _participation_patterns() -> str:
+    """Reified event participation with a role.
+
+    The only participation axiom was a blunt
+    `:hasParticipant (DomainEvent -> Agent)`, which cannot say *how* an
+    agent took part. The source already models this properly — an
+    `event_participants` table carrying event, agent, role and join time —
+    so the n-ary relation existed in the data and was flattened to a
+    binary link on the way into the ontology.
+    """
+    return """\
+# ── Participation (reified n-ary relation) ────────────────────────────
+:Participation
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Participation" ;
+  rdfs:comment "An agent's involvement in an event, in a stated role. Reified because the relation carries its own attributes — role and time — which a binary property cannot hold." ;
+  :sensitivityTier :Internal .
+
+:participationIn
+  a owl:ObjectProperty ;
+  rdfs:domain :Participation ;
+  rdfs:range :DomainEvent ;
+  rdfs:label "participation in" ;
+  :sensitivityTier :Internal .
+
+:participatingAgent
+  a owl:ObjectProperty ;
+  rdfs:subPropertyOf prov:wasAssociatedWith ;
+  rdfs:domain :Participation ;
+  rdfs:range :Agent ;
+  rdfs:label "participating agent" ;
+  :sensitivityTier :Internal .
+
+:participationRole
+  a owl:DatatypeProperty ;
+  rdfs:domain :Participation ;
+  rdfs:range xsd:string ;
+  rdfs:label "participation role" ;
+  rdfs:comment "The capacity in which the agent took part." ;
+  :sensitivityTier :Internal .
+
+"""
+
+
 def _prov_patterns() -> str:
     return f"""\
 # ── PROV-O Integration Patterns ──────────────────────────────────────
@@ -743,6 +899,24 @@ def generate_ontology(intro: DBIntrospector, output_dir: str,
     with open(prov_path, "w") as f:
         f.write(prov_content)
     print(f"  ✓ Provenance profile    → {prov_path}")
+
+    # ── Dimensions sub-module (Phase 5) ──────────────────────────────
+    dim_content = (
+        DIMENSION_PREFIXES + "\n"
+        f'<{BASE_IRI}dimensions/>\n'
+        f'  a owl:Ontology ;\n'
+        f'  owl:imports <{BASE_IRI}> ;\n'
+        f'  rdfs:label "Enterprise Dimensions Profile" ;\n'
+        f'  rdfs:comment "Time, quantity and participation patterns: the '
+        f'dimensions a relational schema flattens away." .\n\n'
+        + _temporal_patterns()
+        + _quantity_patterns()
+        + _participation_patterns()
+    )
+    dim_path = os.path.join(output_dir, "dimensions.ttl")
+    with open(dim_path, "w") as f:
+        f.write(dim_content)
+    print(f"  ✓ Dimensions profile    → {dim_path}")
 
 
 def _report_stats(tables, path):

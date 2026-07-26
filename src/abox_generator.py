@@ -50,6 +50,7 @@ PREFIXES = f"""\
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix time: <http://www.w3.org/2006/time#> .
 """
 
 # Columns worth promoting to rdfs:label, in preference order. Competency
@@ -147,6 +148,132 @@ def _literal(value: object, xsd_type: str) -> Optional[str]:
 # in preference order.
 _GENERATED_AT_COLUMNS = ("observed_at", "recorded_at", "generated_at",
                          "asserted_at", "created_at")
+
+# Valid-time columns — when the fact holds in the modelled world. Kept
+# separate from transaction time (created_at), which is when the system
+# recorded it. Conflating the two is what made as-of questions impossible.
+_VALID_FROM_COLUMNS = ("valid_from", "effective_from", "start_date",
+                       "started_at")
+_VALID_UNTIL_COLUMNS = ("valid_to", "valid_until", "effective_until",
+                        "end_date", "ended_at", "expiry_date",
+                        "credential_expiry")
+_UNIT_COLUMNS = ("unit_of_measure", "uom", "unit")
+_NUMERIC_VALUE_COLUMNS = ("numeric_value", "value", "measured_value",
+                          "amount", "quantity")
+
+
+def _first_present(row: Dict[str, object], columns) -> Optional[str]:
+    for col in columns:
+        val = row.get(col)
+        if val is not None and str(val).strip() != "":
+            return str(val)
+    return None
+
+
+def _dimension_statements(class_name: str, key: object,
+                          row: Dict[str, object]) -> Tuple[str, List[str]]:
+    """Emit validity period and quantity value for a record, when present.
+
+    Returns (extra turtle blocks, statements to attach to the record).
+    Nothing is emitted where the source has no corresponding column — a
+    record with no valid-time columns gets no validity period rather than
+    one invented from its creation timestamp, which would assert that the
+    fact became true at the moment it was typed in.
+    """
+    blocks: List[str] = []
+    statements: List[str] = []
+
+    valid_from = _first_present(row, _VALID_FROM_COLUMNS)
+    valid_until = _first_present(row, _VALID_UNTIL_COLUMNS)
+    if valid_from or valid_until:
+        extent = _individual_iri(f"{class_name}Validity", key)
+        ext_stmts = ["  a :TemporalExtent"]
+        if valid_from:
+            ext_stmts.append(f'  :validFrom "{_escape(valid_from)}"^^xsd:dateTime')
+            ext_stmts.append(
+                f'  time:hasBeginning [ a time:Instant ;\n'
+                f'                      time:inXSDDateTime "{_escape(valid_from)}"^^xsd:dateTime ]')
+        if valid_until:
+            ext_stmts.append(f'  :validUntil "{_escape(valid_until)}"^^xsd:dateTime')
+            ext_stmts.append(
+                f'  time:hasEnd [ a time:Instant ;\n'
+                f'                time:inXSDDateTime "{_escape(valid_until)}"^^xsd:dateTime ]')
+        blocks.append(extent + "\n" + " ;\n".join(ext_stmts) + " .\n")
+        statements.append(f"  :hasValidityPeriod {extent}")
+
+    unit = _first_present(row, _UNIT_COLUMNS)
+    magnitude = _first_present(row, _NUMERIC_VALUE_COLUMNS)
+    if unit and magnitude is not None:
+        try:
+            float(magnitude)
+        except (TypeError, ValueError):
+            unit = None
+    if unit and magnitude is not None:
+        qty = _individual_iri(f"{class_name}Quantity", key)
+        blocks.append(
+            qty + "\n"
+            "  a :QuantityValue ;\n"
+            f"  :numericValue {float(magnitude)} ;\n"
+            f'  :unitOfMeasure "{_escape(unit)}" .\n')
+        statements.append(f"  :hasQuantity {qty}")
+
+    return "".join(blocks), statements
+
+
+def _participation_statements(row: Dict[str, object],
+                              allowed: List["MappingRow"],
+                              event_classes: set) -> List[str]:
+    """Type a junction record as a reified :Participation.
+
+    Detected structurally rather than by table name: a record qualifies
+    when it references an event class *and* an agent, and carries a role
+    column. That is an n-ary relation — the link has its own attributes —
+    which the schema models correctly and the ontology previously
+    flattened into a bare `:hasParticipant (DomainEvent -> Agent)` that
+    cannot say in what capacity the agent took part.
+    """
+    event_prop = next((p for p in allowed
+                       if p.kind == "Object Property" and p.target in event_classes), None)
+    agent_prop = next((p for p in allowed
+                       if p.kind == "Object Property" and p.target == "Agent"), None)
+    role_col = next((p.column for p in allowed
+                     if "role" in p.column.lower() and p.kind == "Data Property"), None)
+    if not (event_prop and agent_prop and role_col):
+        return []
+    event_val = row.get(event_prop.column)
+    agent_val = row.get(agent_prop.column)
+    if event_val is None or agent_val is None:
+        return []
+    stmts = [
+        "  a :Participation",
+        f"  :participationIn {_individual_iri(event_prop.target, event_val)}",
+        f"  :participatingAgent {_individual_iri(agent_prop.target, agent_val)}",
+    ]
+    role = row.get(role_col)
+    if role is not None and str(role).strip():
+        stmts.append(f'  :participationRole "{_escape(str(role))}"')
+    return stmts
+
+
+def _event_class_names(ontology_dir: str) -> set:
+    """Classes that are :DomainEvent or a subclass of it."""
+    try:
+        import rdflib
+    except ImportError:
+        return set()
+    g = rdflib.Graph()
+    for fname in ("enterprise.ttl", "events.ttl"):
+        path = os.path.join(ontology_dir, fname)
+        if os.path.isfile(path):
+            try:
+                g.parse(path, format="turtle")
+            except Exception:
+                pass
+    base = rdflib.URIRef(BASE_IRI + "DomainEvent")
+    names = {"DomainEvent"}
+    names |= {str(s).rsplit("/", 1)[-1]
+              for s in g.subjects(rdflib.RDFS.subClassOf, base)}
+    return names
 
 
 def _prov_entity_classes(ontology_dir: str) -> set:
@@ -295,7 +422,7 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
         PREFIXES,
         f"\n<{BASE_IRI}instances/>\n"
         f"  a owl:Ontology ;\n"
-        f"  owl:imports <{BASE_IRI}> ;\n"
+        f"  owl:imports <{BASE_IRI}> , <{BASE_IRI}dimensions/> ;\n"
         f'  rdfs:label "Enterprise ABox" ;\n'
         f'  rdfs:comment "Instance data materialised from the relational '
         f'source via the logical-physical mapping. Tier ceiling: {max_tier}." ;\n'
@@ -303,7 +430,10 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
     ]
 
     prov_entity_classes = _prov_entity_classes(ont_dir)
+    event_classes = _event_class_names(ont_dir)
+    n_participations = 0
     n_prov_activities = 0
+    n_dimensions = 0
     n_individuals = 0
     n_triples = 0
     n_classes = 0
@@ -368,6 +498,16 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
                 statements.append(f'  rdfs:label "{_escape(label)}"')
 
             # PROV-O chain for provenance-bearing records.
+            part_stmts = _participation_statements(row, allowed, event_classes)
+            if part_stmts:
+                statements.extend(part_stmts)
+                n_participations += 1
+
+            dim_block, dim_stmts = _dimension_statements(class_name, key, row)
+            statements.extend(dim_stmts)
+            if dim_block:
+                n_dimensions += 1
+
             prov_block = ""
             if class_name in prov_entity_classes:
                 prov_block, prov_stmts = _prov_chain(
@@ -404,6 +544,8 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
             n_individuals += 1
             n_triples += len(statements)
             lines.append(subject + "\n" + " ;\n".join(statements) + " .\n")
+            if dim_block:
+                lines.append(dim_block)
             if prov_block:
                 n_prov_activities += 1
                 lines.append(prov_block)
@@ -416,6 +558,12 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
     print(f"  ✓ ABox instances       → {path}")
     print(f"    {n_individuals} individuals across {n_classes} classes, "
           f"{n_triples} assertions  (tier ceiling: {max_tier})")
+    if n_participations:
+        print(f"    Participations reified: {n_participations} n-ary "
+              f"event/agent/role records")
+    if n_dimensions:
+        print(f"    Dimensions reified: {n_dimensions} records carry a "
+              f"validity period and/or a united quantity")
     if n_prov_activities:
         print(f"    PROV-O chains: {n_prov_activities} activities reified "
               f"(Entity -> Activity -> Agent)")

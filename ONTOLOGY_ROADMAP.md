@@ -350,7 +350,31 @@ Ontomesh emits TBox only and has no path from rows to instances — no R2RML/RML
 
 ---
 
-## Phase 5 · Depth — the modeling patterns
+## Phase 5 · Depth — the modeling patterns ✅ **DELIVERED**
+
+*Branch `phase0/ontology-quality-gates` · 2026-07-26*
+
+| Capability | Before | After |
+|---|---|---|
+| `temporal_extents` (OWL-Time, bitemporal) | **0** | **22** |
+| `quantity_values` (QUDT-aligned) | **0** | **10** |
+| `participations` (reified n-ary) | **0** | **6** |
+| `prov_chains` | 0 | 4 |
+| OWL-Time instants materialised | 0 | **24** |
+
+New `output/ontology/dimensions.ttl` — "the dimensions a relational schema flattens away" — plus ABox emission for each. All four are now ratcheted by the gate, counted as **reified instances rather than declarations**, because a vocabulary nothing uses is precisely the failure mode this roadmap exists to remove.
+
+**Every addition has data behind it.** I checked the source before adding vocabulary, rather than importing standards speculatively:
+
+- **Bitemporality is genuinely supported.** `valid_from` / `effective_from` / `effective_until` carry *valid* time; `created_at` carries *transaction* time. The ontology previously had one undifferentiated `xsd:dateTime`, so "the policy was effective from March" and "we entered the policy in June" were indistinguishable. The two axes are now separate — which is what `runtime/temporal_queries/TQ-03`, a bi-temporal SPARQL template with no vocabulary to run against, was written for.
+- **Units sit next to their values in the source.** `unit_of_measure` is adjacent to `numeric_value` in three populated tables and never reached the ontology. A magnitude and its unit are now one reified `:QuantityValue`, so a measurement cannot be read without its unit — `15` is no longer ambiguous between milliseconds and megawatts.
+- **Participation was already n-ary in the data.** `event_participants(event_id, agent_id, participation_role, joined_at)` models it correctly; the ontology flattened it to a bare `:hasParticipant (DomainEvent → Agent)` that cannot say *in what capacity*. Reified as `:Participation`, roles now query: `INITIATOR`, `OBSERVER`, `EXECUTOR`.
+
+**Nothing is invented where the source is silent.** A record with no valid-time columns gets no validity period rather than one synthesised from its creation timestamp — that would assert a fact became true at the moment it was typed in. Participation is detected structurally (an FK to an event class *and* to an agent *and* a role column), not by table name.
+
+**Identity semantics (5.5) landed in Phase 3** — 39 `owl:hasKey` axioms derived from UNIQUE constraints.
+
+Governance holds at **3.32/5.0**. Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 **Goal:** a domain model rather than a schema transliteration. These are absent entirely.
 
