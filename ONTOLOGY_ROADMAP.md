@@ -82,7 +82,19 @@ Two hard gates remain unconditional: a Turtle file that does not parse, and a SP
 
 Those requirements were being marked satisfied on the strength of competency-question tests that **returned zero rows**, and signed evidence bundles were generated from them (7 committed under `compliance/bundles/`). The dead status has been removed from all four regulation files; because the status can no longer be produced, those requirements now evaluate honestly.
 
-**Action required beyond this branch:** the previously generated bundles asserted compliance on that basis. They should be reviewed and, if they were ever shared externally, re-issued. This is a disclosure question, not just a code change.
+**Measured impact.** The pre-fix behaviour was reproduced on a copy of the output tree (37 `FAIL` rows restored to `PASS-STRUCTURAL`, old `pass_expression` restored) and scored against the same engine:
+
+| Regulation | Reported before | Honest now |
+|---|---|---|
+| Basel IV / SR 11-7 | **7/7 — 100%** | 4/7 — 57% |
+| EU AI Act Art. 13 | **5/5 — 100%** | 2/5 — 40% |
+| HIPAA §164.312 | **6/6 — 100%** | 3/6 — 50% |
+| Ofcom network transparency | 5/6 — 83% | 2/6 — 33% |
+| **Regulations at ≥80% coverage** | **4 of 4** | **0 of 4** |
+
+The toolkit was reporting **100% regulatory coverage**, with three regulations at a perfect score, on the strength of tests that returned no rows. It now reports 33–57%. The governance criterion *Regulatory Evidence Coverage* correspondingly moved to **2/5** — "Only 0/4 regulations at ≥80% coverage — remediation required." Overall governance holds at **3.35/5.0**, still above the 3.0 CI gate.
+
+**Action required beyond this branch:** the previously generated bundles asserted compliance on the old basis. They should be reviewed and, if they were ever shared externally, re-issued. This is a disclosure question, not just a code change.
 
 ---
 
