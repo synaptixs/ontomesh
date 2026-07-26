@@ -116,19 +116,45 @@ def _terminal(answer: str, status: str, provider: str, trace: list, **kw) -> Rea
                           provider=str(provider), trace=trace, **kw)
 
 
-def _fk_neighbors(db_path: str, table: str | None, rows: list[dict]) -> list[dict]:
+def _fk_neighbors(db_path: str, table: str | None, rows: list[dict], *,
+                  mapping=None, allowed_tables: set[str] | None = None,
+                  max_tier: str = "Public",
+                  deid_columns: set[str] | None = None) -> tuple[list[dict], list[dict]]:
     """Resolve 1-hop FK-neighbour rows for the result set (Phase 4 #1).
 
     For each FK (from_col → ref_table.to_col) declared on ``table``, fetch the
-    referenced rows. Returns structured edges — ``{subject_key, from_col,
-    ref_table, ref_key, row}`` — consumed both by the reasoner (as facts) and by
-    subgraph materialization (as edges). Read-only; identifiers come from SQLite
-    PRAGMA (schema), never from user input.
+    referenced rows. Returns ``(edges, skipped)`` where an edge is
+    ``{subject_key, from_col, ref_table, ref_key, row}`` — consumed both by the
+    reasoner (as facts) and by subgraph materialization — and ``skipped``
+    records the FKs that were not followed, with the reason.
+
+    Subject to the *same* controls as the primary query, which it previously
+    bypassed entirely:
+
+    * ``ref_table`` must be in the flavor's allow-list. A foreign key pointing
+      outside it is dropped, not followed.
+    * Only columns the mapping describes and that sit within ``max_tier`` are
+      projected. The previous ``SELECT *`` returned every column of the
+      referenced row regardless of tier, and those values reached the
+      materialized subgraph — which ``POST /api/sparql`` lets a caller query
+      directly, making the ceiling advisory on this path.
+    * De-identification is applied here rather than only to the primary rows,
+      because these are fetched after the primary masking pass has run.
+
+    Read-only; identifiers come from SQLite PRAGMA (schema) and from the
+    mapping, never from user input.
     """
     import sqlite3
 
+    skipped: list[dict] = []
     if not table or not table.isidentifier():
-        return []
+        return [], skipped
+    if mapping is None:
+        # Without a mapping there is no way to know which columns are
+        # readable, so no neighbour is followed. Failing closed keeps the
+        # tier ceiling meaningful when a caller omits it.
+        return [], [{"reason": "no mapping supplied; neighbours not followed"}]
+
     out: list[dict] = []
     con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
@@ -136,28 +162,48 @@ def _fk_neighbors(db_path: str, table: str | None, rows: list[dict]) -> list[dic
         try:
             fks = con.execute(f"PRAGMA foreign_key_list({table})").fetchall()
         except sqlite3.Error:
-            return []
+            return [], skipped
         for fk in fks:
             ref_table, from_col, to_col = fk["table"], fk["from"], (fk["to"] or "id")
             if not (str(ref_table).isidentifier() and str(from_col).isidentifier()
                     and str(to_col).isidentifier()):
                 continue
+            if allowed_tables and ref_table not in allowed_tables:
+                skipped.append({"ref_table": ref_table, "from_col": from_col,
+                                "reason": "not allow-listed for this flavor"})
+                continue
+            cols = mapping.readable_columns(ref_table, max_tier)
+            if to_col not in cols:
+                # The join key is needed to attach the edge; include it only
+                # when it is itself readable.
+                cols = ([to_col] + cols) if tier_ok(
+                    mapping.tier.get(f"{mapping.class_for_table(ref_table)}.{to_col}"),
+                    max_tier) else cols
+            if not cols:
+                skipped.append({"ref_table": ref_table, "from_col": from_col,
+                                "reason": f"no columns readable at tier {max_tier!r}"})
+                continue
+            select_list = ", ".join(sorted(set(cols)))
             for i, row in enumerate(rows):
                 fv = row.get(from_col)
                 if fv is None:
                     continue
                 try:
                     nbrs = con.execute(
-                        f"SELECT * FROM {ref_table} WHERE {to_col} = ? LIMIT 5", (fv,)
+                        f"SELECT {select_list} FROM {ref_table} WHERE {to_col} = ? LIMIT 5",
+                        (fv,),
                     ).fetchall()
                 except sqlite3.Error:
                     continue
                 for nb in nbrs:
+                    nb_row = dict(nb)
+                    if deid_columns:
+                        nb_row = deidentify([nb_row], deid_columns)[0]
                     out.append({"subject_key": str(row.get("id", i)), "from_col": from_col,
-                                "ref_table": ref_table, "ref_key": str(fv), "row": dict(nb)})
+                                "ref_table": ref_table, "ref_key": str(fv), "row": nb_row})
     finally:
         con.close()
-    return out
+    return out, skipped
 
 
 def _facts_from_neighbors(neighbors: list[dict]) -> list:
@@ -284,8 +330,16 @@ def search(
     #     materialized subgraph.
     neighbors: list[dict] = []
     if (auto_relations or materialize) and db_path and rows:
-        neighbors = _fk_neighbors(db_path, mapping.table_for(the_plan.primary_class), rows)
-        emit({"stage": "relations", "neighbor_rows": len(neighbors)})
+        neighbors, skipped_fks = _fk_neighbors(
+            db_path, mapping.table_for(the_plan.primary_class), rows,
+            mapping=mapping, allowed_tables=allowed_tables, max_tier=max_tier,
+            deid_columns=deid_columns,
+        )
+        # Dropped edges are reported rather than silently omitted: a caller
+        # seeing fewer relations than expected should be able to tell that a
+        # policy withheld them, not that the data lacked them.
+        emit({"stage": "relations", "neighbor_rows": len(neighbors),
+              "skipped_fks": skipped_fks})
 
     # 4b. Reason — derive facts over the result subgraph (+ any relationship facts).
     inferred: list[dict] = []

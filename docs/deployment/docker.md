@@ -1,9 +1,9 @@
 # Docker
 
-The published image at `ghcr.io/synaptixs/ontomesh:3.10.0` is the standard delivery vehicle.
+The published image at `ghcr.io/synaptixs/ontomesh:3.10.1` is the standard delivery vehicle.
 
 ```bash
-docker run --rm -p 5051:5051 ghcr.io/synaptixs/ontomesh:3.10.0
+docker run --rm -p 5051:5051 ghcr.io/synaptixs/ontomesh:3.10.1
 ```
 
 ## Persistent run
@@ -14,7 +14,7 @@ docker run -d --name ontomesh \
   -p 5051:5051 \
   -v ontomesh-data:/data \
   -e ONTOMESH_DATA_DIR=/data \
-  ghcr.io/synaptixs/ontomesh:3.10.0
+  ghcr.io/synaptixs/ontomesh:3.10.1
 ```
 
 ## Environment
@@ -44,7 +44,7 @@ docker run -d --name ontomesh \
 ## Verify the image
 
 ```bash
-cosign verify ghcr.io/synaptixs/ontomesh:3.10.0 \
+cosign verify ghcr.io/synaptixs/ontomesh:3.10.1 \
   --certificate-identity-regexp='^https://github.com/synaptixs/ontomesh' \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 ```
