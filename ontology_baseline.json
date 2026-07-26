@@ -8,8 +8,8 @@
     "malformed_iris": 0,
     "object_properties_ranged_at_thing": 0,
     "owl_restrictions": 244,
-    "cq_tests_returning_rows": 0,
-    "cq_tests_failing": 37
+    "cq_tests_returning_rows": 3,
+    "cq_tests_failing": 34
   },
   "directions": {
     "turtle_parse_failures": "lower_is_better",

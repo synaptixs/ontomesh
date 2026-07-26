@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Energy & Utilities Ontology Module" ;
   rdfs:comment "Domain template for electric utilities, gas networks, and renewable energy operators. Aligned with IEC Common Information Model (CIM) IEC 61968/61970 and NERC reliability standards." ;
-  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:48:30Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 

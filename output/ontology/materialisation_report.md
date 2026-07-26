@@ -1,6 +1,6 @@
 # Materialisation Report
 
-Generated: 2026-07-26T16:30:49.552600+00:00
+Generated: 2026-07-26T16:48:33.586014+00:00
 
 Lineage records (Phase D): **7,614**
 
@@ -17,8 +17,8 @@ Lineage records (Phase D): **7,614**
 
 | Engine | Status | Derived | Duration | Rules |
 |--------|--------|--------:|---------:|------:|
-| owl-rl | PASS | 7,614 | 1652 ms | 1 |
-| shacl | PASS | 0 | 79 ms | 0 |
+| owl-rl | PASS | 7,614 | 1460 ms | 1 |
+| shacl | PASS | 0 | 67 ms | 0 |
 | sparql | SKIPPED | 0 | 0 ms | 0 |
 
 - **owl-rl**: 7614 triples inferred via OWL-RL

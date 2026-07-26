@@ -246,7 +246,42 @@ Governance holds at **3.32/5.0**. Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 ---
 
-## Phase 4 · The ABox — instance data and the Spine join
+## Phase 4 · The ABox — instance data ✅ **DELIVERED (partial)**
+
+*Branch `phase0/ontology-quality-gates` · 2026-07-26*
+
+| Metric | Before | After |
+|---|---|---|
+| ABox individuals | **0** | **146** across 37 classes |
+| ABox assertions | 0 | **1,700** |
+| `cq_tests_returning_rows` | 0 | **3** |
+| `cq_tests_failing` | 37 | **34** |
+| SHACL violations against instances | *nothing to validate* | 411 → **208** |
+| ABox predicates undeclared in the TBox | — | **0 of 206** |
+
+**Scoped to the toolkit alone, not Spine.** The roadmap wrote this phase around ingesting Spine's PKG. The more fundamental gap was closer to home: there was no path from rows to individuals at all — no R2RML, no RML, no OBDA. But `output/mapping/logical_physical_map.csv` already *is* a mapping (class→table, property→column, FK→range class). It was written as documentation and never executed. The new `src/abox_generator.py` executes it, behind `--phase abox`. Spine's `POST /api/facts` becomes an additional source later rather than the only one.
+
+**SHACL finally validates against instances.** The shapes existed but had nothing to check, so their own defects were invisible. First run: 411 violations. **243 of them were a single cause** — the shapes require `:sensitivityTier` on every node, which no individual carried. Individuals now inherit their class's tier, which is independently useful for tier-gated retrieval. Remainder after fixes: 208, and those are genuine findings about source data that does not satisfy the declared constraints.
+
+### The honest part: 3 of 43, not 43 of 43
+
+The exit criterion was "CQ tests return non-zero rows". Three do, up from zero. That is a real change of kind — the suite can now distinguish a working query from a broken one — but it is not the number that matters, and the reason is a finding in itself.
+
+**There are three different vocabularies for the same relation.** For `domain_events.asset_id`:
+
+| Source | Name |
+|---|---|
+| Mapping workbook (`mapping_generator`) | `asset` |
+| Ontology generator (`object_property_name`) | `assetOf` |
+| Hand-written CQ suite + `_prov_patterns` | `refersToAsset` |
+
+The competency questions were written against a vocabulary the generator has never produced. With `PASS-STRUCTURAL` scoring every empty result as a pass, nothing ever surfaced the divergence.
+
+What this phase fixed is the half that is unambiguously wrong: **the ABox now derives property IRIs from the ontology generator's own naming functions rather than from the workbook**, so instance data and schema agree by construction — 206 predicates asserted, 0 undeclared. Building the ABox from the workbook would have produced an instance graph its own schema could not describe.
+
+**Remaining work, which is a design decision rather than a defect fix:** reconcile the hand-written vocabulary (`refersToAsset`, `derivationMethod`, `observationType`) with the schema-derived one. Either the generator should emit the intended names, or the 43 CQ files should be rewritten to match what it emits. The CQ files encode intent about what the ontology *should* look like, so this is not a mechanical rename — it needs a decision about which vocabulary is canonical.
+
+Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 **Gated on Phase 2. Do not start earlier.**
 

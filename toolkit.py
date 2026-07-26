@@ -714,7 +714,7 @@ def main():
     parser.add_argument("--phase",    default="all",
                         choices=["all","1","2","3","4","5","reason","tmf","test","report","reasoner","sparql","log","mine","sequence","drift-templates","security","conflict","alignment","runtime",
                                  "publish","drift","templates","modular","discover","tmf630","wizard","evolve","federate","comply",
-                                 "embed","retrieve","targets"],
+                                 "embed","retrieve","targets","abox"],
                         help="Run a specific phase only")
     # ── T1.5 — Multi-target generation ─────────────────────────────────
     parser.add_argument("--targets", default=None,
@@ -1115,6 +1115,11 @@ def main():
         step(0, "Phase 3 — Industry Templates")
         from template_loader import run_templates
         run_templates(out_path, template_name=args.template)
+
+    def phase_abox(db_path: str, out_path: str):
+        step(0, "Phase 4 — ABox materialisation (instances from the source rows)")
+        from abox_generator import run_abox
+        run_abox(db_path, out_path, max_tier=args.max_tier)
 
     def phase_modular(db_path: str, out_path: str):
         step(0, "Phase 3 — Modular OWL (owl:imports + cycle + IRI conflict detection)")
@@ -1601,6 +1606,7 @@ def main():
         "drift":     [(phase_drift,     [args.db, args.out])],
         "templates": [(phase_templates, [args.db, args.out])],
         "modular":   [(phase_modular,   [args.db, args.out])],
+        "abox":      [(phase_abox,      [args.db, args.out])],
         "discover":  [(phase_discover,  [args.db, args.out])],
         "tmf630":    [(phase_tmf630,    [args.db, args.out])],
         "wizard":    [(phase_wizard,    [args.db, args.out])],

@@ -214,7 +214,11 @@ def run_sparql_cq_tests(ontology_dir: str, output_dir: str) -> List[Dict]:
 
     # Collect Turtle files to load
     turtle_paths = []
-    for fname in ("enterprise.ttl", "events.ttl", "provenance.ttl"):
+    # instances.ttl is the ABox (Phase 4). Without it the suite ran against
+    # a TBox alone, so every competency question that asked for data
+    # returned nothing — which is what PASS-STRUCTURAL existed to excuse.
+    for fname in ("enterprise.ttl", "events.ttl", "provenance.ttl",
+                  "instances.ttl"):
         p = os.path.join(ontology_dir, fname)
         if os.path.isfile(p):
             turtle_paths.append(p)

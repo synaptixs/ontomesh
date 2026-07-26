@@ -14,7 +14,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:48:29Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
