@@ -1643,6 +1643,10 @@ def main():
             # the ABox contributes to.
             (phase_abox,        [args.db, args.out]),
             (phase_quality,     [args.db, args.out]),
+            # The SPARQL suite runs against the ABox, so it belongs after it —
+            # and it must be in `all`, or a full run leaves the competency
+            # questions unmeasured and the gate with nothing to compare.
+            (phase_sparql,      [args.db, args.out]),
             (phase_test,        [args.db, args.out]),
             (phase_report,      [args.out]),
         ]

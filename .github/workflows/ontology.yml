@@ -35,33 +35,14 @@ jobs:
       - name: Install rdflib + owlrl (SPARQL backend, reasoner)
         run: pip install rdflib owlrl
 
-      - name: Phase 1 — DB setup & introspection
-        run: python toolkit.py --phase 1 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 2 — OWL 2 ontology generation
-        run: python toolkit.py --phase 2 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 3 — SHACL shape generation
-        run: python toolkit.py --phase 3 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 4 — Mapping & semantic loss
-        run: python toolkit.py --phase 4 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 5 — JSON-LD, SKOS, MCP tools
-        run: python toolkit.py --phase 5 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase TMF — TM Forum alignment
-        run: python toolkit.py --phase tmf --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      # Phase 4 — instance data. Without it the SPARQL suite runs against a
-      # TBox alone and every data question returns nothing.
-      - name: Phase ABox — materialise instances
-        run: python toolkit.py --phase abox --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      # Phase 6 — pitfalls, structural metrics, consistency. Feeds both the
-      # governance scorecard and the artifact gate.
-      - name: Phase Quality — pitfalls + metrics + consistency
-        run: python toolkit.py --phase quality --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+      # One invocation, not an enumerated list. The generate job previously
+      # ran a hand-listed subset of phases while the baseline was recorded
+      # from `--phase all`, so CI measured a smaller corpus than the baseline
+      # described and the gate failed on a difference that was not a
+      # regression. `all` is the single source of truth for what a full run
+      # produces; anything it omits is omitted everywhere.
+      - name: Run the full pipeline
+        run: python toolkit.py --phase all --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
 
       - name: Upload generated artifacts
         uses: actions/upload-artifact@v4

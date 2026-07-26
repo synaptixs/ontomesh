@@ -31,7 +31,7 @@ import json
 import os
 import sys
 from collections import defaultdict
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     import rdflib
@@ -173,22 +173,35 @@ def _count_predicate_objects(graph: rdflib.Graph, predicate, obj) -> int:
 
 
 def _cq_rows(output_dir: str) -> Tuple[int, int, int]:
-    """(tests returning rows, failing tests, total) from the SPARQL CQ CSV."""
+    """(tests returning rows, failing tests, total) from the SPARQL CQ CSV.
+
+    Returns ``(None, None, 0)`` when the report is absent or empty. A
+    missing measurement is not a measurement of zero: reporting it as 0
+    turned "this job has not run yet" into "every competency question
+    stopped returning rows", which failed the gate on a false regression.
+    Unavailable metrics are skipped in the comparison and shown as `n/a`.
+    """
     csv_path = os.path.join(output_dir, "reports", "sparql_cq_test_results.csv")
     if not os.path.isfile(csv_path):
-        return (0, 0, 0)
+        return (None, None, 0)
     with open(csv_path, newline="") as f:
         rows = list(csv.DictReader(f))
+    if not rows:
+        return (None, None, 0)
     returning = sum(1 for r in rows if (r.get("row_count") or "0").strip() not in ("0", ""))
     failing = sum(1 for r in rows if (r.get("status") or "").strip() in ("FAIL", "ERROR"))
     return returning, failing, len(rows)
 
 
-def _pitfall_counts(output_dir: str) -> Tuple[int, int]:
-    """(firing, critical-firing) from the Phase 6 quality report."""
+def _pitfall_counts(output_dir: str) -> Tuple[Optional[int], Optional[int]]:
+    """(firing, critical-firing) from the Phase 6 quality report.
+
+    ``(None, None)`` when the report has not been produced — see `_cq_rows`
+    for why an absent measurement must not be reported as zero.
+    """
     path = os.path.join(output_dir, "reports", "ontology_quality.csv")
     if not os.path.isfile(path):
-        return (0, 0)
+        return (None, None)
     firing = critical = 0
     with open(path, newline="") as f:
         for row in csv.DictReader(f):
@@ -301,6 +314,10 @@ def compare(current: Dict[str, Any], baseline: Dict[str, Any]) -> List[str]:
         if name not in base_metrics:
             continue  # new metric — recorded on next --update-baseline
         prior = base_metrics[name]
+        # An unavailable measurement is not a regression. The phase that
+        # produces it may simply not have run in this job.
+        if value is None or prior is None:
+            continue
         direction = DIRECTIONS.get(name, LOWER_IS_BETTER)
         if direction == LOWER_IS_BETTER and value > prior:
             problems.append(f"{name}: {prior} -> {value} (regressed; lower is better)")
@@ -318,7 +335,10 @@ def _render(current: Dict[str, Any], baseline: Dict[str, Any] | None) -> None:
         prior = base_metrics.get(name, "—")
         owner = PHASE_OWNER.get(name, "")
         flag = ""
-        if isinstance(prior, int):
+        if value is None:
+            value = "n/a"
+            flag = "  not measured"
+        elif isinstance(prior, int):
             direction = DIRECTIONS.get(name, LOWER_IS_BETTER)
             if (direction == LOWER_IS_BETTER and value < prior) or (
                 direction == HIGHER_IS_BETTER and value > prior
@@ -335,9 +355,13 @@ def _render(current: Dict[str, Any], baseline: Dict[str, Any] | None) -> None:
             print(f"      ✗ {path}")
             print(f"          {err}")
     d = current["detail"]
+    cq_returning = current["metrics"].get("cq_tests_returning_rows")
+    cq_summary = ("not measured — run `--phase sparql`"
+                  if cq_returning is None
+                  else f"{cq_returning}/{d['cq_tests_total']} return rows")
     print(
         f"\n    {d['turtle_files_parsed']}/{d['turtle_files_scanned']} Turtle files parsed"
-        f"  |  CQ tests: {current['metrics']['cq_tests_returning_rows']}/{d['cq_tests_total']} return rows"
+        f"  |  CQ tests: {cq_summary}"
     )
 
 
