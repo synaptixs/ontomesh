@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [3.10.1] — 2026-07-26 · Security patch
+
+### Security
+
+- **FK-neighbour reads bypassed the sensitivity ceiling and the table
+  allow-list.** Reasoning Search has two paths that read the database.
+  `compile_sql()` enforces the flavor's table allow-list and drops columns
+  above the caller's `max_tier`; `_fk_neighbors()` enforced neither. It issued
+  `SELECT *` against tables discovered from `PRAGMA foreign_key_list` — the
+  schema, not the allow-list — and returned every column regardless of tier.
+  De-identification ran before neighbours were fetched, so it never masked them.
+
+  The values were not confined to the process: every neighbour column became a
+  triple in the materialised subgraph, and `POST /api/sparql` runs the
+  *caller's* SPARQL over that subgraph and returns the results. The ceiling was
+  advisory on that path.
+
+  Demonstrated on the shipped demo database — a fetch seeded from
+  `observations` returned `agents.credential_expiry`, classified
+  `Confidential`, with no ceiling applied.
+
+  The neighbour read now goes through the same controls: allow-list checked,
+  projected to mapped columns within the ceiling, de-identified on the same
+  pass, and failing closed without a mapping. Dropped edges are reported in the
+  trace rather than silently omitted.
+
+  **Affected:** 3.10.0 and earlier, when Reasoning Search is enabled
+  (`ONTOFORGE_SEARCH=1`, default-off). Installations that never enabled it were
+  not exposed. **Upgrade to 3.10.1** if you enabled it.
+
+---
+
 ## [3.10.0] — 2026-07-26 · Ontology correctness, instance data, self-checking output
 
 A correctness release for the generated ontology itself. The pipeline was
