@@ -1,10 +1,10 @@
 {
-  "generated": "2026-04-22T20:08:54Z",
-  "module_count": 13,
-  "total_classes": 186,
-  "total_properties": 986,
+  "generated": "2026-07-26T19:51:24Z",
+  "module_count": 19,
+  "total_classes": 270,
+  "total_properties": 1029,
   "cycles_detected": 0,
-  "iri_conflicts": 128,
+  "iri_conflicts": 387,
   "modules": [
     {
       "filename": "alignment.ttl",
@@ -16,6 +16,17 @@
       ],
       "class_count": 0,
       "property_count": 0
+    },
+    {
+      "filename": "dimensions.ttl",
+      "iri": "https://ontology.example.com/enterprise/dimensions/",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 3,
+      "property_count": 10
     },
     {
       "filename": "drift.ttl",
@@ -36,8 +47,17 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 8,
-      "property_count": 50
+      "class_count": 12,
+      "property_count": 47
+    },
+    {
+      "filename": "enterprise-inferred.ttl",
+      "iri": "",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 2,
+      "property_count": 9
     },
     {
       "filename": "enterprise.ttl",
@@ -45,8 +65,8 @@
       "version": "1.0.0",
       "version_iri": "https://ontology.example.com/enterprise/1.0.0",
       "imports": [],
-      "class_count": 62,
-      "property_count": 645
+      "class_count": 60,
+      "property_count": 372
     },
     {
       "filename": "events.ttl",
@@ -56,7 +76,7 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 5,
+      "class_count": 4,
       "property_count": 0
     },
     {
@@ -76,8 +96,28 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 8,
-      "property_count": 61
+      "class_count": 11,
+      "property_count": 57
+    },
+    {
+      "filename": "inferred-shacl.ttl",
+      "iri": "",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 0,
+      "property_count": 0
+    },
+    {
+      "filename": "instances.ttl",
+      "iri": "https://ontology.example.com/enterprise/instances/",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [
+        "https://ontology.example.com/enterprise/"
+      ],
+      "class_count": 0,
+      "property_count": 0
     },
     {
       "filename": "insurance.ttl",
@@ -87,8 +127,8 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 7,
-      "property_count": 59
+      "class_count": 11,
+      "property_count": 53
     },
     {
       "filename": "logistics_supply_chain.ttl",
@@ -98,8 +138,26 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 8,
-      "property_count": 66
+      "class_count": 12,
+      "property_count": 61
+    },
+    {
+      "filename": "materialised-lineage.ttl",
+      "iri": "",
+      "version": "unknown",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 0,
+      "property_count": 0
+    },
+    {
+      "filename": "materialised.ttl",
+      "iri": "https://ontology.example.com/enterprise/events/",
+      "version": "1.0.0",
+      "version_iri": "",
+      "imports": [],
+      "class_count": 63,
+      "property_count": 324
     },
     {
       "filename": "pharmaceuticals.ttl",
@@ -109,8 +167,8 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 8,
-      "property_count": 74
+      "class_count": 11,
+      "property_count": 64
     },
     {
       "filename": "provenance.ttl",
@@ -120,8 +178,8 @@
       "imports": [
         "https://ontology.example.com/enterprise/"
       ],
-      "class_count": 0,
-      "property_count": 6
+      "class_count": 1,
+      "property_count": 7
     },
     {
       "filename": "tmf-sid-hierarchy.ttl",
@@ -144,581 +202,409 @@
   ],
   "cycles": [],
   "conflicts": {
-    "https://ontology.example.com/enterprise/asset_id": [
-      "energy_utilities.ttl",
-      "energy_utilities.ttl"
+    "http://www.w3.org/2002/07/owl#Nothing": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/capacity_mw": [
-      "energy_utilities.ttl",
-      "energy_utilities.ttl"
+    "http://www.w3.org/2002/07/owl#Thing": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/geo_location": [
-      "energy_utilities.ttl",
-      "logistics_supply_chain.ttl"
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/meter_id": [
-      "energy_utilities.ttl",
-      "energy_utilities.ttl"
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/location_id": [
-      "energy_utilities.ttl",
-      "logistics_supply_chain.ttl"
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#seeAlso": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "http://www.w3.org/2002/07/owl#backwardCompatibleWith": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "http://www.w3.org/2002/07/owl#deprecated": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "http://www.w3.org/2002/07/owl#incompatibleWith": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "http://www.w3.org/2002/07/owl#priorVersion": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "http://www.w3.org/2002/07/owl#versionInfo": [
+      "enterprise-inferred.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/SensitivityTierValue": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/DomainEntity": [
+      "enterprise.ttl",
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/DomainEvent": [
       "enterprise.ttl",
-      "enterprise.ttl"
+      "enterprise.ttl",
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/ObservationRecord": [
       "enterprise.ttl",
-      "enterprise.ttl"
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/AgentRoles": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Agent": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/AssetType": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Asset": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ComplianceBundles": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/EmbeddingIndexes": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/EmbeddingRecords": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/EventParticipants": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/FederationPartners": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/FederationQueryLog": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/FederationTrustLedger": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/OntologyEvolutionProposals": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/OntologyVersionLedger": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Organization": [
+      "enterprise.ttl",
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/Policy": [
       "enterprise.ttl",
       "enterprise.ttl",
-      "insurance.ttl"
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/TmfExportJob": [
+    "https://ontology.example.com/enterprise/PolicyApplication": [
       "enterprise.ttl",
-      "tmf630-task-bulk.ttl"
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/TmfImportJob": [
+    "https://ontology.example.com/enterprise/RetrievalBenchmarks": [
       "enterprise.ttl",
-      "tmf630-task-bulk.ttl"
+      "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/TmfTask": [
+    "https://ontology.example.com/enterprise/Role": [
       "enterprise.ttl",
-      "tmf630-task-bulk.ttl"
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/RuntimeFlavor": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/RuntimeGrounding": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/RuntimePayload": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Agreement": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Alarm": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Attachment": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Characteristic": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ConflictEvent": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/CustomerAccount": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/CustomerBill": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/EventSubscription": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/GeographicSite": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/NetworkSliceProfile": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Note": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Party": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/PartyRole": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/PerformanceIndicator": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/GeographicLocation": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Product": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ProductOffering": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ProductOfferingQualification": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ProductOrder": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ProductSpecification": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Resource": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ResourceRelationship": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ResourceSpecification": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/Service": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ServiceOrder": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ServiceProblem": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ServiceQualityReport": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/ServiceSpecification": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/TroubleTicket": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/UserRole": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/VectorQueryLog": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/DerivationActivity": [
+      "enterprise.ttl",
+      "materialised.ttl",
+      "provenance.ttl"
+    ],
+    "https://ontology.example.com/enterprise/sensitivityTier": [
+      "enterprise.ttl",
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasValidFrom": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasValidUntil": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasAgentIri": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasName": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasAgentType": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCredentialExpiry": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasAuthorizedTiers": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasActive": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasCreatedAt": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasCode": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasLabel": [
       "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasDescription": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasUnitOfMeasure": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasExternalId": [
       "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasLocationCode": [
+      "enterprise.ttl",
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasStatus": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCommissionedAt": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasDecommissionedAt": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasUpdatedAt": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasDecisionIri": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasBundlePath": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSha256": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasSignerIri": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasVerified": [
       "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasCoveragePercent": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasSensitivityTier": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasAssembledAt": [
       "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasStoredAt": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEventIri": [
+      "enterprise.ttl",
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasEventType": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasTitle": [
       "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOutcome": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasIndexName": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasFlavor": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOwlClasses": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasRecordCount": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasExecutedAt": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasNumericValue": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasConfidenceScore": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "provenance.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasDerivationMethod": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasSourceRef": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasObservedAt": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasVersion": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOrgType": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasPolicyType": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasEffectiveFrom": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasEffectiveUntil": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasStrategy": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasFlavorName": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasQuestion": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasUrl": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOwnerType": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasResolvedAt": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasCurrencyCode": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasState": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasValidForStart": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasValidForEnd": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasContentType": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasPath": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasCreationDate": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasCompletionDate": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasErrorLog": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasHref": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasBaseType": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasSchemaLocation": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasLatitude": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasLongitude": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasLifecycleStatus": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasStartDate": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasEndDate": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasIsBundle": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOrderIri": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOrderDate": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasOrderType": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasSpecIri": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasCategory": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasServiceType": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasPriority": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasSlaViolated": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasResolutionNotes": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/hasSubmittedAt": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/agentOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/parentOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/externalOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/assetOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/ownerOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/policyOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/modelOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/eventOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/partnerOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/queryOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/proposalOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/payloadOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/raisedBy": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/assignedTo": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/resolvedBy": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/partyOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/customerAccount": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/placeOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/resourceOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/agreementOf": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/serviceOf": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/productOffering": [
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/submittedBy": [
-      "enterprise.ttl",
-      "enterprise.ttl",
-      "enterprise.ttl"
-    ],
-    "https://ontology.example.com/enterprise/serviceSpec": [
-      "enterprise.ttl",
-      "enterprise.ttl"
+      "materialised.ttl"
     ]
   }
 }

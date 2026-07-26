@@ -6,9 +6,9 @@
 #   they carry an assembledAt timestamp? Are any payloads missing a flavor link?
 #
 # Expected result: All RuntimePayload instances have:
-#   - :flavorName bound and matching a registered RuntimeFlavor
-#   - :assembledAt present and parseable as xsd:dateTime
-#   - :question non-empty
+#   - :hasFlavorName bound and matching a registered RuntimeFlavor
+#   - :hasAssembledAt present and parseable as xsd:dateTime
+#   - :hasQuestion non-empty
 #   - Optional: linked grounding events via RuntimeGrounding
 #
 # Phase: RT — Runtime Layer
@@ -23,13 +23,13 @@ SELECT ?payload ?payloadId ?flavorName ?question ?assembledAt ?groundingId ?reco
 WHERE {
   ?payload a :RuntimePayload ;
            :payloadId    ?payloadId ;
-           :flavorName   ?flavorName ;
-           :question     ?question ;
-           :assembledAt  ?assembledAt .
+           :hasFlavorName   ?flavorName ;
+           :hasQuestion     ?question ;
+           :hasAssembledAt  ?assembledAt .
 
   # Verify the flavor is registered
   ?flavorRef a :RuntimeFlavor ;
-             :name ?flavorName .
+             :hasName ?flavorName .
 
   # assembledAt must be present and non-empty
   FILTER(BOUND(?assembledAt) && ?assembledAt != "")
@@ -42,7 +42,7 @@ WHERE {
     ?grounding a :RuntimeGrounding ;
                :payloadId    ?payloadId ;
                :groundingId  ?groundingId ;
-               :recordCount  ?recordCount .
+               :hasRecordCount  ?recordCount .
   }
 }
 ORDER BY DESC(?assembledAt)

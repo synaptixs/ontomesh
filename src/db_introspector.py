@@ -191,6 +191,35 @@ def snake_to_label(s: str) -> str:
     return " ".join(w.capitalize() for w in s.split("_"))
 
 
+def value_to_local_name(s: str) -> str:
+    """Mint a Turtle-safe IRI local name from an arbitrary *data* value.
+
+    ``snake_to_camel`` splits on underscores only, which is fine for SQL
+    identifiers but not for column *values* — a status of "In Progress"
+    produced ``:TroubleTicketStatusIn progress``, an IRI containing a
+    space, which makes the whole file unparseable.
+
+    Splits on every non-alphanumeric run, so "In Progress", "in-progress"
+    and "in_progress" all mint ``InProgress``. Returns "" when the value
+    contains nothing usable, so callers can skip it rather than emit a
+    malformed IRI.
+    """
+    parts = [p for p in re.split(r"[^0-9A-Za-z]+", s or "") if p]
+    if not parts:
+        return ""
+    out = []
+    for p in parts:
+        # SQL enum values are conventionally SHOUTED (INCIDENT,
+        # COMPLIANCE_AUDIT). Preserving that case verbatim produced
+        # :INCIDENTEvent and :COMPLIANCEAUDITEvent. An all-caps run is
+        # folded before capitalising; mixed-case input (inProgress) is left
+        # alone so intentional camelCase survives.
+        if p.isupper():
+            p = p.lower()
+        out.append(p[:1].upper() + p[1:])
+    return "".join(out)
+
+
 # ── Introspector ─────────────────────────────────────────────────────────
 
 class DBIntrospector:
@@ -272,6 +301,37 @@ class DBIntrospector:
     def get_tables(self) -> List[str]:
         return self._connector.get_tables()
 
+    def _infer_key_columns(self, table: str) -> List[str]:
+        """Columns under a UNIQUE constraint, as owl:hasKey candidates.
+
+        Surrogate auto-increment `id` primary keys are excluded: they carry
+        no domain meaning, so keying on them says nothing useful. Only
+        SQLite is introspected today; other backends return no candidates
+        rather than a wrong guess.
+        """
+        conn = getattr(self._connector, "conn", None)
+        if conn is None or not hasattr(conn, "execute"):
+            return []
+        try:
+            indexes = list(conn.execute(f"PRAGMA index_list({table})"))
+        except Exception:
+            return []
+        keys: List[str] = []
+        for idx in indexes:
+            # (seq, name, unique, origin, partial)
+            if not (len(idx) > 2 and idx[2]):
+                continue
+            try:
+                cols = [r[2] for r in conn.execute(f"PRAGMA index_info({idx[1]})")]
+            except Exception:
+                continue
+            if not cols or any(c is None for c in cols):
+                continue
+            if all(c == "id" for c in cols):
+                continue
+            keys.extend(c for c in cols if c not in keys)
+        return keys
+
     def introspect_table(self, table: str) -> TableModel:
         meta = self._metadata_cache.get(table, {})
         fk_map = self._get_fk_map(table)   # now delegates to connector
@@ -289,6 +349,19 @@ class DBIntrospector:
         has_key_cols: List[str] = []
         if meta.get("has_key_columns"):
             has_key_cols = [x.strip() for x in meta["has_key_columns"].split(",") if x.strip()]
+        else:
+            # Derive owl:hasKey from UNIQUE constraints when no author has
+            # declared one. The ontology_metadata columns that drive the
+            # advanced axioms are populated in no shipped database, so this
+            # code path had never produced a single owl:hasKey — the schema
+            # already states the identity, it was simply never read.
+            #
+            # A UNIQUE constraint is a genuine identity claim, so this is
+            # sound. Transitivity and inverses are *not* inferred: a
+            # self-referencing FK named `parent_org_id` means "direct
+            # parent", and asserting owl:TransitiveProperty over it would
+            # manufacture relationships the data does not contain.
+            has_key_cols = self._infer_key_columns(table)
 
         return TableModel(
             name=table,

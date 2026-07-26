@@ -12,7 +12,7 @@ SELECT ?obs ?obsType ?activity ?agent ?agentLabel WHERE {
   ?obs a :ObservationRecord ;
        prov:wasGeneratedBy ?activity .
   ?activity prov:wasAssociatedWith ?agent .
-  OPTIONAL { ?obs :observationType ?obsType }
+  OPTIONAL { ?obs :hasObservationType ?obsType }
   OPTIONAL { ?agent rdfs:label ?agentLabel }
 }
 ORDER BY DESC(?obs)

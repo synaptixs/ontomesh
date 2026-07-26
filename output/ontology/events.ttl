@@ -18,34 +18,72 @@
 :ComplianceAuditEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
+  owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+      :DomainEvent
+      [ a owl:Restriction ;
+        owl:onProperty :hasEventType ;
+        owl:hasValue "COMPLIANCE_AUDIT" ]
+    )
+  ] ;
   rdfs:label "Compliance Audit Event" ;
-  rdfs:comment "Subclass of DomainEvent for event_type = COMPLIANCE_AUDIT." ;
+  rdfs:comment "Events of DomainEvent whose event_type is COMPLIANCE_AUDIT." ;
   :sensitivityTier :Internal .
 
 :IncidentEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
+  owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+      :DomainEvent
+      [ a owl:Restriction ;
+        owl:onProperty :hasEventType ;
+        owl:hasValue "INCIDENT" ]
+    )
+  ] ;
   rdfs:label "Incident Event" ;
-  rdfs:comment "Subclass of DomainEvent for event_type = INCIDENT." ;
+  rdfs:comment "Events of DomainEvent whose event_type is INCIDENT." ;
   :sensitivityTier :Internal .
 
 :InspectionEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
+  owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+      :DomainEvent
+      [ a owl:Restriction ;
+        owl:onProperty :hasEventType ;
+        owl:hasValue "INSPECTION" ]
+    )
+  ] ;
   rdfs:label "Inspection Event" ;
-  rdfs:comment "Subclass of DomainEvent for event_type = INSPECTION." ;
+  rdfs:comment "Events of DomainEvent whose event_type is INSPECTION." ;
   :sensitivityTier :Internal .
 
 :MaintenanceEvent
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
+  owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+      :DomainEvent
+      [ a owl:Restriction ;
+        owl:onProperty :hasEventType ;
+        owl:hasValue "MAINTENANCE" ]
+    )
+  ] ;
   rdfs:label "Maintenance Event" ;
-  rdfs:comment "Subclass of DomainEvent for event_type = MAINTENANCE." ;
+  rdfs:comment "Events of DomainEvent whose event_type is MAINTENANCE." ;
   :sensitivityTier :Internal .
 
-:EventTypeEvent
-  a owl:Class ;
-  rdfs:subClassOf :PolicyApplication ;
-  rdfs:label "Event Type Event" ;
-  rdfs:comment "Subclass of PolicyApplication for event_type = event_type." ;
-  :sensitivityTier :Internal .
+# Sibling event subclasses were detected but no owl:AllDisjointClasses
+# axiom is emitted: event_type values are frequently lifecycle
+# phases of one entity rather than mutually exclusive kinds, and
+# asserting disjointness over them makes any entity that passes
+# through two phases unsatisfiable. Declare disjointness explicitly
+# in metadata when it genuinely holds.
+
+#   candidate group: :ComplianceAuditEvent :IncidentEvent :InspectionEvent :MaintenanceEvent

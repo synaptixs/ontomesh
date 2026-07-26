@@ -16,27 +16,58 @@
 # ── PROV-O Integration Patterns ──────────────────────────────────────
 # Aligns ObservationRecord with prov:Entity and agents with prov:Agent.
 
+# PROV-O requires an Activity to sit between an Entity and its Agent, so
+# the profile needs all three roles declared. Only :ObservationRecord was
+# aligned (to prov:Entity); agents were not prov:Agent and no Activity
+# class existed, which is why the ABox could not emit a chain at all.
+:Agent
+  rdfs:subClassOf prov:Agent .
+
+:DerivationActivity
+  a owl:Class ;
+  rdfs:subClassOf prov:Activity ;
+  rdfs:label "Derivation Activity" ;
+  rdfs:comment "The act of recording or deriving an observation. Reified so an observation can be linked to both the activity that generated it and the agent responsible." ;
+  :sensitivityTier :Internal .
+
+# `rdfs:subPropertyOf prov:wasGeneratedBy` with `rdfs:range :Agent` was
+# incorrect: in PROV-O, wasGeneratedBy points at an Activity, so this
+# inferred that every agent was an Activity. Entity→Agent is
+# prov:wasAttributedTo.
 :wasProducedBy
   a owl:ObjectProperty ;
-  rdfs:subPropertyOf prov:wasGeneratedBy ;
+  rdfs:subPropertyOf prov:wasAttributedTo ;
   rdfs:label "was produced by" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range :Agent ;
   rdfs:comment "Links an observation to the agent that produced it." ;
   :sensitivityTier :Internal .
 
+# :hasConfidenceScore is declared by the schema-driven generator in
+# enterprise.ttl, where its domain is the union of every class that uses a
+# confidence column. Re-declaring it here with `rdfs:domain
+# :ObservationRecord` added a second domain axiom, and multiple domains
+# conjoin — so a confidence score on a PerformanceIndicator also made that
+# individual an ObservationRecord. Only the range and documentation are
+# restated; the domain belongs to the authoritative declaration.
 :hasConfidenceScore
   a owl:DatatypeProperty ;
   rdfs:label "Confidence Score" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:decimal ;
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .
 
+# Semantic alias. The schema-driven generator derives :hasDerivationMethod
+# from the derivation_method column, and that is the name instance data
+# carries. This hand-authored name reads better and is what the competency
+# questions were written against, so it is kept and *linked* rather than
+# either one being deleted — owl:equivalentProperty makes them the same
+# property to a reasoner. Domain is omitted: the authoritative declaration
+# carries it, and a second rdfs:domain would conjoin (see Phase 2).
 :derivationMethod
   a owl:DatatypeProperty ;
+  owl:equivalentProperty :hasDerivationMethod ;
   rdfs:label "Derivation Method" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:string ;
   rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
   :sensitivityTier :Internal .
@@ -57,11 +88,25 @@
   rdfs:comment "An agent that participated in this event." ;
   :sensitivityTier :Internal .
 
+# Semantic alias for the FK-derived :asset. Same reasoning as
+# :derivationMethod above — the structural name is what the data carries,
+# this one says what the relation means, and owl:equivalentProperty makes
+# a query against either find the same triples under a reasoner.
 :refersToAsset
   a owl:ObjectProperty ;
+  owl:equivalentProperty :asset ;
   rdfs:label "refers to asset" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range :Asset ;
   rdfs:comment "The asset this observation is about." ;
+  :sensitivityTier :Internal .
+
+# Same alias pattern for resources. The alignment table maps this name to
+# sosa:hasFeatureOfInterest; without the declaration that axiom had no
+# subject to attach to.
+:refersToResource
+  a owl:ObjectProperty ;
+  owl:equivalentProperty :resource ;
+  rdfs:label "refers to resource" ;
+  rdfs:comment "The resource this observation is about." ;
   :sensitivityTier :Internal .
 

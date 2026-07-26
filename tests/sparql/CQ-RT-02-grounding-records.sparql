@@ -6,9 +6,9 @@
 #   carry derivationMethod SYNTHESIZED, and do they reference a source question?
 #
 # Expected result: All grounding-type observation records have:
-#   - :derivationMethod "SYNTHESIZED"
+#   - :hasDerivationMethod "SYNTHESIZED"
 #   - :recordType "GROUNDING"
-#   - :sourceRef bound and non-empty
+#   - :hasSourceRef bound and non-empty
 #   - prov:generatedAtTime present
 #
 # Phase: RT — Runtime Layer
@@ -22,8 +22,8 @@ SELECT ?record ?entityIri ?derivationMethod ?sourceRef ?generatedAt
 WHERE {
   ?record a :ObservationRecord ;
           :recordType        "GROUNDING" ;
-          :derivationMethod  ?derivationMethod ;
-          :sourceRef         ?sourceRef ;
+          :hasDerivationMethod  ?derivationMethod ;
+          :hasSourceRef         ?sourceRef ;
           :entityIri         ?entityIri .
 
   OPTIONAL { ?record prov:generatedAtTime ?generatedAt }

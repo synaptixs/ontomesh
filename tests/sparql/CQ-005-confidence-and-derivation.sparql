@@ -9,7 +9,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT ?obs ?obsType ?confidence ?method WHERE {
   ?obs a :ObservationRecord ;
        :hasConfidenceScore ?confidence ;
-       :derivationMethod ?method .
-  OPTIONAL { ?obs :observationType ?obsType }
+       :hasDerivationMethod ?method .
+  OPTIONAL { ?obs :hasObservationType ?obsType }
 }
 ORDER BY DESC(?confidence)

@@ -16,7 +16,8 @@ import json
 from typing import List
 from db_introspector import (
     DBIntrospector, TableModel,
-    BASE_IRI, VOCAB_IRI, snake_to_camel, snake_to_lower_camel
+    BASE_IRI, VOCAB_IRI, snake_to_camel, snake_to_lower_camel,
+    value_to_local_name,
 )
 
 XSD = "http://www.w3.org/2001/XMLSchema#"
@@ -237,8 +238,7 @@ def _skos_scheme_header() -> str:
 <{VOCAB_IRI}>
   a skos:ConceptScheme ;
   skos:prefLabel "Enterprise Domain Vocabulary" ;
-  rdfs:comment "Controlled vocabulary for the enterprise domain ontology. "
-               "Covers preferred labels, synonyms, and deprecated terms." ;
+  rdfs:comment "Controlled vocabulary for the enterprise domain ontology. Covers preferred labels, synonyms, and deprecated terms." ;
   dcterms:creator "Ontology Toolkit — Auto-generated from ontology_metadata" .
 
 """
@@ -279,7 +279,13 @@ def _status_values_concept(tables: List[TableModel], intro: DBIntrospector) -> s
                 lines.append(f"  skos:inScheme <{VOCAB_IRI}> .\n")
                 for val in vals:
                     label = val.replace("_", " ").title()
-                    concept_id = f":{t.class_name}{snake_to_camel(col.name)}{snake_to_camel(val.lower())}"
+                    # Column *values* are free text — mint via the
+                    # value-safe helper, and skip anything that yields no
+                    # usable local name rather than emit a broken IRI.
+                    val_frag = value_to_local_name(val)
+                    if not val_frag:
+                        continue
+                    concept_id = f":{t.class_name}{snake_to_camel(col.name)}{val_frag}"
                     lines.append(f"{concept_id}")
                     lines.append(f"  a skos:Concept ;")
                     lines.append(f'  skos:prefLabel "{label}" ;')

@@ -134,6 +134,7 @@ nav:
       - Integrate:  integrate.md
       - Extending:  extending.md
       - Artifacts:  artifacts.md
+      - Quality gates: reference/quality-gates.md
       - Metadata:   metadata.md
       - TMF Forum:  tmf.md
       - Advanced:   advanced.md

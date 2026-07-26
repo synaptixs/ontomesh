@@ -8,9 +8,9 @@ SELECT ?bill ?account ?amountDue ?state ?disputed
 WHERE {
   ?bill a :CustomerBill ;
         :hasBillState ?state ;
-        :amountDue ?amountDue .
+        :hasAmountDue ?amountDue .
   FILTER(?state NOT IN ("Settled","Cancelled"))
   OPTIONAL { ?bill :billedToAccount ?account }
-  OPTIONAL { ?bill :disputed ?disputed }
+  OPTIONAL { ?bill :hasDisputed ?disputed }
 }
 ORDER BY ?account DESC(?amountDue)

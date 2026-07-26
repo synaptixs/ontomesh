@@ -10,6 +10,9 @@ version: "1.0.0"
 base_iri: "https://ontology.example.com/logistics/"
 external_alignments:
   - schema_org: "https://schema.org/"
+  # Entities below reference this namespace as `schema:`; both spellings are
+  # declared so the CURIEs resolve to an absolute IRI at generation time.
+  - schema: "https://schema.org/"
   - gs1: "https://www.gs1.org/voc/"
   - dcterms: "http://purl.org/dc/terms/"
 

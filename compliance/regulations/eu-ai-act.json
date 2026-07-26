@@ -26,7 +26,7 @@
       "description": "Every AI decision must be traceable to input data with full PROV-O provenance, including agent attribution and derivation method.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-004",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "EU-AIA-13-3",
@@ -34,7 +34,7 @@
       "description": "Each AI output must carry a confidence score and derivation method that an auditor can read.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-005",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "EU-AIA-13-4",
@@ -58,7 +58,7 @@
       "description": "Decisions below 0.8 confidence must be discoverable via SPARQL so deployers can review before acting.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-008",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     }
   ]
 }

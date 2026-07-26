@@ -1,4 +1,5 @@
-@prefix :       <https://ontology.example.com/tmf/> .
+@prefix :       <https://ontology.example.com/enterprise/> .
+@prefix sid:    <https://ontology.example.com/tmf/> .
 @prefix dolce:  <http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#> .
 @prefix foaf:   <http://xmlns.com/foaf/0.1/> .
 @prefix schema: <https://schema.org/> .

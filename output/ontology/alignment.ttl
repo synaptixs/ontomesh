@@ -1,4 +1,5 @@
-@prefix :       <https://ontology.example.com/tmf/> .
+@prefix :       <https://ontology.example.com/enterprise/> .
+@prefix sid:    <https://ontology.example.com/tmf/> .
 @prefix dolce:  <http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#> .
 @prefix foaf:   <http://xmlns.com/foaf/0.1/> .
 @prefix schema: <https://schema.org/> .
@@ -18,7 +19,7 @@
   rdfs:label "Ontology Alignment Module" ;
   rdfs:comment "Alignment axioms linking the generated ontology to DOLCE, FOAF, Schema.org, and SOSA." ;
   owl:imports <https://ontology.example.com/tmf/> ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T19:51:24Z"^^xsd:dateTime ;
   dcterms:description "Phase 2B: owl:equivalentClass and skos:exactMatch axioms for cross-ontology alignment." .
 
 # ═══════════════════════════════════════════════════════
@@ -26,7 +27,7 @@
 # ═══════════════════════════════════════════════════════
 
 # ── DOLCE Class Alignments ───────────────────────────────────────────
-:TmfEntity
+sid:TmfEntity
   owl:equivalentClass <http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#particular> ;
   rdfs:comment "DOLCE:particular — all SID entities are spatio-temporal particulars." .
 
@@ -59,7 +60,7 @@
   owl:equivalentClass <http://xmlns.com/foaf/0.1/Agent> ;
   rdfs:comment "foaf:Agent — a Party (individual or organization) is an agent." .
 
-:Individual
+sid:Individual
   owl:equivalentClass <http://xmlns.com/foaf/0.1/Person> ;
   rdfs:comment "foaf:Person — an Individual is a natural person." .
 
@@ -80,7 +81,7 @@
   owl:equivalentClass <https://schema.org/Organization> ;
   rdfs:comment "schema:Organization — direct equivalence for legal/operational entities." .
 
-:Individual
+sid:Individual
   owl:equivalentClass <https://schema.org/Person> ;
   rdfs:comment "schema:Person — direct equivalence for natural persons." .
 
@@ -96,7 +97,7 @@
   owl:equivalentClass <https://schema.org/Place> ;
   rdfs:comment "schema:Place — geographic sites map to schema:Place." .
 
-:GeographicPlace
+sid:GeographicPlace
   owl:equivalentClass <https://schema.org/PostalAddress> ;
   rdfs:comment "schema:PostalAddress — geographic addresses map to PostalAddress." .
 
@@ -133,7 +134,7 @@
   skos:closeMatch <http://www.w3.org/ns/sosa/FeatureOfInterest> ;
   rdfs:comment "sosa:FeatureOfInterest — resources are the features that observations are about." .
 
-:NetworkFunction
+sid:NetworkFunction
   skos:closeMatch <http://www.w3.org/ns/sosa/FeatureOfInterest> ;
   rdfs:comment "sosa:FeatureOfInterest — NFs are monitored features of interest." .
 
@@ -173,15 +174,15 @@
   owl:equivalentProperty <https://schema.org/description> ;
   rdfs:comment "schema:description — description maps directly." .
 
-:startDate
+:hasStartDate
   owl:equivalentProperty <https://schema.org/startDate> ;
   rdfs:comment "schema:startDate — start dates align with schema:startDate." .
 
-:endDate
+:hasEndDate
   owl:equivalentProperty <https://schema.org/endDate> ;
   rdfs:comment "schema:endDate — end dates align with schema:endDate." .
 
-:amountDue
+:hasAmountDue
   skos:closeMatch <https://schema.org/totalPaymentDue> ;
   rdfs:comment "schema:totalPaymentDue — bill amount due maps to schema:totalPaymentDue." .
 
@@ -189,7 +190,7 @@
   skos:closeMatch <http://www.w3.org/ns/sosa/resultQuality> ;
   rdfs:comment "sosa:resultQuality — confidence score maps to observation result quality." .
 
-:observedAt
+:hasObservedAt
   owl:equivalentProperty <http://www.w3.org/ns/sosa/resultTime> ;
   rdfs:comment "sosa:resultTime — observation timestamp maps to resultTime." .
 
@@ -197,7 +198,7 @@
   skos:closeMatch <http://www.w3.org/ns/prov#wasGeneratedBy> ;
   rdfs:comment "prov:wasGeneratedBy — derivation method relates to provenance generation." .
 
-:sourceRef
+:hasSourceRef
   owl:equivalentProperty <http://www.w3.org/ns/prov#hadPrimarySource> ;
   rdfs:comment "prov:hadPrimarySource — sourceRef maps to PROV-O primary source." .
 

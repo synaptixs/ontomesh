@@ -26,7 +26,7 @@
       "description": "Every network event must be associated with the affected asset.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-003",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "OFCOM-NT-3",
@@ -42,7 +42,7 @@
       "description": "Every AI observation affecting a customer must disclose a confidence score that an auditor can filter on.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-005",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "OFCOM-NT-5",
@@ -50,7 +50,7 @@
       "description": "Customer-affecting events must name the governing service-quality policy and its outcome.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-007",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "OFCOM-NT-6",

@@ -32,26 +32,20 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib (SPARQL backend)
-        run: pip install rdflib
+      # Install the package's own declared dependencies rather than a
+      # hand-picked list, which silently omitted PyYAML and broke the
+      # templates phase.
+      - name: Install the package
+        run: pip install -e .
 
-      - name: Phase 1 — DB setup & introspection
-        run: python toolkit.py --phase 1 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 2 — OWL 2 ontology generation
-        run: python toolkit.py --phase 2 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 3 — SHACL shape generation
-        run: python toolkit.py --phase 3 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 4 — Mapping & semantic loss
-        run: python toolkit.py --phase 4 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase 5 — JSON-LD, SKOS, MCP tools
-        run: python toolkit.py --phase 5 --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
-
-      - name: Phase TMF — TM Forum alignment
-        run: python toolkit.py --phase tmf --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
+      # One invocation, not an enumerated list. The generate job previously
+      # ran a hand-listed subset of phases while the baseline was recorded
+      # from `--phase all`, so CI measured a smaller corpus than the baseline
+      # described and the gate failed on a difference that was not a
+      # regression. `all` is the single source of truth for what a full run
+      # produces; anything it omits is omitted everywhere.
+      - name: Run the full pipeline
+        run: python toolkit.py --phase all --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
 
       - name: Upload generated artifacts
         uses: actions/upload-artifact@v4
@@ -59,6 +53,47 @@ jobs:
           name: ontology-artifacts
           path: ${{ env.OUT_PATH }}/
           retention-days: 7
+
+  # ── Stage 1b: Artifact quality ratchet ───────────────────────────────────
+  # Phase 0 of ONTOLOGY_ROADMAP.md. Before this gate, nothing in CI could
+  # fail on a defective ontology: the SPARQL suite scored zero-row queries as
+  # passes, several governance criteria were score literals, and no step
+  # parsed the emitted Turtle. This compares measurable artifact properties
+  # against ontology_baseline.json and fails only on regression, so existing
+  # debt does not block work while new debt cannot land silently.
+  artifact-gate:
+    name: Ontology artifact gate
+    runs-on: ubuntu-latest
+    needs: generate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the package
+        run: pip install -e .
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ontology-artifacts
+          path: ${{ env.OUT_PATH }}
+
+      - name: Check artifact metrics against baseline
+        run: python scripts/ontology_gate.py --out ${{ env.OUT_PATH }}
+
+      - name: Upload metrics
+        if: always()
+        run: python scripts/ontology_gate.py --out ${{ env.OUT_PATH }} --json > ontology-metrics.json || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ontology-metrics
+          path: ontology-metrics.json
 
   # ── Stage 2: Reasoner consistency ────────────────────────────────────────
   reasoner:
@@ -79,8 +114,8 @@ jobs:
           name: ontology-artifacts
           path: ${{ env.OUT_PATH }}
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Install Java (required for ROBOT)
         uses: actions/setup-java@v4
@@ -127,8 +162,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -139,19 +174,26 @@ jobs:
       - name: Run SPARQL CQ tests
         run: python toolkit.py --phase sparql --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
 
-      - name: Check for test failures
+      # A query that ERRORs is always a defect — it is malformed or targets a
+      # vocabulary that does not exist, and that is never acceptable.
+      #
+      # A query that FAILs (returns no rows against a TBox-only ontology) is
+      # currently expected: 37 of 43 do, because the ontology has no ABox.
+      # That count is tracked by the artifact-gate ratchet against
+      # ontology_baseline.json so it can only go down. Hard-failing here
+      # instead would leave CI red until Phase 4 lands and train everyone to
+      # ignore it. See ONTOLOGY_ROADMAP.md Phase 0.
+      - name: Check for query errors (hard gate)
         run: |
           csv="${{ env.OUT_PATH }}/reports/sparql_cq_test_results.csv"
           if [ -f "$csv" ]; then
-            failed=$(grep -c ",FAIL," "$csv" 2>/dev/null || true)
             errors=$(grep -c ",ERROR," "$csv" 2>/dev/null || true)
-            total=$((failed + errors))
-            if [ "$total" -gt 0 ]; then
-              echo "::error::$failed SPARQL CQ tests FAILED, $errors ERRORS"
-              cat "$csv"
+            failed=$(grep -c ",FAIL," "$csv" 2>/dev/null || true)
+            echo "SPARQL CQ: $failed failing (ratcheted), $errors errors (blocking)"
+            if [ "$errors" -gt 0 ]; then
+              echo "::error::$errors SPARQL CQ queries ERRORED — malformed query or missing vocabulary"
+              grep ",ERROR," "$csv" || true
               exit 1
-            else
-              echo "All SPARQL CQ tests passed."
             fi
           fi
 
@@ -175,8 +217,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Download artifacts
         uses: actions/download-artifact@v4

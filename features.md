@@ -18,16 +18,34 @@ Generates the OWL ontology, SHACL shapes, JSON-LD context, mapping workbook, and
 |---|---|
 | Onboard (`onboard.py`) | Schema, seed data, scope charter, CQ catalog (for new projects) |
 | 1 — Foundation | Annotated class and property inventory |
-| 2 — Modeling | `enterprise.ttl`, `events.ttl`, `provenance.ttl` |
+| 2 — Modeling | `enterprise.ttl`, `events.ttl`, `provenance.ttl`, `dimensions.ttl` |
 | 3 — Validation | `enterprise-shapes.ttl`, `agent-gate.ttl` |
-| reason — Materialisation *(new in v3.1)* | `materialised.ttl` + `materialised-lineage.ttl` from OWL-RL ⊕ SHACL `sh:rule` ⊕ SPARQL CONSTRUCT |
+| reason — Materialisation | `materialised.ttl` + `materialised-lineage.ttl` from OWL-RL ⊕ SHACL `sh:rule` ⊕ SPARQL CONSTRUCT |
 | 4 — Mapping | Mapping workbook, semantic loss report, orphan analysis |
 | 5 — Exchange | Context file, sample payloads, MCP tool definitions, vocabulary |
+| **abox — Instance data** | `instances.ttl` — individuals materialised from your rows, with reified PROV chains and tier gating |
 | TMF | TM Forum SID OWL hierarchy (24 APIs, 13 CQs) |
-| test | 18+ SPARQL CQ tests, governance scorecard |
+| **quality — Ontology quality** | `ontology_quality.csv` — OOPS! pitfalls, structural metrics, consistency |
+| test | SPARQL CQ tests, 36-criterion governance scorecard |
 | report | Self-contained HTML run summary |
 
-What each output file is for: [docs/artifacts.md](docs/artifacts.md) · How to drive generation: [docs/metadata.md](docs/metadata.md).
+Or run the lot: `python toolkit.py --phase all --db db/enterprise.db --out output`.
+
+What each output file is for: [docs/artifacts.md](docs/artifacts.md) · What the ontology
+actually contains: [docs/concepts/ontology-model.md](docs/concepts/ontology-model.md) ·
+How to drive generation: [docs/metadata.md](docs/metadata.md).
+
+### What the ontology gives you
+
+| Capability | What it means in practice |
+|---|---|
+| **OWL 2 DL with real class expressions** | `owl:Restriction` blocks, defined classes with `owl:equivalentClass` — a reasoner classifies rather than just parsing |
+| **`owl:hasKey` from UNIQUE constraints** | Identity semantics: two records sharing an external id are the same thing |
+| **Reified PROV-O chains** | `Entity → Activity → Agent` is traversable, not a flat foreign key |
+| **Bitemporal modelling** | Valid time (when a fact was true) kept distinct from transaction time (when you recorded it) |
+| **United quantities** | A magnitude and its unit are one object, so `15` is never ambiguous |
+| **Reified participation** | *Who* took part and *in what role*, not just that they did |
+| **Deprecation lifecycle** | Removed terms become `owl:deprecated` tombstones, so held IRIs still resolve |
 
 ### Tier 2 — Choose what you need
 

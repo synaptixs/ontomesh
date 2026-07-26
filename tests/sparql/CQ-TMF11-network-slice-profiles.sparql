@@ -9,9 +9,9 @@ WHERE {
   ?profile a :NetworkSliceProfile ;
            :hasSliceType ?sliceType ;
            :hasSst ?sst ;
-           :latencyTargetMs ?latency ;
-           :lifecycleStatus "Active" .
+           :hasLatencyTargetMs ?latency ;
+           :hasLifecycleStatus "Active" .
   OPTIONAL { ?profile :backedByResource ?resource }
-  OPTIONAL { ?profile :reliabilityTarget ?reliability }
+  OPTIONAL { ?profile :hasReliabilityTarget ?reliability }
 }
 ORDER BY ?sliceType

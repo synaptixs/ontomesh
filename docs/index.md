@@ -58,6 +58,9 @@ grounded the answer with a SPARQL `SELECT` over the materialized RDF triples.
 |---|---|
 | **8 pipeline phases** | Domain → Entities → Events → Relationships → SHACL → Generation → Evolution → Compliance |
 | **8 enrichment phases** | Log mining L4–L13 (template clustering, HMM regimes, Granger causality, PMI co-occurrence, switching SSM, …) |
+| **OWL 2 DL output** | Real class expressions, defined classes, `owl:hasKey`, PROV-O chains, OWL-Time, QUDT — see [the ontology model](concepts/ontology-model.md) |
+| **Instance data** | `--phase abox` materialises individuals from your rows, tier-gated — see [artifacts](artifacts.md) |
+| **Self-checking output** | Pitfall detection, structural metrics, consistency, and a CI ratchet — see [quality gates](reference/quality-gates.md) |
 | **10 starter industries** | Telecom, healthcare, finance, manufacturing, retail, energy, government, insurance, logistics, pharma |
 | **6 database backends** | SQLite (default), Postgres, MySQL, MSSQL, Oracle, DB2 |
 | **5 LLM adapters** | Anthropic, OpenAI, Vertex AI, Ollama, OCI |
