@@ -170,6 +170,7 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
     base_iri  = tmpl.get("base_iri", f"{BASE_IRI}{industry}/")
     prefix_map = _build_prefix_map(tmpl)
     unexpanded: list[str] = []
+    module_props: dict[str, dict] = {}
     prefixes  = f"""\
 @prefix :      <{BASE_IRI}> .
 @prefix ind:   <{base_iri}> .
@@ -206,10 +207,15 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
             if v:
                 equiv_items.append(v)
 
-        lines.append(f":{class_name}")
+        # Module-local terms are minted in the module's own namespace via
+        # `ind:`. The prefix was already declared but never used: every
+        # class and property went into the shared enterprise namespace, so
+        # `expiry_date` declared by insurance, logistics and pharmaceuticals
+        # collided on one IRI that then carried three conjunctive domains.
+        lines.append(f"ind:{class_name}")
         lines.append(f"  a owl:Class ;")
         if parent and parent != "owl:Thing":
-            lines.append(f"  rdfs:subClassOf :{parent} ;")
+            lines.append(f"  rdfs:subClassOf ind:{parent} ;")
         lines.append(f'  rdfs:label "{ent_label}" ;')
         if ent_desc:
             lines.append(f'  rdfs:comment "{ent_desc}" ;')
@@ -226,28 +232,46 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
         lines.append(f"  :sensitivityTier :{tier} .")
         lines.append("")
 
+        # Properties are collected across entities and emitted once, below.
+        # Emitting per-entity re-declared a shared property name (a module's
+        # `product_id` used on three entities) with one rdfs:domain each,
+        # and multiple domains conjoin.
         for prop_name, prop_def in _iter_properties(entity):
             if not isinstance(prop_def, dict):
                 continue
-            fk = prop_def.get("fk")
-            xsd_type = _py_type_to_owl(prop_def.get("type", "string"))
-            prop_iri = f":{prop_name}"
-            lines.append(f":{prop_name}")
-            if fk:
-                lines.append(f"  a owl:ObjectProperty ;")
-                lines.append(f"  rdfs:domain :{class_name} ;")
-                lines.append(f"  rdfs:range :{fk} ;")
-            else:
-                lines.append(f"  a owl:DatatypeProperty ;")
-                lines.append(f"  rdfs:domain :{class_name} ;")
-                lines.append(f"  rdfs:range {xsd_type} ;")
-            prop_label = prop_name.replace("_", " ").title()
-            lines.append(f'  rdfs:label "{prop_label}" ;')
-            desc = prop_def.get("description", "")
-            if desc:
-                lines.append(f'  rdfs:comment "{desc}" ;')
-            lines.append(f"  :sensitivityTier :{tier} .")
-            lines.append("")
+            cols = module_props.setdefault(prop_name, {
+                "def": prop_def, "classes": [], "tiers": [],
+            })
+            cols["classes"].append(class_name)
+            cols["tiers"].append(tier)
+
+    _TIER_ORDER = ["Public", "Internal", "Confidential", "Restricted"]
+    for prop_name, info in module_props.items():
+        prop_def = info["def"]
+        classes = sorted(set(info["classes"]))
+        fk = prop_def.get("fk")
+        xsd_type = _py_type_to_owl(prop_def.get("type", "string"))
+        lines.append(f"ind:{prop_name}")
+        lines.append("  a owl:ObjectProperty ;" if fk
+                     else "  a owl:DatatypeProperty ;")
+        if len(classes) == 1:
+            lines.append(f"  rdfs:domain ind:{classes[0]} ;")
+        else:
+            members = " ".join(f"ind:{c}" for c in classes)
+            lines.append("  rdfs:domain [ a owl:Class ;")
+            lines.append(f"                owl:unionOf ( {members} ) ] ;")
+        lines.append(f"  rdfs:range ind:{fk} ;" if fk
+                     else f"  rdfs:range {xsd_type} ;")
+        lines.append(f'  rdfs:label "{prop_name.replace("_", " ").title()}" ;')
+        desc = prop_def.get("description", "")
+        if desc:
+            lines.append(f'  rdfs:comment "{desc}" ;')
+        tier = "Public"
+        for t in info["tiers"]:
+            if t in _TIER_ORDER and _TIER_ORDER.index(t) > _TIER_ORDER.index(tier):
+                tier = t
+        lines.append(f"  :sensitivityTier :{tier} .")
+        lines.append("")
 
     if unexpanded:
         lines.append(

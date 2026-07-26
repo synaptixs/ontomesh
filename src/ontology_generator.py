@@ -13,8 +13,9 @@ No external dependencies.
 """
 
 import os
+from collections import OrderedDict
 from datetime import datetime, timezone
-from typing import Dict, List
+from typing import Dict, List, Optional
 from db_introspector import (
     DBIntrospector, TableModel, ColumnModel,
     BASE_IRI, SHAPES_IRI, VOCAB_IRI, snake_to_lower_camel, snake_to_camel,
@@ -248,69 +249,144 @@ def _has_key_property_iris(t: TableModel) -> List[str]:
     return iris
 
 
-def _data_property_block(col: ColumnModel, table: TableModel) -> str:
+def _render_domain(class_names: List[str]) -> str:
+    """Render an rdfs:domain clause for the classes a property is used on.
+
+    Multiple `rdfs:domain` axioms on one property **conjoin** in OWL: a
+    property declared once per table accumulated one domain per table, so
+    `:hasCreatedAt` carried 43 of them and any individual with a creation
+    timestamp was inferred to be all 43 classes at once. Loading a single
+    instance triple into the shipped ontology and running OWL-RL produced
+    47 rdf:type assertions from one asserted fact.
+
+    The union class is the correct idiom for "used on any of these": the
+    individual is inferred to be a member of the union, not the
+    intersection. A single class is emitted directly, since a one-member
+    union adds nothing.
+    """
+    unique = sorted(set(class_names))
+    if len(unique) == 1:
+        return f"  rdfs:domain :{unique[0]} ;"
+    members = " ".join(f":{c}" for c in unique)
+    return (
+        "  rdfs:domain [ a owl:Class ;\n"
+        f"                owl:unionOf ( {members} ) ] ;"
+    )
+
+
+def _data_property_block(cols: List[ColumnModel], class_names: List[str]) -> str:
+    """Emit one datatype property, covering every class that declares it."""
+    col = cols[0]
     prop_name = f"has{snake_to_camel(col.name)}"
     lines = [
         f":{prop_name}",
         f"  a owl:DatatypeProperty ;",
         f'  rdfs:label "{_str(col.effective_label)}" ;',
-        f"  rdfs:domain :{table.class_name} ;",
+        _render_domain(class_names),
         f"  rdfs:range {col.effective_xsd_type} ;",
     ]
-    if col.description:
-        lines.append(f'  rdfs:comment "{_str(col.description)}" ;')
-    if col.not_null:
-        lines.append(f'  owl:minCardinality "1"^^xsd:nonNegativeInteger ;')
-    lines.append(f"  :sensitivityTier :{col.sensitivity_tier} .")
+    description = next((c.description for c in cols if c.description), None)
+    if description:
+        lines.append(f'  rdfs:comment "{_str(description)}" ;')
+    # Sensitivity is the most restrictive tier seen across the declaring
+    # tables — a property shared with a Confidential class must not be
+    # advertised as Public because another table happened to be listed first.
+    tier = _most_restrictive_tier([c.sensitivity_tier for c in cols])
+    lines.append(f"  :sensitivityTier :{tier} .")
     return "\n".join(lines) + "\n"
 
 
-def _object_property_block(col: ColumnModel, table: TableModel,
-                            all_tables: List[TableModel]) -> str:
-    # Determine range class from FK target table
-    ref_table_name = col.fk_references.split(".")[0] if col.fk_references else None
-    range_class = "owl:Thing"
-    if ref_table_name:
-        for t in all_tables:
-            if t.name == ref_table_name:
-                range_class = f":{t.class_name}"
-                break
+_TIER_ORDER = ["Public", "Internal", "Confidential", "Restricted"]
 
-    # Derive property name: owner_org_id → isOwnedBy
-    col_stripped = col.name.replace("_id", "").replace("_org", "").replace("_type", "")
-    parts = col_stripped.split("_")
-    prop_name = snake_to_lower_camel(col_stripped) + "Of" \
-        if len(parts) == 1 else snake_to_lower_camel(col_stripped)
+
+def _most_restrictive_tier(tiers: List[str]) -> str:
+    best = "Public"
+    for tier in tiers:
+        if tier in _TIER_ORDER and _TIER_ORDER.index(tier) > _TIER_ORDER.index(best):
+            best = tier
+    return best
+
+
+def object_property_name(col_name: str) -> str:
+    """Derive an object-property name from an FK column name.
+
+    Only a *trailing* `_id` is stripped. The previous rule removed `_id`,
+    `_org` and `_type` anywhere in the name, which collapsed distinct
+    relations onto one IRI: `asset_type_id` and `asset_id` both became
+    `assetOf`, giving a single property two unrelated domains and ranges.
+    """
+    stripped = col_name[:-3] if col_name.endswith("_id") else col_name
+    if not stripped:
+        stripped = col_name
+    parts = stripped.split("_")
+    name = snake_to_lower_camel(stripped)
+    return name + "Of" if len(parts) == 1 else name
+
+
+def _object_property_range(col: ColumnModel,
+                           all_tables: List[TableModel]) -> Optional[str]:
+    """Resolve the FK target class, or None when it is outside this ontology."""
+    ref_table_name = col.fk_references.split(".")[0] if col.fk_references else None
+    if not ref_table_name:
+        return None
+    for t in all_tables:
+        if t.name == ref_table_name:
+            return f":{t.class_name}"
+    return None
+
+
+def _object_property_block(cols: List[ColumnModel], class_names: List[str],
+                            all_tables: List[TableModel]) -> str:
+    """Emit one object property, covering every class that declares it."""
+    col = cols[0]
+    prop_name = object_property_name(col.name)
+
+    ranges = sorted({r for r in (_object_property_range(c, all_tables) for c in cols) if r})
 
     # Phase A: object-property characteristic types.
     # FK columns are inherently functional — one row references at most one
     # parent — so we always emit owl:FunctionalProperty for FK-backed object
     # properties unless the metadata explicitly disables it. Authors can
     # additionally flag transitive/symmetric/inverse-functional.
-    fk_default_functional = col.is_fk
+    fk_default_functional = any(c.is_fk for c in cols)
     types = ["owl:ObjectProperty"]
-    if col.is_transitive:
+    if any(c.is_transitive for c in cols):
         types.append("owl:TransitiveProperty")
-    if col.is_symmetric:
+    if any(c.is_symmetric for c in cols):
         types.append("owl:SymmetricProperty")
-    if col.is_functional or fk_default_functional:
+    if any(c.is_functional for c in cols) or fk_default_functional:
         types.append("owl:FunctionalProperty")
-    if col.is_inverse_functional:
+    if any(c.is_inverse_functional for c in cols):
         types.append("owl:InverseFunctionalProperty")
 
     lines = [
         f":{prop_name}",
         f"  a {', '.join(types)} ;",
         f'  rdfs:label "{_str(col.effective_label)}" ;',
-        f"  rdfs:domain :{table.class_name} ;",
-        f"  rdfs:range {range_class} ;",
+        _render_domain(class_names),
     ]
-    if col.inverse_of:
-        lines.append(f"  owl:inverseOf :{col.inverse_of} ;")
-    if col.description:
-        lines.append(f'  rdfs:comment "{_str(col.description)}" ;')
-    if col.not_null:
-        lines.append(f"  owl:minCardinality 1 ;")
+    # An unresolvable FK target used to be written as `rdfs:range owl:Thing`.
+    # That asserts nothing — every individual is an owl:Thing — while reading
+    # like a constraint. The range is omitted instead, and the unresolved
+    # target is recorded so it is visible rather than disguised.
+    if len(ranges) == 1:
+        lines.append(f"  rdfs:range {ranges[0]} ;")
+    elif len(ranges) > 1:
+        members = " ".join(ranges)
+        lines.append("  rdfs:range [ a owl:Class ;\n"
+                     f"               owl:unionOf ( {members} ) ] ;")
+    else:
+        target = next((c.fk_references for c in cols if c.fk_references), None)
+        note = (f"FK target '{target}' is outside this ontology"
+                if target else "no FK target declared")
+        lines.append(f'  rdfs:comment "Range unresolved: {note}." ;')
+
+    inverse = next((c.inverse_of for c in cols if c.inverse_of), None)
+    if inverse:
+        lines.append(f"  owl:inverseOf :{inverse} ;")
+    description = next((c.description for c in cols if c.description), None)
+    if description:
+        lines.append(f'  rdfs:comment "{_str(description)}" ;')
     lines[-1] = lines[-1][:-1] + " ."
     return "\n".join(lines) + "\n"
 
@@ -357,16 +433,38 @@ def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
         if len(siblings) >= 2:
             sibling_groups.append(siblings)
 
-    for group in sibling_groups:
-        # Turtle RDF-list members must be whitespace-separated. A comma
-        # is a "same-subject same-predicate" repeat marker and isn't
-        # valid inside a `( ... )` collection — using one breaks parsers
-        # downstream (rdflib, pyshacl, ROBOT).
-        members = " ".join(f":{c}" for c in group)
+    # Disjointness over event_type siblings is NOT emitted.
+    #
+    # The original justification — "a row has exactly one event_type, so the
+    # subclasses are mutually exclusive by construction" — holds only if each
+    # transition is reified as its own individual. It is not. The generated
+    # groups were lifecycle *phases* of a single entity:
+    #
+    #     AllDisjointClasses( PlacedEvent ConfirmedEvent ShippedEvent
+    #                         DeliveredEvent CancelledEvent RefundedEvent )
+    #
+    # An order that is placed and later shipped belongs to two of those, so
+    # the axiom makes it unsatisfiable — a reasoner is entitled to conclude
+    # the data is contradictory. Asserting disjointness requires knowing the
+    # values are mutually exclusive *for the same individual*, which the
+    # schema does not tell us.
+    #
+    # The sibling grouping is still computed so it can be surfaced for
+    # review; see ONTOLOGY_ROADMAP.md Phase 2.
+    if sibling_groups:
         blocks.append(
-            "[] a owl:AllDisjointClasses ;\n"
-            f"   owl:members ( {members} ) .\n"
+            "# Sibling event subclasses were detected but no "
+            "owl:AllDisjointClasses\n"
+            "# axiom is emitted: event_type values are frequently lifecycle\n"
+            "# phases of one entity rather than mutually exclusive kinds, and\n"
+            "# asserting disjointness over them makes any entity that passes\n"
+            "# through two phases unsatisfiable. Declare disjointness "
+            "explicitly\n"
+            "# in metadata when it genuinely holds.\n"
         )
+        for group in sibling_groups:
+            blocks.append("#   candidate group: "
+                          + " ".join(f":{c}" for c in group) + "\n")
 
     return "\n".join(blocks)
 
@@ -406,10 +504,16 @@ def _prov_patterns() -> str:
   rdfs:comment "Links an observation to the agent that produced it." ;
   :sensitivityTier :Internal .
 
+# :hasConfidenceScore is declared by the schema-driven generator in
+# enterprise.ttl, where its domain is the union of every class that uses a
+# confidence column. Re-declaring it here with `rdfs:domain
+# :ObservationRecord` added a second domain axiom, and multiple domains
+# conjoin — so a confidence score on a PerformanceIndicator also made that
+# individual an ObservationRecord. Only the range and documentation are
+# restated; the domain belongs to the authoritative declaration.
 :hasConfidenceScore
   a owl:DatatypeProperty ;
   rdfs:label "Confidence Score" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:decimal ;
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .
@@ -496,15 +600,34 @@ def generate_ontology(intro: DBIntrospector, output_dir: str,
         # Skip tables that are pure junction/log tables not needing a top-level class
         lines.append(_class_block(t))
 
-    lines.append("\n# ── Data Properties ─────────────────────────────────────────────────\n")
+    # Properties are grouped by IRI before emission. Emitting one block per
+    # (table, column) re-declared the same property once per table, and each
+    # declaration carried its own rdfs:domain — which conjoin. Grouping lets
+    # a property be declared exactly once, with a union domain covering every
+    # class that uses it. See _render_domain.
+    data_props: "OrderedDict[str, tuple]" = OrderedDict()
     for t in tables:
         for col in t.data_properties:
-            lines.append(_data_property_block(col, t))
+            key = f"has{snake_to_camel(col.name)}"
+            cols, classes = data_props.setdefault(key, ([], []))
+            cols.append(col)
+            classes.append(t.class_name)
 
-    lines.append("\n# ── Object Properties ───────────────────────────────────────────────\n")
+    lines.append("\n# ── Data Properties ─────────────────────────────────────────────────\n")
+    for cols, classes in data_props.values():
+        lines.append(_data_property_block(cols, classes))
+
+    obj_props: "OrderedDict[str, tuple]" = OrderedDict()
     for t in tables:
         for col in t.object_properties:
-            lines.append(_object_property_block(col, t, tables))
+            key = object_property_name(col.name)
+            cols, classes = obj_props.setdefault(key, ([], []))
+            cols.append(col)
+            classes.append(t.class_name)
+
+    lines.append("\n# ── Object Properties ───────────────────────────────────────────────\n")
+    for cols, classes in obj_props.values():
+        lines.append(_object_property_block(cols, classes, tables))
 
     disjoint_block = _disjoint_class_groups(tables)
     if disjoint_block:

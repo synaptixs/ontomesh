@@ -14,7 +14,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-07-26T15:20:27Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:06:25Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -627,14 +627,16 @@
 :hasValidFrom
   a owl:DatatypeProperty ;
   rdfs:label "Valid From" ;
-  rdfs:domain :AgentRoles ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :AgentRoles :Agreement :FederationPartners :PartyRole ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasValidUntil
   a owl:DatatypeProperty ;
   rdfs:label "Valid Until" ;
-  rdfs:domain :AgentRoles ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :AgentRoles :Agreement :FederationPartners :PartyRole ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
@@ -649,9 +651,9 @@
 :hasName
   a owl:DatatypeProperty ;
   rdfs:label "Name" ;
-  rdfs:domain :Agent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Agent :Agreement :Asset :Attachment :Characteristic :CustomerAccount :GeographicLocation :GeographicSite :NetworkSliceProfile :Organization :Party :PerformanceIndicator :Policy :Product :ProductOffering :ProductSpecification :Resource :ResourceSpecification :RuntimeFlavor :Service :ServiceSpecification :UserRole ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasAgentType
@@ -659,7 +661,6 @@
   rdfs:label "Agent Type" ;
   rdfs:domain :Agent ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasCredentialExpiry
@@ -680,52 +681,49 @@
 :hasActive
   a owl:DatatypeProperty ;
   rdfs:label "Active" ;
-  rdfs:domain :Agent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Agent :Organization :Policy ) ] ;
   rdfs:range xsd:boolean ;
   :sensitivityTier :Internal .
 
 :hasCreatedAt
   a owl:DatatypeProperty ;
   rdfs:label "Created At" ;
-  rdfs:domain :Agent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Agent :Agreement :Alarm :Asset :AssetType :Attachment :Characteristic :ConflictEvent :CustomerAccount :CustomerBill :DomainEvent :EmbeddingIndexes :EventSubscription :FederationTrustLedger :GeographicLocation :GeographicSite :NetworkSliceProfile :ObservationRecord :OntologyEvolutionProposals :OntologyVersionLedger :Organization :Party :PartyRole :PerformanceIndicator :Policy :Product :ProductOffering :ProductOfferingQualification :ProductOrder :ProductSpecification :Resource :ResourceRelationship :ResourceSpecification :RuntimeFlavor :RuntimeGrounding :RuntimePayload :Service :ServiceOrder :ServiceProblem :ServiceQualityReport :ServiceSpecification :TroubleTicket :UserRole ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasCode
   a owl:DatatypeProperty ;
   rdfs:label "Code" ;
-  rdfs:domain :AssetType ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :AssetType :Policy :Role ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasLabel
   a owl:DatatypeProperty ;
   rdfs:label "Label" ;
-  rdfs:domain :AssetType ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :AssetType :Role ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasDescription
   a owl:DatatypeProperty ;
   rdfs:label "Description" ;
-  rdfs:domain :AssetType ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Agreement :AssetType :Attachment :ConflictEvent :DomainEvent :GeographicSite :PerformanceIndicator :Policy :ProductOffering :ProductOfferingQualification :ProductSpecification :ResourceSpecification :Role :RuntimeFlavor :ServiceProblem :ServiceQualityReport :ServiceSpecification :TroubleTicket :UserRole ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasUnitOfMeasure
   a owl:DatatypeProperty ;
   rdfs:label "Unit Of Measure" ;
-  rdfs:domain :AssetType ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :AssetType :ObservationRecord :PerformanceIndicator ) ] ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :AssetType ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasExternalId
@@ -734,14 +732,6 @@
   rdfs:domain :Asset ;
   rdfs:range xsd:string ;
   rdfs:comment "Identifier used in external systems (e.g. OSS/BSS, NMS)." ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Asset ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasLocationCode
@@ -754,7 +744,8 @@
 :hasStatus
   a owl:DatatypeProperty ;
   rdfs:label "Asset Status" ;
-  rdfs:domain :Asset ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Agreement :Asset :ConflictEvent :CustomerAccount :DomainEvent :EventSubscription :FederationQueryLog :OntologyEvolutionProposals :PartyRole :Policy :Product :ServiceProblem :ServiceQualityReport :TroubleTicket ) ] ;
   rdfs:range xsd:string ;
   rdfs:comment "Current operational lifecycle status of the asset." ;
   :sensitivityTier :Internal .
@@ -773,17 +764,11 @@
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Asset ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasUpdatedAt
   a owl:DatatypeProperty ;
   rdfs:label "Updated At" ;
-  rdfs:domain :Asset ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Asset :CustomerBill :DomainEvent :EmbeddingIndexes :EventSubscription :FederationPartners :GeographicSite :NetworkSliceProfile :OntologyEvolutionProposals :Organization :Party :Product :ProductOfferingQualification :ProductOrder :Resource :ResourceSpecification :Service :ServiceOrder :TroubleTicket ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -799,7 +784,6 @@
   rdfs:label "Bundle Path" ;
   rdfs:domain :ComplianceBundles ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasSha256
@@ -807,7 +791,6 @@
   rdfs:label "Sha256" ;
   rdfs:domain :ComplianceBundles ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasSignerIri
@@ -834,14 +817,16 @@
 :hasSensitivityTier
   a owl:DatatypeProperty ;
   rdfs:label "Sensitivity Tier" ;
-  rdfs:domain :ComplianceBundles ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ComplianceBundles :EmbeddingRecords :Policy :Role :RuntimeFlavor ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasAssembledAt
   a owl:DatatypeProperty ;
   rdfs:label "Assembled At" ;
-  rdfs:domain :ComplianceBundles ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ComplianceBundles :RuntimePayload ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -862,38 +847,25 @@
 :hasEventType
   a owl:DatatypeProperty ;
   rdfs:label "Event Type" ;
-  rdfs:domain :DomainEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :DomainEvent :EventSubscription :FederationTrustLedger ) ] ;
   rdfs:range xsd:string ;
   rdfs:comment "Subclass discriminator for OWL event class hierarchy." ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasTitle
   a owl:DatatypeProperty ;
   rdfs:label "Title" ;
-  rdfs:domain :DomainEvent ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :DomainEvent ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :DomainEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :DomainEvent :OntologyEvolutionProposals :Policy ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasOutcome
   a owl:DatatypeProperty ;
   rdfs:label "Outcome" ;
-  rdfs:domain :DomainEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :DomainEvent :PolicyApplication ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
@@ -911,34 +883,20 @@
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :DomainEvent ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :DomainEvent ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasIndexName
   a owl:DatatypeProperty ;
   rdfs:label "Index Name" ;
-  rdfs:domain :EmbeddingIndexes ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EmbeddingIndexes :VectorQueryLog ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasFlavor
   a owl:DatatypeProperty ;
   rdfs:label "Flavor" ;
-  rdfs:domain :EmbeddingIndexes ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EmbeddingIndexes :EmbeddingRecords :VectorQueryLog ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasVectorStore
@@ -946,7 +904,6 @@
   rdfs:label "Vector Store" ;
   rdfs:domain :EmbeddingIndexes ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasConnectionString
@@ -954,7 +911,6 @@
   rdfs:label "Connection String" ;
   rdfs:domain :EmbeddingIndexes ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasDimensions
@@ -962,20 +918,21 @@
   rdfs:label "Dimensions" ;
   rdfs:domain :EmbeddingIndexes ;
   rdfs:range xsd:integer ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasOwlClasses
   a owl:DatatypeProperty ;
   rdfs:label "Owl Classes" ;
-  rdfs:domain :EmbeddingIndexes ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EmbeddingIndexes :RuntimeFlavor ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasRecordCount
   a owl:DatatypeProperty ;
   rdfs:label "Record Count" ;
-  rdfs:domain :EmbeddingIndexes ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EmbeddingIndexes :RuntimeGrounding ) ] ;
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
@@ -993,26 +950,11 @@
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :EmbeddingIndexes ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :EmbeddingIndexes ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasRecordIri
   a owl:DatatypeProperty ;
   rdfs:label "Record Iri" ;
   rdfs:domain :EmbeddingRecords ;
   rdfs:range xsd:anyURI ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasOwlClass
@@ -1020,23 +962,6 @@
   rdfs:label "Owl Class" ;
   rdfs:domain :EmbeddingRecords ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasFlavor
-  a owl:DatatypeProperty ;
-  rdfs:label "Flavor" ;
-  rdfs:domain :EmbeddingRecords ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasSensitivityTier
-  a owl:DatatypeProperty ;
-  rdfs:label "Sensitivity Tier" ;
-  rdfs:domain :EmbeddingRecords ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasPrimaryKey
@@ -1058,7 +983,6 @@
   rdfs:label "Text Repr" ;
   rdfs:domain :EmbeddingRecords ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasVectorB64
@@ -1066,7 +990,6 @@
   rdfs:label "Vector B64" ;
   rdfs:domain :EmbeddingRecords ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasContentHash
@@ -1074,7 +997,6 @@
   rdfs:label "Content Hash" ;
   rdfs:domain :EmbeddingRecords ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasIndexedAt
@@ -1089,7 +1011,6 @@
   rdfs:label "Participation Role" ;
   rdfs:domain :EventParticipants ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasJoinedAt
@@ -1104,7 +1025,6 @@
   rdfs:label "Partner Iri" ;
   rdfs:domain :FederationPartners ;
   rdfs:range xsd:anyURI ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasDisplayName
@@ -1112,7 +1032,6 @@
   rdfs:label "Display Name" ;
   rdfs:domain :FederationPartners ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasSparqlEndpoint
@@ -1120,7 +1039,6 @@
   rdfs:label "Sparql Endpoint" ;
   rdfs:domain :FederationPartners ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasManifestUrl
@@ -1149,7 +1067,6 @@
   rdfs:label "Public Key" ;
   rdfs:domain :FederationPartners ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasExposedClasses
@@ -1173,30 +1090,9 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasValidFrom
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid From" ;
-  rdfs:domain :FederationPartners ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidUntil
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid Until" ;
-  rdfs:domain :FederationPartners ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasRegisteredAt
   a owl:DatatypeProperty ;
   rdfs:label "Registered At" ;
-  rdfs:domain :FederationPartners ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
   rdfs:domain :FederationPartners ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
@@ -1213,7 +1109,6 @@
   rdfs:label "Original Query" ;
   rdfs:domain :FederationQueryLog ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasRewrittenQuery
@@ -1237,13 +1132,6 @@
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :FederationQueryLog ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasDurationMs
   a owl:DatatypeProperty ;
   rdfs:label "Duration Ms" ;
@@ -1254,16 +1142,9 @@
 :hasExecutedAt
   a owl:DatatypeProperty ;
   rdfs:label "Executed At" ;
-  rdfs:domain :FederationQueryLog ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :FederationQueryLog :RetrievalBenchmarks :VectorQueryLog ) ] ;
   rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasEventType
-  a owl:DatatypeProperty ;
-  rdfs:label "Event Type" ;
-  rdfs:domain :FederationTrustLedger ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasPayloadHash
@@ -1287,13 +1168,6 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :FederationTrustLedger ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasObservationIri
   a owl:DatatypeProperty ;
   rdfs:label "Observation Iri" ;
@@ -1306,13 +1180,13 @@
   rdfs:label "Observation Type" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasNumericValue
   a owl:DatatypeProperty ;
   rdfs:label "Numeric Value" ;
-  rdfs:domain :ObservationRecord ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ObservationRecord :PerformanceIndicator ) ] ;
   rdfs:range xsd:decimal ;
   :sensitivityTier :Internal .
 
@@ -1323,17 +1197,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasUnitOfMeasure
-  a owl:DatatypeProperty ;
-  rdfs:label "Unit Of Measure" ;
-  rdfs:domain :ObservationRecord ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasConfidenceScore
   a owl:DatatypeProperty ;
   rdfs:label "Confidence Score" ;
-  rdfs:domain :ObservationRecord ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ObservationRecord :OntologyEvolutionProposals :PerformanceIndicator ) ] ;
   rdfs:range xsd:decimal ;
   rdfs:comment "Numeric confidence in the observation value between 0.0 and 1.0." ;
   :sensitivityTier :Confidential .
@@ -1341,7 +1209,8 @@
 :hasDerivationMethod
   a owl:DatatypeProperty ;
   rdfs:label "Derivation Method" ;
-  rdfs:domain :ObservationRecord ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ObservationRecord :PerformanceIndicator ) ] ;
   rdfs:range xsd:string ;
   rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, or SYNTHESIZED." ;
   :sensitivityTier :Internal .
@@ -1349,7 +1218,8 @@
 :hasSourceRef
   a owl:DatatypeProperty ;
   rdfs:label "Source Reference" ;
-  rdfs:domain :ObservationRecord ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ObservationRecord :PerformanceIndicator ) ] ;
   rdfs:range xsd:anyURI ;
   rdfs:comment "IRI or document reference for the external source of this observation." ;
   :sensitivityTier :Internal .
@@ -1357,15 +1227,8 @@
 :hasObservedAt
   a owl:DatatypeProperty ;
   rdfs:label "Observed At" ;
-  rdfs:domain :ObservationRecord ;
-  rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ObservationRecord ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ObservationRecord :PerformanceIndicator ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -1374,15 +1237,6 @@
   rdfs:label "Proposal Type" ;
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasTitle
-  a owl:DatatypeProperty ;
-  rdfs:label "Title" ;
-  rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasCandidateTurtle
@@ -1390,7 +1244,6 @@
   rdfs:label "Candidate Turtle" ;
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasEvidenceSparql
@@ -1398,7 +1251,6 @@
   rdfs:label "Evidence Sparql" ;
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasDetectionStrategy
@@ -1406,14 +1258,6 @@
   rdfs:label "Detection Strategy" ;
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasConfidenceScore
-  a owl:DatatypeProperty ;
-  rdfs:label "Confidence Score" ;
-  rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range xsd:decimal ;
   :sensitivityTier :Internal .
 
 :hasDimEvidenceVolume
@@ -1449,13 +1293,6 @@
   rdfs:label "Dim Schema Alignment" ;
   rdfs:domain :OntologyEvolutionProposals ;
   rdfs:range xsd:decimal ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasReviewNote
@@ -1507,26 +1344,12 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasVersion
   a owl:DatatypeProperty ;
   rdfs:label "Version" ;
-  rdfs:domain :OntologyVersionLedger ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :OntologyVersionLedger :Policy :ProductOffering :ProductSpecification :ResourceSpecification :ServiceSpecification ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasParentVersion
@@ -1571,27 +1394,12 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :OntologyVersionLedger ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Organization ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasOrgType
   a owl:DatatypeProperty ;
   rdfs:label "Org Type" ;
-  rdfs:domain :Organization ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Organization :Party ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasJurisdiction
@@ -1601,57 +1409,12 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasActive
-  a owl:DatatypeProperty ;
-  rdfs:label "Active" ;
-  rdfs:domain :Organization ;
-  rdfs:range xsd:boolean ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Organization ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :Organization ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasCode
-  a owl:DatatypeProperty ;
-  rdfs:label "Code" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasTitle
-  a owl:DatatypeProperty ;
-  rdfs:label "Title" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasPolicyType
   a owl:DatatypeProperty ;
   rdfs:label "Policy Type" ;
   rdfs:domain :Policy ;
   rdfs:range xsd:string ;
   rdfs:comment "Category of policy: OPERATIONAL, COMPLIANCE, SECURITY, SLA, SAFETY." ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasEffectiveFrom
@@ -1665,27 +1428,6 @@
   a owl:DatatypeProperty ;
   rdfs:label "Effective Until" ;
   rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSensitivityTier
-  a owl:DatatypeProperty ;
-  rdfs:label "Sensitivity Tier" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasActive
-  a owl:DatatypeProperty ;
-  rdfs:label "Active" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:boolean ;
-  :sensitivityTier :Internal .
-
-:hasOutcome
-  a owl:DatatypeProperty ;
-  rdfs:label "Outcome" ;
-  rdfs:domain :PolicyApplication ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
@@ -1713,9 +1455,9 @@
 :hasStrategy
   a owl:DatatypeProperty ;
   rdfs:label "Strategy" ;
-  rdfs:domain :RetrievalBenchmarks ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :RetrievalBenchmarks :VectorQueryLog ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasCorpusSize
@@ -1781,74 +1523,6 @@
   rdfs:range xsd:decimal ;
   :sensitivityTier :Internal .
 
-:hasExecutedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Executed At" ;
-  rdfs:domain :RetrievalBenchmarks ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasCode
-  a owl:DatatypeProperty ;
-  rdfs:label "Code" ;
-  rdfs:domain :Role ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasLabel
-  a owl:DatatypeProperty ;
-  rdfs:label "Label" ;
-  rdfs:domain :Role ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :Role ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSensitivityTier
-  a owl:DatatypeProperty ;
-  rdfs:label "Sensitivity Tier" ;
-  rdfs:domain :Role ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :RuntimeFlavor ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :RuntimeFlavor ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSensitivityTier
-  a owl:DatatypeProperty ;
-  rdfs:label "Sensitivity Tier" ;
-  rdfs:domain :RuntimeFlavor ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasOwlClasses
-  a owl:DatatypeProperty ;
-  rdfs:label "Owl Classes" ;
-  rdfs:domain :RuntimeFlavor ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasShaclShapes
   a owl:DatatypeProperty ;
   rdfs:label "Shacl Shapes" ;
@@ -1868,7 +1542,6 @@
   rdfs:label "Db Tables" ;
   rdfs:domain :RuntimeFlavor ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasSystemPromptHint
@@ -1885,27 +1558,20 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :RuntimeFlavor ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasFlavorName
   a owl:DatatypeProperty ;
   rdfs:label "Flavor Name" ;
-  rdfs:domain :RuntimeGrounding ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :RuntimeGrounding :RuntimePayload ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasQuestion
   a owl:DatatypeProperty ;
   rdfs:label "Question" ;
-  rdfs:domain :RuntimeGrounding ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :RuntimeGrounding :RuntimePayload :VectorQueryLog ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasTablesQueried
@@ -1915,42 +1581,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasRecordCount
-  a owl:DatatypeProperty ;
-  rdfs:label "Record Count" ;
-  rdfs:domain :RuntimeGrounding ;
-  rdfs:range xsd:integer ;
-  :sensitivityTier :Internal .
-
 :hasGroundedAt
   a owl:DatatypeProperty ;
   rdfs:label "Grounded At" ;
   rdfs:domain :RuntimeGrounding ;
   rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :RuntimeGrounding ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasFlavorName
-  a owl:DatatypeProperty ;
-  rdfs:label "Flavor Name" ;
-  rdfs:domain :RuntimePayload ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasQuestion
-  a owl:DatatypeProperty ;
-  rdfs:label "Question" ;
-  rdfs:domain :RuntimePayload ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasTokenBudget
@@ -1960,21 +1595,6 @@
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
-:hasAssembledAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Assembled At" ;
-  rdfs:domain :RuntimePayload ;
-  rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :RuntimePayload ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasAgreementIri
   a owl:DatatypeProperty ;
   rdfs:label "Agreement Iri" ;
@@ -1982,54 +1602,11 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Agreement ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasAgreementType
   a owl:DatatypeProperty ;
   rdfs:label "Agreement Type" ;
   rdfs:domain :Agreement ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :Agreement ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :Agreement ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidFrom
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid From" ;
-  rdfs:domain :Agreement ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidUntil
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid Until" ;
-  rdfs:domain :Agreement ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Agreement ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasAlarmIri
@@ -2044,7 +1621,6 @@
   rdfs:label "Alarm Type" ;
   rdfs:domain :Alarm ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasPerceivedSeverity
@@ -2053,7 +1629,6 @@
   rdfs:domain :Alarm ;
   rdfs:range xsd:string ;
   rdfs:comment "ITU-T X.733 / TMF642 alarm severity: Critical, Major, Minor, Warning, Indeterminate, Cleared." ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasProbableCause
@@ -2083,7 +1658,6 @@
   rdfs:label "Raised At" ;
   rdfs:domain :Alarm ;
   rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasAcknowledgedAt
@@ -2098,27 +1672,6 @@
   rdfs:label "Cleared At" ;
   rdfs:domain :Alarm ;
   rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Alarm ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Attachment ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :Attachment ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasMimeType
@@ -2145,24 +1698,9 @@
 :hasOwnerType
   a owl:DatatypeProperty ;
   rdfs:label "Owner Type" ;
-  rdfs:domain :Attachment ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Attachment :Characteristic :Note ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Attachment ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Characteristic ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasValue
@@ -2186,21 +1724,6 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasOwnerType
-  a owl:DatatypeProperty ;
-  rdfs:label "Owner Type" ;
-  rdfs:domain :Characteristic ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Characteristic ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasConflictIri
   a owl:DatatypeProperty ;
   rdfs:label "Conflict Iri" ;
@@ -2213,7 +1736,6 @@
   rdfs:label "Assertion A Iri" ;
   rdfs:domain :ConflictEvent ;
   rdfs:range xsd:anyURI ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasAssertionBIri
@@ -2221,7 +1743,6 @@
   rdfs:label "Assertion B Iri" ;
   rdfs:domain :ConflictEvent ;
   rdfs:range xsd:anyURI ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasConflictType
@@ -2229,15 +1750,6 @@
   rdfs:label "Conflict Type" ;
   rdfs:domain :ConflictEvent ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ConflictEvent ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasShaclViolationMsg
@@ -2289,32 +1801,18 @@
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :ConflictEvent ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasDetectedAt
   a owl:DatatypeProperty ;
   rdfs:label "Detected At" ;
   rdfs:domain :ConflictEvent ;
   rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasResolvedAt
   a owl:DatatypeProperty ;
   rdfs:label "Resolved At" ;
-  rdfs:domain :ConflictEvent ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ConflictEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ConflictEvent :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -2332,24 +1830,9 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :CustomerAccount ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasAccountType
   a owl:DatatypeProperty ;
   rdfs:label "Account Type" ;
-  rdfs:domain :CustomerAccount ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
   rdfs:domain :CustomerAccount ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -2364,15 +1847,9 @@
 :hasCurrencyCode
   a owl:DatatypeProperty ;
   rdfs:label "Currency Code" ;
-  rdfs:domain :CustomerAccount ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :CustomerAccount :CustomerBill ) ] ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :CustomerAccount ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasBillIri
@@ -2387,7 +1864,6 @@
   rdfs:label "Bill Number" ;
   rdfs:domain :CustomerBill ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasBillType
@@ -2416,7 +1892,6 @@
   rdfs:label "Bill Date" ;
   rdfs:domain :CustomerBill ;
   rdfs:range xsd:date ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasPaymentDueDate
@@ -2431,7 +1906,6 @@
   rdfs:label "Amount Due" ;
   rdfs:domain :CustomerBill ;
   rdfs:range xsd:decimal ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasTaxAmount
@@ -2448,17 +1922,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasCurrencyCode
-  a owl:DatatypeProperty ;
-  rdfs:label "Currency Code" ;
-  rdfs:domain :CustomerBill ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasState
   a owl:DatatypeProperty ;
   rdfs:label "State" ;
-  rdfs:domain :CustomerBill ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :CustomerBill :ProductOfferingQualification :ProductOrder :Service :ServiceOrder ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
@@ -2483,33 +1951,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :CustomerBill ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :CustomerBill ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasSubscriptionIri
   a owl:DatatypeProperty ;
   rdfs:label "Subscription Iri" ;
   rdfs:domain :EventSubscription ;
   rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasEventType
-  a owl:DatatypeProperty ;
-  rdfs:label "Event Type" ;
-  rdfs:domain :EventSubscription ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasEventDomain
@@ -2531,7 +1977,6 @@
   rdfs:label "Callback Url" ;
   rdfs:domain :EventSubscription ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasCallbackMethod
@@ -2544,13 +1989,6 @@
 :hasAuthHeader
   a owl:DatatypeProperty ;
   rdfs:label "Auth Header" ;
-  rdfs:domain :EventSubscription ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
   rdfs:domain :EventSubscription ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -2579,29 +2017,17 @@
 :hasValidForStart
   a owl:DatatypeProperty ;
   rdfs:label "Valid For Start" ;
-  rdfs:domain :EventSubscription ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EventSubscription :ProductOffering :ProductOfferingQualification ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasValidForEnd
   a owl:DatatypeProperty ;
   rdfs:label "Valid For End" ;
-  rdfs:domain :EventSubscription ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EventSubscription :ProductOffering :ProductOfferingQualification ) ] ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :EventSubscription ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :EventSubscription ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasSiteIri
@@ -2611,24 +2037,9 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :GeographicSite ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasSiteType
   a owl:DatatypeProperty ;
   rdfs:label "Site Type" ;
-  rdfs:domain :GeographicSite ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
   rdfs:domain :GeographicSite ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -2671,29 +2082,17 @@
 :hasLatitude
   a owl:DatatypeProperty ;
   rdfs:label "Latitude" ;
-  rdfs:domain :GeographicSite ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :GeographicLocation :GeographicSite ) ] ;
   rdfs:range xsd:decimal ;
   :sensitivityTier :Internal .
 
 :hasLongitude
   a owl:DatatypeProperty ;
   rdfs:label "Longitude" ;
-  rdfs:domain :GeographicSite ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :GeographicLocation :GeographicSite ) ] ;
   rdfs:range xsd:decimal ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :GeographicSite ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :GeographicSite ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasProfileIri
@@ -2703,20 +2102,11 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :NetworkSliceProfile ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasSliceType
   a owl:DatatypeProperty ;
   rdfs:label "Slice Type" ;
   rdfs:domain :NetworkSliceProfile ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasSst
@@ -2771,22 +2161,9 @@
 :hasLifecycleStatus
   a owl:DatatypeProperty ;
   rdfs:label "Lifecycle Status" ;
-  rdfs:domain :NetworkSliceProfile ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :GeographicLocation :NetworkSliceProfile :Party :ProductOffering :ProductSpecification :ResourceSpecification :ServiceSpecification ) ] ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :NetworkSliceProfile ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :NetworkSliceProfile ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasText
@@ -2794,7 +2171,6 @@
   rdfs:label "Text" ;
   rdfs:domain :Note ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasAuthor
@@ -2818,14 +2194,6 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasOwnerType
-  a owl:DatatypeProperty ;
-  rdfs:label "Owner Type" ;
-  rdfs:domain :Note ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasPartyIri
   a owl:DatatypeProperty ;
   rdfs:label "Party IRI" ;
@@ -2839,15 +2207,6 @@
   rdfs:label "Party Type" ;
   rdfs:domain :Party ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Party ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasGivenName
@@ -2878,13 +2237,6 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasOrgType
-  a owl:DatatypeProperty ;
-  rdfs:label "Org Type" ;
-  rdfs:domain :Party ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasEmail
   a owl:DatatypeProperty ;
   rdfs:label "Email" ;
@@ -2899,33 +2251,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasLifecycleStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Lifecycle Status" ;
-  rdfs:domain :Party ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Party ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :Party ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasRoleName
   a owl:DatatypeProperty ;
   rdfs:label "Role Name" ;
   rdfs:domain :PartyRole ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasRoleType
@@ -2935,61 +2265,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :PartyRole ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidFrom
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid From" ;
-  rdfs:domain :PartyRole ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidUntil
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid Until" ;
-  rdfs:domain :PartyRole ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :PartyRole ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasKpiIri
   a owl:DatatypeProperty ;
   rdfs:label "Kpi Iri" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasUnitOfMeasure
-  a owl:DatatypeProperty ;
-  rdfs:label "Unit Of Measure" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasKpiType
@@ -2999,39 +2279,9 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasNumericValue
-  a owl:DatatypeProperty ;
-  rdfs:label "Numeric Value" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:decimal ;
-  :sensitivityTier :Internal .
-
 :hasStringValue
   a owl:DatatypeProperty ;
   rdfs:label "String Value" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasConfidenceScore
-  a owl:DatatypeProperty ;
-  rdfs:label "Confidence Score" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:decimal ;
-  rdfs:comment "Numeric confidence in the measurement or derived value. Range 0.0–1.0." ;
-  :sensitivityTier :Confidential .
-
-:hasDerivationMethod
-  a owl:DatatypeProperty ;
-  rdfs:label "Derivation Method" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:string ;
-  rdfs:comment "How the value was obtained per PROV-O: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
-  :sensitivityTier :Internal .
-
-:hasSourceRef
-  a owl:DatatypeProperty ;
-  rdfs:label "Source Ref" ;
   rdfs:domain :PerformanceIndicator ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -3057,34 +2307,11 @@
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
-:hasObservedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Observed At" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasPlaceIri
   a owl:DatatypeProperty ;
   rdfs:label "Place Iri" ;
   rdfs:domain :GeographicLocation ;
   rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :GeographicLocation ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasPlaceType
@@ -3136,75 +2363,11 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasLatitude
-  a owl:DatatypeProperty ;
-  rdfs:label "Latitude" ;
-  rdfs:domain :GeographicLocation ;
-  rdfs:range xsd:decimal ;
-  :sensitivityTier :Internal .
-
-:hasLongitude
-  a owl:DatatypeProperty ;
-  rdfs:label "Longitude" ;
-  rdfs:domain :GeographicLocation ;
-  rdfs:range xsd:decimal ;
-  :sensitivityTier :Internal .
-
-:hasLifecycleStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Lifecycle Status" ;
-  rdfs:domain :GeographicLocation ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :GeographicLocation ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasPolicyIri
   a owl:DatatypeProperty ;
   rdfs:label "Policy Iri" ;
   rdfs:domain :Policy ;
   rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasPolicyType
-  a owl:DatatypeProperty ;
-  rdfs:label "Policy Type" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasVersion
-  a owl:DatatypeProperty ;
-  rdfs:label "Version" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasGoverningBody
@@ -3214,27 +2377,6 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasEffectiveFrom
-  a owl:DatatypeProperty ;
-  rdfs:label "Effective From" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasEffectiveUntil
-  a owl:DatatypeProperty ;
-  rdfs:label "Effective Until" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Policy ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasProductIri
   a owl:DatatypeProperty ;
   rdfs:label "Product Iri" ;
@@ -3242,47 +2384,20 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Product ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :Product ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasStartDate
   a owl:DatatypeProperty ;
   rdfs:label "Start Date" ;
-  rdfs:domain :Product ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Product :Service ) ] ;
   rdfs:range xsd:date ;
   :sensitivityTier :Internal .
 
 :hasEndDate
   a owl:DatatypeProperty ;
   rdfs:label "End Date" ;
-  rdfs:domain :Product ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Product :Service ) ] ;
   rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Product ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :Product ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasOfferingIri
@@ -3292,61 +2407,12 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasVersion
-  a owl:DatatypeProperty ;
-  rdfs:label "Version" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasIsBundle
   a owl:DatatypeProperty ;
   rdfs:label "Is Bundle" ;
-  rdfs:domain :ProductOffering ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOffering :ProductSpecification :ResourceSpecification ) ] ;
   rdfs:range xsd:boolean ;
-  :sensitivityTier :Internal .
-
-:hasLifecycleStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Lifecycle Status" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidForStart
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid For Start" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidForEnd
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid For End" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ProductOffering ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasPoqIri
@@ -3354,20 +2420,6 @@
   rdfs:label "Poq Iri" ;
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasState
-  a owl:DatatypeProperty ;
-  rdfs:label "State" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasQualificationResult
@@ -3398,38 +2450,9 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasValidForStart
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid For Start" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasValidForEnd
-  a owl:DatatypeProperty ;
-  rdfs:label "Valid For End" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasRequestedAt
   a owl:DatatypeProperty ;
   rdfs:label "Requested At" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
@@ -3437,22 +2460,24 @@
 :hasOrderIri
   a owl:DatatypeProperty ;
   rdfs:label "Order Iri" ;
-  rdfs:domain :ProductOrder ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOrder :ServiceOrder ) ] ;
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
 :hasOrderDate
   a owl:DatatypeProperty ;
   rdfs:label "Order Date" ;
-  rdfs:domain :ProductOrder ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOrder :ServiceOrder ) ] ;
   rdfs:range xsd:date ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasCompletionDate
   a owl:DatatypeProperty ;
   rdfs:label "Completion Date" ;
-  rdfs:domain :ProductOrder ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOrder :ServiceOrder ) ] ;
   rdfs:range xsd:date ;
   :sensitivityTier :Internal .
 
@@ -3466,51 +2491,17 @@
 :hasOrderType
   a owl:DatatypeProperty ;
   rdfs:label "Order Type" ;
-  rdfs:domain :ProductOrder ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOrder :ServiceOrder ) ] ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasState
-  a owl:DatatypeProperty ;
-  rdfs:label "State" ;
-  rdfs:domain :ProductOrder ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ProductOrder ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :ProductOrder ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasSpecIri
   a owl:DatatypeProperty ;
   rdfs:label "Spec Iri" ;
-  rdfs:domain :ProductSpecification ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductSpecification :ResourceSpecification :ServiceSpecification ) ] ;
   rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :ProductSpecification ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasVersion
-  a owl:DatatypeProperty ;
-  rdfs:label "Version" ;
-  rdfs:domain :ProductSpecification ;
-  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasProductNumber
@@ -3527,34 +2518,6 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ProductSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasLifecycleStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Lifecycle Status" ;
-  rdfs:domain :ProductSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasIsBundle
-  a owl:DatatypeProperty ;
-  rdfs:label "Is Bundle" ;
-  rdfs:domain :ProductSpecification ;
-  rdfs:range xsd:boolean ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ProductSpecification ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasResourceIri
   a owl:DatatypeProperty ;
   rdfs:label "Resource Iri" ;
@@ -3562,20 +2525,11 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Resource ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasResourceType
   a owl:DatatypeProperty ;
   rdfs:label "Resource Type" ;
   rdfs:domain :Resource ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasNfType
@@ -3630,98 +2584,20 @@
   rdfs:range xsd:date ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Resource ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :Resource ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasRelationshipType
   a owl:DatatypeProperty ;
   rdfs:label "Relationship Type" ;
   rdfs:domain :ResourceRelationship ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ResourceRelationship ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasSpecIri
-  a owl:DatatypeProperty ;
-  rdfs:label "Spec Iri" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasVersion
-  a owl:DatatypeProperty ;
-  rdfs:label "Version" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ResourceSpecification ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasCategory
   a owl:DatatypeProperty ;
   rdfs:label "Resource Category" ;
-  rdfs:domain :ResourceSpecification ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ResourceSpecification :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range xsd:string ;
   rdfs:comment "SID ResourceCategory discriminator: LOGICAL or PHYSICAL. Drives OWL subclass assignment." ;
-  :sensitivityTier :Public .
-
-:hasLifecycleStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Lifecycle Status" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasIsBundle
-  a owl:DatatypeProperty ;
-  rdfs:label "Is Bundle" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:boolean ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :ResourceSpecification ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasServiceIri
@@ -3731,105 +2607,12 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :Service ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasServiceType
   a owl:DatatypeProperty ;
   rdfs:label "Service Type" ;
-  rdfs:domain :Service ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Service :ServiceSpecification ) ] ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasState
-  a owl:DatatypeProperty ;
-  rdfs:label "State" ;
-  rdfs:domain :Service ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStartDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Start Date" ;
-  rdfs:domain :Service ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasEndDate
-  a owl:DatatypeProperty ;
-  rdfs:label "End Date" ;
-  rdfs:domain :Service ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :Service ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :Service ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasOrderIri
-  a owl:DatatypeProperty ;
-  rdfs:label "Order Iri" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasOrderDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Order Date" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:date ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasCompletionDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Completion Date" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
-:hasOrderType
-  a owl:DatatypeProperty ;
-  rdfs:label "Order Type" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasState
-  a owl:DatatypeProperty ;
-  rdfs:label "State" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
 :hasProblemIri
@@ -3839,69 +2622,35 @@
   rdfs:range xsd:anyURI ;
   :sensitivityTier :Internal .
 
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
 :hasPriority
   a owl:DatatypeProperty ;
   rdfs:label "Priority" ;
-  rdfs:domain :ServiceProblem ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCategory
-  a owl:DatatypeProperty ;
-  rdfs:label "Problem Category" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range xsd:string ;
-  rdfs:comment "Free-text problem category (e.g. CommunicationsDisruption, ResourceDegradation)." ;
   :sensitivityTier :Internal .
 
 :hasSlaViolated
   a owl:DatatypeProperty ;
   rdfs:label "Sla Violated" ;
-  rdfs:domain :ServiceProblem ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
 :hasResolutionNotes
   a owl:DatatypeProperty ;
   rdfs:label "Resolution Notes" ;
-  rdfs:domain :ServiceProblem ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasSubmittedAt
   a owl:DatatypeProperty ;
   rdfs:label "Submitted At" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasResolvedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Resolved At" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ServiceProblem ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -3915,20 +2664,6 @@
 :hasReportType
   a owl:DatatypeProperty ;
   rdfs:label "Report Type" ;
-  rdfs:domain :ServiceQualityReport ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ServiceQualityReport ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
   rdfs:domain :ServiceQualityReport ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -3968,63 +2703,6 @@
   rdfs:range xsd:decimal ;
   :sensitivityTier :Internal .
 
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ServiceQualityReport ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasSpecIri
-  a owl:DatatypeProperty ;
-  rdfs:label "Spec Iri" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:anyURI ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasVersion
-  a owl:DatatypeProperty ;
-  rdfs:label "Version" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasServiceType
-  a owl:DatatypeProperty ;
-  rdfs:label "Service Type" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasLifecycleStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Lifecycle Status" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :ServiceSpecification ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 :hasTicketIri
   a owl:DatatypeProperty ;
   rdfs:label "Ticket Iri" ;
@@ -4037,41 +2715,11 @@
   rdfs:label "Ticket Type" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasSeverity
   a owl:DatatypeProperty ;
   rdfs:label "Severity" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasPriority
-  a owl:DatatypeProperty ;
-  rdfs:label "Priority" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasStatus
-  a owl:DatatypeProperty ;
-  rdfs:label "Status" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCategory
-  a owl:DatatypeProperty ;
-  rdfs:label "Category" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
@@ -4083,68 +2731,10 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
-:hasResolutionNotes
-  a owl:DatatypeProperty ;
-  rdfs:label "Resolution Notes" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
 :hasExpectedResolution
   a owl:DatatypeProperty ;
   rdfs:label "Expected Resolution" ;
   rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasSlaViolated
-  a owl:DatatypeProperty ;
-  rdfs:label "Sla Violated" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:integer ;
-  :sensitivityTier :Internal .
-
-:hasSubmittedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Submitted At" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:dateTime ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasResolvedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Resolved At" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasUpdatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Updated At" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasName
-  a owl:DatatypeProperty ;
-  rdfs:label "Name" ;
-  rdfs:domain :UserRole ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
-  :sensitivityTier :Internal .
-
-:hasDescription
-  a owl:DatatypeProperty ;
-  rdfs:label "Description" ;
-  rdfs:domain :UserRole ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
@@ -4153,35 +2743,6 @@
   rdfs:label "Permission Set" ;
   rdfs:domain :UserRole ;
   rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasCreatedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Created At" ;
-  rdfs:domain :UserRole ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
-:hasIndexName
-  a owl:DatatypeProperty ;
-  rdfs:label "Index Name" ;
-  rdfs:domain :VectorQueryLog ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasFlavor
-  a owl:DatatypeProperty ;
-  rdfs:label "Flavor" ;
-  rdfs:domain :VectorQueryLog ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasQuestion
-  a owl:DatatypeProperty ;
-  rdfs:label "Question" ;
-  rdfs:domain :VectorQueryLog ;
-  rdfs:range xsd:string ;
-  owl:minCardinality "1"^^xsd:nonNegativeInteger ;
   :sensitivityTier :Internal .
 
 :hasClassFilter
@@ -4219,36 +2780,21 @@
   rdfs:range xsd:integer ;
   :sensitivityTier :Internal .
 
-:hasStrategy
-  a owl:DatatypeProperty ;
-  rdfs:label "Strategy" ;
-  rdfs:domain :VectorQueryLog ;
-  rdfs:range xsd:string ;
-  :sensitivityTier :Internal .
-
-:hasExecutedAt
-  a owl:DatatypeProperty ;
-  rdfs:label "Executed At" ;
-  rdfs:domain :VectorQueryLog ;
-  rdfs:range xsd:dateTime ;
-  :sensitivityTier :Internal .
-
 
 # ── Object Properties ───────────────────────────────────────────────
 
 :agentOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agent Id" ;
-  rdfs:domain :AgentRoles ;
-  rdfs:range :Agent ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :AgentRoles :EventParticipants ) ] ;
+  rdfs:range :Agent  .
 
 :roleOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Role Id" ;
   rdfs:domain :AgentRoles ;
-  rdfs:range :Role ;
-  owl:minCardinality 1  .
+  rdfs:range :Role  .
 
 :scopeAsset
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -4262,26 +2808,25 @@
   rdfs:domain :Agent ;
   rdfs:range :Organization  .
 
-:parentOf
+:parentType
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Type Id" ;
   rdfs:domain :AssetType ;
   rdfs:range :AssetType  .
 
-:assetOf
+:assetType
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Type Id" ;
   rdfs:domain :Asset ;
-  rdfs:range :AssetType ;
-  owl:minCardinality 1  .
+  rdfs:range :AssetType  .
 
-:ownerOf
+:ownerOrg
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Owner Org Id" ;
   rdfs:domain :Asset ;
   rdfs:range :Organization  .
 
-:operatorOf
+:operatorOrg
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Operator Org Id" ;
   rdfs:domain :Asset ;
@@ -4291,20 +2836,19 @@
   a owl:ObjectProperty ;
   rdfs:label "Bundle Id" ;
   rdfs:domain :ComplianceBundles ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :regulationOf
   a owl:ObjectProperty ;
   rdfs:label "Regulation Id" ;
   rdfs:domain :ComplianceBundles ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :assetOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Id" ;
-  rdfs:domain :DomainEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :DomainEvent :ObservationRecord :PolicyApplication ) ] ;
   rdfs:range :Asset  .
 
 :initiatedBy
@@ -4316,184 +2860,105 @@
 :policyOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Policy Id" ;
-  rdfs:domain :DomainEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :DomainEvent :PolicyApplication ) ] ;
   rdfs:range :Policy  .
 
 :modelOf
   a owl:ObjectProperty ;
   rdfs:label "Model Id" ;
-  rdfs:domain :EmbeddingIndexes ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EmbeddingIndexes :RuntimePayload ) ] ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :indexName
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Index Name" ;
   rdfs:domain :EmbeddingRecords ;
-  rdfs:range :EmbeddingIndexes ;
-  owl:minCardinality 1  .
+  rdfs:range :EmbeddingIndexes  .
 
 :eventOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Event Id" ;
-  rdfs:domain :EventParticipants ;
-  rdfs:range :DomainEvent ;
-  owl:minCardinality 1  .
-
-:agentOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Agent Id" ;
-  rdfs:domain :EventParticipants ;
-  rdfs:range :Agent ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :EventParticipants :FederationTrustLedger :ObservationRecord :PolicyApplication ) ] ;
+  rdfs:range :DomainEvent  .
 
 :partnerOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Partner Id" ;
-  rdfs:domain :FederationPartners ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :FederationPartners :FederationQueryLog :FederationTrustLedger ) ] ;
+  rdfs:range :FederationPartners  .
 
 :queryOf
   a owl:ObjectProperty ;
   rdfs:label "Query Id" ;
-  rdfs:domain :FederationQueryLog ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
-:partnerOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Partner Id" ;
-  rdfs:domain :FederationQueryLog ;
-  rdfs:range :FederationPartners  .
-
-:eventOf
-  a owl:ObjectProperty ;
-  rdfs:label "Event Id" ;
-  rdfs:domain :FederationTrustLedger ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
-:partnerOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Partner Id" ;
-  rdfs:domain :FederationTrustLedger ;
-  rdfs:range :FederationPartners  .
-
-:assetOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Asset Id" ;
-  rdfs:domain :ObservationRecord ;
-  rdfs:range :Asset  .
-
-:eventOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Event Id" ;
-  rdfs:domain :ObservationRecord ;
-  rdfs:range :DomainEvent  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :FederationQueryLog :VectorQueryLog ) ] ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :recordedBy
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Recorded By" ;
   rdfs:domain :ObservationRecord ;
-  rdfs:range :Agent ;
-  owl:minCardinality 1  .
+  rdfs:range :Agent  .
 
 :proposalOf
-  a owl:ObjectProperty ;
+  a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Proposal Id" ;
-  rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :OntologyEvolutionProposals :OntologyVersionLedger ) ] ;
+  rdfs:range :OntologyEvolutionProposals  .
 
 :reviewerOf
   a owl:ObjectProperty ;
   rdfs:label "Reviewer Id" ;
   rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range owl:Thing  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :evidenceTemplate
   a owl:ObjectProperty ;
   rdfs:label "Evidence Template Id" ;
   rdfs:domain :OntologyEvolutionProposals ;
-  rdfs:range owl:Thing  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
-:proposalOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Proposal Id" ;
-  rdfs:domain :OntologyVersionLedger ;
-  rdfs:range :OntologyEvolutionProposals  .
-
-:parentOf
+:parentOrg
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Parent Org Id" ;
   rdfs:domain :Organization ;
   rdfs:range :Organization  .
 
-:governingOf
+:governingOrg
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Governing Org Id" ;
   rdfs:domain :Policy ;
   rdfs:range :Organization  .
 
-:policyOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Policy Id" ;
-  rdfs:domain :PolicyApplication ;
-  rdfs:range :Policy ;
-  owl:minCardinality 1  .
-
-:eventOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Event Id" ;
-  rdfs:domain :PolicyApplication ;
-  rdfs:range :DomainEvent  .
-
-:assetOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Asset Id" ;
-  rdfs:domain :PolicyApplication ;
-  rdfs:range :Asset  .
-
 :appliedBy
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Applied By" ;
   rdfs:domain :PolicyApplication ;
-  rdfs:range :Agent ;
-  owl:minCardinality 1  .
+  rdfs:range :Agent  .
 
 :runOf
   a owl:ObjectProperty ;
   rdfs:label "Run Id" ;
   rdfs:domain :RetrievalBenchmarks ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :groundingOf
   a owl:ObjectProperty ;
   rdfs:label "Grounding Id" ;
   rdfs:domain :RuntimeGrounding ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :payloadOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Payload Id" ;
-  rdfs:domain :RuntimeGrounding ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :RuntimeGrounding :RuntimePayload ) ] ;
   rdfs:range :RuntimePayload  .
-
-:payloadOf
-  a owl:ObjectProperty ;
-  rdfs:label "Payload Id" ;
-  rdfs:domain :RuntimePayload ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
-:modelOf
-  a owl:ObjectProperty ;
-  rdfs:label "Model Id" ;
-  rdfs:domain :RuntimePayload ;
-  rdfs:range owl:Thing  .
 
 :partyA
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -4522,7 +2987,8 @@
 :raisedBy
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Raised By Id" ;
-  rdfs:domain :Alarm ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Alarm :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range :Party  .
 
 :acknowledgedBy
@@ -4534,42 +3000,37 @@
 :ownerOf
   a owl:ObjectProperty ;
   rdfs:label "Owner Id" ;
-  rdfs:domain :Attachment ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
-:ownerOf
-  a owl:ObjectProperty ;
-  rdfs:label "Owner Id" ;
-  rdfs:domain :Characteristic ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Attachment :Characteristic :Note ) ] ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :assignedTo
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Assigned To Id" ;
-  rdfs:domain :ConflictEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ConflictEvent :TroubleTicket ) ] ;
   rdfs:range :Party  .
 
 :resolvedBy
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resolved By Id" ;
-  rdfs:domain :ConflictEvent ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ConflictEvent :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range :Party  .
 
 :partyOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Party Id" ;
-  rdfs:domain :CustomerAccount ;
-  rdfs:range :Party ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :CustomerAccount :PartyRole ) ] ;
+  rdfs:range :Party  .
 
 :customerAccount
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Customer Account Id" ;
-  rdfs:domain :CustomerBill ;
-  rdfs:range :CustomerAccount ;
-  owl:minCardinality 1  .
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :CustomerBill :ProductOfferingQualification :ProductOrder ) ] ;
+  rdfs:range :CustomerAccount  .
 
 :subscriberParty
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -4580,7 +3041,8 @@
 :placeOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Place Id" ;
-  rdfs:domain :GeographicSite ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :GeographicSite :Party :Resource ) ] ;
   rdfs:range :GeographicLocation  .
 
 :ownerParty
@@ -4592,45 +3054,22 @@
 :resourceOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resource Id" ;
-  rdfs:domain :NetworkSliceProfile ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :NetworkSliceProfile :PerformanceIndicator :ResourceRelationship ) ] ;
   rdfs:range :Resource  .
 
 :agreementOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agreement Id" ;
-  rdfs:domain :NetworkSliceProfile ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :NetworkSliceProfile :ServiceQualityReport ) ] ;
   rdfs:range :Agreement  .
-
-:ownerOf
-  a owl:ObjectProperty ;
-  rdfs:label "Owner Id" ;
-  rdfs:domain :Note ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
-:placeOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Place Id" ;
-  rdfs:domain :Party ;
-  rdfs:range :GeographicLocation  .
-
-:partyOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Party Id" ;
-  rdfs:domain :PartyRole ;
-  rdfs:range :Party ;
-  owl:minCardinality 1  .
-
-:resourceOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Resource Id" ;
-  rdfs:domain :PerformanceIndicator ;
-  rdfs:range :Resource  .
 
 :serviceOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Id" ;
-  rdfs:domain :PerformanceIndicator ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :PerformanceIndicator :ServiceProblem :ServiceQualityReport ) ] ;
   rdfs:range :Service  .
 
 :recordedByParty
@@ -4648,7 +3087,8 @@
 :productOffering
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Product Offering Id" ;
-  rdfs:domain :Product ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Product :ProductOrder ) ] ;
   rdfs:range :ProductOffering  .
 
 :parentProduct
@@ -4675,34 +3115,17 @@
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range :ProductOffering  .
 
-:customerAccount
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Customer Account Id" ;
-  rdfs:domain :ProductOfferingQualification ;
-  rdfs:range :CustomerAccount  .
-
 :installAddress
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Install Address Id" ;
   rdfs:domain :ProductOfferingQualification ;
   rdfs:range :GeographicLocation  .
 
-:customerAccount
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Customer Account Id" ;
-  rdfs:domain :ProductOrder ;
-  rdfs:range :CustomerAccount  .
-
-:productOffering
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Product Offering Id" ;
-  rdfs:domain :ProductOrder ;
-  rdfs:range :ProductOffering  .
-
 :submittedBy
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Submitted By Id" ;
-  rdfs:domain :ProductOrder ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOrder :ServiceOrder :ServiceQualityReport ) ] ;
   rdfs:range :Party  .
 
 :resourceSpec
@@ -4717,36 +3140,23 @@
   rdfs:domain :Resource ;
   rdfs:range :Resource  .
 
-:placeOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Place Id" ;
-  rdfs:domain :Resource ;
-  rdfs:range :GeographicLocation  .
-
 :externalOf
   a owl:ObjectProperty ;
   rdfs:label "External Id" ;
   rdfs:domain :Resource ;
-  rdfs:range owl:Thing  .
-
-:resourceOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Resource Id" ;
-  rdfs:domain :ResourceRelationship ;
-  rdfs:range :Resource ;
-  owl:minCardinality 1  .
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :relatedResource
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Related Resource Id" ;
   rdfs:domain :ResourceRelationship ;
-  rdfs:range :Resource ;
-  owl:minCardinality 1  .
+  rdfs:range :Resource  .
 
 :serviceSpec
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Spec Id" ;
-  rdfs:domain :Service ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Service :ServiceOrder ) ] ;
   rdfs:range :ServiceSpecification  .
 
 :parentService
@@ -4767,59 +3177,11 @@
   rdfs:domain :ServiceOrder ;
   rdfs:range :ProductOrder  .
 
-:serviceSpec
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Service Spec Id" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range :ServiceSpecification  .
-
-:submittedBy
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Submitted By Id" ;
-  rdfs:domain :ServiceOrder ;
-  rdfs:range :Party  .
-
-:serviceOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Service Id" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range :Service  .
-
 :alarmOf
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Alarm Id" ;
   rdfs:domain :ServiceProblem ;
   rdfs:range :Alarm  .
-
-:raisedBy
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Raised By Id" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range :Party  .
-
-:resolvedBy
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Resolved By Id" ;
-  rdfs:domain :ServiceProblem ;
-  rdfs:range :Party  .
-
-:serviceOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Service Id" ;
-  rdfs:domain :ServiceQualityReport ;
-  rdfs:range :Service  .
-
-:agreementOf
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Agreement Id" ;
-  rdfs:domain :ServiceQualityReport ;
-  rdfs:range :Agreement  .
-
-:submittedBy
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Submitted By Id" ;
-  rdfs:domain :ServiceQualityReport ;
-  rdfs:range :Party  .
 
 :affectedResource
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -4839,31 +3201,6 @@
   rdfs:domain :TroubleTicket ;
   rdfs:range :Alarm  .
 
-:raisedBy
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Raised By Id" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range :Party  .
-
-:assignedTo
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Assigned To Id" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range :Party  .
-
-:resolvedBy
-  a owl:ObjectProperty, owl:FunctionalProperty ;
-  rdfs:label "Resolved By Id" ;
-  rdfs:domain :TroubleTicket ;
-  rdfs:range :Party  .
-
-:queryOf
-  a owl:ObjectProperty ;
-  rdfs:label "Query Id" ;
-  rdfs:domain :VectorQueryLog ;
-  rdfs:range owl:Thing ;
-  owl:minCardinality 1  .
-
 
 
 # ── PROV-O Integration Patterns ──────────────────────────────────────
@@ -4878,10 +3215,16 @@
   rdfs:comment "Links an observation to the agent that produced it." ;
   :sensitivityTier :Internal .
 
+# :hasConfidenceScore is declared by the schema-driven generator in
+# enterprise.ttl, where its domain is the union of every class that uses a
+# confidence column. Re-declaring it here with `rdfs:domain
+# :ObservationRecord` added a second domain axiom, and multiple domains
+# conjoin — so a confidence score on a PerformanceIndicator also made that
+# individual an ObservationRecord. Only the range and documentation are
+# restated; the domain belongs to the authoritative declaration.
 :hasConfidenceScore
   a owl:DatatypeProperty ;
   rdfs:label "Confidence Score" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:decimal ;
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .

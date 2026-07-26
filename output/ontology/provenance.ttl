@@ -25,10 +25,16 @@
   rdfs:comment "Links an observation to the agent that produced it." ;
   :sensitivityTier :Internal .
 
+# :hasConfidenceScore is declared by the schema-driven generator in
+# enterprise.ttl, where its domain is the union of every class that uses a
+# confidence column. Re-declaring it here with `rdfs:domain
+# :ObservationRecord` added a second domain axiom, and multiple domains
+# conjoin — so a confidence score on a PerformanceIndicator also made that
+# individual an ObservationRecord. Only the range and documentation are
+# restated; the domain belongs to the authoritative declaration.
 :hasConfidenceScore
   a owl:DatatypeProperty ;
   rdfs:label "Confidence Score" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:decimal ;
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .

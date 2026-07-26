@@ -143,7 +143,35 @@ Net effect of both: the corpus is 23 files rather than 68, and the Phase 2/3/4 f
 
 ---
 
-## Phase 2 · Soundness — stop asserting falsehoods
+## Phase 2 · Soundness — stop asserting falsehoods ✅ **DELIVERED**
+
+*Branch `phase0/ontology-quality-gates` · 2026-07-26*
+
+| Metric | Before | After |
+|---|---|---|
+| `multi_domain_properties` | 105 | **0** |
+| `worst_domain_count` | 43 | **0** |
+| `object_properties_ranged_at_thing` | 14 | **0** |
+| `owl:minCardinality` outside a restriction | 139 | **0** |
+| unsound lifecycle `AllDisjointClasses` | present | **removed** |
+
+**The soundness proof, re-run.** The same test that demonstrated the defect now returns the opposite result: loading one instance triple (`:t42 :hasCreatedAt "…"`) into the shipped ontology and running OWL-RL previously inferred **47 `rdf:type` assertions**; it now infers **0 spurious named types**, and correctly infers membership of the anonymous union-domain class — so the domain still constrains, it just no longer lies.
+
+**Decision: union domain, not per-class property IRIs.** The roadmap originally specified minting `:Batch_expiryDate` per `(class, property)`. Measurement changed the answer: of 366 properties only 77 carried multiple domains, and the heaviest were generic audit columns — `hasCreatedAt` (43 classes), `hasName` (22), `hasDescription` (19). Fragmenting those into 43 separate `createdAt` properties would be worse modelling, not better, and would have churned 662 SHACL paths, 653 mapping rows, 372 context terms and the SPARQL suite. `rdfs:domain [ owl:unionOf (…) ]` is the standard OWL idiom for "used on any of these", is logically sound, and left every property IRI stable.
+
+**What the fix actually required.** The root cause was structural: properties were emitted once per `(table, column)`, so each declaration carried its own `rdfs:domain` — and multiple domains conjoin. Emission is now grouped by property IRI in both the schema-driven generator and the industry-template generator, so each property is declared exactly once.
+
+Three further sources surfaced only after the main fix, each found by re-measuring rather than by inspection:
+
+- **Cross-module IRI collisions.** Industry templates declared an `ind:` prefix for their own namespace and never used it, minting every class and property into the shared enterprise namespace — so `expiry_date` from insurance, logistics and pharmaceuticals collided on one IRI carrying three domains. (This was roadmap item 3.5; it belongs here because it was a soundness cause.)
+- **Within-module collisions.** The same property name used on several entities of one template, e.g. `product_id` across three pharmaceutical entities.
+- **A hardcoded duplicate.** `_prov_patterns()` re-declared `:hasConfidenceScore` with `rdfs:domain :ObservationRecord`, adding a second domain axiom to a property the schema-driven generator already emits — so a confidence score on a `PerformanceIndicator` also made it an `ObservationRecord`.
+
+**Other fixes in this phase.** Object-property naming stripped `_id`, `_org` and `_type` *anywhere* in a column name, collapsing `asset_type_id` and `asset_id` onto one `:assetOf` IRI with two unrelated domains and ranges; only a trailing `_id` is now stripped, giving `:assetType` and `:assetOf`. Unresolvable FK targets were written as `rdfs:range owl:Thing`, which asserts nothing while reading like a constraint — the range is now omitted and the unresolved target recorded in a comment. Lifecycle disjointness is no longer emitted at all: the candidate sibling groups are still computed and listed as comments for review, because asserting `AllDisjointClasses(Placed, Confirmed, Shipped, …)` makes any order that ships unsatisfiable.
+
+Governance holds at **3.32/5.0**. Full suite: 1006 passed, 9 skipped, 1 xfailed.
+
+**Phase 4 is now unblocked** — the hard gate this phase represented is cleared.
 
 **Goal:** the ontology says only true things. **This is the hard gate for Phase 4.**
 

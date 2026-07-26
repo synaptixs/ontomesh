@@ -2,11 +2,11 @@
   "_comment": "Ontology quality ratchet baseline. Regenerate with `python scripts/ontology_gate.py --update-baseline` after a roadmap phase lands. Never raise a lower_is_better number to make CI green.",
   "metrics": {
     "turtle_parse_failures": 0,
-    "multi_domain_properties": 105,
-    "worst_domain_count": 43,
+    "multi_domain_properties": 0,
+    "worst_domain_count": 0,
     "alignment_subjects_unbound": 1,
     "malformed_iris": 0,
-    "object_properties_ranged_at_thing": 14,
+    "object_properties_ranged_at_thing": 0,
     "owl_restrictions": 0,
     "cq_tests_returning_rows": 0,
     "cq_tests_failing": 37

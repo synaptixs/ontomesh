@@ -43,5 +43,11 @@
   rdfs:comment "Subclass of DomainEvent for event_type = MAINTENANCE." ;
   :sensitivityTier :Internal .
 
-[] a owl:AllDisjointClasses ;
-   owl:members ( :COMPLIANCEAUDITEvent :INCIDENTEvent :INSPECTIONEvent :MAINTENANCEEvent ) .
+# Sibling event subclasses were detected but no owl:AllDisjointClasses
+# axiom is emitted: event_type values are frequently lifecycle
+# phases of one entity rather than mutually exclusive kinds, and
+# asserting disjointness over them makes any entity that passes
+# through two phases unsatisfiable. Declare disjointness explicitly
+# in metadata when it genuinely holds.
+
+#   candidate group: :COMPLIANCEAUDITEvent :INCIDENTEvent :INSPECTIONEvent :MAINTENANCEEvent

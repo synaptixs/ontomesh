@@ -13,524 +13,492 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Logistics & Supply Chain Ontology Module" ;
   rdfs:comment "Domain template for freight, warehousing, last-mile delivery, and supply chain visibility. Suitable for 3PL providers, e-commerce fulfillment, cold chain, and customs/trade compliance." ;
-  dcterms:created "2026-07-26T15:22:11Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:06:26Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
-:Shipment
+ind:Shipment
   a owl:Class ;
   rdfs:label "Shipment" ;
   rdfs:comment "A collection of goods being transported from origin to destination." ;
   owl:equivalentClass <https://schema.org/ParcelDelivery> ;
   :sensitivityTier :Internal .
 
-:shipment_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:string ;
-  rdfs:label "Shipment Id" ;
-  :sensitivityTier :Internal .
-
-:tracking_number
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:string ;
-  rdfs:label "Tracking Number" ;
-  :sensitivityTier :Internal .
-
-:origin_facility_id
-  a owl:ObjectProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range :Facility ;
-  rdfs:label "Origin Facility Id" ;
-  :sensitivityTier :Internal .
-
-:destination_facility_id
-  a owl:ObjectProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range :Facility ;
-  rdfs:label "Destination Facility Id" ;
-  :sensitivityTier :Internal .
-
-:carrier_id
-  a owl:ObjectProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range :Carrier ;
-  rdfs:label "Carrier Id" ;
-  :sensitivityTier :Internal .
-
-:service_level
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:string ;
-  rdfs:label "Service Level" ;
-  :sensitivityTier :Internal .
-
-:shipment_status
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:string ;
-  rdfs:label "Shipment Status" ;
-  :sensitivityTier :Internal .
-
-:estimated_delivery
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Estimated Delivery" ;
-  :sensitivityTier :Internal .
-
-:actual_delivery
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Actual Delivery" ;
-  :sensitivityTier :Internal .
-
-:gross_weight_kg
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Gross Weight Kg" ;
-  :sensitivityTier :Internal .
-
-:declared_value
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Declared Value" ;
-  :sensitivityTier :Internal .
-
-:incoterms
-  a owl:DatatypeProperty ;
-  rdfs:domain :Shipment ;
-  rdfs:range xsd:string ;
-  rdfs:label "Incoterms" ;
-  :sensitivityTier :Internal .
-
-:Package
+ind:Package
   a owl:Class ;
   rdfs:label "Package" ;
   rdfs:comment "An individual physical container within a shipment." ;
   owl:equivalentClass <https://www.gs1.org/voc/Logistic_Unit> ;
   :sensitivityTier :Internal .
 
-:package_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:string ;
-  rdfs:label "Package Id" ;
-  :sensitivityTier :Internal .
-
-:shipment_id
-  a owl:ObjectProperty ;
-  rdfs:domain :Package ;
-  rdfs:range :Shipment ;
-  rdfs:label "Shipment Id" ;
-  :sensitivityTier :Internal .
-
-:sscc
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:string ;
-  rdfs:label "Sscc" ;
-  rdfs:comment "GS1 Serial Shipping Container Code" ;
-  :sensitivityTier :Internal .
-
-:package_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:string ;
-  rdfs:label "Package Type" ;
-  :sensitivityTier :Internal .
-
-:weight_kg
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Weight Kg" ;
-  :sensitivityTier :Internal .
-
-:length_cm
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Length Cm" ;
-  :sensitivityTier :Internal .
-
-:width_cm
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Width Cm" ;
-  :sensitivityTier :Internal .
-
-:height_cm
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Height Cm" ;
-  :sensitivityTier :Internal .
-
-:is_hazmat
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:boolean ;
-  rdfs:label "Is Hazmat" ;
-  :sensitivityTier :Internal .
-
-:temperature_requirement
-  a owl:DatatypeProperty ;
-  rdfs:domain :Package ;
-  rdfs:range xsd:string ;
-  rdfs:label "Temperature Requirement" ;
-  :sensitivityTier :Internal .
-
-:Facility
+ind:Facility
   a owl:Class ;
   rdfs:label "Facility" ;
   rdfs:comment "A warehouse, distribution centre, port, airport, or retail fulfilment location." ;
   :sensitivityTier :Internal .
 
-:facility_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Facility Id" ;
-  :sensitivityTier :Internal .
-
-:facility_name
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Facility Name" ;
-  :sensitivityTier :Internal .
-
-:facility_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Facility Type" ;
-  :sensitivityTier :Internal .
-
-:address
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Address" ;
-  :sensitivityTier :Internal .
-
-:country_code
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Country Code" ;
-  :sensitivityTier :Internal .
-
-:geo_location
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Geo Location" ;
-  rdfs:comment "WKT POINT" ;
-  :sensitivityTier :Internal .
-
-:capacity_sqm
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Capacity Sqm" ;
-  :sensitivityTier :Internal .
-
-:operator_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Facility ;
-  rdfs:range xsd:string ;
-  rdfs:label "Operator Id" ;
-  :sensitivityTier :Internal .
-
-:Carrier
+ind:Carrier
   a owl:Class ;
   rdfs:label "Carrier" ;
   rdfs:comment "A transport service provider (airline, road freight, rail, ocean liner)." ;
   :sensitivityTier :Internal .
 
-:carrier_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Carrier ;
-  rdfs:range xsd:string ;
-  rdfs:label "Carrier Id" ;
-  :sensitivityTier :Internal .
-
-:carrier_name
-  a owl:DatatypeProperty ;
-  rdfs:domain :Carrier ;
-  rdfs:range xsd:string ;
-  rdfs:label "Carrier Name" ;
-  :sensitivityTier :Internal .
-
-:carrier_scac
-  a owl:DatatypeProperty ;
-  rdfs:domain :Carrier ;
-  rdfs:range xsd:string ;
-  rdfs:label "Carrier Scac" ;
-  rdfs:comment "Standard Carrier Alpha Code" ;
-  :sensitivityTier :Internal .
-
-:carrier_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :Carrier ;
-  rdfs:range xsd:string ;
-  rdfs:label "Carrier Type" ;
-  :sensitivityTier :Internal .
-
-:is_preferred
-  a owl:DatatypeProperty ;
-  rdfs:domain :Carrier ;
-  rdfs:range xsd:boolean ;
-  rdfs:label "Is Preferred" ;
-  :sensitivityTier :Internal .
-
-:Order
+ind:Order
   a owl:Class ;
   rdfs:label "Customer Order" ;
   rdfs:comment "A customer purchase order that triggers fulfilment and shipment creation." ;
   owl:equivalentClass <https://schema.org/Order> ;
   :sensitivityTier :Confidential .
 
-:order_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:string ;
-  rdfs:label "Order Id" ;
-  :sensitivityTier :Confidential .
-
-:customer_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:string ;
-  rdfs:label "Customer Id" ;
-  :sensitivityTier :Confidential .
-
-:order_date
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Order Date" ;
-  :sensitivityTier :Confidential .
-
-:order_status
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:string ;
-  rdfs:label "Order Status" ;
-  :sensitivityTier :Confidential .
-
-:total_value
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Total Value" ;
-  :sensitivityTier :Confidential .
-
-:currency
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:string ;
-  rdfs:label "Currency" ;
-  :sensitivityTier :Confidential .
-
-:priority_flag
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:boolean ;
-  rdfs:label "Priority Flag" ;
-  :sensitivityTier :Confidential .
-
-:channel
-  a owl:DatatypeProperty ;
-  rdfs:domain :Order ;
-  rdfs:range xsd:string ;
-  rdfs:label "Channel" ;
-  :sensitivityTier :Confidential .
-
-:InventoryItem
+ind:InventoryItem
   a owl:Class ;
   rdfs:label "Inventory Item" ;
   rdfs:comment "A SKU held in a facility at a point in time." ;
   owl:equivalentClass <https://www.gs1.org/voc/Product> ;
   :sensitivityTier :Internal .
 
-:inventory_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:string ;
-  rdfs:label "Inventory Id" ;
-  :sensitivityTier :Internal .
-
-:sku
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:string ;
-  rdfs:label "Sku" ;
-  :sensitivityTier :Internal .
-
-:facility_id
-  a owl:ObjectProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range :Facility ;
-  rdfs:label "Facility Id" ;
-  :sensitivityTier :Internal .
-
-:quantity_on_hand
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:integer ;
-  rdfs:label "Quantity On Hand" ;
-  :sensitivityTier :Internal .
-
-:quantity_reserved
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:integer ;
-  rdfs:label "Quantity Reserved" ;
-  :sensitivityTier :Internal .
-
-:reorder_point
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:integer ;
-  rdfs:label "Reorder Point" ;
-  :sensitivityTier :Internal .
-
-:unit_cost
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Unit Cost" ;
-  :sensitivityTier :Internal .
-
-:expiry_date
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:date ;
-  rdfs:label "Expiry Date" ;
-  :sensitivityTier :Internal .
-
-:lot_number
-  a owl:DatatypeProperty ;
-  rdfs:domain :InventoryItem ;
-  rdfs:range xsd:string ;
-  rdfs:label "Lot Number" ;
-  :sensitivityTier :Internal .
-
-:TrackingEvent
+ind:TrackingEvent
   a owl:Class ;
   rdfs:label "Tracking Event" ;
   rdfs:comment "A scan event recording the location and status of a shipment or package." ;
   :sensitivityTier :Internal .
 
-:event_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Event Id" ;
-  :sensitivityTier :Internal .
-
-:shipment_id
-  a owl:ObjectProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range :Shipment ;
-  rdfs:label "Shipment Id" ;
-  :sensitivityTier :Internal .
-
-:event_timestamp
-  a owl:DatatypeProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Event Timestamp" ;
-  :sensitivityTier :Internal .
-
-:event_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Event Type" ;
-  :sensitivityTier :Internal .
-
-:location_id
-  a owl:ObjectProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range :Facility ;
-  rdfs:label "Location Id" ;
-  :sensitivityTier :Internal .
-
-:scan_location_description
-  a owl:DatatypeProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Scan Location Description" ;
-  :sensitivityTier :Internal .
-
-:exception_code
-  a owl:DatatypeProperty ;
-  rdfs:domain :TrackingEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Exception Code" ;
-  :sensitivityTier :Internal .
-
-:CustomsDeclaration
+ind:CustomsDeclaration
   a owl:Class ;
   rdfs:label "Customs Declaration" ;
   rdfs:comment "Cross-border customs entry declaration for international shipments." ;
   :sensitivityTier :Restricted .
 
-:declaration_id
+ind:shipment_id
   a owl:DatatypeProperty ;
-  rdfs:domain :CustomsDeclaration ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( ind:CustomsDeclaration ind:Package ind:Shipment ind:TrackingEvent ) ] ;
+  rdfs:range xsd:string ;
+  rdfs:label "Shipment Id" ;
+  :sensitivityTier :Restricted .
+
+ind:tracking_number
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:string ;
+  rdfs:label "Tracking Number" ;
+  :sensitivityTier :Internal .
+
+ind:origin_facility_id
+  a owl:ObjectProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range ind:Facility ;
+  rdfs:label "Origin Facility Id" ;
+  :sensitivityTier :Internal .
+
+ind:destination_facility_id
+  a owl:ObjectProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range ind:Facility ;
+  rdfs:label "Destination Facility Id" ;
+  :sensitivityTier :Internal .
+
+ind:carrier_id
+  a owl:ObjectProperty ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( ind:Carrier ind:Shipment ) ] ;
+  rdfs:range ind:Carrier ;
+  rdfs:label "Carrier Id" ;
+  :sensitivityTier :Internal .
+
+ind:service_level
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:string ;
+  rdfs:label "Service Level" ;
+  :sensitivityTier :Internal .
+
+ind:shipment_status
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:string ;
+  rdfs:label "Shipment Status" ;
+  :sensitivityTier :Internal .
+
+ind:estimated_delivery
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Estimated Delivery" ;
+  :sensitivityTier :Internal .
+
+ind:actual_delivery
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Actual Delivery" ;
+  :sensitivityTier :Internal .
+
+ind:gross_weight_kg
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Gross Weight Kg" ;
+  :sensitivityTier :Internal .
+
+ind:declared_value
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Declared Value" ;
+  :sensitivityTier :Internal .
+
+ind:incoterms
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Shipment ;
+  rdfs:range xsd:string ;
+  rdfs:label "Incoterms" ;
+  :sensitivityTier :Internal .
+
+ind:package_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:string ;
+  rdfs:label "Package Id" ;
+  :sensitivityTier :Internal .
+
+ind:sscc
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:string ;
+  rdfs:label "Sscc" ;
+  rdfs:comment "GS1 Serial Shipping Container Code" ;
+  :sensitivityTier :Internal .
+
+ind:package_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:string ;
+  rdfs:label "Package Type" ;
+  :sensitivityTier :Internal .
+
+ind:weight_kg
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Weight Kg" ;
+  :sensitivityTier :Internal .
+
+ind:length_cm
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Length Cm" ;
+  :sensitivityTier :Internal .
+
+ind:width_cm
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Width Cm" ;
+  :sensitivityTier :Internal .
+
+ind:height_cm
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Height Cm" ;
+  :sensitivityTier :Internal .
+
+ind:is_hazmat
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Is Hazmat" ;
+  :sensitivityTier :Internal .
+
+ind:temperature_requirement
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Package ;
+  rdfs:range xsd:string ;
+  rdfs:label "Temperature Requirement" ;
+  :sensitivityTier :Internal .
+
+ind:facility_id
+  a owl:DatatypeProperty ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( ind:Facility ind:InventoryItem ) ] ;
+  rdfs:range xsd:string ;
+  rdfs:label "Facility Id" ;
+  :sensitivityTier :Internal .
+
+ind:facility_name
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:string ;
+  rdfs:label "Facility Name" ;
+  :sensitivityTier :Internal .
+
+ind:facility_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:string ;
+  rdfs:label "Facility Type" ;
+  :sensitivityTier :Internal .
+
+ind:address
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:string ;
+  rdfs:label "Address" ;
+  :sensitivityTier :Internal .
+
+ind:country_code
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:string ;
+  rdfs:label "Country Code" ;
+  :sensitivityTier :Internal .
+
+ind:geo_location
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:string ;
+  rdfs:label "Geo Location" ;
+  rdfs:comment "WKT POINT" ;
+  :sensitivityTier :Internal .
+
+ind:capacity_sqm
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Capacity Sqm" ;
+  :sensitivityTier :Internal .
+
+ind:operator_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Facility ;
+  rdfs:range xsd:string ;
+  rdfs:label "Operator Id" ;
+  :sensitivityTier :Internal .
+
+ind:carrier_name
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Carrier ;
+  rdfs:range xsd:string ;
+  rdfs:label "Carrier Name" ;
+  :sensitivityTier :Internal .
+
+ind:carrier_scac
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Carrier ;
+  rdfs:range xsd:string ;
+  rdfs:label "Carrier Scac" ;
+  rdfs:comment "Standard Carrier Alpha Code" ;
+  :sensitivityTier :Internal .
+
+ind:carrier_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Carrier ;
+  rdfs:range xsd:string ;
+  rdfs:label "Carrier Type" ;
+  :sensitivityTier :Internal .
+
+ind:is_preferred
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Carrier ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Is Preferred" ;
+  :sensitivityTier :Internal .
+
+ind:order_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:string ;
+  rdfs:label "Order Id" ;
+  :sensitivityTier :Confidential .
+
+ind:customer_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:string ;
+  rdfs:label "Customer Id" ;
+  :sensitivityTier :Confidential .
+
+ind:order_date
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Order Date" ;
+  :sensitivityTier :Confidential .
+
+ind:order_status
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:string ;
+  rdfs:label "Order Status" ;
+  :sensitivityTier :Confidential .
+
+ind:total_value
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Total Value" ;
+  :sensitivityTier :Confidential .
+
+ind:currency
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:string ;
+  rdfs:label "Currency" ;
+  :sensitivityTier :Confidential .
+
+ind:priority_flag
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:boolean ;
+  rdfs:label "Priority Flag" ;
+  :sensitivityTier :Confidential .
+
+ind:channel
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:Order ;
+  rdfs:range xsd:string ;
+  rdfs:label "Channel" ;
+  :sensitivityTier :Confidential .
+
+ind:inventory_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:string ;
+  rdfs:label "Inventory Id" ;
+  :sensitivityTier :Internal .
+
+ind:sku
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:string ;
+  rdfs:label "Sku" ;
+  :sensitivityTier :Internal .
+
+ind:quantity_on_hand
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Quantity On Hand" ;
+  :sensitivityTier :Internal .
+
+ind:quantity_reserved
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Quantity Reserved" ;
+  :sensitivityTier :Internal .
+
+ind:reorder_point
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Reorder Point" ;
+  :sensitivityTier :Internal .
+
+ind:unit_cost
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Unit Cost" ;
+  :sensitivityTier :Internal .
+
+ind:expiry_date
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:date ;
+  rdfs:label "Expiry Date" ;
+  :sensitivityTier :Internal .
+
+ind:lot_number
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:InventoryItem ;
+  rdfs:range xsd:string ;
+  rdfs:label "Lot Number" ;
+  :sensitivityTier :Internal .
+
+ind:event_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:TrackingEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Event Id" ;
+  :sensitivityTier :Internal .
+
+ind:event_timestamp
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:TrackingEvent ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Event Timestamp" ;
+  :sensitivityTier :Internal .
+
+ind:event_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:TrackingEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Event Type" ;
+  :sensitivityTier :Internal .
+
+ind:location_id
+  a owl:ObjectProperty ;
+  rdfs:domain ind:TrackingEvent ;
+  rdfs:range ind:Facility ;
+  rdfs:label "Location Id" ;
+  :sensitivityTier :Internal .
+
+ind:scan_location_description
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:TrackingEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Scan Location Description" ;
+  :sensitivityTier :Internal .
+
+ind:exception_code
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:TrackingEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Exception Code" ;
+  :sensitivityTier :Internal .
+
+ind:declaration_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:CustomsDeclaration ;
   rdfs:range xsd:string ;
   rdfs:label "Declaration Id" ;
   :sensitivityTier :Restricted .
 
-:shipment_id
-  a owl:ObjectProperty ;
-  rdfs:domain :CustomsDeclaration ;
-  rdfs:range :Shipment ;
-  rdfs:label "Shipment Id" ;
-  :sensitivityTier :Restricted .
-
-:hs_code
+ind:hs_code
   a owl:DatatypeProperty ;
-  rdfs:domain :CustomsDeclaration ;
+  rdfs:domain ind:CustomsDeclaration ;
   rdfs:range xsd:string ;
   rdfs:label "Hs Code" ;
   rdfs:comment "Harmonized System commodity code" ;
   :sensitivityTier :Restricted .
 
-:declared_value_usd
+ind:declared_value_usd
   a owl:DatatypeProperty ;
-  rdfs:domain :CustomsDeclaration ;
+  rdfs:domain ind:CustomsDeclaration ;
   rdfs:range xsd:decimal ;
   rdfs:label "Declared Value Usd" ;
   :sensitivityTier :Restricted .
 
-:country_of_origin
+ind:country_of_origin
   a owl:DatatypeProperty ;
-  rdfs:domain :CustomsDeclaration ;
+  rdfs:domain ind:CustomsDeclaration ;
   rdfs:range xsd:string ;
   rdfs:label "Country Of Origin" ;
   :sensitivityTier :Restricted .
 
-:customs_status
+ind:customs_status
   a owl:DatatypeProperty ;
-  rdfs:domain :CustomsDeclaration ;
+  rdfs:domain ind:CustomsDeclaration ;
   rdfs:range xsd:string ;
   rdfs:label "Customs Status" ;
   :sensitivityTier :Restricted .
 
-:duty_amount
+ind:duty_amount
   a owl:DatatypeProperty ;
-  rdfs:domain :CustomsDeclaration ;
+  rdfs:domain ind:CustomsDeclaration ;
   rdfs:range xsd:decimal ;
   rdfs:label "Duty Amount" ;
   :sensitivityTier :Restricted .
