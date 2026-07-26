@@ -42,7 +42,7 @@
       "description": "Every model decision must carry agent attribution and observation timestamps sufficient to reconstruct the decision chain.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-004",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "SR-11-7-PROV-2",
@@ -50,7 +50,7 @@
       "description": "Confidence scores and derivation methods must be recorded for every observation used in model input or output.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-005",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "SR-11-7-USE-1",
@@ -58,7 +58,7 @@
       "description": "Each model-driven event must name the governing policy and its compliance outcome.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-007",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "SR-11-7-USE-2",

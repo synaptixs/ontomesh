@@ -623,7 +623,7 @@ python3 toolkit.py --phase comply \
     --decision https://ontology.example.com/enterprise/observation/obs-001
 ```
 
-`pass_expression` is a tiny declarative DSL (`status in ('PASS','PASS-STRUCTURAL')`, `score >= 3`, `chain_depth >= 2`, `exists`) so custom regulations do not need Python code.
+`pass_expression` is a tiny declarative DSL (`status == 'PASS'`, `score >= 3`, `chain_depth >= 2`, `exists`) so custom regulations do not need Python code.
 
 ### 13.3 Signed compliance bundle exporter (`compliance/bundle.py`)
 
