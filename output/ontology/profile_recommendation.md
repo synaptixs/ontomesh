@@ -1,6 +1,6 @@
 # OWL 2 Profile Recommendation
-**Recommended profile:** OWL 2 EL  
-**Recommended reasoner:** ELK  
+**Recommended profile:** OWL 2 DL  
+**Recommended reasoner:** HermiT  
 
 ## Axiom summary
 
@@ -9,11 +9,11 @@
 | OWL classes | 55 |
 | Data properties | 498 |
 | Object properties | 100 |
-| **Total axioms (est.)** | **653** |
+| **Total axioms (est.)** | **3635** |
 
 ## Decision rationale
 
-Axiom count 653 is within EL limits and no DL constructs detected — OWL 2 EL profile is sufficient. ELK reasoner recommended.
+OWL 2 DL constructs detected (owl:unionOf (disjunction)). OWL 2 EL does not permit these — the ontology requires a full DL reasoner. Use HermiT or Pellet.
 
 ## Profile decision rules
 
@@ -32,7 +32,7 @@ Axiom count 653 is within EL limits and no DL constructs detected — OWL 2 EL p
 Run the reasoner via ROBOT after Phase 2:
 
 ```bash
-robot reason --reasoner elk \
+robot reason --reasoner hermit \
   --input output/ontology/enterprise.ttl \
   --output output/ontology/enterprise-classified.ttl
 ```

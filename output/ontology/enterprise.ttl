@@ -14,7 +14,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-07-26T16:06:25Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -73,7 +73,14 @@
   skos:altLabel "Actor" ;
   skos:altLabel "System Agent" ;
   skos:altLabel "Sensor" ;
-  rdfs:isDefinedBy "CQ-004, CQ-005"  .
+  rdfs:isDefinedBy "CQ-004, CQ-005" ;
+  owl:hasKey ( :hasAgentIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasAgentType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :AssetType
   a owl:Class ;
@@ -84,7 +91,14 @@
   skos:prefLabel "Asset Type" ;
   skos:altLabel "Asset Category" ;
   skos:altLabel "Resource Class" ;
-  rdfs:isDefinedBy "CQ-002"  .
+  rdfs:isDefinedBy "CQ-002" ;
+  owl:hasKey ( :hasCode ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasCode ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasLabel ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Asset
   a owl:Class ;
@@ -96,13 +110,23 @@
   skos:altLabel "Resource" ;
   skos:altLabel "Managed Object" ;
   skos:altLabel "Network Element" ;
-  rdfs:isDefinedBy "CQ-001, CQ-002, CQ-003, CQ-007"  .
+  rdfs:isDefinedBy "CQ-001, CQ-002, CQ-003, CQ-007" ;
+  owl:hasKey ( :hasExternalId ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ComplianceBundles
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Compliance Bundles" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasBundlePath ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSha256 ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :DomainEvent
   a owl:Class ;
@@ -114,43 +138,111 @@
   skos:altLabel "Activity" ;
   skos:altLabel "Incident" ;
   skos:altLabel "Inspection" ;
-  rdfs:isDefinedBy "CQ-003, CQ-004, CQ-005, CQ-007"  .
+  rdfs:isDefinedBy "CQ-003, CQ-004, CQ-005, CQ-007" ;
+  owl:hasKey ( :hasEventIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasEventType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasTitle ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :EmbeddingIndexes
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Embedding Indexes" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  owl:hasKey ( :hasIndexName ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasIndexName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasFlavor ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasVectorStore ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasConnectionString ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDimensions ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :EmbeddingRecords
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Embedding Records" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  owl:hasKey ( :hasRecordIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasRecordIri ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOwlClass ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasFlavor ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSensitivityTier ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasTextRepr ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasVectorB64 ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasContentHash ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :EventParticipants
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Event Participants" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  owl:hasKey ( :hasParticipationRole ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasParticipationRole ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :FederationPartners
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Federation Partners" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  owl:hasKey ( :hasPartnerIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasPartnerIri ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDisplayName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSparqlEndpoint ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasPublicKey ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :FederationQueryLog
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Federation Query Log" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOriginalQuery ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :FederationTrustLedger
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Federation Trust Ledger" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasEventType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ObservationRecord
   a owl:Class ;
@@ -163,19 +255,45 @@
   skos:altLabel "Reading" ;
   skos:altLabel "Detection" ;
   skos:altLabel "Finding" ;
-  rdfs:isDefinedBy "CQ-004, CQ-005, CQ-008"  .
+  rdfs:isDefinedBy "CQ-004, CQ-005, CQ-008" ;
+  owl:hasKey ( :hasObservationIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasObservationType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasObservedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :OntologyEvolutionProposals
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Ontology Evolution Proposals" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasProposalType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasTitle ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasCandidateTurtle ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasEvidenceSparql ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDetectionStrategy ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :OntologyVersionLedger
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Ontology Version Ledger" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  owl:hasKey ( :hasVersion ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasVersion ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Organization
   a owl:Class ;
@@ -187,7 +305,13 @@
   skos:altLabel "Enterprise" ;
   skos:altLabel "Company" ;
   skos:altLabel "Entity" ;
-  rdfs:isDefinedBy "CQ-001, CQ-006"  .
+  rdfs:isDefinedBy "CQ-001, CQ-006" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOrgType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Policy
   a owl:Class ;
@@ -199,7 +323,17 @@
   skos:altLabel "Rule" ;
   skos:altLabel "Standard" ;
   skos:altLabel "SLA" ;
-  rdfs:isDefinedBy "CQ-007"  .
+  rdfs:isDefinedBy "CQ-007" ;
+  owl:hasKey ( :hasCode ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasCode ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasTitle ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasPolicyType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :PolicyApplication
   a owl:Class ;
@@ -216,7 +350,10 @@
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Retrieval Benchmarks" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasStrategy ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Role
   a owl:Class ;
@@ -227,7 +364,14 @@
   skos:prefLabel "Role" ;
   skos:altLabel "Function" ;
   skos:altLabel "Responsibility" ;
-  rdfs:isDefinedBy "CQ-006"  .
+  rdfs:isDefinedBy "CQ-006" ;
+  owl:hasKey ( :hasCode ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasCode ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasLabel ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :RuntimeFlavor
   a owl:Class ;
@@ -239,7 +383,20 @@
   skos:altLabel "Ontology Flavor" ;
   skos:altLabel "Domain Flavor" ;
   skos:altLabel "LLM Scope" ;
-  rdfs:isDefinedBy "CQ-RT-01"  .
+  rdfs:isDefinedBy "CQ-RT-01" ;
+  owl:hasKey ( :hasName ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSensitivityTier ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOwlClasses ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDbTables ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :RuntimeGrounding
   a owl:Class ;
@@ -250,7 +407,16 @@
   skos:prefLabel "Runtime Grounding" ;
   skos:altLabel "Data Grounding" ;
   skos:altLabel "Context Retrieval" ;
-  rdfs:isDefinedBy "CQ-RT-02"  .
+  rdfs:isDefinedBy "CQ-RT-02" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasFlavorName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasQuestion ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasGroundedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :RuntimePayload
   a owl:Class ;
@@ -261,7 +427,16 @@
   skos:prefLabel "Runtime Payload" ;
   skos:altLabel "LLM Payload" ;
   skos:altLabel "AI Payload" ;
-  rdfs:isDefinedBy "CQ-RT-03"  .
+  rdfs:isDefinedBy "CQ-RT-03" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasFlavorName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasQuestion ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasAssembledAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Agreement
   a owl:Class ;
@@ -273,7 +448,11 @@
   skos:altLabel "SLA" ;
   skos:altLabel "Contract" ;
   skos:altLabel "Service Level Agreement" ;
-  rdfs:isDefinedBy "CQ-005, CQ-TMF05"  .
+  rdfs:isDefinedBy "CQ-005, CQ-TMF05" ;
+  owl:hasKey ( :hasAgreementIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Alarm
   a owl:Class ;
@@ -285,7 +464,17 @@
   skos:altLabel "Fault" ;
   skos:altLabel "Notification" ;
   skos:altLabel "Alert" ;
-  rdfs:isDefinedBy "CQ-007, CQ-TMF06"  .
+  rdfs:isDefinedBy "CQ-007, CQ-TMF06" ;
+  owl:hasKey ( :hasAlarmIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasAlarmType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasPerceivedSeverity ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasRaisedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Attachment
   a owl:Class ;
@@ -293,7 +482,10 @@
   rdfs:label "Attachment" ;
   rdfs:comment "A file or URL attachment linked to any TMF entity per SID Common ABE." ;
   :sensitivityTier :Internal ;
-  skos:prefLabel "Attachment"  .
+  skos:prefLabel "Attachment" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOwnerType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Characteristic
   a owl:Class ;
@@ -305,7 +497,13 @@
   skos:altLabel "Attribute" ;
   skos:altLabel "Property" ;
   skos:altLabel "Feature" ;
-  rdfs:isDefinedBy "CQ-002"  .
+  rdfs:isDefinedBy "CQ-002" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOwnerType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ConflictEvent
   a owl:Class ;
@@ -316,7 +514,23 @@
   skos:prefLabel "Conflict Event" ;
   skos:altLabel "Assertion Conflict" ;
   skos:altLabel "Semantic Conflict" ;
-  rdfs:isDefinedBy "CQ-P2B-conflict-resolution"  .
+  rdfs:isDefinedBy "CQ-P2B-conflict-resolution" ;
+  owl:hasKey ( :hasConflictIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasAssertionAIri ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasAssertionBIri ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasConflictType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDescription ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDetectedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :CustomerAccount
   a owl:Class ;
@@ -327,7 +541,11 @@
   skos:prefLabel "Customer Account" ;
   skos:altLabel "Account" ;
   skos:altLabel "Billing Account" ;
-  rdfs:isDefinedBy "CQ-005, CQ-TMF03"  .
+  rdfs:isDefinedBy "CQ-005, CQ-TMF03" ;
+  owl:hasKey ( :hasAccountNumber :hasAccountIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :CustomerBill
   a owl:Class ;
@@ -339,7 +557,17 @@
   skos:altLabel "Invoice" ;
   skos:altLabel "Bill" ;
   skos:altLabel "Statement" ;
-  rdfs:isDefinedBy "CQ-TMF03, CQ-TMF13"  .
+  rdfs:isDefinedBy "CQ-TMF03, CQ-TMF13" ;
+  owl:hasKey ( :hasBillNumber :hasBillIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasBillNumber ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasBillDate ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasAmountDue ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :EventSubscription
   a owl:Class ;
@@ -350,7 +578,14 @@
   skos:prefLabel "Event Subscription" ;
   skos:altLabel "Notification Subscription" ;
   skos:altLabel "Hub Subscription" ;
-  rdfs:isDefinedBy "CQ-002"  .
+  rdfs:isDefinedBy "CQ-002" ;
+  owl:hasKey ( :hasSubscriptionIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasEventType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasCallbackUrl ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :GeographicSite
   a owl:Class ;
@@ -363,7 +598,11 @@
   skos:altLabel "Location" ;
   skos:altLabel "Data Centre" ;
   skos:altLabel "Cell Site" ;
-  rdfs:isDefinedBy "CQ-001, CQ-002"  .
+  rdfs:isDefinedBy "CQ-001, CQ-002" ;
+  owl:hasKey ( :hasSiteIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :NetworkSliceProfile
   a owl:Class ;
@@ -375,7 +614,14 @@
   skos:altLabel "Slice Template" ;
   skos:altLabel "NST" ;
   skos:altLabel "Network Slice Specification" ;
-  rdfs:isDefinedBy "CQ-TMF01, CQ-TMF11"  .
+  rdfs:isDefinedBy "CQ-TMF01, CQ-TMF11" ;
+  owl:hasKey ( :hasProfileIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSliceType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Note
   a owl:Class ;
@@ -383,7 +629,13 @@
   rdfs:label "Note" ;
   rdfs:comment "A free-text annotation linked to any TMF entity per SID Common ABE." ;
   :sensitivityTier :Internal ;
-  skos:prefLabel "Note"  .
+  skos:prefLabel "Note" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasText ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOwnerType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Party
   a owl:Class ;
@@ -396,7 +648,14 @@
   skos:altLabel "Organization" ;
   skos:altLabel "Customer" ;
   skos:altLabel "Partner" ;
-  rdfs:isDefinedBy "CQ-005, CQ-TMF04"  .
+  rdfs:isDefinedBy "CQ-005, CQ-TMF04" ;
+  owl:hasKey ( :hasPartyIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasPartyType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :PartyRole
   a owl:Class ;
@@ -408,7 +667,10 @@
   skos:altLabel "Role" ;
   skos:altLabel "Function" ;
   skos:altLabel "Relationship" ;
-  rdfs:isDefinedBy "CQ-005"  .
+  rdfs:isDefinedBy "CQ-005" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasRoleName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :PerformanceIndicator
   a owl:Class ;
@@ -421,7 +683,14 @@
   skos:altLabel "Metric" ;
   skos:altLabel "Measurement" ;
   skos:altLabel "Observation" ;
-  rdfs:isDefinedBy "CQ-008, CQ-TMF07"  .
+  rdfs:isDefinedBy "CQ-008, CQ-TMF07" ;
+  owl:hasKey ( :hasKpiIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasObservedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :GeographicLocation
   a owl:Class ;
@@ -433,7 +702,11 @@
   skos:altLabel "Location" ;
   skos:altLabel "Address" ;
   skos:altLabel "Site" ;
-  rdfs:isDefinedBy "CQ-001, CQ-002"  .
+  rdfs:isDefinedBy "CQ-001, CQ-002" ;
+  owl:hasKey ( :hasPlaceIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Policy
   a owl:Class ;
@@ -446,7 +719,11 @@
   skos:altLabel "Regulation" ;
   skos:altLabel "Standard" ;
   skos:altLabel "SLA Policy" ;
-  rdfs:isDefinedBy "CQ-006"  .
+  rdfs:isDefinedBy "CQ-006" ;
+  owl:hasKey ( :hasPolicyIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Product
   a owl:Class ;
@@ -457,7 +734,11 @@
   skos:prefLabel "Product" ;
   skos:altLabel "Subscribed Product" ;
   skos:altLabel "Active Subscription" ;
-  rdfs:isDefinedBy "CQ-004, CQ-TMF03"  .
+  rdfs:isDefinedBy "CQ-004, CQ-TMF03" ;
+  owl:hasKey ( :hasProductIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ProductOffering
   a owl:Class ;
@@ -468,7 +749,11 @@
   skos:prefLabel "Product Offering" ;
   skos:altLabel "Commercial Offer" ;
   skos:altLabel "Tariff Plan" ;
-  rdfs:isDefinedBy "CQ-004"  .
+  rdfs:isDefinedBy "CQ-004" ;
+  owl:hasKey ( :hasOfferingIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ProductOfferingQualification
   a owl:Class ;
@@ -479,7 +764,11 @@
   skos:prefLabel "Product Offering Qualification" ;
   skos:altLabel "Eligibility Check" ;
   skos:altLabel "Feasibility Check" ;
-  rdfs:isDefinedBy "CQ-TMF03"  .
+  rdfs:isDefinedBy "CQ-TMF03" ;
+  owl:hasKey ( :hasPoqIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasRequestedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ProductOrder
   a owl:Class ;
@@ -490,7 +779,11 @@
   skos:prefLabel "Product Order" ;
   skos:altLabel "Customer Order" ;
   skos:altLabel "Service Request" ;
-  rdfs:isDefinedBy "CQ-004, CQ-TMF03"  .
+  rdfs:isDefinedBy "CQ-004, CQ-TMF03" ;
+  owl:hasKey ( :hasOrderIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOrderDate ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ProductSpecification
   a owl:Class ;
@@ -501,7 +794,11 @@
   skos:prefLabel "Product Specification" ;
   skos:altLabel "Product Template" ;
   skos:altLabel "Product Catalog Entry" ;
-  rdfs:isDefinedBy "CQ-004"  .
+  rdfs:isDefinedBy "CQ-004" ;
+  owl:hasKey ( :hasSpecIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Resource
   a owl:Class ;
@@ -513,7 +810,14 @@
   skos:altLabel "Network Element" ;
   skos:altLabel "Network Function" ;
   skos:altLabel "Physical Asset" ;
-  rdfs:isDefinedBy "CQ-001, CQ-002, CQ-003, CQ-TMF01"  .
+  rdfs:isDefinedBy "CQ-001, CQ-002, CQ-003, CQ-TMF01" ;
+  owl:hasKey ( :hasResourceIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasResourceType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ResourceRelationship
   a owl:Class ;
@@ -524,7 +828,10 @@
   skos:prefLabel "Resource Relationship" ;
   skos:altLabel "Resource Association" ;
   skos:altLabel "Network Topology Link" ;
-  rdfs:isDefinedBy "CQ-TMF01"  .
+  rdfs:isDefinedBy "CQ-TMF01" ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasRelationshipType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ResourceSpecification
   a owl:Class ;
@@ -535,7 +842,11 @@
   skos:prefLabel "Resource Specification" ;
   skos:altLabel "Resource Template" ;
   skos:altLabel "Resource Catalog Entry" ;
-  rdfs:isDefinedBy "CQ-001, CQ-002"  .
+  rdfs:isDefinedBy "CQ-001, CQ-002" ;
+  owl:hasKey ( :hasSpecIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :Service
   a owl:Class ;
@@ -546,7 +857,14 @@
   skos:prefLabel "Service" ;
   skos:altLabel "Customer Facing Service" ;
   skos:altLabel "Resource Facing Service" ;
-  rdfs:isDefinedBy "CQ-003, CQ-TMF02"  .
+  rdfs:isDefinedBy "CQ-003, CQ-TMF02" ;
+  owl:hasKey ( :hasServiceIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasServiceType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ServiceOrder
   a owl:Class ;
@@ -557,7 +875,11 @@
   skos:prefLabel "Service Order" ;
   skos:altLabel "Fulfilment Order" ;
   skos:altLabel "Provisioning Order" ;
-  rdfs:isDefinedBy "CQ-003, CQ-TMF02"  .
+  rdfs:isDefinedBy "CQ-003, CQ-TMF02" ;
+  owl:hasKey ( :hasOrderIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasOrderDate ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ServiceProblem
   a owl:Class ;
@@ -569,7 +891,14 @@
   skos:altLabel "Trouble Ticket" ;
   skos:altLabel "Incident" ;
   skos:altLabel "Fault Report" ;
-  rdfs:isDefinedBy "CQ-007, CQ-TMF06"  .
+  rdfs:isDefinedBy "CQ-007, CQ-TMF06" ;
+  owl:hasKey ( :hasProblemIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDescription ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSubmittedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :ServiceQualityReport
   a owl:Class ;
@@ -581,7 +910,8 @@
   skos:altLabel "SLA Report" ;
   skos:altLabel "KQI Report" ;
   skos:altLabel "QoS Assessment" ;
-  rdfs:isDefinedBy "CQ-TMF05, CQ-TMF12"  .
+  rdfs:isDefinedBy "CQ-TMF05, CQ-TMF12" ;
+  owl:hasKey ( :hasReportIri )  .
 
 :ServiceSpecification
   a owl:Class ;
@@ -592,7 +922,11 @@
   skos:prefLabel "Service Specification" ;
   skos:altLabel "Service Template" ;
   skos:altLabel "Service Catalog Entry" ;
-  rdfs:isDefinedBy "CQ-003"  .
+  rdfs:isDefinedBy "CQ-003" ;
+  owl:hasKey ( :hasSpecIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :TroubleTicket
   a owl:Class ;
@@ -604,7 +938,17 @@
   skos:altLabel "Incident" ;
   skos:altLabel "Issue" ;
   skos:altLabel "Problem Ticket" ;
-  rdfs:isDefinedBy "CQ-007, CQ-TMF06, CQ-TMF10"  .
+  rdfs:isDefinedBy "CQ-007, CQ-TMF06, CQ-TMF10" ;
+  owl:hasKey ( :hasTicketIri ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasTicketType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasDescription ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasSubmittedAt ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :UserRole
   a owl:Class ;
@@ -613,13 +957,20 @@
   rdfs:comment "A named permission set for users per SID Enterprise ABE / TMF672." ;
   :sensitivityTier :Internal ;
   skos:prefLabel "User Role" ;
-  rdfs:isDefinedBy "CQ-006"  .
+  rdfs:isDefinedBy "CQ-006" ;
+  owl:hasKey ( :hasName ) ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :VectorQueryLog
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
   rdfs:label "Vector Query Log" ;
-  :sensitivityTier :Internal  .
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasQuestion ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 
 # ── Data Properties ─────────────────────────────────────────────────

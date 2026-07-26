@@ -195,7 +195,33 @@ Governance holds at **3.32/5.0**. Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 ---
 
-## Phase 3 · Expressivity — become actually OWL 2
+## Phase 3 · Expressivity — become actually OWL 2 ✅ **DELIVERED**
+
+*Branch `phase0/ontology-quality-gates` · 2026-07-26*
+
+| Construct | Before | After |
+|---|---|---|
+| `owl:Restriction` | **0** | **244** |
+| `owl:hasKey` | 0 | **39** |
+| `owl:oneOf` | 0 | **55** |
+| `owl:equivalentClass` (defined classes) | 0 | **38** |
+| Genuine classifications inferred | **0** | **yes** |
+| Reflexive tautologies in the closure | 64% | **35%** |
+
+**The exit criterion, demonstrated.** Asserting `:e1 a :DomainEvent ; :hasEventType "INCIDENT"` and running OWL-RL now infers `:IncidentEvent`. That is the first deductive content the ontology has ever had — previously the closure contained 2,207 tautologies and zero classifications.
+
+**What produced it.** The event subclasses stated their membership rule only in an `rdfs:comment` ("Subclass of DomainEvent for event_type = INCIDENT") — text a reasoner cannot read. They are now *defined classes*: `owl:equivalentClass` over an intersection of the parent and a `hasValue` restriction on the discriminator. The class is no longer a label; it is a rule.
+
+**Other work in this phase:**
+
+- **Required columns as restrictions.** Phase 2 removed 139 property-level `owl:minCardinality` triples because a cardinality outside an `owl:Restriction` is not an axiom. The same information is now emitted in the form a reasoner can use, as `rdfs:subClassOf [ owl:Restriction … ]` on the owning class.
+- **`owl:hasKey` from UNIQUE constraints.** The metadata columns driving the advanced-axiom path are populated in no shipped database, so that code had never emitted a single axiom. The schema already carried 51 UNIQUE constraints stating identity — they were simply never read. Transitivity and inverses are deliberately *not* inferred: a self-referencing `parent_org_id` means "direct parent", and asserting `owl:TransitiveProperty` would manufacture relationships the data does not contain.
+- **Templates stopped discarding their own content.** `generate_owl_module` iterated only `entities:`. Event classes (`is_event: true`), enumerations (`values:`) and required flags were dropped. Enumerations now emit a closed `rdfs:Datatype`/`owl:oneOf` range instead of a bare `xsd:string`; the pharmaceutical module went from 8 classes and 0 restrictions to 16 classes, 26 restrictions and 12 enumerations. `relationships:` is prose ("A ClinicalTrial investigates exactly one MedicinalProduct") and cannot become an axiom without guessing, so it is preserved as documentation on the module rather than discarded — that is where a future phase's cardinality constraints come from.
+- **Profile detection actually inspects the graph.** It was substring-searching the file text, which matches a comment or a prefix declaration as readily as an axiom, and its "axiom count" was classes + properties. It now parses with rdflib. It also missed disjunction entirely: with union domains now routine, the honest answer is **OWL 2 DL**, not the EL it previously always reported. When the graph cannot be parsed it reports `unknown` rather than guessing.
+
+**A regression I introduced in Phase 1, found here.** `value_to_local_name` preserved case, so the SQL-conventional `INCIDENT` and `COMPLIANCE_AUDIT` minted `:INCIDENTEvent` and `:COMPLIANCEAUDITEvent` — worse than the `:IncidentEvent` it replaced. An all-caps run is now folded before capitalising, while mixed-case input is left alone so intentional camelCase survives.
+
+Governance holds at **3.32/5.0**. Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 **Goal:** a reasoner run produces at least one genuine classification.
 

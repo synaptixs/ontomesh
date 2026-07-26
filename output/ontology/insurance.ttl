@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Insurance Ontology Module" ;
   rdfs:comment "Domain template for P&C, life, health, and specialty insurance carriers. Covers policy lifecycle, underwriting, claims management, reinsurance, and regulatory reporting. Aligned with ACORD (Association for Cooperative Operations Research and Development) standards." ;
-  dcterms:created "2026-07-26T16:06:26Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -79,7 +79,8 @@ ind:policy_number
 ind:policy_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Policy ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Auto" "Home" "Life" "Health" "Commercial" "Liability" "Marine" "Travel" "Cyber" "Specialty" ) ] ;
   rdfs:label "Policy Type" ;
   :sensitivityTier :Confidential .
 
@@ -145,7 +146,8 @@ ind:deductible_amount
 ind:policy_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Policy ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Quote" "Bound" "Active" "Lapsed" "Cancelled" "Expired" "Renewed" ) ] ;
   rdfs:label "Policy Status" ;
   :sensitivityTier :Confidential .
 
@@ -159,7 +161,8 @@ ind:risk_score
 ind:entity_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Policyholder ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Individual" "Business" "Trust" "GovernmentEntity" ) ] ;
   rdfs:label "Entity Type" ;
   :sensitivityTier :Restricted .
 
@@ -196,7 +199,8 @@ ind:years_as_customer
 ind:kyc_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Policyholder ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Pending" "Verified" "Rejected" "Review" ) ] ;
   rdfs:label "Kyc Status" ;
   :sensitivityTier :Restricted .
 
@@ -260,14 +264,16 @@ ind:report_date
 ind:claim_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Claim ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "MotorAccident" "TheftLoss" "PropertyDamage" "LiabilityBodily" "LifeDeath" "HealthMedical" "BusinessInterruption" "CyberIncident" ) ] ;
   rdfs:label "Claim Type" ;
   :sensitivityTier :Confidential .
 
 ind:claim_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Claim ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Fnol" "InvestigationOpen" "InvestigationClosed" "PartiallyPaid" "FullyPaid" "Denied" "Withdrawn" "Litigation" ) ] ;
   rdfs:label "Claim Status" ;
   :sensitivityTier :Confidential .
 
@@ -323,7 +329,8 @@ ind:risk_assessment_date
 ind:risk_class
   a owl:DatatypeProperty ;
   rdfs:domain ind:Underwriting ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Standard" "Preferred" "SubStandard" "Declined" ) ] ;
   rdfs:label "Risk Class" ;
   :sensitivityTier :Confidential .
 
@@ -352,7 +359,8 @@ ind:reinsurance_id
 ind:treaty_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Reinsurance ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "QuotaShare" "SurplusShare" "ExcessOfLoss" "StopLoss" "Facultative" ) ] ;
   rdfs:label "Treaty Type" ;
   :sensitivityTier :Restricted .
 
@@ -401,7 +409,8 @@ ind:return_id
 ind:return_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:RegulatoryReturn ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "SolvencyII_QRT" "SolvencyII_ORSA" "NAIC_Annual" "NAIC_Quarterly" "IFRS17" ) ] ;
   rdfs:label "Return Type" ;
   :sensitivityTier :Restricted .
 
@@ -429,7 +438,8 @@ ind:submission_date
 ind:filing_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:RegulatoryReturn ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Pending" "Submitted" "Accepted" "Rejected" "Amended" ) ] ;
   rdfs:label "Filing Status" ;
   :sensitivityTier :Restricted .
 
@@ -440,3 +450,201 @@ ind:scr_ratio_pct
   rdfs:label "Scr Ratio Pct" ;
   rdfs:comment "Solvency Capital Requirement ratio" ;
   :sensitivityTier :Restricted .
+
+ind:Claim
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:claim_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Claim
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:claim_number ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Claim
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:loss_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Claim
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:policy_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Claim
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:report_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Insurer
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:insurer_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Insurer
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:insurer_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:coverage_limit ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:currency ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:expiry_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:inception_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:insurer_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:policy_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:policy_number ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:policyholder_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policy
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:premium_amount ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Policyholder
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:policyholder_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RegulatoryReturn
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:insurer_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RegulatoryReturn
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:reporting_period ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RegulatoryReturn
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:return_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RegulatoryReturn
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:submission_deadline ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:cedant_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:cession_limit ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:effective_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:expiry_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:reinsurance_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:reinsurer_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Reinsurance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:retention_limit ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Underwriting
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:policy_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Underwriting
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:risk_assessment_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Underwriting
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:underwriter_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Underwriting
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:underwriting_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:FraudAlert
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Fraud Alert" ;
+  rdfs:comment "A claim or application flagged for potential insurance fraud." ;
+  :sensitivityTier :Restricted .
+
+ind:PolicyLapseEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Policy Lapse Event" ;
+  rdfs:comment "A policy became inactive due to non-payment of premium." ;
+  :sensitivityTier :Confidential .
+
+ind:LargeClaimEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Large Loss Event" ;
+  rdfs:comment "A claim exceeding the large-loss threshold requiring senior adjuster." ;
+  :sensitivityTier :Confidential .
+
+ind:CatastropheEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Catastrophe Event" ;
+  rdfs:comment "A natural or man-made catastrophe triggering multiple claims." ;
+  :sensitivityTier :Internal .
+
+<https://ontology.example.com/insurance/>
+  rdfs:comment "Relationship (unformalised): A Policy is held by exactly one Policyholder." ;
+  rdfs:comment "Relationship (unformalised): A Policy is issued by exactly one Insurer." ;
+  rdfs:comment "Relationship (unformalised): A Claim is lodged against exactly one Policy." ;
+  rdfs:comment "Relationship (unformalised): An Underwriting record is created for exactly one Policy." ;
+  rdfs:comment "Relationship (unformalised): A Reinsurance treaty is between exactly one cedant Insurer and a reinsurer." ;
+  rdfs:comment "Relationship (unformalised): A RegulatoryReturn is filed by exactly one Insurer." ;
+  rdfs:comment "Relationship (unformalised): A FraudAlert is associated with one or more Claims." ;
+  rdfs:comment "Relationship (unformalised): A CatastropheEvent may trigger multiple Claims."  .

@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Logistics & Supply Chain Ontology Module" ;
   rdfs:comment "Domain template for freight, warehousing, last-mile delivery, and supply chain visibility. Suitable for 3PL providers, e-commerce fulfillment, cold chain, and customs/trade compliance." ;
-  dcterms:created "2026-07-26T16:06:26Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -109,14 +109,16 @@ ind:carrier_id
 ind:service_level
   a owl:DatatypeProperty ;
   rdfs:domain ind:Shipment ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "SameDay" "NextDay" "Standard" "Economy" "Freight" ) ] ;
   rdfs:label "Service Level" ;
   :sensitivityTier :Internal .
 
 ind:shipment_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Shipment ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Created" "PickedUp" "InTransit" "OutForDelivery" "Delivered" "Returned" "Exception" ) ] ;
   rdfs:label "Shipment Status" ;
   :sensitivityTier :Internal .
 
@@ -151,7 +153,8 @@ ind:declared_value
 ind:incoterms
   a owl:DatatypeProperty ;
   rdfs:domain ind:Shipment ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "EXW" "FCA" "CPT" "CIP" "DAP" "DPU" "DDP" "FAS" "FOB" "CFR" "CIF" ) ] ;
   rdfs:label "Incoterms" ;
   :sensitivityTier :Internal .
 
@@ -173,7 +176,8 @@ ind:sscc
 ind:package_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Package ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Box" "Pallet" "Envelope" "Drum" "Crate" "Bag" "Bundle" ) ] ;
   rdfs:label "Package Type" ;
   :sensitivityTier :Internal .
 
@@ -215,7 +219,8 @@ ind:is_hazmat
 ind:temperature_requirement
   a owl:DatatypeProperty ;
   rdfs:domain ind:Package ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Ambient" "Chilled" "Frozen" "Controlled" ) ] ;
   rdfs:label "Temperature Requirement" ;
   :sensitivityTier :Internal .
 
@@ -237,7 +242,8 @@ ind:facility_name
 ind:facility_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Facility ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Warehouse" "DistributionCenter" "Port" "Airport" "CrossDock" "RetailStore" "CustomerAddress" ) ] ;
   rdfs:label "Facility Type" ;
   :sensitivityTier :Internal .
 
@@ -295,7 +301,8 @@ ind:carrier_scac
 ind:carrier_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Carrier ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Road" "Rail" "Air" "Ocean" "Intermodal" "Courier" ) ] ;
   rdfs:label "Carrier Type" ;
   :sensitivityTier :Internal .
 
@@ -330,7 +337,8 @@ ind:order_date
 ind:order_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Order ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Pending" "Processing" "Shipped" "Delivered" "Cancelled" "Returned" ) ] ;
   rdfs:label "Order Status" ;
   :sensitivityTier :Confidential .
 
@@ -358,7 +366,8 @@ ind:priority_flag
 ind:channel
   a owl:DatatypeProperty ;
   rdfs:domain ind:Order ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "eCommerce" "EDI" "Manual" "Marketplace" "API" ) ] ;
   rdfs:label "Channel" ;
   :sensitivityTier :Confidential .
 
@@ -435,7 +444,8 @@ ind:event_timestamp
 ind:event_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:TrackingEvent ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Pickup" "Arrival" "Departure" "DeliveryAttempt" "Delivered" "Exception" "Return" ) ] ;
   rdfs:label "Event Type" ;
   :sensitivityTier :Internal .
 
@@ -492,7 +502,8 @@ ind:country_of_origin
 ind:customs_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:CustomsDeclaration ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Pending" "Submitted" "Cleared" "Held" "Rejected" ) ] ;
   rdfs:label "Customs Status" ;
   :sensitivityTier :Restricted .
 
@@ -502,3 +513,190 @@ ind:duty_amount
   rdfs:range xsd:decimal ;
   rdfs:label "Duty Amount" ;
   :sensitivityTier :Restricted .
+
+ind:Carrier
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:carrier_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Carrier
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:carrier_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:CustomsDeclaration
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:country_of_origin ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:CustomsDeclaration
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:declaration_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:CustomsDeclaration
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:declared_value_usd ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:CustomsDeclaration
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:hs_code ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:CustomsDeclaration
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:shipment_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Facility
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:address ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Facility
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:country_code ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Facility
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:facility_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Facility
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:facility_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:InventoryItem
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:facility_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:InventoryItem
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:inventory_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:InventoryItem
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:quantity_on_hand ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:InventoryItem
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:sku ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Order
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:currency ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Order
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:customer_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Order
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:order_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Order
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:order_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Order
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:total_value ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Package
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:package_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Package
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:shipment_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Shipment
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:carrier_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Shipment
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:destination_facility_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Shipment
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:origin_facility_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Shipment
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:shipment_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Shipment
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:tracking_number ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:TrackingEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:event_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:TrackingEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:event_timestamp ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:TrackingEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:shipment_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:DeliveryException
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Delivery Exception" ;
+  rdfs:comment "A delivery attempt failed or a shipment encountered a problem." ;
+  :sensitivityTier :Internal .
+
+ind:InventoryAlert
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Inventory Alert" ;
+  rdfs:comment "Stock falls below reorder point or expiry date is approaching." ;
+  :sensitivityTier :Internal .
+
+ind:CarrierDelayEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Carrier Delay Event" ;
+  rdfs:comment "Carrier reports delay — weather, mechanical, customs, or capacity." ;
+  :sensitivityTier :Internal .
+
+ind:TemperatureBreachEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Temperature Breach Event" ;
+  rdfs:comment "Cold chain temperature breached acceptable range — product may be compromised." ;
+  :sensitivityTier :Confidential .
+
+<https://ontology.example.com/logistics/>
+  rdfs:comment "Relationship (unformalised): A Shipment contains one or more Packages." ;
+  rdfs:comment "Relationship (unformalised): A Shipment is transported by exactly one Carrier." ;
+  rdfs:comment "Relationship (unformalised): A Shipment moves between exactly two Facilities (origin and destination)." ;
+  rdfs:comment "Relationship (unformalised): An Order generates one or more Shipments." ;
+  rdfs:comment "Relationship (unformalised): A TrackingEvent records the current state of a Shipment." ;
+  rdfs:comment "Relationship (unformalised): An InventoryItem is held at exactly one Facility." ;
+  rdfs:comment "Relationship (unformalised): A CustomsDeclaration covers exactly one Shipment."  .

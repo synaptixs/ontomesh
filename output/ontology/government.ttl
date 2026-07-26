@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Government & Public Sector Ontology Module" ;
   rdfs:comment "Domain template for government agencies, municipalities, and public sector organisations. Aligned with W3C DCAT v3, INSPIRE Directive (EU), and FOAF for agent descriptions. Suitable for open data portals, regulatory compliance, public service delivery, and e-government." ;
-  dcterms:created "2026-07-26T16:06:26Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -87,7 +87,8 @@ ind:date_of_birth
 ind:residency_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Citizen ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Resident" "NonResident" "Visitor" "Refugee" "Applicant" ) ] ;
   rdfs:label "Residency Status" ;
   :sensitivityTier :Restricted .
 
@@ -129,7 +130,8 @@ ind:agency_name
 ind:agency_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:GovernmentAgency ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Ministry" "Department" "RegionalAuthority" "Municipality" "RegulatoryBody" "Court" "PublicEnterprise" ) ] ;
   rdfs:label "Agency Type" ;
   :sensitivityTier :Public .
 
@@ -188,14 +190,16 @@ ind:owning_agency_id
 ind:service_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:PublicService ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Permit" "Benefit" "Registration" "Certification" "Inspection" "Enforcement" "Advisory" ) ] ;
   rdfs:label "Service Type" ;
   :sensitivityTier :Public .
 
 ind:delivery_channel
   a owl:DatatypeProperty ;
   rdfs:domain ind:PublicService ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Online" "InPerson" "Post" "Phone" "Mobile" ) ] ;
   rdfs:label "Delivery Channel" ;
   :sensitivityTier :Public .
 
@@ -237,7 +241,8 @@ ind:submission_date
 ind:application_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:ServiceApplication ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Draft" "Submitted" "UnderReview" "Approved" "Rejected" "Appealed" "Withdrawn" ) ] ;
   rdfs:label "Application Status" ;
   :sensitivityTier :Restricted .
 
@@ -280,7 +285,8 @@ ind:title
 ind:legislation_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:Legislation ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "PrimaryLegislation" "SecondaryLegislation" "Directive" "Regulation" "Guidance" "Policy" ) ] ;
   rdfs:label "Legislation Type" ;
   :sensitivityTier :Public .
 
@@ -346,7 +352,8 @@ ind:theme
 ind:update_frequency
   a owl:DatatypeProperty ;
   rdfs:domain ind:Dataset ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Daily" "Weekly" "Monthly" "Quarterly" "Annual" "Irregular" ) ] ;
   rdfs:label "Update Frequency" ;
   :sensitivityTier :Public .
 
@@ -389,7 +396,8 @@ ind:feature_id
 ind:feature_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:GeoFeature ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "AdministrativeUnit" "Address" "Building" "Road" "TransportLink" "LandParcel" "ProtectedSite" "WaterBody" ) ] ;
   rdfs:label "Feature Type" ;
   :sensitivityTier :Public .
 
@@ -441,7 +449,8 @@ ind:actor_id
 ind:action_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:AuditRecord ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Create" "Read" "Update" "Delete" "Approve" "Reject" "Export" "Share" ) ] ;
   rdfs:label "Action Type" ;
   :sensitivityTier :Confidential .
 
@@ -470,7 +479,8 @@ ind:timestamp
 ind:outcome
   a owl:DatatypeProperty ;
   rdfs:domain ind:AuditRecord ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Success" "Failure" "PartialSuccess" ) ] ;
   rdfs:label "Outcome" ;
   :sensitivityTier :Confidential .
 
@@ -480,3 +490,159 @@ ind:ip_address
   rdfs:range xsd:string ;
   rdfs:label "Ip Address" ;
   :sensitivityTier :Confidential .
+
+ind:AuditRecord
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:actor_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AuditRecord
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:audit_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AuditRecord
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:subject_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AuditRecord
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:subject_type ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AuditRecord
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:timestamp ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Citizen
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:citizen_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Dataset
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:dataset_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Dataset
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:owning_agency_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Dataset
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:title ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GeoFeature
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:country_code ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GeoFeature
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:feature_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GovernmentAgency
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:agency_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GovernmentAgency
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:agency_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GovernmentAgency
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:jurisdiction ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Legislation
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:is_in_force ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Legislation
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:jurisdiction ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Legislation
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:legislation_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Legislation
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:title ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:PublicService
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:owning_agency_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:PublicService
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:service_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:PublicService
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:service_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ServiceApplication
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:applicant_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ServiceApplication
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:application_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ServiceApplication
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:service_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ServiceApplication
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:submission_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:PolicyDecisionEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Policy Decision Event" ;
+  rdfs:comment "A formal policy decision made by a government body." ;
+  :sensitivityTier :Public .
+
+ind:DataBreachEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Data Breach Event" ;
+  rdfs:comment "Unauthorised access to personal data held by a government agency." ;
+  :sensitivityTier :Restricted .
+
+ind:ComplianceViolationEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Compliance Violation Event" ;
+  rdfs:comment "A detected violation of a statutory obligation." ;
+  :sensitivityTier :Confidential .
+
+<https://ontology.example.com/government/>
+  rdfs:comment "Relationship (unformalised): A ServiceApplication is submitted by exactly one Citizen." ;
+  rdfs:comment "Relationship (unformalised): A ServiceApplication requests exactly one PublicService." ;
+  rdfs:comment "Relationship (unformalised): A PublicService is owned by exactly one GovernmentAgency." ;
+  rdfs:comment "Relationship (unformalised): A GovernmentAgency may be subordinate to another GovernmentAgency." ;
+  rdfs:comment "Relationship (unformalised): A Dataset is published by exactly one GovernmentAgency." ;
+  rdfs:comment "Relationship (unformalised): A Legislation governs one or more PublicServices." ;
+  rdfs:comment "Relationship (unformalised): An AuditRecord is associated with one subject entity." ;
+  rdfs:comment "Relationship (unformalised): A GeoFeature may be the spatial extent of a GovernmentAgency jurisdiction."  .

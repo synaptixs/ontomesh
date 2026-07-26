@@ -7,7 +7,7 @@
     "alignment_subjects_unbound": 1,
     "malformed_iris": 0,
     "object_properties_ranged_at_thing": 0,
-    "owl_restrictions": 0,
+    "owl_restrictions": 244,
     "cq_tests_returning_rows": 0,
     "cq_tests_failing": 37
   },

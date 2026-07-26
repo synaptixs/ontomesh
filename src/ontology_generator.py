@@ -226,6 +226,22 @@ def _class_block(t: TableModel) -> str:
     key_props = _has_key_property_iris(t)
     if key_props:
         lines.append(f"  owl:hasKey ( {' '.join(key_props)} ) ;")
+    # NOT NULL columns as owl:Restriction subclass axioms.
+    #
+    # This information used to be emitted as `owl:minCardinality` asserted
+    # directly on the property IRI, which is not an axiom at all — in OWL 2
+    # a cardinality is only meaningful inside an owl:Restriction, so those
+    # 139 triples were stray RDF that ROBOT and HermiT drop or reject. They
+    # were removed in Phase 2; this restores the same information in the
+    # form a reasoner can actually use.
+    for col in t.data_properties:
+        if not col.not_null:
+            continue
+        lines.append(
+            f"  rdfs:subClassOf [ a owl:Restriction ;\n"
+            f"                    owl:onProperty :has{snake_to_camel(col.name)} ;\n"
+            f'                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;'
+        )
     # Close — replace last ; with .
     lines[-1] = lines[-1][:-1] + " ."
     return "\n".join(lines) + "\n"
@@ -422,12 +438,29 @@ def _event_subclasses(tables: List[TableModel], intro: DBIntrospector) -> str:
             seen.add(class_name)
             siblings.append(class_name)
             label = val.replace("_", " ").title() + " Event"
+            # A *defined* class, not a bare subclass. The membership rule was
+            # previously stated only in an rdfs:comment ("for event_type =
+            # INCIDENT"), which a reasoner cannot read — so the ontology had
+            # no class anything could be classified into, and an OWL-RL run
+            # produced zero classifications. As an owl:equivalentClass over a
+            # hasValue restriction, an event carrying that discriminator is
+            # inferred to be a member. This is the ontology's first real
+            # deductive content. See ONTOLOGY_ROADMAP.md Phase 3.
             blocks.append(
                 f":{class_name}\n"
                 f"  a owl:Class ;\n"
                 f"  rdfs:subClassOf :{et.class_name} ;\n"
+                f"  owl:equivalentClass [\n"
+                f"    a owl:Class ;\n"
+                f"    owl:intersectionOf (\n"
+                f"      :{et.class_name}\n"
+                f"      [ a owl:Restriction ;\n"
+                f"        owl:onProperty :hasEventType ;\n"
+                f'        owl:hasValue "{_str(val)}" ]\n'
+                f"    )\n"
+                f"  ] ;\n"
                 f'  rdfs:label "{label}" ;\n'
-                f'  rdfs:comment "Subclass of {et.class_name} for event_type = {val}." ;\n'
+                f'  rdfs:comment "Events of {et.class_name} whose event_type is {val}." ;\n'
                 f"  :sensitivityTier :{et.sensitivity_tier} .\n"
             )
         if len(siblings) >= 2:
@@ -706,15 +739,41 @@ def _detect_owl_profile(tables: list, ontology_path: str) -> dict:
     has_inverse_of  = False
     has_symmetric   = False
     has_inv_func    = False
+    has_disjoint    = False
+    has_union       = False
+    has_complement  = False
+    graph_parsed    = False
+
+    # Parse the graph rather than substring-search the file. The previous
+    # implementation asked whether the *text* contained "owl:oneOf", which
+    # matches a comment, a prefix declaration or a URL fragment as readily
+    # as an axiom — and could never see a construct written in a different
+    # syntactic form. It also counted "axioms" as classes + properties,
+    # which is not an axiom count.
     try:
-        with open(ontology_path) as f:
-            content = f.read()
-        has_role_chains = "propertyChainAxiom" in content
-        has_nominals    = "owl:oneOf" in content
-        has_inverse_of  = "owl:inverseOf" in content
-        has_symmetric   = "owl:SymmetricProperty" in content
-        has_inv_func    = "owl:InverseFunctionalProperty" in content
-    except OSError:
+        import rdflib
+        g = rdflib.Graph()
+        g.parse(ontology_path, format="turtle")
+        graph_parsed = True
+        axiom_count = len(g)
+        has_role_chains = bool(list(g.triples((None, rdflib.OWL.propertyChainAxiom, None))))
+        has_nominals    = bool(list(g.triples((None, rdflib.OWL.oneOf, None))))
+        has_inverse_of  = bool(list(g.triples((None, rdflib.OWL.inverseOf, None))))
+        has_symmetric   = bool(list(g.triples((None, rdflib.RDF.type, rdflib.OWL.SymmetricProperty))))
+        has_inv_func    = bool(list(g.triples((None, rdflib.RDF.type, rdflib.OWL.InverseFunctionalProperty))))
+        has_disjoint    = bool(
+            list(g.triples((None, rdflib.RDF.type, rdflib.OWL.AllDisjointClasses)))
+            or list(g.triples((None, rdflib.OWL.disjointWith, None)))
+        )
+        # Disjunction. OWL 2 EL has no union constructor, so a union class
+        # expression — which the union-domain fix now emits routinely —
+        # puts the ontology outside EL. Missing this would report EL for an
+        # ontology ELK cannot fully classify.
+        has_union       = bool(list(g.triples((None, rdflib.OWL.unionOf, None))))
+        has_complement  = bool(list(g.triples((None, rdflib.OWL.complementOf, None))))
+    except Exception:
+        # rdflib unavailable or the file does not parse. Report honestly
+        # rather than fall back to a guess that reads like a measurement.
         pass
 
     dl_constructs = []
@@ -728,6 +787,35 @@ def _detect_owl_profile(tables: list, ontology_path: str) -> dict:
         dl_constructs.append("owl:SymmetricProperty")
     if has_inv_func:
         dl_constructs.append("owl:InverseFunctionalProperty")
+    # AllDisjointClasses / disjointWith are not in OWL 2 EL either. The old
+    # detector omitted them, so an ontology carrying disjointness was still
+    # reported as EL — which was wrong even when the answer happened to be
+    # "EL" for other reasons.
+    if has_disjoint:
+        dl_constructs.append("class disjointness")
+    if has_union:
+        dl_constructs.append("owl:unionOf (disjunction)")
+    if has_complement:
+        dl_constructs.append("owl:complementOf (negation)")
+
+    if not graph_parsed:
+        return {
+            "profile":         "unknown",
+            "axiom_count":     axiom_count,
+            "classes":         classes,
+            "data_properties": data_props,
+            "object_properties": obj_props,
+            "has_role_chains": False,
+            "has_nominals":    False,
+            "has_inverse_of":  False,
+            "has_symmetric":   False,
+            "has_inverse_functional": False,
+            "rationale": (
+                "Profile not determined: the ontology could not be parsed "
+                "(rdflib missing, or the file is malformed). No profile is "
+                "reported rather than guessing one."
+            ),
+        }
 
     if dl_constructs:
         profile  = "OWL 2 DL"

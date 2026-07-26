@@ -171,6 +171,7 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
     prefix_map = _build_prefix_map(tmpl)
     unexpanded: list[str] = []
     module_props: dict[str, dict] = {}
+    required_by_class: dict[str, list[str]] = {}
     prefixes  = f"""\
 @prefix :      <{BASE_IRI}> .
 @prefix ind:   <{base_iri}> .
@@ -244,8 +245,11 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
             })
             cols["classes"].append(class_name)
             cols["tiers"].append(tier)
+            if prop_def.get("required"):
+                required_by_class.setdefault(class_name, []).append(prop_name)
 
     _TIER_ORDER = ["Public", "Internal", "Confidential", "Restricted"]
+    enumerations: list[tuple[str, list]] = []
     for prop_name, info in module_props.items():
         prop_def = info["def"]
         classes = sorted(set(info["classes"]))
@@ -260,8 +264,19 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
             members = " ".join(f"ind:{c}" for c in classes)
             lines.append("  rdfs:domain [ a owl:Class ;")
             lines.append(f"                owl:unionOf ( {members} ) ] ;")
-        lines.append(f"  rdfs:range ind:{fk} ;" if fk
-                     else f"  rdfs:range {xsd_type} ;")
+        # A property with a declared value list gets a closed datarange
+        # rather than a bare xsd:string. The template stated the permitted
+        # values (regulatory_status: [PreClinical, Phase1, ...]) and nothing
+        # read them, so every enumeration shipped as an open string.
+        values = prop_def.get("values")
+        if not fk and isinstance(values, list) and values:
+            members = " ".join(f'"{v}"' for v in values)
+            lines.append(f"  rdfs:range [ a rdfs:Datatype ;")
+            lines.append(f"               owl:oneOf ( {members} ) ] ;")
+            enumerations.append((prop_name, values))
+        else:
+            lines.append(f"  rdfs:range ind:{fk} ;" if fk
+                         else f"  rdfs:range {xsd_type} ;")
         lines.append(f'  rdfs:label "{prop_name.replace("_", " ").title()}" ;')
         desc = prop_def.get("description", "")
         if desc:
@@ -271,6 +286,46 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
             if t in _TIER_ORDER and _TIER_ORDER.index(t) > _TIER_ORDER.index(tier):
                 tier = t
         lines.append(f"  :sensitivityTier :{tier} .")
+        lines.append("")
+
+    # Required properties as owl:Restriction axioms on their owning class.
+    for class_name, required in sorted(required_by_class.items()):
+        for prop_name in sorted(set(required)):
+            lines.append(f"ind:{class_name}")
+            lines.append("  rdfs:subClassOf [ a owl:Restriction ;")
+            lines.append(f"                    owl:onProperty ind:{prop_name} ;")
+            lines.append('                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .')
+            lines.append("")
+
+    # Event classes. Templates declare these with is_event: true and the
+    # generator iterated only `entities:`, so a pharmaceutical module
+    # carrying BatchRecallEvent, ClinicalTrialHoldEvent and
+    # PatentExpiryEvent emitted no event classes at all.
+    for event in tmpl.get("events") or []:
+        if not isinstance(event, dict) or not event.get("name"):
+            continue
+        name = event["name"]
+        lines.append(f"ind:{name}")
+        lines.append("  a owl:Class ;")
+        lines.append("  rdfs:subClassOf :DomainEvent ;")
+        lines.append(f'  rdfs:label "{event.get("label", name)}" ;')
+        if event.get("description"):
+            lines.append(f'  rdfs:comment "{event["description"].strip()}" ;')
+        lines.append(f'  :sensitivityTier :{event.get("sensitivity", "Internal")} .')
+        lines.append("")
+
+    # Relationship statements are prose ("A ClinicalTrial investigates
+    # exactly one MedicinalProduct"), not machine-readable triples, so they
+    # cannot be turned into axioms without guessing. They are preserved as
+    # documentation on the module rather than discarded, which is where the
+    # cardinality constraints for a future phase will come from.
+    relationships = [r for r in (tmpl.get("relationships") or []) if isinstance(r, str)]
+    if relationships:
+        lines.append(f"<{base_iri}>")
+        for statement in relationships:
+            lines.append(f'  rdfs:comment "Relationship (unformalised): '
+                         f'{statement.strip()}" ;')
+        lines[-1] = lines[-1][:-1] + " ."
         lines.append("")
 
     if unexpanded:

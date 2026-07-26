@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Pharmaceuticals Ontology Module" ;
   rdfs:comment "Domain template for pharmaceutical manufacturers, CROs, and regulatory affairs teams. Covers drug product lifecycle from R&D through clinical trials, manufacturing, and pharmacovigilance. Aligned with IDMP (Identification of Medicinal Products, ISO 11616/11238/11239/11240/11615), EMA SPOR, ICH E2B(R3), and HL7 FHIR R4 MedicinalProduct resources." ;
-  dcterms:created "2026-07-26T16:06:26Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:30:45Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
@@ -104,7 +104,8 @@ ind:atc_code
 ind:regulatory_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:MedicinalProduct ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "PreClinical" "Phase1" "Phase2" "Phase3" "MAA_Submitted" "Approved" "Withdrawn" "Discontinued" ) ] ;
   rdfs:label "Regulatory Status" ;
   :sensitivityTier :Public .
 
@@ -168,7 +169,8 @@ ind:chebi_id
 ind:substance_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:ActiveSubstance ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "SmallMolecule" "Biologic" "Peptide" "Oligonucleotide" "CellGeneTherapy" "Radiopharmaceutical" ) ] ;
   rdfs:label "Substance Type" ;
   :sensitivityTier :Public .
 
@@ -212,7 +214,8 @@ ind:eudract_number
 ind:phase
   a owl:DatatypeProperty ;
   rdfs:domain ind:ClinicalTrial ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Phase1" "Phase1_2" "Phase2" "Phase2_3" "Phase3" "Phase4" "Observational" ) ] ;
   rdfs:label "Phase" ;
   :sensitivityTier :Internal .
 
@@ -220,7 +223,8 @@ ind:status
   a owl:DatatypeProperty ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( ind:ClinicalTrial ind:RegulatorySubmission ) ] ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Planned" "Recruiting" "Active" "Completed" "Terminated" "Suspended" "Withdrawn" ) ] ;
   rdfs:label "Status" ;
   :sensitivityTier :Restricted .
 
@@ -312,7 +316,8 @@ ind:gmp_certificate_expiry
 ind:site_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:ManufacturingSite ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "API" "Formulation" "Packaging" "QualityControl" "Biologics" "Sterile" ) ] ;
   rdfs:label "Site Type" ;
   :sensitivityTier :Internal .
 
@@ -362,7 +367,8 @@ ind:batch_size_units
 ind:batch_status
   a owl:DatatypeProperty ;
   rdfs:domain ind:Batch ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "InProcess" "Released" "Quarantined" "Rejected" "Recalled" "Distributed" ) ] ;
   rdfs:label "Batch Status" ;
   :sensitivityTier :Internal .
 
@@ -383,14 +389,16 @@ ind:ae_id
 ind:reporter_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:AdverseEvent ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "HealthcareProfessional" "Patient" "Regulator" "Literature" ) ] ;
   rdfs:label "Reporter Type" ;
   :sensitivityTier :Confidential .
 
 ind:seriousness
   a owl:DatatypeProperty ;
   rdfs:domain ind:AdverseEvent ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "NonSerious" "Serious" "Fatal" ) ] ;
   rdfs:label "Seriousness" ;
   :sensitivityTier :Confidential .
 
@@ -448,14 +456,16 @@ ind:submission_id
 ind:authority
   a owl:DatatypeProperty ;
   rdfs:domain ind:RegulatorySubmission ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "EMA" "FDA" "PMDA" "HC" "TGA" "NMPA" "ANVISA" "CDSCO" ) ] ;
   rdfs:label "Authority" ;
   :sensitivityTier :Restricted .
 
 ind:submission_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:RegulatorySubmission ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "MAA" "Variation" "Renewal" "ICSR" "PSUR" "PBRER" "DSUR" "IND" "NDA" "BLA" ) ] ;
   rdfs:label "Submission Type" ;
   :sensitivityTier :Restricted .
 
@@ -491,14 +501,16 @@ ind:nc_id
 ind:nc_type
   a owl:DatatypeProperty ;
   rdfs:domain ind:QualityNonConformance ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "OOS" "OOT" "Deviation" "Complaint" "AuditFinding" "CAPA" ) ] ;
   rdfs:label "Nc Type" ;
   :sensitivityTier :Confidential .
 
 ind:severity
   a owl:DatatypeProperty ;
   rdfs:domain ind:QualityNonConformance ;
-  rdfs:range xsd:string ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Critical" "Major" "Minor" ) ] ;
   rdfs:label "Severity" ;
   :sensitivityTier :Confidential .
 
@@ -529,3 +541,164 @@ ind:capa_closed_date
   rdfs:range xsd:date ;
   rdfs:label "Capa Closed Date" ;
   :sensitivityTier :Confidential .
+
+ind:ActiveSubstance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:substance_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ActiveSubstance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:substance_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AdverseEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:ae_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AdverseEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:case_number ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AdverseEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:AdverseEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:report_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Batch
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:batch_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Batch
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:batch_number ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Batch
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:expiry_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Batch
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:manufacture_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Batch
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:Batch
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:site_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ClinicalTrial
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ClinicalTrial
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:sponsor ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ClinicalTrial
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:trial_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ManufacturingSite
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:address ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ManufacturingSite
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:country_code ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ManufacturingSite
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:site_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:ManufacturingSite
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:site_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:MedicinalProduct
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:MedicinalProduct
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_name ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:QualityNonConformance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:detection_date ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:QualityNonConformance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:nc_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:QualityNonConformance
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RegulatorySubmission
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:product_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RegulatorySubmission
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:submission_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:BatchRecallEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Batch Recall Event" ;
+  rdfs:comment "A market recall initiated for a defective or unsafe batch." ;
+  :sensitivityTier :Confidential .
+
+ind:ClinicalTrialHoldEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Clinical Trial Hold" ;
+  rdfs:comment "Regulatory hold placed on a clinical trial due to safety concerns." ;
+  :sensitivityTier :Internal .
+
+ind:PatentExpiryEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Patent Expiry Event" ;
+  rdfs:comment "Patent protection expires, opening the product to generic competition." ;
+  :sensitivityTier :Public .
+
+<https://ontology.example.com/pharma/>
+  rdfs:comment "Relationship (unformalised): A MedicinalProduct contains one or more ActiveSubstances." ;
+  rdfs:comment "Relationship (unformalised): A ClinicalTrial investigates exactly one MedicinalProduct." ;
+  rdfs:comment "Relationship (unformalised): A Batch is manufactured at exactly one ManufacturingSite." ;
+  rdfs:comment "Relationship (unformalised): A Batch belongs to exactly one MedicinalProduct." ;
+  rdfs:comment "Relationship (unformalised): An AdverseEvent is associated with exactly one MedicinalProduct." ;
+  rdfs:comment "Relationship (unformalised): A RegulatorySubmission covers exactly one MedicinalProduct." ;
+  rdfs:comment "Relationship (unformalised): A QualityNonConformance is linked to one Batch or one MedicinalProduct." ;
+  rdfs:comment "Relationship (unformalised): A BatchRecallEvent invalidates one or more Batches."  .
