@@ -32,8 +32,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib + owlrl (SPARQL backend, reasoner)
-        run: pip install rdflib owlrl
+      # Install the package's own declared dependencies rather than a
+      # hand-picked list, which silently omitted PyYAML and broke the
+      # templates phase.
+      - name: Install the package
+        run: pip install -e .
 
       # One invocation, not an enumerated list. The generate job previously
       # ran a hand-listed subset of phases while the baseline was recorded
@@ -70,8 +73,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -111,8 +114,8 @@ jobs:
           name: ontology-artifacts
           path: ${{ env.OUT_PATH }}
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Install Java (required for ROBOT)
         uses: actions/setup-java@v4
@@ -159,8 +162,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -214,8 +217,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install rdflib
-        run: pip install rdflib
+      - name: Install the package
+        run: pip install -e .
 
       - name: Download artifacts
         uses: actions/download-artifact@v4

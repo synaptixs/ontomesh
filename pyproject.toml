@@ -33,6 +33,11 @@ classifiers = [
 dependencies = [
     "rdflib>=7.0.0",
     "pyshacl>=0.26.0",
+    # Imported directly by src/materializer.py, src/ontology_quality.py and
+    # src/reasoners/owlrl_adapter.py. It arrived transitively through pyshacl
+    # and so worked by accident; a direct import belongs in the direct
+    # dependencies, or those three modules break the day pyshacl drops it.
+    "owlrl>=7.1.2",
     "sparqlwrapper>=2.0.0",
     "pyyaml>=6.0.2",
     "jinja2>=3.1.4",
