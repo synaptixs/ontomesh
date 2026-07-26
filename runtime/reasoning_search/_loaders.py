@@ -50,6 +50,41 @@ class Mapping:
         loc = self.resolve(owl_class, prop)
         return (loc[1], loc[2]) if loc else None
 
+    def class_for_table(self, table: str) -> str | None:
+        """Reverse lookup: which OWL class is mapped to ``table``."""
+        for cls, tbl in self.class_table.items():
+            if tbl == table:
+                return cls
+        return None
+
+    def readable_columns(self, table: str, max_tier: str) -> list[str]:
+        """Columns of ``table`` that are mapped *and* within ``max_tier``.
+
+        The projection used for any read of this table. A column the mapping
+        does not describe is not returned, because nothing has classified it
+        — an unclassified column is treated as unreadable rather than public.
+
+        This exists so that every path reading the database applies one
+        policy. The FK-neighbour fetch previously issued ``SELECT *`` against
+        tables discovered from ``PRAGMA foreign_key_list``, bypassing both
+        the flavor allow-list and the tier ceiling that ``compile_sql``
+        enforces on the primary query.
+        """
+        from .safety import tier_ok
+
+        cls = self.class_for_table(table)
+        if not cls:
+            return []
+        cols: list[str] = []
+        for (c, prop), (tbl, col) in self.prop_col.items():
+            if c != cls or tbl != table:
+                continue
+            if not tier_ok(self.tier.get(f"{c}.{prop}"), max_tier):
+                continue
+            if col not in cols:
+                cols.append(col)
+        return sorted(cols)
+
     def resolve(self, owl_class: str, prop: str) -> tuple[str, str, str] | None:
         """Resolve a property to ``(canonical_prop, table, column)``.
 

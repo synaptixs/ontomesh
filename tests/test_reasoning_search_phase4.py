@@ -67,6 +67,18 @@ def fk_fx(tmp_path):
         "Order,id,Data Property,orders.id,orders,id,xsd:integer,N,Internal,,\n"
         "Order,customer_id,Data Property,orders.customer_id,orders,customer_id,xsd:integer,N,Internal,,\n"
         "Order,amount,Data Property,orders.amount,orders,amount,xsd:decimal,N,Internal,,\n"
+        # The FK target must be classified too. `db_tables` grants permission to
+        # touch a table; the mapping is what says how sensitive its columns are.
+        # A table that is allow-listed but unmapped has no tier information, so
+        # the neighbour fetch declines to read it — an unclassified column is
+        # treated as unreadable rather than public. A generated
+        # logical_physical_map.csv covers every domain table, so this reflects a
+        # real deployment; the fixture previously relied on `SELECT *` returning
+        # columns nothing had classified.
+        "Customer,(class),OWL Class,customer,customer,(table),,Y,Internal,,\n"
+        "Customer,id,Data Property,customer.id,customer,id,xsd:integer,N,Internal,,\n"
+        "Customer,name,Data Property,customer.name,customer,name,xsd:string,N,Internal,,\n"
+        "Customer,sla_tier,Data Property,customer.sla_tier,customer,sla_tier,xsd:string,N,Internal,,\n"
     )
     return {"db": str(db), "flavors": str(flavors), "mapping": str(mapping)}
 
