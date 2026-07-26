@@ -16,9 +16,27 @@
 # ── PROV-O Integration Patterns ──────────────────────────────────────
 # Aligns ObservationRecord with prov:Entity and agents with prov:Agent.
 
+# PROV-O requires an Activity to sit between an Entity and its Agent, so
+# the profile needs all three roles declared. Only :ObservationRecord was
+# aligned (to prov:Entity); agents were not prov:Agent and no Activity
+# class existed, which is why the ABox could not emit a chain at all.
+:Agent
+  rdfs:subClassOf prov:Agent .
+
+:DerivationActivity
+  a owl:Class ;
+  rdfs:subClassOf prov:Activity ;
+  rdfs:label "Derivation Activity" ;
+  rdfs:comment "The act of recording or deriving an observation. Reified so an observation can be linked to both the activity that generated it and the agent responsible." ;
+  :sensitivityTier :Internal .
+
+# `rdfs:subPropertyOf prov:wasGeneratedBy` with `rdfs:range :Agent` was
+# incorrect: in PROV-O, wasGeneratedBy points at an Activity, so this
+# inferred that every agent was an Activity. Entity→Agent is
+# prov:wasAttributedTo.
 :wasProducedBy
   a owl:ObjectProperty ;
-  rdfs:subPropertyOf prov:wasGeneratedBy ;
+  rdfs:subPropertyOf prov:wasAttributedTo ;
   rdfs:label "was produced by" ;
   rdfs:domain :ObservationRecord ;
   rdfs:range :Agent ;

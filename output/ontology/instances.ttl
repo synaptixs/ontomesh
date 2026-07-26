@@ -11,7 +11,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Enterprise ABox" ;
   rdfs:comment "Instance data materialised from the relational source via the logical-physical mapping. Tier ceiling: Confidential." ;
-  dcterms:created "2026-07-26T16:58:56Z"^^xsd:dateTime .
+  dcterms:created "2026-07-26T17:07:34Z"^^xsd:dateTime .
 
 # ── Agent (5 individuals) ─────────────────────────────────────────
 <https://ontology.example.com/enterprise/Agent/1>
@@ -841,6 +841,10 @@
 <https://ontology.example.com/enterprise/ObservationRecord/1>
   a :ObservationRecord ;
   :sensitivityTier :Confidential ;
+  a prov:Entity ;
+  prov:wasGeneratedBy <https://ontology.example.com/enterprise/ObservationRecordDerivation/1> ;
+  prov:wasAttributedTo <https://ontology.example.com/enterprise/Agent/2> ;
+  prov:generatedAtTime "2026-04-10T02:14:00Z"^^xsd:dateTime ;
   :hasObservationIri "https://gtc.example.com/obs/obs-001"^^xsd:anyURI ;
   :hasObservationType "PACKET_LOSS_RATE" ;
   :hasNumericValue 18.7 ;
@@ -853,10 +857,19 @@
   :asset <https://ontology.example.com/enterprise/Asset/5> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/1> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/2> .
+<https://ontology.example.com/enterprise/ObservationRecordDerivation/1>
+  a :DerivationActivity ;
+  prov:wasAssociatedWith <https://ontology.example.com/enterprise/Agent/2> ;
+  prov:generated <https://ontology.example.com/enterprise/ObservationRecord/1> ;
+  prov:startedAtTime "2026-04-10T02:14:00Z"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ObservationRecord/2>
   a :ObservationRecord ;
   :sensitivityTier :Confidential ;
+  a prov:Entity ;
+  prov:wasGeneratedBy <https://ontology.example.com/enterprise/ObservationRecordDerivation/2> ;
+  prov:wasAttributedTo <https://ontology.example.com/enterprise/Agent/4> ;
+  prov:generatedAtTime "2026-04-10T00:00:00Z"^^xsd:dateTime ;
   :hasObservationIri "https://gtc.example.com/obs/obs-002"^^xsd:anyURI ;
   :hasObservationType "AVAILABILITY" ;
   :hasNumericValue 99.997 ;
@@ -868,10 +881,19 @@
   :hasCreatedAt "2026-07-26 16:58:55"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/4> .
+<https://ontology.example.com/enterprise/ObservationRecordDerivation/2>
+  a :DerivationActivity ;
+  prov:wasAssociatedWith <https://ontology.example.com/enterprise/Agent/4> ;
+  prov:generated <https://ontology.example.com/enterprise/ObservationRecord/2> ;
+  prov:startedAtTime "2026-04-10T00:00:00Z"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ObservationRecord/3>
   a :ObservationRecord ;
   :sensitivityTier :Confidential ;
+  a prov:Entity ;
+  prov:wasGeneratedBy <https://ontology.example.com/enterprise/ObservationRecordDerivation/3> ;
+  prov:wasAttributedTo <https://ontology.example.com/enterprise/Agent/3> ;
+  prov:generatedAtTime "2026-04-12T10:05:00Z"^^xsd:dateTime ;
   :hasObservationIri "https://gtc.example.com/obs/obs-003"^^xsd:anyURI ;
   :hasObservationType "RF_SIGNAL_STRENGTH" ;
   :hasNumericValue -72.4 ;
@@ -883,10 +905,19 @@
   :asset <https://ontology.example.com/enterprise/Asset/4> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/4> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/3> .
+<https://ontology.example.com/enterprise/ObservationRecordDerivation/3>
+  a :DerivationActivity ;
+  prov:wasAssociatedWith <https://ontology.example.com/enterprise/Agent/3> ;
+  prov:generated <https://ontology.example.com/enterprise/ObservationRecord/3> ;
+  prov:startedAtTime "2026-04-12T10:05:00Z"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ObservationRecord/4>
   a :ObservationRecord ;
   :sensitivityTier :Confidential ;
+  a prov:Entity ;
+  prov:wasGeneratedBy <https://ontology.example.com/enterprise/ObservationRecordDerivation/4> ;
+  prov:wasAttributedTo <https://ontology.example.com/enterprise/Agent/5> ;
+  prov:generatedAtTime "2026-04-01T11:25:00Z"^^xsd:dateTime ;
   :hasObservationIri "https://gtc.example.com/obs/obs-004"^^xsd:anyURI ;
   :hasObservationType "COMPLIANCE_SCORE" ;
   :hasNumericValue 0.96 ;
@@ -899,6 +930,11 @@
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/3> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/5> .
+<https://ontology.example.com/enterprise/ObservationRecordDerivation/4>
+  a :DerivationActivity ;
+  prov:wasAssociatedWith <https://ontology.example.com/enterprise/Agent/5> ;
+  prov:generated <https://ontology.example.com/enterprise/ObservationRecord/4> ;
+  prov:startedAtTime "2026-04-01T11:25:00Z"^^xsd:dateTime .
 
 # ── Organization (4 individuals) ──────────────────────────────────
 <https://ontology.example.com/enterprise/Organization/1>

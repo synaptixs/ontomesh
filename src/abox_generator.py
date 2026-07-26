@@ -143,6 +143,102 @@ def _literal(value: object, xsd_type: str) -> Optional[str]:
     return f'"{_escape(text)}"'
 
 
+# Columns that record when a provenance-bearing record came into being,
+# in preference order.
+_GENERATED_AT_COLUMNS = ("observed_at", "recorded_at", "generated_at",
+                         "asserted_at", "created_at")
+
+
+def _prov_entity_classes(ontology_dir: str) -> set:
+    """Classes the TBox aligns to prov:Entity.
+
+    Read from the ontology rather than hardcoded, so declaring a new class
+    `rdfs:subClassOf prov:Entity` is enough to make its records carry a
+    provenance chain — no change here.
+    """
+    try:
+        import rdflib
+    except ImportError:
+        return set()
+    PROV = rdflib.Namespace("http://www.w3.org/ns/prov#")
+    g = rdflib.Graph()
+    found = False
+    for fname in ("enterprise.ttl", "provenance.ttl"):
+        path = os.path.join(ontology_dir, fname)
+        if os.path.isfile(path):
+            try:
+                g.parse(path, format="turtle")
+                found = True
+            except Exception:
+                pass
+    if not found:
+        return set()
+    return {str(s).rsplit("/", 1)[-1].rsplit("#", 1)[-1]
+            for s in g.subjects(rdflib.RDFS.subClassOf, PROV.Entity)}
+
+
+def _prov_chain(class_name: str, key: object, row: Dict[str, object],
+                allowed: List["MappingRow"],
+                class_table: Dict[str, str]) -> Tuple[str, List[str]]:
+    """Reify a record's provenance as a PROV-O chain.
+
+    A flat foreign key ("this observation was recorded by agent 3") is not
+    provenance a PROV-O consumer can traverse: `prov:wasGeneratedBy` links
+    an Entity to an *Activity*, and the Agent hangs off the Activity via
+    `prov:wasAssociatedWith`. The source carries the endpoints but not the
+    Activity in between, so it is minted here — one per record, with a
+    derived IRI so the chain is stable across runs.
+
+    Returns (turtle block for the activity, extra statements for the
+    record). Both are empty when the record names no agent, because
+    inventing an activity with no responsible party would be fabricated
+    provenance rather than materialised provenance.
+    """
+    agent_prop = next(
+        (p for p in allowed
+         if p.kind == "Object Property" and p.target
+         and p.target in class_table
+         and ("agent" in p.column.lower() or "recorded_by" in p.column.lower()
+              or "initiated_by" in p.column.lower())),
+        None,
+    )
+    if agent_prop is None:
+        return "", []
+    agent_value = row.get(agent_prop.column)
+    if agent_value is None or str(agent_value).strip() == "":
+        return "", []
+
+    subject = _individual_iri(class_name, key)
+    activity = _individual_iri(f"{class_name}Derivation", key)
+    agent_iri = _individual_iri(agent_prop.target, agent_value)
+
+    generated_at = None
+    for col in _GENERATED_AT_COLUMNS:
+        if row.get(col):
+            generated_at = str(row[col])
+            break
+
+    record_statements = [
+        "  a prov:Entity",
+        f"  prov:wasGeneratedBy {activity}",
+        f"  prov:wasAttributedTo {agent_iri}",
+    ]
+    if generated_at:
+        record_statements.append(
+            f'  prov:generatedAtTime "{_escape(generated_at)}"^^xsd:dateTime')
+
+    activity_statements = [
+        "  a :DerivationActivity",
+        f"  prov:wasAssociatedWith {agent_iri}",
+        f"  prov:generated {subject}",
+    ]
+    if generated_at:
+        activity_statements.append(
+            f'  prov:startedAtTime "{_escape(generated_at)}"^^xsd:dateTime')
+    block = activity + "\n" + " ;\n".join(activity_statements) + " .\n"
+    return block, record_statements
+
+
 def _pk_column(connector, table: str) -> Optional[str]:
     """Primary-key column name, via the connector's row-dict interface."""
     try:
@@ -206,6 +302,8 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
         f'  dcterms:created "{NOW}"^^xsd:dateTime .\n\n',
     ]
 
+    prov_entity_classes = _prov_entity_classes(ont_dir)
+    n_prov_activities = 0
     n_individuals = 0
     n_triples = 0
     n_classes = 0
@@ -269,6 +367,13 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
             if label:
                 statements.append(f'  rdfs:label "{_escape(label)}"')
 
+            # PROV-O chain for provenance-bearing records.
+            prov_block = ""
+            if class_name in prov_entity_classes:
+                prov_block, prov_stmts = _prov_chain(
+                    class_name, key, row, allowed, class_table)
+                statements.extend(prov_stmts)
+
             for p in allowed:
                 value = row.get(p.column)
                 if value is None or str(value).strip() == "":
@@ -298,7 +403,11 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
 
             n_individuals += 1
             n_triples += len(statements)
-            lines.append(subject + "\n" + " ;\n".join(statements) + " .\n\n")
+            lines.append(subject + "\n" + " ;\n".join(statements) + " .\n")
+            if prov_block:
+                n_prov_activities += 1
+                lines.append(prov_block)
+            lines.append("\n")
 
     path = os.path.join(ont_dir, "instances.ttl")
     with open(path, "w") as f:
@@ -307,11 +416,15 @@ def generate_abox(intro, output_dir: str, mapping_path: str = "",
     print(f"  ✓ ABox instances       → {path}")
     print(f"    {n_individuals} individuals across {n_classes} classes, "
           f"{n_triples} assertions  (tier ceiling: {max_tier})")
+    if n_prov_activities:
+        print(f"    PROV-O chains: {n_prov_activities} activities reified "
+              f"(Entity -> Activity -> Agent)")
     if skipped_tiers:
         detail = ", ".join(f"{n} {tier}" for tier, n in sorted(skipped_tiers.items()))
         print(f"    Withheld above the tier ceiling: {detail}")
 
-    return {"individuals": n_individuals, "triples": n_triples, "classes": n_classes}
+    return {"individuals": n_individuals, "triples": n_triples,
+            "classes": n_classes, "prov_activities": n_prov_activities}
 
 
 def run_abox(db_path: str, output_dir: str, max_tier: str = "Confidential",

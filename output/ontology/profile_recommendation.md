@@ -9,7 +9,7 @@
 | OWL classes | 55 |
 | Data properties | 498 |
 | Object properties | 100 |
-| **Total axioms (est.)** | **3635** |
+| **Total axioms (est.)** | **3641** |
 
 ## Decision rationale
 

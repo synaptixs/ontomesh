@@ -300,7 +300,30 @@ What this phase fixed is the half that is unambiguously wrong: **the ABox now de
 - **~10** reference properties that exist but are never asserted, because the source column is empty.
 - **1** queries a class whose source table has no rows.
 
-Emitting a PROV-O chain from the ABox is the natural next piece of work and is worth more than the remaining vocabulary tail.
+### PROV-O chain in the ABox ✅ **DELIVERED** *(2026-07-26)*
+
+| Measure | Before | After |
+|---|---|---|
+| PROV-O triples in the ABox | **0** | reified chains for every provenance-bearing record |
+| `Entity → Activity → Agent` traversable | no | **yes** |
+| `cq_tests_returning_rows` | 4 | **5** |
+| SHACL violations vs instances | 208 | **167** |
+
+**A modelling bug in the TBox came first.** `:wasProducedBy` was declared `rdfs:subPropertyOf prov:wasGeneratedBy` with `rdfs:range :Agent`. In PROV-O, `wasGeneratedBy` points at an **Activity** — so that axiom inferred every agent was an Activity. It is now a subproperty of `prov:wasAttributedTo`, which is the Entity→Agent relation. The profile was also incomplete: `:Agent` was not aligned to `prov:Agent` and no Activity class existed, which is why no chain could be emitted at all. Added `:Agent rdfs:subClassOf prov:Agent` and a `:DerivationActivity`.
+
+**The Activity is minted, because the source has the endpoints but not the middle.** A flat foreign key ("recorded_by = 3") is not provenance a PROV-O consumer can traverse. One activity is reified per record, with a derived IRI so the chain is stable across runs. It is emitted **only when the record names an agent** — inventing an activity with no responsible party would be fabricated provenance rather than materialised provenance.
+
+**Driven by the TBox, not by table names.** The emitter reads which classes are `rdfs:subClassOf prov:Entity`. Aligning a new class to `prov:Entity` is enough to give its records a provenance chain; no change to the generator is needed.
+
+### Why the CQ count is 5 of 43, and why that is now the right number
+
+The residual is no longer vocabulary or modelling — it is **absent data**. 17 of 58 source tables have zero rows, and they are exactly the compliance, federation, runtime, memory, evolution and vector-retrieval subsystems those competency questions target. Two further PROV terms, `prov:wasInvalidatedBy` and `prov:wasInfluencedBy`, have no source at all: they describe supersession and cross-agent influence, and `memory_influence_log` is a table nothing ever writes to.
+
+Those questions cannot pass without seed data for those subsystems, which is a fixture problem rather than an ontology one. The suite is now honest about it: 11 pass, 32 fail, and each failure names something real.
+
+---
+
+*Phases 0–4 complete. Phase 5 (depth: time, units, participation, identity) and Phase 6 (governance maturity) remain.*
 
 Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
