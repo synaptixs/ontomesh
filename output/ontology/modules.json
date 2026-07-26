@@ -1,10 +1,10 @@
 {
-  "generated": "2026-07-26T17:44:01Z",
+  "generated": "2026-07-26T18:03:57Z",
   "module_count": 19,
-  "total_classes": 276,
-  "total_properties": 1064,
+  "total_classes": 270,
+  "total_properties": 1029,
   "cycles_detected": 0,
-  "iri_conflicts": 408,
+  "iri_conflicts": 387,
   "modules": [
     {
       "filename": "alignment.ttl",
@@ -65,8 +65,8 @@
       "version": "1.0.0",
       "version_iri": "https://ontology.example.com/enterprise/1.0.0",
       "imports": [],
-      "class_count": 63,
-      "property_count": 390
+      "class_count": 60,
+      "property_count": 372
     },
     {
       "filename": "events.ttl",
@@ -156,8 +156,8 @@
       "version": "1.0.0",
       "version_iri": "",
       "imports": [],
-      "class_count": 66,
-      "property_count": 342
+      "class_count": 63,
+      "property_count": 324
     },
     {
       "filename": "pharmaceuticals.ttl",
@@ -179,7 +179,7 @@
         "https://ontology.example.com/enterprise/"
       ],
       "class_count": 1,
-      "property_count": 6
+      "property_count": 7
     },
     {
       "filename": "tmf-sid-hierarchy.ttl",
@@ -381,19 +381,9 @@
       "enterprise.ttl",
       "materialised.ttl"
     ],
-    "https://ontology.example.com/enterprise/TmfExportJob": [
-      "enterprise.ttl",
-      "materialised.ttl",
-      "tmf630-task-bulk.ttl"
-    ],
     "https://ontology.example.com/enterprise/GeographicSite": [
       "enterprise.ttl",
       "materialised.ttl"
-    ],
-    "https://ontology.example.com/enterprise/TmfImportJob": [
-      "enterprise.ttl",
-      "materialised.ttl",
-      "tmf630-task-bulk.ttl"
     ],
     "https://ontology.example.com/enterprise/NetworkSliceProfile": [
       "enterprise.ttl",
@@ -470,11 +460,6 @@
     "https://ontology.example.com/enterprise/ServiceSpecification": [
       "enterprise.ttl",
       "materialised.ttl"
-    ],
-    "https://ontology.example.com/enterprise/TmfTask": [
-      "enterprise.ttl",
-      "materialised.ttl",
-      "tmf630-task-bulk.ttl"
     ],
     "https://ontology.example.com/enterprise/TroubleTicket": [
       "enterprise.ttl",
@@ -606,6 +591,18 @@
       "materialised.ttl"
     ],
     "https://ontology.example.com/enterprise/hasStoredAt": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEventIri": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasEventType": [
+      "enterprise.ttl",
+      "materialised.ttl"
+    ],
+    "https://ontology.example.com/enterprise/hasTitle": [
       "enterprise.ttl",
       "materialised.ttl"
     ]

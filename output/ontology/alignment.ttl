@@ -19,7 +19,7 @@
   rdfs:label "Ontology Alignment Module" ;
   rdfs:comment "Alignment axioms linking the generated ontology to DOLCE, FOAF, Schema.org, and SOSA." ;
   owl:imports <https://ontology.example.com/tmf/> ;
-  dcterms:created "2026-07-26T17:44:00Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T18:03:56Z"^^xsd:dateTime ;
   dcterms:description "Phase 2B: owl:equivalentClass and skos:exactMatch axioms for cross-ontology alignment." .
 
 # ═══════════════════════════════════════════════════════
@@ -206,10 +206,7 @@ sid:NetworkFunction
   owl:equivalentProperty <http://www.w3.org/ns/sosa/madeBySensor> ;
   rdfs:comment "sosa:madeBySensor — the agent making the observation is the sensor." .
 
-# ── Unresolved ─────────────────────────────────────────────
-# These alignments name entities that neither the enterprise
-# ontology nor the TMF SID module declares, so emitting them
-# would create IRIs nothing defines. Fix the alignment table or
-# generate the missing entity, then re-run.
-#   refersToResource
+:refersToResource
+  owl:equivalentProperty <http://www.w3.org/ns/sosa/hasFeatureOfInterest> ;
+  rdfs:comment "sosa:hasFeatureOfInterest — the resource being observed." .
 

@@ -134,7 +134,14 @@ def _alignment_unbound(graphs: Dict[str, rdflib.Graph]) -> int:
         known |= set(g.subjects())
     unbound = 0
     for path in align_paths:
-        subjects = {s for s in graphs[path].subjects() if isinstance(s, rdflib.URIRef)}
+        g = graphs[path]
+        # The module's own owl:Ontology declaration is a subject in this
+        # file and is not expected to exist elsewhere. Counting it made the
+        # metric bottom out at 1 rather than 0, which reads as one
+        # permanently dangling axiom when there are none.
+        own = set(g.subjects(rdflib.RDF.type, rdflib.OWL.Ontology))
+        subjects = {s for s in g.subjects()
+                    if isinstance(s, rdflib.URIRef) and s not in own}
         unbound += len([s for s in subjects if s not in known])
     return unbound
 

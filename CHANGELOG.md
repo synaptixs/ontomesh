@@ -6,6 +6,93 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [3.10.0] — 2026-07-26 · Ontology correctness, instance data, self-checking output
+
+A correctness release for the generated ontology itself. The pipeline was
+sound; the artifact it produced was not. Six phases of work, each measured
+against a committed baseline.
+
+### ⚠ Breaking
+
+- **Object-property IRIs changed.** The `Of` suffix is gone and only a
+  trailing `_id` is stripped, so `asset_id` yields `:asset` (was `:assetOf`)
+  and `asset_type_id` yields `:assetType` (was also `:assetOf` — the two
+  collapsed onto one IRI with contradictory domains). Saved SPARQL queries
+  against the old names need updating. The mapping workbook, the ontology
+  and the ABox now share one naming function, so they cannot drift apart.
+- **`PASS-STRUCTURAL` is removed.** A competency question returning zero rows
+  is no longer scored as a pass. Suites that relied on it will now report
+  real failures — that is the point.
+- **Compliance outcomes change.** Twelve requirements across the EU AI Act,
+  HIPAA §164.312, Basel IV/SR 11-7 and the Ofcom transparency code were
+  gated on `PASS-STRUCTURAL`, so they were satisfied by tests returning no
+  rows. Reported coverage was 100% with three regulations at a perfect
+  score; honest figures are 33–57%. **Previously generated evidence bundles
+  asserted compliance on the old basis and should be reviewed.**
+- Property-level `owl:minCardinality` triples (139 of them) are gone. A
+  cardinality outside an `owl:Restriction` is not an axiom; the same
+  information is now emitted as restrictions.
+
+### Added
+
+- **`--phase abox`** — materialises instance data from your rows via the
+  mapping workbook. `instances.ttl` carries individuals, reified PROV-O
+  chains, validity periods, united quantities and reified participation.
+  Sensitivity-tier gated, `Restricted` excluded by default.
+- **`--phase quality`** — OOPS!-style pitfall detection (10 checks),
+  structural metrics, and in-process consistency checking with `owlrl`. No
+  external reasoner binary required.
+- **`scripts/ontology_gate.py`** — a CI ratchet over 16 measurable artifact
+  properties, compared against a committed `ontology_baseline.json`. Fails
+  on regression rather than on the existence of known debt.
+- **`dimensions.ttl`** — OWL-Time bitemporal modelling (valid time kept
+  distinct from transaction time), QUDT-aligned quantities, and reified
+  n-ary participation.
+- **Real class expressions.** Event subclasses are now defined classes with
+  `owl:equivalentClass` restrictions, so a reasoner classifies into them.
+  244 `owl:Restriction` blocks where there were none.
+- **`owl:hasKey`** derived from UNIQUE constraints — 39 axioms where the
+  feature had never emitted one, because it read metadata columns no shipped
+  database populates.
+- **Versioning and deprecation** — `owl:priorVersion`,
+  `owl:backwardCompatibleWith`, `dcterms:license`, and `owl:deprecated`
+  tombstones so retired IRIs still resolve.
+- Industry templates now emit their declared `events:`, `values:`
+  enumerations (as closed `owl:oneOf` dataranges) and required-property
+  restrictions, all of which the generator previously read and discarded.
+
+### Fixed
+
+- **Every generated SKOS vocabulary failed to parse.** Two adjacent Turtle
+  string literals in an f-string produced an unterminated object.
+- **114 properties carried conjunctive multi-domain axioms.** `:hasCreatedAt`
+  had 43 domains, so one instance triple inferred 47 `rdf:type` assertions.
+  Properties are now declared once with a union domain.
+- **All 45 upper-ontology alignments were dangling** — minted under the TMF
+  namespace while describing enterprise classes. Subjects are now resolved
+  against the ontologies actually generated; 44 of 44 bind.
+- **20 malformed alignment IRIs** (`<fhir:MedicinalProduct>`) — the
+  templates' `external_alignments:` prefix map was never read.
+- Unsound `owl:AllDisjointClasses` over lifecycle phases, which made any
+  order that shipped unsatisfiable.
+- A self-referential `:DomainEvent rdfs:subClassOf :DomainEvent`, and an
+  `:EventTypeEvent` class minted from a CSV header row.
+- Object properties ranged at `owl:Thing`, which asserts nothing while
+  reading like a constraint.
+- `:wasProducedBy` was a subproperty of `prov:wasGeneratedBy` with an Agent
+  range, which inferred every agent was an Activity.
+
+### Changed
+
+- The governance scorecard has 36 criteria and **none are hardcoded**. Nine
+  passed a score literal on every run regardless of output; each now reads
+  the artifact it makes a claim about. The average moved 3.6 → 3.4, and the
+  lower number is the honest one.
+- Consistency checking no longer requires the ROBOT binary.
+- `--phase all` includes `abox` and `quality`.
+
+---
+
 ## [3.9.0] — 2026-06-22 · Liquid Glass theme
 
 ### Added

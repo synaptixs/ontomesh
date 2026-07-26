@@ -4,7 +4,7 @@
     "turtle_parse_failures": 0,
     "multi_domain_properties": 0,
     "worst_domain_count": 0,
-    "alignment_subjects_unbound": 1,
+    "alignment_subjects_unbound": 0,
     "malformed_iris": 0,
     "object_properties_ranged_at_thing": 0,
     "owl_restrictions": 244,

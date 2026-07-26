@@ -100,3 +100,13 @@
   rdfs:comment "The asset this observation is about." ;
   :sensitivityTier :Internal .
 
+# Same alias pattern for resources. The alignment table maps this name to
+# sosa:hasFeatureOfInterest; without the declaration that axiom had no
+# subject to attach to.
+:refersToResource
+  a owl:ObjectProperty ;
+  owl:equivalentProperty :resource ;
+  rdfs:label "refers to resource" ;
+  rdfs:comment "The resource this observation is about." ;
+  :sensitivityTier :Internal .
+

@@ -251,6 +251,10 @@ SELECT ?role ?agent WHERE {
 ## Instance data (`instances.ttl`)
 
 ```bash
+# Default ceiling is Internal — conservative on purpose
+python toolkit.py --phase abox --db db/enterprise.db --out output
+
+# Raise it deliberately when you need Confidential columns materialised
 python toolkit.py --phase abox --db db/enterprise.db --out output \
                   --max-tier Confidential
 ```

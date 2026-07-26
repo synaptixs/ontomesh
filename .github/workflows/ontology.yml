@@ -56,7 +56,7 @@ jobs:
       # Phase 4 — instance data. Without it the SPARQL suite runs against a
       # TBox alone and every data question returns nothing.
       - name: Phase ABox — materialise instances
-        run: python toolkit.py --phase abox --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }} --max-tier Confidential
+        run: python toolkit.py --phase abox --db ${{ env.DB_PATH }} --out ${{ env.OUT_PATH }}
 
       # Phase 6 — pitfalls, structural metrics, consistency. Feeds both the
       # governance scorecard and the artifact gate.

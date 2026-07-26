@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Insurance Ontology Module" ;
   rdfs:comment "Domain template for P&C, life, health, and specialty insurance carriers. Covers policy lifecycle, underwriting, claims management, reinsurance, and regulatory reporting. Aligned with ACORD (Association for Cooperative Operations Research and Development) standards." ;
-  dcterms:created "2026-07-26T17:44:01Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T18:03:56Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 

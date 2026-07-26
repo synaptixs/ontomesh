@@ -10,7 +10,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Ontology — Master Module" ;
   rdfs:comment "Auto-generated master ontology that owl:imports all modules." ;
-  dcterms:created "2026-07-26T17:44:01Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T18:03:57Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — modular_owl.py" ;
   owl:imports <https://ontology.example.com/tmf/alignment/> ;
   owl:imports <https://ontology.example.com/enterprise/dimensions/> ;

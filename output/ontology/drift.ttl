@@ -14,7 +14,7 @@
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Drift Detection Ontology Extension
-#  Phase 3 · Sprint S14 · Generated 2026-07-26T17:44:01Z
+#  Phase 3 · Sprint S14 · Generated 2026-07-26T18:03:56Z
 # ═══════════════════════════════════════════════════════════════════════════
 
 <https://ontology.example.com/enterprise/drift/>
@@ -24,7 +24,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Drift Detection Ontology Extension" ;
   rdfs:comment "ML monitoring metrics as first-class OWL citizens — PSI, KL/JS, calibration, log template shift." ;
-  dcterms:created "2026-07-26T17:44:01Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T18:03:56Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Phase 3 Auto-generated" .
 
 
