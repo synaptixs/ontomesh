@@ -8,12 +8,14 @@
     "malformed_iris": 0,
     "object_properties_ranged_at_thing": 0,
     "owl_restrictions": 244,
-    "cq_tests_returning_rows": 5,
-    "cq_tests_failing": 32,
+    "cq_tests_returning_rows": 4,
+    "cq_tests_failing": 33,
     "prov_chains": 4,
-    "temporal_extents": 22,
+    "temporal_extents": 20,
     "quantity_values": 10,
-    "participations": 6
+    "participations": 6,
+    "pitfalls_firing": 3,
+    "pitfalls_critical": 0
   },
   "directions": {
     "turtle_parse_failures": "lower_is_better",
@@ -28,7 +30,9 @@
     "prov_chains": "higher_is_better",
     "temporal_extents": "higher_is_better",
     "quantity_values": "higher_is_better",
-    "participations": "higher_is_better"
+    "participations": "higher_is_better",
+    "pitfalls_firing": "lower_is_better",
+    "pitfalls_critical": "lower_is_better"
   },
   "phase_owner": {
     "turtle_parse_failures": "Phase 1",
@@ -43,6 +47,8 @@
     "prov_chains": "Phase 4",
     "temporal_extents": "Phase 5",
     "quantity_values": "Phase 5",
-    "participations": "Phase 5"
+    "participations": "Phase 5",
+    "pitfalls_firing": "Phase 6",
+    "pitfalls_critical": "Phase 6"
   }
 }

@@ -177,6 +177,27 @@ def _cq_rows(output_dir: str) -> Tuple[int, int, int]:
     return returning, failing, len(rows)
 
 
+def _pitfall_counts(output_dir: str) -> Tuple[int, int]:
+    """(firing, critical-firing) from the Phase 6 quality report."""
+    path = os.path.join(output_dir, "reports", "ontology_quality.csv")
+    if not os.path.isfile(path):
+        return (0, 0)
+    firing = critical = 0
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            if row.get("kind") != "pitfall":
+                continue
+            try:
+                count = int(row.get("count") or 0)
+            except ValueError:
+                continue
+            if count:
+                firing += 1
+                if (row.get("severity") or "").strip() == "CRITICAL":
+                    critical += 1
+    return (firing, critical)
+
+
 def collect(output_dir: str) -> Dict[str, Any]:
     paths = _turtle_files(output_dir)
     graphs, failures = _parse_all(paths)
@@ -198,6 +219,9 @@ def collect(output_dir: str) -> Dict[str, Any]:
     quantity_values = _count_predicate_objects(authored, rdflib.RDF.type, ns.QuantityValue)
     participations = _count_predicate_objects(authored, rdflib.RDF.type, ns.Participation)
 
+    # Phase 6: pitfalls firing, from the quality report.
+    pitfalls_firing, pitfalls_critical = _pitfall_counts(output_dir)
+
     metrics = {
         "turtle_parse_failures":       len(failures),
         "multi_domain_properties":     multi_count,
@@ -212,6 +236,8 @@ def collect(output_dir: str) -> Dict[str, Any]:
         "temporal_extents":            temporal_extents,
         "quantity_values":             quantity_values,
         "participations":              participations,
+        "pitfalls_firing":             pitfalls_firing,
+        "pitfalls_critical":           pitfalls_critical,
     }
     detail = {
         "turtle_files_scanned": len(paths),
@@ -236,6 +262,8 @@ DIRECTIONS: Dict[str, str] = {
     "temporal_extents":            HIGHER_IS_BETTER,
     "quantity_values":             HIGHER_IS_BETTER,
     "participations":              HIGHER_IS_BETTER,
+    "pitfalls_firing":             LOWER_IS_BETTER,
+    "pitfalls_critical":           LOWER_IS_BETTER,
 }
 
 # Metrics that must reach zero before the roadmap phase that owns them closes.
@@ -253,6 +281,8 @@ PHASE_OWNER = {
     "temporal_extents":            "Phase 5",
     "quantity_values":             "Phase 5",
     "participations":              "Phase 5",
+    "pitfalls_firing":             "Phase 6",
+    "pitfalls_critical":           "Phase 6",
 }
 
 

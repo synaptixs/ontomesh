@@ -388,7 +388,33 @@ Governance holds at **3.32/5.0**. Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 ---
 
-## Phase 6 · Governance maturity
+## Phase 6 · Governance maturity ✅ **DELIVERED**
+
+*Branch `phase0/ontology-quality-gates` · 2026-07-26*
+
+| Capability | Before | After |
+|---|---|---|
+| OOPS! pitfalls checked | **0 of 41** | **10**, ratcheted (`pitfalls_firing`, `pitfalls_critical`) |
+| Structural metrics | none | depth, richness, leaves, defined classes |
+| Consistency check | ROBOT absent → **2/5 forever** | owlrl in-process → **5/5, consistent** |
+| `dcterms:license` | absent | declared on every module |
+| `owl:priorVersion` | never emitted | emitted when a prior version exists |
+| Deprecation lifecycle | none | `owl:deprecated` tombstones |
+| Governance criteria | 34 | **36**, none hardcoded |
+
+**Phase 0 made the gate honest; Phase 6 makes the scorecard honest.** The two bookend each other: the scorecard now parses the graph it is scoring.
+
+**The detector immediately found real defects — including in my own work.** `P41` fired on all five modules for a missing `dcterms:license`, which is now declared. `P11` fires 17 times for properties without a domain or range — that is correct and deliberate: the semantic aliases from the vocabulary reconciliation carry no domain (a second `rdfs:domain` would conjoin, per Phase 2), and unresolvable FK ranges are omitted rather than written as a vacuous `owl:Thing`. The check is telling the truth about a considered trade-off.
+
+**It also confirmed the earlier phases held.** `P19` (conjunctive multi-domain) and `P24` (self-subclass) both report **zero** — independently re-verifying the Phase 1 and Phase 2 fixes through a different code path than the gate uses.
+
+**Consistency no longer depends on a binary nobody has.** The old criterion asked whether ROBOT was installed — a question about the machine, not the ontology — and since ROBOT is not bundled it answered "not found" on every run and scored 2/5 permanently. `owlrl` is already a dependency of the materialiser and answers the real question in-process: **no unsatisfiable classes** across a 12,218-triple closure.
+
+**Versioning and deprecation are real.** The generator reads the previously emitted ontology before overwriting it, so a new release carries `owl:priorVersion` / `owl:backwardCompatibleWith`, and any entity that has disappeared is retained as an `owl:deprecated` tombstone — verified by injecting a class into a prior version and confirming it was tombstoned rather than silently dropped. Held IRIs still resolve; consumers can see that a term was retired rather than merely missing.
+
+**`--phase abox` and `--phase quality` are now in the `all` sequence and in CI**, so the ABox and the quality report are exercised on every run rather than only when invoked by hand.
+
+Governance: **3.39/5.0** over 36 criteria. Full suite: 1006 passed, 9 skipped, 1 xfailed.
 
 **Goal:** the scorecard measures the ontology, and change is managed.
 

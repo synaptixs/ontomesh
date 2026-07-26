@@ -11,8 +11,8 @@
   a owl:Ontology ;
   owl:imports <https://ontology.example.com/enterprise/> , <https://ontology.example.com/enterprise/dimensions/> ;
   rdfs:label "Enterprise ABox" ;
-  rdfs:comment "Instance data materialised from the relational source via the logical-physical mapping. Tier ceiling: Confidential." ;
-  dcterms:created "2026-07-26T17:17:59Z"^^xsd:dateTime .
+  rdfs:comment "Instance data materialised from the relational source via the logical-physical mapping. Tier ceiling: Internal." ;
+  dcterms:created "2026-07-26T17:28:44Z"^^xsd:dateTime .
 
 # ── Agent (5 individuals) ─────────────────────────────────────────
 <https://ontology.example.com/enterprise/Agent/1>
@@ -24,27 +24,20 @@
   :hasAgentType "HUMAN" ;
   :hasAuthorizedTiers "Public,Internal,Confidential" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
 
 <https://ontology.example.com/enterprise/Agent/2>
   a :Agent ;
   :sensitivityTier :Internal ;
   rdfs:label "ML Monitor Agent" ;
-  :hasValidityPeriod <https://ontology.example.com/enterprise/AgentValidity/2> ;
   :hasAgentIri "https://gtc.example.com/agents/ml-monitor-agent"^^xsd:anyURI ;
   :hasName "ML Monitor Agent" ;
   :hasAgentType "AI_AGENT" ;
-  :hasCredentialExpiry "2026-12-31T23:59:59Z"^^xsd:dateTime ;
   :hasAuthorizedTiers "Public,Internal" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
-<https://ontology.example.com/enterprise/AgentValidity/2>
-  a :TemporalExtent ;
-  :validUntil "2026-12-31T23:59:59Z"^^xsd:dateTime ;
-  time:hasEnd [ a time:Instant ;
-                time:inXSDDateTime "2026-12-31T23:59:59Z"^^xsd:dateTime ] .
 
 <https://ontology.example.com/enterprise/Agent/3>
   a :Agent ;
@@ -55,7 +48,7 @@
   :hasAgentType "SENSOR" ;
   :hasAuthorizedTiers "Public,Internal" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
 
 <https://ontology.example.com/enterprise/Agent/4>
@@ -67,27 +60,20 @@
   :hasAgentType "SYSTEM" ;
   :hasAuthorizedTiers "Public,Internal,Confidential" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
 
 <https://ontology.example.com/enterprise/Agent/5>
   a :Agent ;
   :sensitivityTier :Internal ;
   rdfs:label "Compliance Audit Bot" ;
-  :hasValidityPeriod <https://ontology.example.com/enterprise/AgentValidity/5> ;
   :hasAgentIri "https://gtc.example.com/agents/audit-bot"^^xsd:anyURI ;
   :hasName "Compliance Audit Bot" ;
   :hasAgentType "AI_AGENT" ;
-  :hasCredentialExpiry "2026-06-30T23:59:59Z"^^xsd:dateTime ;
   :hasAuthorizedTiers "Public,Internal,Confidential" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
-<https://ontology.example.com/enterprise/AgentValidity/5>
-  a :TemporalExtent ;
-  :validUntil "2026-06-30T23:59:59Z"^^xsd:dateTime ;
-  time:hasEnd [ a time:Instant ;
-                time:inXSDDateTime "2026-06-30T23:59:59Z"^^xsd:dateTime ] .
 
 # ── AgentRoles (4 individuals) ────────────────────────────────────
 <https://ontology.example.com/enterprise/AgentRoles/1>
@@ -156,7 +142,7 @@
   :hasStatus "Active" ;
   :hasValidFrom "2024-04-01" ;
   :hasValidUntil "2025-04-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :partyA <https://ontology.example.com/enterprise/Party/1> ;
   :partyB <https://ontology.example.com/enterprise/Party/2> .
 <https://ontology.example.com/enterprise/AgreementValidity/1>
@@ -180,7 +166,7 @@
   :hasStatus "Active" ;
   :hasValidFrom "2024-05-15" ;
   :hasValidUntil "2025-05-15" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :partyA <https://ontology.example.com/enterprise/Party/1> ;
   :partyB <https://ontology.example.com/enterprise/Party/3> .
 <https://ontology.example.com/enterprise/AgreementValidity/2>
@@ -205,7 +191,7 @@
   :hasRaisedAt "2026-04-10T02:14:00Z"^^xsd:dateTime ;
   :hasAcknowledgedAt "2026-04-10T02:16:00Z"^^xsd:dateTime ;
   :hasClearedAt "2026-04-10T05:44:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :sourceResource <https://ontology.example.com/enterprise/Resource/7> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/6> .
 
@@ -219,7 +205,7 @@
   :hasSpecificProblem "UPF East 01 memory utilization exceeded 90% threshold" ;
   :hasAlarmState "Active" ;
   :hasRaisedAt "2026-04-15T01:05:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :sourceResource <https://ontology.example.com/enterprise/Resource/3> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/6> .
 
@@ -234,7 +220,7 @@
   :hasAlarmState "Acknowledged" ;
   :hasRaisedAt "2026-04-12T10:00:00Z"^^xsd:dateTime ;
   :hasAcknowledgedAt "2026-04-12T10:15:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :sourceResource <https://ontology.example.com/enterprise/Resource/6> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/6> .
 
@@ -248,8 +234,8 @@
   :hasLocationCode "REGION-EAST" ;
   :hasStatus "ACTIVE" ;
   :hasCommissionedAt "2024-01-15"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :assetType <https://ontology.example.com/enterprise/AssetType/2> ;
   :ownerOrg <https://ontology.example.com/enterprise/Organization/1> ;
   :operatorOrg <https://ontology.example.com/enterprise/Organization/2> .
@@ -263,8 +249,8 @@
   :hasLocationCode "REGION-EAST" ;
   :hasStatus "ACTIVE" ;
   :hasCommissionedAt "2024-01-15"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :assetType <https://ontology.example.com/enterprise/AssetType/3> ;
   :ownerOrg <https://ontology.example.com/enterprise/Organization/1> ;
   :operatorOrg <https://ontology.example.com/enterprise/Organization/2> .
@@ -278,8 +264,8 @@
   :hasLocationCode "REGION-EAST" ;
   :hasStatus "ACTIVE" ;
   :hasCommissionedAt "2024-01-15"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :assetType <https://ontology.example.com/enterprise/AssetType/4> ;
   :ownerOrg <https://ontology.example.com/enterprise/Organization/1> ;
   :operatorOrg <https://ontology.example.com/enterprise/Organization/2> .
@@ -293,8 +279,8 @@
   :hasLocationCode "SITE-042" ;
   :hasStatus "ACTIVE" ;
   :hasCommissionedAt "2023-06-01"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :assetType <https://ontology.example.com/enterprise/AssetType/5> ;
   :ownerOrg <https://ontology.example.com/enterprise/Organization/1> ;
   :operatorOrg <https://ontology.example.com/enterprise/Organization/2> .
@@ -308,8 +294,8 @@
   :hasLocationCode "SITE-043" ;
   :hasStatus "UNDER_MAINTENANCE" ;
   :hasCommissionedAt "2023-06-01"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :assetType <https://ontology.example.com/enterprise/AssetType/5> ;
   :ownerOrg <https://ontology.example.com/enterprise/Organization/1> ;
   :operatorOrg <https://ontology.example.com/enterprise/Organization/2> .
@@ -323,8 +309,8 @@
   :hasLocationCode "SITE-042" ;
   :hasStatus "ACTIVE" ;
   :hasCommissionedAt "2024-03-01"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :assetType <https://ontology.example.com/enterprise/AssetType/8> ;
   :ownerOrg <https://ontology.example.com/enterprise/Organization/1> ;
   :operatorOrg <https://ontology.example.com/enterprise/Organization/2> .
@@ -337,7 +323,7 @@
   :hasCode "NETWORK_ELEMENT" ;
   :hasLabel "Network Element" ;
   :hasDescription "Any physical or virtual network function node." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/AssetType/2>
   a :AssetType ;
@@ -346,7 +332,7 @@
   :hasCode "AMF" ;
   :hasLabel "Access and Mobility Function" ;
   :hasDescription "5G core AMF network function." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :parentType <https://ontology.example.com/enterprise/AssetType/1> .
 
 <https://ontology.example.com/enterprise/AssetType/3>
@@ -356,7 +342,7 @@
   :hasCode "SMF" ;
   :hasLabel "Session Management Function" ;
   :hasDescription "5G core SMF network function." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :parentType <https://ontology.example.com/enterprise/AssetType/1> .
 
 <https://ontology.example.com/enterprise/AssetType/4>
@@ -366,7 +352,7 @@
   :hasCode "UPF" ;
   :hasLabel "User Plane Function" ;
   :hasDescription "5G core UPF network function." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :parentType <https://ontology.example.com/enterprise/AssetType/1> .
 
 <https://ontology.example.com/enterprise/AssetType/5>
@@ -376,7 +362,7 @@
   :hasCode "RAN_NODE" ;
   :hasLabel "RAN Node" ;
   :hasDescription "Radio access network node (gNB, eNB)." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :parentType <https://ontology.example.com/enterprise/AssetType/1> .
 
 <https://ontology.example.com/enterprise/AssetType/6>
@@ -387,7 +373,7 @@
   :hasLabel "Transmission Link" ;
   :hasDescription "Fibre or microwave transmission segment." ;
   :hasUnitOfMeasure "Gbps" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :parentType <https://ontology.example.com/enterprise/AssetType/1> .
 
 <https://ontology.example.com/enterprise/AssetType/7>
@@ -397,7 +383,7 @@
   :hasCode "SERVER" ;
   :hasLabel "Compute Server" ;
   :hasDescription "Physical or virtual compute host." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/AssetType/8>
   a :AssetType ;
@@ -406,7 +392,7 @@
   :hasCode "SENSOR" ;
   :hasLabel "Monitoring Sensor" ;
   :hasDescription "A device that records measurements against assets." ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── ConflictEvent (2 individuals) ─────────────────────────────────
 <https://ontology.example.com/enterprise/ConflictEvent/1>
@@ -425,7 +411,7 @@
   :hasStatus "Resolved" ;
   :hasDetectedAt "2026-04-15T01:05:00Z"^^xsd:dateTime ;
   :hasResolvedAt "2026-04-15T01:05:01Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ConflictEvent/2>
   a :ConflictEvent ;
@@ -441,7 +427,7 @@
   :hasInvalidationRecorded 0 ;
   :hasStatus "Escalated" ;
   :hasDetectedAt "2026-04-10T02:14:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── CustomerAccount (2 individuals) ───────────────────────────────
 <https://ontology.example.com/enterprise/CustomerAccount/1>
@@ -454,7 +440,7 @@
   :hasAccountType "Enterprise" ;
   :hasStatus "Active" ;
   :hasCurrencyCode "USD" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/2> .
 
 <https://ontology.example.com/enterprise/CustomerAccount/2>
@@ -467,7 +453,7 @@
   :hasAccountType "Enterprise" ;
   :hasStatus "Active" ;
   :hasCurrencyCode "USD" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/3> .
 
 # ── CustomerBill (3 individuals) ──────────────────────────────────
@@ -486,8 +472,8 @@
   :hasCurrencyCode "USD" ;
   :hasState "Sent" ;
   :hasDisputed 0 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :customerAccount <https://ontology.example.com/enterprise/CustomerAccount/1> .
 
 <https://ontology.example.com/enterprise/CustomerBill/2>
@@ -505,8 +491,8 @@
   :hasCurrencyCode "USD" ;
   :hasState "Sent" ;
   :hasDisputed 0 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :customerAccount <https://ontology.example.com/enterprise/CustomerAccount/2> .
 
 <https://ontology.example.com/enterprise/CustomerBill/3>
@@ -524,8 +510,8 @@
   :hasCurrencyCode "USD" ;
   :hasState "Settled" ;
   :hasDisputed 0 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :customerAccount <https://ontology.example.com/enterprise/CustomerAccount/1> .
 
 # ── DomainEvent (4 individuals) ───────────────────────────────────
@@ -541,8 +527,8 @@
   :hasOutcome "RESOLVED" ;
   :hasStartedAt "2026-04-10T02:15:00Z"^^xsd:dateTime ;
   :hasCompletedAt "2026-04-10T05:44:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/5> ;
   :initiatedBy <https://ontology.example.com/enterprise/Agent/1> ;
   :policy <https://ontology.example.com/enterprise/Policy/4> .
@@ -562,8 +548,8 @@
   :hasTitle "Scheduled maintenance — UPF East" ;
   :hasStatus "IN_PROGRESS" ;
   :hasStartedAt "2026-04-15T01:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/3> ;
   :initiatedBy <https://ontology.example.com/enterprise/Agent/1> ;
   :policy <https://ontology.example.com/enterprise/Policy/1> .
@@ -585,8 +571,8 @@
   :hasOutcome "COMPLIANT" ;
   :hasStartedAt "2026-04-01T09:00:00Z"^^xsd:dateTime ;
   :hasCompletedAt "2026-04-01T11:30:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
   :initiatedBy <https://ontology.example.com/enterprise/Agent/5> ;
   :policy <https://ontology.example.com/enterprise/Policy/3> .
@@ -608,8 +594,8 @@
   :hasOutcome "PASS" ;
   :hasStartedAt "2026-04-12T10:00:00Z"^^xsd:dateTime ;
   :hasCompletedAt "2026-04-12T11:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/4> ;
   :initiatedBy <https://ontology.example.com/enterprise/Agent/1> .
 <https://ontology.example.com/enterprise/DomainEventValidity/4>
@@ -627,7 +613,7 @@
   :participatingAgent <https://ontology.example.com/enterprise/Agent/1> ;
   :participationRole "INITIATOR" ;
   :hasParticipationRole "INITIATOR" ;
-  :hasJoinedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasJoinedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :event <https://ontology.example.com/enterprise/DomainEvent/1> ;
   :agent <https://ontology.example.com/enterprise/Agent/1> .
 
@@ -639,7 +625,7 @@
   :participatingAgent <https://ontology.example.com/enterprise/Agent/2> ;
   :participationRole "OBSERVER" ;
   :hasParticipationRole "OBSERVER" ;
-  :hasJoinedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasJoinedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :event <https://ontology.example.com/enterprise/DomainEvent/1> ;
   :agent <https://ontology.example.com/enterprise/Agent/2> .
 
@@ -651,7 +637,7 @@
   :participatingAgent <https://ontology.example.com/enterprise/Agent/1> ;
   :participationRole "EXECUTOR" ;
   :hasParticipationRole "EXECUTOR" ;
-  :hasJoinedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasJoinedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :event <https://ontology.example.com/enterprise/DomainEvent/2> ;
   :agent <https://ontology.example.com/enterprise/Agent/1> .
 
@@ -663,7 +649,7 @@
   :participatingAgent <https://ontology.example.com/enterprise/Agent/5> ;
   :participationRole "INITIATOR" ;
   :hasParticipationRole "INITIATOR" ;
-  :hasJoinedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasJoinedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :event <https://ontology.example.com/enterprise/DomainEvent/3> ;
   :agent <https://ontology.example.com/enterprise/Agent/5> .
 
@@ -675,7 +661,7 @@
   :participatingAgent <https://ontology.example.com/enterprise/Agent/1> ;
   :participationRole "INITIATOR" ;
   :hasParticipationRole "INITIATOR" ;
-  :hasJoinedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasJoinedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :event <https://ontology.example.com/enterprise/DomainEvent/4> ;
   :agent <https://ontology.example.com/enterprise/Agent/1> .
 
@@ -687,7 +673,7 @@
   :participatingAgent <https://ontology.example.com/enterprise/Agent/3> ;
   :participationRole "OBSERVER" ;
   :hasParticipationRole "OBSERVER" ;
-  :hasJoinedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasJoinedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :event <https://ontology.example.com/enterprise/DomainEvent/4> ;
   :agent <https://ontology.example.com/enterprise/Agent/3> .
 
@@ -705,8 +691,8 @@
   :hasRetryPolicy "{\"max_retries\":3,\"backoff_seconds\":30}" ;
   :hasDeliveryFailures 0 ;
   :hasValidForStart "2024-04-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :subscriberParty <https://ontology.example.com/enterprise/Party/2> .
 
 <https://ontology.example.com/enterprise/EventSubscription/2>
@@ -722,8 +708,8 @@
   :hasRetryPolicy "{\"max_retries\":3,\"backoff_seconds\":10}" ;
   :hasDeliveryFailures 0 ;
   :hasValidForStart "2024-04-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :subscriberParty <https://ontology.example.com/enterprise/Party/2> .
 
 <https://ontology.example.com/enterprise/EventSubscription/3>
@@ -739,8 +725,8 @@
   :hasRetryPolicy "{\"max_retries\":5,\"backoff_seconds\":5}" ;
   :hasDeliveryFailures 0 ;
   :hasValidForStart "2024-03-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :subscriberParty <https://ontology.example.com/enterprise/Party/6> .
 
 # ── GeographicLocation (5 individuals) ────────────────────────────
@@ -757,7 +743,7 @@
   :hasLatitude 40.7128 ;
   :hasLongitude -74.006 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/GeographicLocation/2>
   a :GeographicLocation ;
@@ -772,7 +758,7 @@
   :hasLatitude 37.3382 ;
   :hasLongitude -121.8863 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/GeographicLocation/3>
   a :GeographicLocation ;
@@ -787,7 +773,7 @@
   :hasLatitude 40.6501 ;
   :hasLongitude -73.9496 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/GeographicLocation/4>
   a :GeographicLocation ;
@@ -802,7 +788,7 @@
   :hasLatitude 40.7282 ;
   :hasLongitude -73.7949 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/GeographicLocation/5>
   a :GeographicLocation ;
@@ -817,7 +803,7 @@
   :hasLatitude 40.758 ;
   :hasLongitude -73.9855 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── GeographicSite (4 individuals) ────────────────────────────────
 <https://ontology.example.com/enterprise/GeographicSite/1>
@@ -835,8 +821,8 @@
   :hasOperationalStatus "Operational" ;
   :hasLatitude 40.7128 ;
   :hasLongitude -74.006 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> ;
   :ownerParty <https://ontology.example.com/enterprise/Party/1> .
 
@@ -855,8 +841,8 @@
   :hasOperationalStatus "Operational" ;
   :hasLatitude 37.3382 ;
   :hasLongitude -121.8863 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/2> ;
   :ownerParty <https://ontology.example.com/enterprise/Party/1> .
 
@@ -875,8 +861,8 @@
   :hasOperationalStatus "Operational" ;
   :hasLatitude 40.6501 ;
   :hasLongitude -73.9496 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/3> ;
   :ownerParty <https://ontology.example.com/enterprise/Party/1> .
 
@@ -895,8 +881,8 @@
   :hasOperationalStatus "Operational" ;
   :hasLatitude 40.7282 ;
   :hasLongitude -73.7949 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/4> ;
   :ownerParty <https://ontology.example.com/enterprise/Party/1> .
 
@@ -916,8 +902,8 @@
   :hasReliabilityTarget 99.9 ;
   :hasMaxDevices 10000 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/8> ;
   :agreement <https://ontology.example.com/enterprise/Agreement/1> .
 
@@ -936,8 +922,8 @@
   :hasReliabilityTarget 99.9999 ;
   :hasMaxDevices 500 ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/9> .
 
 # ── ObservationRecord (4 individuals) ─────────────────────────────
@@ -953,11 +939,10 @@
   :hasObservationType "PACKET_LOSS_RATE" ;
   :hasNumericValue 18.7 ;
   :hasUnitOfMeasure "percent" ;
-  :hasConfidenceScore 0.98 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/metrics/ran043"^^xsd:anyURI ;
   :hasObservedAt "2026-04-10T02:14:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/5> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/1> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/2> .
@@ -983,11 +968,10 @@
   :hasObservationType "AVAILABILITY" ;
   :hasNumericValue 99.997 ;
   :hasUnitOfMeasure "percent" ;
-  :hasConfidenceScore 0.99 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/metrics/amf001"^^xsd:anyURI ;
   :hasObservedAt "2026-04-10T00:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/4> .
 <https://ontology.example.com/enterprise/ObservationRecordQuantity/2>
@@ -1012,10 +996,9 @@
   :hasObservationType "RF_SIGNAL_STRENGTH" ;
   :hasNumericValue -72.4 ;
   :hasUnitOfMeasure "dBm" ;
-  :hasConfidenceScore 0.94 ;
   :hasDerivationMethod "MEASURED" ;
   :hasObservedAt "2026-04-12T10:05:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/4> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/4> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/3> .
@@ -1041,11 +1024,10 @@
   :hasObservationType "COMPLIANCE_SCORE" ;
   :hasNumericValue 0.96 ;
   :hasUnitOfMeasure "score" ;
-  :hasConfidenceScore 0.91 ;
   :hasDerivationMethod "SYNTHESIZED" ;
   :hasSourceRef "https://audit.gtc.example.com/q1-2026"^^xsd:anyURI ;
   :hasObservedAt "2026-04-01T11:25:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/3> ;
   :recordedBy <https://ontology.example.com/enterprise/Agent/5> .
@@ -1068,8 +1050,8 @@
   :hasOrgType "INTERNAL" ;
   :hasJurisdiction "US" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Organization/2>
   a :Organization ;
@@ -1079,8 +1061,8 @@
   :hasOrgType "INTERNAL" ;
   :hasJurisdiction "US" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Organization/3>
   a :Organization ;
@@ -1090,8 +1072,8 @@
   :hasOrgType "SUPPLIER" ;
   :hasJurisdiction "DE" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Organization/4>
   a :Organization ;
@@ -1101,89 +1083,83 @@
   :hasOrgType "PARTNER" ;
   :hasJurisdiction "EU" ;
   :hasActive true ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── Party (6 individuals) ─────────────────────────────────────────
 <https://ontology.example.com/enterprise/Party/1>
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "Global Telecom Corp" ;
-  :hasPartyIri "https://gtc.example.com/parties/gtc-operator"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "Global Telecom Corp" ;
   :hasTradingName "GTC" ;
   :hasOrgType "Operator" ;
   :hasEmail "ops@gtc.example.com" ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/5> .
 
 <https://ontology.example.com/enterprise/Party/2>
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "Acme Corporation" ;
-  :hasPartyIri "https://gtc.example.com/parties/acme-corp"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "Acme Corporation" ;
   :hasTradingName "Acme" ;
   :hasOrgType "Enterprise Customer" ;
   :hasEmail "it@acme.example.com" ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Party/3>
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "SmartCity IoT Ltd" ;
-  :hasPartyIri "https://gtc.example.com/parties/smartcity-iot"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "SmartCity IoT Ltd" ;
   :hasTradingName "SmartCity IoT" ;
   :hasOrgType "Enterprise Customer" ;
   :hasEmail "connect@smartcity.example.com" ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Party/4>
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "Vendor Alpha GmbH" ;
-  :hasPartyIri "https://gtc.example.com/parties/vendor-alpha"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "Vendor Alpha GmbH" ;
   :hasTradingName "Vendor Alpha" ;
   :hasOrgType "Vendor" ;
   :hasEmail "support@vendor-alpha.example.de" ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Party/5>
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "NOC Engineer 01" ;
-  :hasPartyIri "https://gtc.example.com/parties/noc-eng-01"^^xsd:anyURI ;
   :hasPartyType "INDIVIDUAL" ;
   :hasName "NOC Engineer 01" ;
   :hasEmail "noc1@gtc.example.com" ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/Party/6>
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "ML Monitor Agent" ;
-  :hasPartyIri "https://gtc.example.com/parties/ml-monitor-agent"^^xsd:anyURI ;
   :hasPartyType "INDIVIDUAL" ;
   :hasName "ML Monitor Agent" ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── PartyRole (5 individuals) ─────────────────────────────────────
 <https://ontology.example.com/enterprise/PartyRole/1>
@@ -1194,7 +1170,7 @@
   :hasRoleType "OperatingCompany" ;
   :hasStatus "Initialized" ;
   :hasValidFrom "2020-01-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/1> .
 <https://ontology.example.com/enterprise/PartyRoleValidity/1>
   a :TemporalExtent ;
@@ -1210,7 +1186,7 @@
   :hasRoleType "BusinessCustomer" ;
   :hasStatus "Initialized" ;
   :hasValidFrom "2024-01-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/2> .
 <https://ontology.example.com/enterprise/PartyRoleValidity/2>
   a :TemporalExtent ;
@@ -1226,7 +1202,7 @@
   :hasRoleType "BusinessCustomer" ;
   :hasStatus "Initialized" ;
   :hasValidFrom "2024-05-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/3> .
 <https://ontology.example.com/enterprise/PartyRoleValidity/3>
   a :TemporalExtent ;
@@ -1242,7 +1218,7 @@
   :hasRoleType "NetworkEquipmentVendor" ;
   :hasStatus "Initialized" ;
   :hasValidFrom "2022-01-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/4> .
 <https://ontology.example.com/enterprise/PartyRoleValidity/4>
   a :TemporalExtent ;
@@ -1258,7 +1234,7 @@
   :hasRoleType "NOCEngineer" ;
   :hasStatus "Initialized" ;
   :hasValidFrom "2023-01-01" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :party <https://ontology.example.com/enterprise/Party/5> .
 <https://ontology.example.com/enterprise/PartyRoleValidity/5>
   a :TemporalExtent ;
@@ -1278,13 +1254,12 @@
   :hasUnitOfMeasure "percent" ;
   :hasKpiType "AVAILABILITY" ;
   :hasNumericValue 99.997 ;
-  :hasConfidenceScore 0.99 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/amf-east-01" ;
   :hasThresholdLow 99.99 ;
   :hasBreachIndicator 0 ;
   :hasObservedAt "2026-04-10T00:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/1> .
 <https://ontology.example.com/enterprise/PerformanceIndicatorQuantity/1>
   a :QuantityValue ;
@@ -1302,13 +1277,12 @@
   :hasUnitOfMeasure "percent" ;
   :hasKpiType "PACKET_LOSS" ;
   :hasNumericValue 18.7 ;
-  :hasConfidenceScore 0.98 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/gnb-043" ;
   :hasThresholdHigh 1.0 ;
   :hasBreachIndicator 1 ;
   :hasObservedAt "2026-04-10T02:14:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/7> .
 <https://ontology.example.com/enterprise/PerformanceIndicatorQuantity/2>
   a :QuantityValue ;
@@ -1326,13 +1300,12 @@
   :hasUnitOfMeasure "percent" ;
   :hasKpiType "CAPACITY" ;
   :hasNumericValue 91.4 ;
-  :hasConfidenceScore 0.99 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/upf-east-01" ;
   :hasThresholdHigh 90.0 ;
   :hasBreachIndicator 1 ;
   :hasObservedAt "2026-04-15T01:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/3> .
 <https://ontology.example.com/enterprise/PerformanceIndicatorQuantity/3>
   a :QuantityValue ;
@@ -1350,12 +1323,11 @@
   :hasUnitOfMeasure "dBm" ;
   :hasKpiType "SIGNAL_STRENGTH" ;
   :hasNumericValue -72.4 ;
-  :hasConfidenceScore 0.94 ;
   :hasDerivationMethod "MEASURED" ;
   :hasThresholdLow -80.0 ;
   :hasBreachIndicator 0 ;
   :hasObservedAt "2026-04-12T10:05:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/6> .
 <https://ontology.example.com/enterprise/PerformanceIndicatorQuantity/4>
   a :QuantityValue ;
@@ -1373,13 +1345,12 @@
   :hasUnitOfMeasure "ms" ;
   :hasKpiType "LATENCY" ;
   :hasNumericValue 14.2 ;
-  :hasConfidenceScore 0.97 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/ns-embb-01" ;
   :hasThresholdHigh 20.0 ;
   :hasBreachIndicator 0 ;
   :hasObservedAt "2026-04-10T08:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/8> .
 <https://ontology.example.com/enterprise/PerformanceIndicatorQuantity/5>
   a :QuantityValue ;
@@ -1397,13 +1368,12 @@
   :hasUnitOfMeasure "score" ;
   :hasKpiType "PSI_SCORE" ;
   :hasNumericValue 0.12 ;
-  :hasConfidenceScore 0.91 ;
   :hasDerivationMethod "SYNTHESIZED" ;
   :hasSourceRef "https://ml.gtc.example.com/drift/amf-east-01" ;
   :hasThresholdHigh 0.2 ;
   :hasBreachIndicator 0 ;
   :hasObservedAt "2026-04-10T06:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/1> .
 <https://ontology.example.com/enterprise/PerformanceIndicatorQuantity/6>
   a :QuantityValue ;
@@ -1416,7 +1386,7 @@
   :sensitivityTier :Internal ;
   :hasOutcome "COMPLIANT" ;
   :hasNotes "Resolved in 3h29m, within 4h RTO." ;
-  :hasAppliedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasAppliedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :policy <https://ontology.example.com/enterprise/Policy/4> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/1> ;
   :appliedBy <https://ontology.example.com/enterprise/Agent/1> .
@@ -1426,7 +1396,7 @@
   :sensitivityTier :Internal ;
   :hasOutcome "COMPLIANT" ;
   :hasNotes "Score 0.96, threshold 0.80." ;
-  :hasAppliedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasAppliedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :policy <https://ontology.example.com/enterprise/Policy/3> ;
   :event <https://ontology.example.com/enterprise/DomainEvent/3> ;
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
@@ -1437,7 +1407,7 @@
   :sensitivityTier :Internal ;
   :hasOutcome "COMPLIANT" ;
   :hasNotes "Monthly availability 99.997%." ;
-  :hasAppliedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasAppliedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :policy <https://ontology.example.com/enterprise/Policy/1> ;
   :asset <https://ontology.example.com/enterprise/Asset/1> ;
   :appliedBy <https://ontology.example.com/enterprise/Agent/4> .
@@ -1447,7 +1417,7 @@
   :sensitivityTier :Internal ;
   :hasOutcome "NON_COMPLIANT" ;
   :hasNotes "Availability degraded during incident evt-001." ;
-  :hasAppliedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasAppliedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :policy <https://ontology.example.com/enterprise/Policy/1> ;
   :asset <https://ontology.example.com/enterprise/Asset/5> ;
   :appliedBy <https://ontology.example.com/enterprise/Agent/4> .
@@ -1462,8 +1432,8 @@
   :hasName "Acme 5G Unlimited Plan" ;
   :hasStatus "Active" ;
   :hasStartDate "2024-04-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :productOffering <https://ontology.example.com/enterprise/ProductOffering/1> ;
   :realisingService <https://ontology.example.com/enterprise/Service/2> .
 <https://ontology.example.com/enterprise/ProductValidity/1>
@@ -1481,8 +1451,8 @@
   :hasName "SmartCity IoT Connectivity Plan" ;
   :hasStatus "Active" ;
   :hasStartDate "2024-05-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :productOffering <https://ontology.example.com/enterprise/ProductOffering/2> ;
   :realisingService <https://ontology.example.com/enterprise/Service/3> .
 <https://ontology.example.com/enterprise/ProductValidity/2>
@@ -1502,7 +1472,7 @@
   :hasVersion "1.0" ;
   :hasIsBundle false ;
   :hasLifecycleStatus "Launched" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :productSpec <https://ontology.example.com/enterprise/ProductSpecification/1> .
 
 <https://ontology.example.com/enterprise/ProductOffering/2>
@@ -1515,7 +1485,7 @@
   :hasVersion "1.0" ;
   :hasIsBundle false ;
   :hasLifecycleStatus "Launched" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :productSpec <https://ontology.example.com/enterprise/ProductSpecification/2> .
 
 <https://ontology.example.com/enterprise/ProductOffering/3>
@@ -1528,7 +1498,7 @@
   :hasVersion "1.0" ;
   :hasIsBundle false ;
   :hasLifecycleStatus "Launched" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :productSpec <https://ontology.example.com/enterprise/ProductSpecification/3> .
 
 # ── ProductOfferingQualification (1 individuals) ──────────────────
@@ -1545,8 +1515,8 @@
   :hasValidForStart "2026-04-20" ;
   :hasValidForEnd "2026-07-20" ;
   :hasRequestedAt "2026-04-15T09:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :requestedProductOffering <https://ontology.example.com/enterprise/ProductOffering/3> ;
   :customerAccount <https://ontology.example.com/enterprise/CustomerAccount/1> ;
   :installAddress <https://ontology.example.com/enterprise/GeographicLocation/5> .
@@ -1559,8 +1529,8 @@
   :hasOrderDate "2024-03-28"^^xsd:date ;
   :hasOrderType "NewProduct" ;
   :hasState "Complete" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :customerAccount <https://ontology.example.com/enterprise/CustomerAccount/1> ;
   :productOffering <https://ontology.example.com/enterprise/ProductOffering/1> ;
   :submittedBy <https://ontology.example.com/enterprise/Party/2> .
@@ -1572,8 +1542,8 @@
   :hasOrderDate "2024-05-10"^^xsd:date ;
   :hasOrderType "NewProduct" ;
   :hasState "Complete" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :customerAccount <https://ontology.example.com/enterprise/CustomerAccount/2> ;
   :productOffering <https://ontology.example.com/enterprise/ProductOffering/2> ;
   :submittedBy <https://ontology.example.com/enterprise/Party/3> .
@@ -1589,7 +1559,7 @@
   :hasDescription "5G unlimited data plan for enterprise customers." ;
   :hasLifecycleStatus "Launched" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ProductSpecification/2>
   a :ProductSpecification ;
@@ -1601,7 +1571,7 @@
   :hasDescription "IoT connectivity plan — low bandwidth, high device count." ;
   :hasLifecycleStatus "Launched" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ProductSpecification/3>
   a :ProductSpecification ;
@@ -1613,7 +1583,7 @@
   :hasDescription "Dedicated URLLC network slice for mission-critical applications." ;
   :hasLifecycleStatus "Launched" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── Resource (9 individuals) ──────────────────────────────────────
 <https://ontology.example.com/enterprise/Resource/1>
@@ -1629,8 +1599,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-01-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/1> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1647,8 +1617,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-01-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/2> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1665,8 +1635,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-01-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/3> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1683,8 +1653,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-01-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/5> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1701,8 +1671,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-01-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/6> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1719,8 +1689,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "NMS-RAN" ;
   :hasStartOperatingDate "2023-06-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/4> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/3> .
 
@@ -1737,8 +1707,8 @@
   :hasUsageState "Idle" ;
   :hasExternalSystem "NMS-RAN" ;
   :hasStartOperatingDate "2023-06-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/4> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/4> .
 
@@ -1754,8 +1724,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-03-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/7> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1771,8 +1741,8 @@
   :hasUsageState "Active" ;
   :hasExternalSystem "5G-NMS" ;
   :hasStartOperatingDate "2024-06-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resourceSpec <https://ontology.example.com/enterprise/ResourceSpecification/8> ;
   :place <https://ontology.example.com/enterprise/GeographicLocation/1> .
 
@@ -1781,7 +1751,7 @@
   a :ResourceRelationship ;
   :sensitivityTier :Internal ;
   :hasRelationshipType "relies-on" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/1> ;
   :relatedResource <https://ontology.example.com/enterprise/Resource/4> .
 
@@ -1789,7 +1759,7 @@
   a :ResourceRelationship ;
   :sensitivityTier :Internal ;
   :hasRelationshipType "controls" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/2> ;
   :relatedResource <https://ontology.example.com/enterprise/Resource/3> .
 
@@ -1797,7 +1767,7 @@
   a :ResourceRelationship ;
   :sensitivityTier :Internal ;
   :hasRelationshipType "relies-on" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/2> ;
   :relatedResource <https://ontology.example.com/enterprise/Resource/5> .
 
@@ -1805,7 +1775,7 @@
   a :ResourceRelationship ;
   :sensitivityTier :Internal ;
   :hasRelationshipType "composedOf" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/8> ;
   :relatedResource <https://ontology.example.com/enterprise/Resource/1> .
 
@@ -1813,7 +1783,7 @@
   a :ResourceRelationship ;
   :sensitivityTier :Internal ;
   :hasRelationshipType "composedOf" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/8> ;
   :relatedResource <https://ontology.example.com/enterprise/Resource/3> .
 
@@ -1821,7 +1791,7 @@
   a :ResourceRelationship ;
   :sensitivityTier :Internal ;
   :hasRelationshipType "connectsTo" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :resource <https://ontology.example.com/enterprise/Resource/6> ;
   :relatedResource <https://ontology.example.com/enterprise/Resource/1> .
 
@@ -1837,8 +1807,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/2>
   a :ResourceSpecification ;
@@ -1851,8 +1821,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/3>
   a :ResourceSpecification ;
@@ -1865,8 +1835,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/4>
   a :ResourceSpecification ;
@@ -1879,8 +1849,8 @@
   :hasCategory "PHYSICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/5>
   a :ResourceSpecification ;
@@ -1893,8 +1863,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/6>
   a :ResourceSpecification ;
@@ -1907,8 +1877,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/7>
   a :ResourceSpecification ;
@@ -1921,8 +1891,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ResourceSpecification/8>
   a :ResourceSpecification ;
@@ -1935,8 +1905,8 @@
   :hasCategory "LOGICAL" ;
   :hasLifecycleStatus "Active" ;
   :hasIsBundle false ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── Role (5 individuals) ──────────────────────────────────────────
 <https://ontology.example.com/enterprise/Role/1>
@@ -1998,7 +1968,7 @@
   :hasDbTables "[\"tmf_resource\",\"tmf_alarm\",\"tmf_performance_indicator\"]" ;
   :hasSystemPromptHint "Focus on resource operational states, alarm severity and correlation, KPI threshold breaches, and 5G network function health." ;
   :hasCqIds "[\"CQ-TMF1\",\"CQ-TMF2\",\"CQ-TMF3\",\"CQ-TMF4\",\"CQ-TMF5\"]" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/RuntimeFlavor/2>
   a :RuntimeFlavor ;
@@ -2013,7 +1983,7 @@
   :hasDbTables "[\"tmf_customer_bill\",\"tmf_product\",\"tmf_agreement\"]" ;
   :hasSystemPromptHint "Focus on bill disputes, overdue payments, SLA-linked commercial agreements, and product subscription lifecycles." ;
   :hasCqIds "[\"CQ-TMF13\"]" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/RuntimeFlavor/3>
   a :RuntimeFlavor ;
@@ -2028,7 +1998,7 @@
   :hasDbTables "[\"tmf_conflict_event\",\"observation_record\",\"semantic_loss_log\"]" ;
   :hasSystemPromptHint "Focus on unresolved conflict events, SHACL violation patterns, low-confidence observations, and policy adherence." ;
   :hasCqIds "[\"CQ-P2B-conflict-resolution\"]" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/RuntimeFlavor/4>
   a :RuntimeFlavor ;
@@ -2043,7 +2013,7 @@
   :hasDbTables "[\"tmf_party\",\"tmf_product\",\"tmf_service\"]" ;
   :hasSystemPromptHint "Focus on party lifecycle states, customer product holdings, service activation status, and related party associations." ;
   :hasCqIds "[\"CQ-TMF6\",\"CQ-TMF7\",\"CQ-TMF8\"]" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/RuntimeFlavor/5>
   a :RuntimeFlavor ;
@@ -2058,7 +2028,7 @@
   :hasDbTables "[\"tmf_alarm\",\"tmf_trouble_ticket\",\"tmf_service_quality_report\"]" ;
   :hasSystemPromptHint "Focus on active alarms, open trouble tickets, SLA violation flags, and service quality degradation." ;
   :hasCqIds "[\"CQ-TMF10\",\"CQ-TMF11\",\"CQ-TMF12\"]" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── Service (3 individuals) ───────────────────────────────────────
 <https://ontology.example.com/enterprise/Service/1>
@@ -2071,8 +2041,8 @@
   :hasServiceType "RESOURCE_FACING_SERVICE" ;
   :hasState "Active" ;
   :hasStartDate "2024-03-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :serviceSpec <https://ontology.example.com/enterprise/ServiceSpecification/1> ;
   :realisingResource <https://ontology.example.com/enterprise/Resource/8> .
 <https://ontology.example.com/enterprise/ServiceValidity/1>
@@ -2091,8 +2061,8 @@
   :hasServiceType "CUSTOMER_FACING_SERVICE" ;
   :hasState "Active" ;
   :hasStartDate "2024-04-01"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :serviceSpec <https://ontology.example.com/enterprise/ServiceSpecification/3> ;
   :parentService <https://ontology.example.com/enterprise/Service/1> .
 <https://ontology.example.com/enterprise/ServiceValidity/2>
@@ -2111,8 +2081,8 @@
   :hasServiceType "CUSTOMER_FACING_SERVICE" ;
   :hasState "Active" ;
   :hasStartDate "2024-05-15"^^xsd:date ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :serviceSpec <https://ontology.example.com/enterprise/ServiceSpecification/4> ;
   :parentService <https://ontology.example.com/enterprise/Service/1> .
 <https://ontology.example.com/enterprise/ServiceValidity/3>
@@ -2129,8 +2099,8 @@
   :hasOrderDate "2024-03-28"^^xsd:date ;
   :hasOrderType "Provision" ;
   :hasState "Complete" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :productOrder <https://ontology.example.com/enterprise/ProductOrder/1> ;
   :serviceSpec <https://ontology.example.com/enterprise/ServiceSpecification/3> ;
   :submittedBy <https://ontology.example.com/enterprise/Party/1> .
@@ -2147,7 +2117,7 @@
   :hasSlaViolated 1 ;
   :hasSubmittedAt "2026-04-10T02:20:00Z"^^xsd:dateTime ;
   :hasResolvedAt "2026-04-10T05:50:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :service <https://ontology.example.com/enterprise/Service/2> ;
   :alarm <https://ontology.example.com/enterprise/Alarm/1> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/5> .
@@ -2162,7 +2132,7 @@
   :hasCategory "ResourceDegradation" ;
   :hasSlaViolated 0 ;
   :hasSubmittedAt "2026-04-15T01:10:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :service <https://ontology.example.com/enterprise/Service/1> ;
   :alarm <https://ontology.example.com/enterprise/Alarm/2> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/5> .
@@ -2180,7 +2150,7 @@
   :hasQualityMetrics "[{\"name\":\"Availability\",\"value\":99.91,\"unit\":\"percent\",\"threshold\":99.95,\"compliant\":false},{\"name\":\"Throughput\",\"value\":1050,\"unit\":\"Mbps\",\"threshold\":1000,\"compliant\":true}]" ;
   :hasSlaCompliant 0 ;
   :hasOverallQualityScore 4.2 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :service <https://ontology.example.com/enterprise/Service/2> ;
   :agreement <https://ontology.example.com/enterprise/Agreement/1> ;
   :submittedBy <https://ontology.example.com/enterprise/Party/1> .
@@ -2197,7 +2167,7 @@
   :hasQualityMetrics "[{\"name\":\"Availability\",\"value\":99.97,\"unit\":\"percent\",\"threshold\":99.9,\"compliant\":true},{\"name\":\"DeviceCount\",\"value\":48200,\"unit\":\"devices\",\"threshold\":50000,\"compliant\":true}]" ;
   :hasSlaCompliant 1 ;
   :hasOverallQualityScore 4.8 ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :service <https://ontology.example.com/enterprise/Service/3> ;
   :agreement <https://ontology.example.com/enterprise/Agreement/2> ;
   :submittedBy <https://ontology.example.com/enterprise/Party/1> .
@@ -2213,7 +2183,7 @@
   :hasServiceType "RESOURCE_FACING_SERVICE" ;
   :hasDescription "5G eMBB resource-facing service delivered via 5G NR + Core." ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ServiceSpecification/2>
   a :ServiceSpecification ;
@@ -2225,7 +2195,7 @@
   :hasServiceType "RESOURCE_FACING_SERVICE" ;
   :hasDescription "Ultra-reliable low-latency connectivity slice-based service." ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ServiceSpecification/3>
   a :ServiceSpecification ;
@@ -2237,7 +2207,7 @@
   :hasServiceType "CUSTOMER_FACING_SERVICE" ;
   :hasDescription "Customer-facing 5G connectivity service for enterprise accounts." ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 <https://ontology.example.com/enterprise/ServiceSpecification/4>
   a :ServiceSpecification ;
@@ -2249,7 +2219,7 @@
   :hasServiceType "CUSTOMER_FACING_SERVICE" ;
   :hasDescription "Customer-facing IoT device connectivity service." ;
   :hasLifecycleStatus "Active" ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime .
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime .
 
 # ── TroubleTicket (2 individuals) ─────────────────────────────────
 <https://ontology.example.com/enterprise/TroubleTicket/1>
@@ -2264,8 +2234,8 @@
   :hasCategory "ResourceDegradation" ;
   :hasSlaViolated 0 ;
   :hasSubmittedAt "2026-04-15T01:15:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :affectedResource <https://ontology.example.com/enterprise/Resource/3> ;
   :relatedAlarm <https://ontology.example.com/enterprise/Alarm/2> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/5> ;
@@ -2284,8 +2254,8 @@
   :hasSlaViolated 1 ;
   :hasSubmittedAt "2026-04-10T02:20:00Z"^^xsd:dateTime ;
   :hasResolvedAt "2026-04-10T06:00:00Z"^^xsd:dateTime ;
-  :hasCreatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
-  :hasUpdatedAt "2026-07-26 17:17:58"^^xsd:dateTime ;
+  :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
+  :hasUpdatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :affectedResource <https://ontology.example.com/enterprise/Resource/7> ;
   :relatedAlarm <https://ontology.example.com/enterprise/Alarm/1> ;
   :raisedBy <https://ontology.example.com/enterprise/Party/5> ;

@@ -396,6 +396,7 @@ def _score_governance(conn, tables: list, output_dir: str = "") -> List[Dict]:
     g_shapes   = _parse_ttl(os.path.join(_shapes_dir, "enterprise-shapes.ttl"))
     g_gate     = _parse_ttl(os.path.join(_shapes_dir, "agent-gate.ttl"))
     g_skos     = _parse_ttl(os.path.join(_vocab_dir, "enterprise-skos.ttl"))
+    _ont_dir    = _artifact_dir(output_dir, "ontology")
     _jsonld_dir = _artifact_dir(output_dir, "jsonld")
     j_context  = _load_json(os.path.join(_jsonld_dir, "enterprise-context.json"))
     j_mcp      = _load_json(os.path.join(_jsonld_dir, "mcp-tool-definitions.json"))
@@ -723,19 +724,69 @@ def _score_governance(conn, tables: list, output_dir: str = "") -> List[Dict]:
           f"{skos_concepts} SKOS Concepts in enterprise-skos.ttl.",
           "enterprise-skos.ttl")
 
-    # Criterion 28: Reasoner integration readiness
+    # Criterion 28: Consistency.
+    #
+    # This asked whether a ROBOT *binary* was installed, which is a question
+    # about the machine rather than the ontology. ROBOT is not bundled, so
+    # it answered "not found" on every run and scored 2/5 permanently. What
+    # matters is whether the ontology is consistent, and owlrl — already a
+    # dependency of the materialiser — can answer that in-process.
+    _consistency = {"available": False}
     try:
-        from reasoner import _robot_cmd
-        robot_available = _robot_cmd() is not None
-    except ImportError:
-        robot_available = False
-    check("Reasoner integration readiness", "Validation",
-          "Is ROBOT available for automated OWL 2 reasoning and consistency checking?",
-          4 if robot_available else 2,
-          "ROBOT binary found — run 'python toolkit.py --phase reasoner' to classify." if robot_available
-          else "ROBOT not found — place binary in bin/robot or install globally. "
-               "Manual review required for unsatisfiable classes.",
-          "src/reasoner.py: _robot_cmd()")
+        from ontology_quality import load_ontology, check_consistency
+        _consistency = check_consistency(load_ontology(_ont_dir))
+    except Exception:
+        pass
+    if not _consistency.get("available"):
+        _cons_score, _cons_note = 1, (
+            f"Consistency not checked: {_consistency.get('reason', 'reasoner unavailable')}.")
+    elif _consistency.get("consistent"):
+        _cons_score, _cons_note = 5, (
+            f"No unsatisfiable classes in the OWL-RL closure "
+            f"({_consistency.get('closure_triples', 0)} inferred triples).")
+    else:
+        _unsat = _consistency.get("unsatisfiable", [])
+        _cons_score, _cons_note = 0, (
+            f"{len(_unsat)} unsatisfiable class(es): {', '.join(_unsat[:5])}.")
+    check("Ontology consistency", "Validation",
+          "Does the ontology classify without unsatisfiable classes?",
+          _cons_score, _cons_note, "src/ontology_quality.py: check_consistency()")
+
+    # Criterion: OOPS!-style pitfall detection. None of the 41 catalogue
+    # pitfalls were checked before Phase 6; the scorecard could not see a
+    # structurally defective ontology at all.
+    _pitfalls = []
+    _metrics = {}
+    try:
+        from ontology_quality import load_ontology, detect_pitfalls, structural_metrics
+        _qg = load_ontology(_ont_dir)
+        _pitfalls = detect_pitfalls(_qg)
+        _metrics = structural_metrics(_qg)
+    except Exception:
+        pass
+    _critical = sum(1 for p in _pitfalls if p["severity"] == "CRITICAL" and p["count"])
+    _high = sum(1 for p in _pitfalls if p["severity"] == "HIGH" and p["count"])
+    _firing = sum(1 for p in _pitfalls if p["count"])
+    check("Modelling pitfalls (OOPS!)", "Modelling",
+          "Is the ontology free of known modelling pitfalls?",
+          0 if not _pitfalls else
+          (0 if _critical else (2 if _high else (4 if _firing else 5))),
+          (f"{_firing} of {len(_pitfalls)} checked pitfalls firing "
+           f"({_critical} critical, {_high} high)." if _pitfalls
+           else "Pitfall detection unavailable."),
+          "output/reports/ontology_quality.csv")
+
+    # Criterion: is the hierarchy a taxonomy or a flat list?
+    _depth = _metrics.get("max_depth", 0)
+    _inherit = _metrics.get("inheritance_richness", 0)
+    check("Taxonomic depth", "Modelling",
+          "Does the class hierarchy have real depth rather than a flat list?",
+          0 if not _metrics else _band(_depth, [(0, 1), (2, 3), (3, 4), (5, 5)]),
+          (f"Max depth {_depth}, inheritance richness {_inherit}, "
+           f"{_metrics.get('restrictions', 0)} restrictions, "
+           f"{_metrics.get('defined_classes', 0)} defined classes."
+           if _metrics else "Structural metrics unavailable."),
+          "output/reports/ontology_quality.csv")
 
     # Criterion 29: MCP tool output schemas (TMF630 compliance)
     try:

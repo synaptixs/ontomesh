@@ -44,18 +44,97 @@ def _str(s):
     return s.replace('"', '\\"').replace('\n', ' ')
 
 
-def _ontology_header(label: str, comment: str, version: str, iri: str) -> str:
-    return f"""\
-<{iri}>
-  a owl:Ontology ;
-  owl:versionIRI <{iri}{version}> ;
-  owl:versionInfo "{version}" ;
-  rdfs:label "{label}" ;
-  rdfs:comment "{comment}" ;
-  dcterms:created "{NOW}"^^xsd:dateTime ;
-  dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
+LICENSE_IRI = os.environ.get(
+    "ONTOLOGY_LICENSE", "https://www.apache.org/licenses/LICENSE-2.0")
 
-"""
+
+def _prior_version(path: str) -> Optional[str]:
+    """Read owl:versionInfo from a previously emitted ontology, if any."""
+    if not os.path.isfile(path):
+        return None
+    try:
+        import rdflib
+        g = rdflib.Graph()
+        g.parse(path, format="turtle")
+        for _, _, v in g.triples((None, rdflib.OWL.versionInfo, None)):
+            return str(v)
+    except Exception:
+        return None
+    return None
+
+
+def _ontology_header(label: str, comment: str, version: str, iri: str,
+                     prior: Optional[str] = None) -> str:
+    """Ontology declaration with version lineage and a licence.
+
+    `owl:priorVersion` was never emitted, so a consumer had no way to tell
+    which release a graph superseded — and `dcterms:license` was absent
+    entirely, which the P41 pitfall check now flags.
+    """
+    lines = [
+        f"<{iri}>",
+        "  a owl:Ontology ;",
+        f"  owl:versionIRI <{iri}{version}> ;",
+        f'  owl:versionInfo "{version}" ;',
+    ]
+    if prior and prior != version:
+        lines.append(f"  owl:priorVersion <{iri}{prior}> ;")
+        lines.append(f"  owl:backwardCompatibleWith <{iri}{prior}> ;")
+    lines += [
+        f'  rdfs:label "{label}" ;',
+        f'  rdfs:comment "{comment}" ;',
+        f"  dcterms:license <{LICENSE_IRI}> ;",
+        f'  dcterms:created "{NOW}"^^xsd:dateTime ;',
+        '  dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .',
+        "",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _deprecation_tombstones(prior_path: str, current_names: set) -> str:
+    """Mark entities that existed in the previous version and no longer do.
+
+    Removals were reported by ontology_diff and recorded nowhere in the
+    artifact, so a consumer holding an old IRI could not tell whether it
+    had been retired or was simply missing. `owl:deprecated` is the
+    standard signal; the entity is kept rather than deleted so existing
+    references still resolve.
+    """
+    if not os.path.isfile(prior_path):
+        return ""
+    try:
+        import rdflib
+        g = rdflib.Graph()
+        g.parse(prior_path, format="turtle")
+    except Exception:
+        return ""
+    prior_names = set()
+    for ty in (rdflib.OWL.Class, rdflib.OWL.ObjectProperty,
+               rdflib.OWL.DatatypeProperty):
+        prior_names |= {str(s).rsplit("/", 1)[-1]
+                        for s in g.subjects(rdflib.RDF.type, ty)
+                        if isinstance(s, rdflib.URIRef)
+                        and str(s).startswith(BASE_IRI)}
+    removed = sorted(prior_names - current_names)
+    # Already-deprecated entities are not re-tombstoned.
+    already = {str(s).rsplit("/", 1)[-1]
+               for s, _, _ in g.triples((None, rdflib.OWL.deprecated, None))}
+    removed = [r for r in removed if r not in already]
+    if not removed:
+        return ""
+    blocks = ["\n# ── Deprecated ───────────────────────────────────────────\n"
+              "# Present in the previous version and absent from this one.\n"
+              "# Retained as tombstones so held IRIs still resolve, and\n"
+              "# marked owl:deprecated so consumers can act on the change.\n"]
+    for name in removed:
+        blocks.append(
+            f":{name}\n"
+            f'  owl:deprecated true ;\n'
+            f'  rdfs:comment "Deprecated: no longer produced by the '
+            f'source schema as of version {VERSION}." .\n'
+        )
+    return "\n".join(blocks)
 
 
 def _sensitivity_property() -> str:
@@ -798,6 +877,11 @@ def generate_ontology(intro: DBIntrospector, output_dir: str,
     tables = intro.introspect_all()
     os.makedirs(output_dir, exist_ok=True)
 
+    # Read the previous emission before overwriting it, so the new header
+    # can carry owl:priorVersion and removed entities can be tombstoned.
+    _ont_path_prior = os.path.join(output_dir, "enterprise.ttl")
+    _prior = _prior_version(_ont_path_prior)
+
     # ── Primary ontology ──────────────────────────────────────────────
     lines = [
         PREFIXES,
@@ -807,7 +891,8 @@ def generate_ontology(intro: DBIntrospector, output_dir: str,
             "Covers all operational domain entities, events, agents, "
             "policies, observations, and provenance patterns.",
             VERSION,
-            BASE_IRI
+            BASE_IRI,
+            prior=_prior,
         ),
         _sensitivity_property(),
         _base_classes(),
@@ -854,6 +939,12 @@ def generate_ontology(intro: DBIntrospector, output_dir: str,
     lines.append("\n# ── Object Properties ───────────────────────────────────────────────\n")
     for cols, classes in obj_props.values():
         lines.append(_object_property_block(cols, classes, tables))
+
+    _current_names = {t.class_name for t in tables}
+    _current_names |= set(data_props.keys()) | set(obj_props.keys())
+    _tombstones = _deprecation_tombstones(_ont_path_prior, _current_names)
+    if _tombstones:
+        lines.append(_tombstones)
 
     disjoint_block = _disjoint_class_groups(tables)
     if disjoint_block:

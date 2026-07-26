@@ -14,7 +14,8 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-07-26T17:17:58Z"^^xsd:dateTime ;
+  dcterms:license <https://www.apache.org/licenses/LICENSE-2.0> ;
+  dcterms:created "2026-07-26T17:28:40Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -3551,6 +3552,44 @@
   rdfs:label "Related Alarm Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Alarm  .
+
+
+# ── Deprecated ───────────────────────────────────────────
+# Present in the previous version and absent from this one.
+# Retained as tombstones so held IRIs still resolve, and
+# marked owl:deprecated so consumers can act on the change.
+
+:DerivationActivity
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:DomainEntity
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:SensitivityTierValue
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:derivationMethod
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:governedBy
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:hasParticipant
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:refersToAsset
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
+
+:wasProducedBy
+  owl:deprecated true ;
+  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
 
 
 
