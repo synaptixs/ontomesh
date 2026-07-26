@@ -14,7 +14,7 @@
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  SHACL Shapes — Drift Detection
-#  Phase 3 · Sprint S14 · Generated 2026-07-26T17:28:43Z
+#  Phase 3 · Sprint S14 · Generated 2026-07-26T17:44:01Z
 # ═══════════════════════════════════════════════════════════════════════════
 
 <https://ontology.example.com/enterprise/drift/shapes>

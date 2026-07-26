@@ -6,10 +6,10 @@
 
 | Metric | Count |
 |--------|-------|
-| OWL classes | 55 |
-| Data properties | 498 |
-| Object properties | 100 |
-| **Total axioms (est.)** | **3658** |
+| OWL classes | 58 |
+| Data properties | 536 |
+| Object properties | 105 |
+| **Total axioms (est.)** | **3845** |
 
 ## Decision rationale
 

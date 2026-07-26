@@ -11,8 +11,8 @@
   a owl:Ontology ;
   owl:imports <https://ontology.example.com/enterprise/> , <https://ontology.example.com/enterprise/dimensions/> ;
   rdfs:label "Enterprise ABox" ;
-  rdfs:comment "Instance data materialised from the relational source via the logical-physical mapping. Tier ceiling: Internal." ;
-  dcterms:created "2026-07-26T17:28:44Z"^^xsd:dateTime .
+  rdfs:comment "Instance data materialised from the relational source via the logical-physical mapping. Tier ceiling: Confidential." ;
+  dcterms:created "2026-07-26T17:44:09Z"^^xsd:dateTime .
 
 # ── Agent (5 individuals) ─────────────────────────────────────────
 <https://ontology.example.com/enterprise/Agent/1>
@@ -31,13 +31,20 @@
   a :Agent ;
   :sensitivityTier :Internal ;
   rdfs:label "ML Monitor Agent" ;
+  :hasValidityPeriod <https://ontology.example.com/enterprise/AgentValidity/2> ;
   :hasAgentIri "https://gtc.example.com/agents/ml-monitor-agent"^^xsd:anyURI ;
   :hasName "ML Monitor Agent" ;
   :hasAgentType "AI_AGENT" ;
+  :hasCredentialExpiry "2026-12-31T23:59:59Z"^^xsd:dateTime ;
   :hasAuthorizedTiers "Public,Internal" ;
   :hasActive true ;
   :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
+<https://ontology.example.com/enterprise/AgentValidity/2>
+  a :TemporalExtent ;
+  :validUntil "2026-12-31T23:59:59Z"^^xsd:dateTime ;
+  time:hasEnd [ a time:Instant ;
+                time:inXSDDateTime "2026-12-31T23:59:59Z"^^xsd:dateTime ] .
 
 <https://ontology.example.com/enterprise/Agent/3>
   a :Agent ;
@@ -67,13 +74,20 @@
   a :Agent ;
   :sensitivityTier :Internal ;
   rdfs:label "Compliance Audit Bot" ;
+  :hasValidityPeriod <https://ontology.example.com/enterprise/AgentValidity/5> ;
   :hasAgentIri "https://gtc.example.com/agents/audit-bot"^^xsd:anyURI ;
   :hasName "Compliance Audit Bot" ;
   :hasAgentType "AI_AGENT" ;
+  :hasCredentialExpiry "2026-06-30T23:59:59Z"^^xsd:dateTime ;
   :hasAuthorizedTiers "Public,Internal,Confidential" ;
   :hasActive true ;
   :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
   :org <https://ontology.example.com/enterprise/Organization/2> .
+<https://ontology.example.com/enterprise/AgentValidity/5>
+  a :TemporalExtent ;
+  :validUntil "2026-06-30T23:59:59Z"^^xsd:dateTime ;
+  time:hasEnd [ a time:Instant ;
+                time:inXSDDateTime "2026-06-30T23:59:59Z"^^xsd:dateTime ] .
 
 # ── AgentRoles (4 individuals) ────────────────────────────────────
 <https://ontology.example.com/enterprise/AgentRoles/1>
@@ -939,6 +953,7 @@
   :hasObservationType "PACKET_LOSS_RATE" ;
   :hasNumericValue 18.7 ;
   :hasUnitOfMeasure "percent" ;
+  :hasConfidenceScore 0.98 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/metrics/ran043"^^xsd:anyURI ;
   :hasObservedAt "2026-04-10T02:14:00Z"^^xsd:dateTime ;
@@ -968,6 +983,7 @@
   :hasObservationType "AVAILABILITY" ;
   :hasNumericValue 99.997 ;
   :hasUnitOfMeasure "percent" ;
+  :hasConfidenceScore 0.99 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/metrics/amf001"^^xsd:anyURI ;
   :hasObservedAt "2026-04-10T00:00:00Z"^^xsd:dateTime ;
@@ -996,6 +1012,7 @@
   :hasObservationType "RF_SIGNAL_STRENGTH" ;
   :hasNumericValue -72.4 ;
   :hasUnitOfMeasure "dBm" ;
+  :hasConfidenceScore 0.94 ;
   :hasDerivationMethod "MEASURED" ;
   :hasObservedAt "2026-04-12T10:05:00Z"^^xsd:dateTime ;
   :hasCreatedAt "2026-07-26 17:28:40"^^xsd:dateTime ;
@@ -1024,6 +1041,7 @@
   :hasObservationType "COMPLIANCE_SCORE" ;
   :hasNumericValue 0.96 ;
   :hasUnitOfMeasure "score" ;
+  :hasConfidenceScore 0.91 ;
   :hasDerivationMethod "SYNTHESIZED" ;
   :hasSourceRef "https://audit.gtc.example.com/q1-2026"^^xsd:anyURI ;
   :hasObservedAt "2026-04-01T11:25:00Z"^^xsd:dateTime ;
@@ -1091,6 +1109,7 @@
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "Global Telecom Corp" ;
+  :hasPartyIri "https://gtc.example.com/parties/gtc-operator"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "Global Telecom Corp" ;
   :hasTradingName "GTC" ;
@@ -1105,6 +1124,7 @@
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "Acme Corporation" ;
+  :hasPartyIri "https://gtc.example.com/parties/acme-corp"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "Acme Corporation" ;
   :hasTradingName "Acme" ;
@@ -1118,6 +1138,7 @@
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "SmartCity IoT Ltd" ;
+  :hasPartyIri "https://gtc.example.com/parties/smartcity-iot"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "SmartCity IoT Ltd" ;
   :hasTradingName "SmartCity IoT" ;
@@ -1131,6 +1152,7 @@
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "Vendor Alpha GmbH" ;
+  :hasPartyIri "https://gtc.example.com/parties/vendor-alpha"^^xsd:anyURI ;
   :hasPartyType "ORGANIZATION" ;
   :hasName "Vendor Alpha GmbH" ;
   :hasTradingName "Vendor Alpha" ;
@@ -1144,6 +1166,7 @@
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "NOC Engineer 01" ;
+  :hasPartyIri "https://gtc.example.com/parties/noc-eng-01"^^xsd:anyURI ;
   :hasPartyType "INDIVIDUAL" ;
   :hasName "NOC Engineer 01" ;
   :hasEmail "noc1@gtc.example.com" ;
@@ -1155,6 +1178,7 @@
   a :Party ;
   :sensitivityTier :Confidential ;
   rdfs:label "ML Monitor Agent" ;
+  :hasPartyIri "https://gtc.example.com/parties/ml-monitor-agent"^^xsd:anyURI ;
   :hasPartyType "INDIVIDUAL" ;
   :hasName "ML Monitor Agent" ;
   :hasLifecycleStatus "Active" ;
@@ -1254,6 +1278,7 @@
   :hasUnitOfMeasure "percent" ;
   :hasKpiType "AVAILABILITY" ;
   :hasNumericValue 99.997 ;
+  :hasConfidenceScore 0.99 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/amf-east-01" ;
   :hasThresholdLow 99.99 ;
@@ -1277,6 +1302,7 @@
   :hasUnitOfMeasure "percent" ;
   :hasKpiType "PACKET_LOSS" ;
   :hasNumericValue 18.7 ;
+  :hasConfidenceScore 0.98 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/gnb-043" ;
   :hasThresholdHigh 1.0 ;
@@ -1300,6 +1326,7 @@
   :hasUnitOfMeasure "percent" ;
   :hasKpiType "CAPACITY" ;
   :hasNumericValue 91.4 ;
+  :hasConfidenceScore 0.99 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/upf-east-01" ;
   :hasThresholdHigh 90.0 ;
@@ -1323,6 +1350,7 @@
   :hasUnitOfMeasure "dBm" ;
   :hasKpiType "SIGNAL_STRENGTH" ;
   :hasNumericValue -72.4 ;
+  :hasConfidenceScore 0.94 ;
   :hasDerivationMethod "MEASURED" ;
   :hasThresholdLow -80.0 ;
   :hasBreachIndicator 0 ;
@@ -1345,6 +1373,7 @@
   :hasUnitOfMeasure "ms" ;
   :hasKpiType "LATENCY" ;
   :hasNumericValue 14.2 ;
+  :hasConfidenceScore 0.97 ;
   :hasDerivationMethod "MEASURED" ;
   :hasSourceRef "https://oss.gtc.example.com/kpi/ns-embb-01" ;
   :hasThresholdHigh 20.0 ;
@@ -1368,6 +1397,7 @@
   :hasUnitOfMeasure "score" ;
   :hasKpiType "PSI_SCORE" ;
   :hasNumericValue 0.12 ;
+  :hasConfidenceScore 0.91 ;
   :hasDerivationMethod "SYNTHESIZED" ;
   :hasSourceRef "https://ml.gtc.example.com/drift/amf-east-01" ;
   :hasThresholdHigh 0.2 ;

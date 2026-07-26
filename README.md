@@ -107,7 +107,11 @@ grounded the answer with a SPARQL `SELECT` against the materialized RDF triples.
 | | |
 |---|---|
 | **Pipeline phases** | 8 build phases + 8 enrichment phases (log mining L4-L13, schema inference, multi-target generation) |
+| **Ontology** | OWL 2 DL — `owl:Restriction` class expressions, defined classes, `owl:hasKey` from UNIQUE constraints, union domains |
+| **Instance data** | `--phase abox` materialises individuals from your rows, with reified PROV-O chains and sensitivity-tier gating |
+| **Modelling depth** | OWL-Time bitemporal (valid vs transaction time) · QUDT united quantities · reified n-ary participation |
 | **Validation** | SHACL 1.1 shapes + materialised inference with `prov:wasDerivedFrom` lineage |
+| **Self-checking** | OOPS!-style pitfall detection, structural metrics, in-process consistency (`owlrl`), and a CI regression ratchet |
 | **Reasoning** | OWL-RL · SWRL · Datalog (Rulewerk) |
 | **Output formats** | OWL/Turtle · SHACL · JSON-LD · SKOS · materialisation report |
 | **Wizard surfaces** | 10 starter industries (telecom, healthcare, finance, manufacturing, retail, energy-utilities, government, insurance, logistics, pharmaceuticals) |

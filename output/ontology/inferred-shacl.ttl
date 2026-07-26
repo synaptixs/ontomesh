@@ -2,8 +2,8 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://ontology.example.com/toolkit/materializer/activity/shacl/20260726T172842Z> a prov:Activity ;
+<https://ontology.example.com/toolkit/materializer/activity/shacl/20260726T174359Z> a prov:Activity ;
     rdfs:label "SHACL sh:rule materialisation" ;
     rdfs:comment "Engine: pyshacl advanced=True" ;
-    prov:endedAtTime "2026-07-26T17:28:42.467577+00:00"^^xsd:dateTime .
+    prov:endedAtTime "2026-07-26T17:43:59.508434+00:00"^^xsd:dateTime .
 

@@ -15,7 +15,7 @@
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
   dcterms:license <https://www.apache.org/licenses/LICENSE-2.0> ;
-  dcterms:created "2026-07-26T17:28:40Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T17:43:57Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -588,6 +588,15 @@
                     owl:onProperty :hasCallbackUrl ;
                     owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
+:TmfExportJob
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Tmf Export Job" ;
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasContentType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
+
 :GeographicSite
   a owl:Class ;
   rdfs:subClassOf :DomainEntity ;
@@ -603,6 +612,15 @@
   owl:hasKey ( :hasSiteIri ) ;
   rdfs:subClassOf [ a owl:Restriction ;
                     owl:onProperty :hasName ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
+
+:TmfImportJob
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Tmf Import Job" ;
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasContentType ;
                     owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
 :NetworkSliceProfile
@@ -929,6 +947,18 @@
                     owl:onProperty :hasName ;
                     owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
 
+:TmfTask
+  a owl:Class ;
+  rdfs:subClassOf :DomainEntity ;
+  rdfs:label "Tmf Task" ;
+  :sensitivityTier :Internal ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasTaskType ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty :hasStatus ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ]  .
+
 :TroubleTicket
   a owl:Class ;
   rdfs:subClassOf :DomainEvent ;
@@ -1042,7 +1072,7 @@
   a owl:DatatypeProperty ;
   rdfs:label "Created At" ;
   rdfs:domain [ a owl:Class ;
-                owl:unionOf ( :Agent :Agreement :Alarm :Asset :AssetType :Attachment :Characteristic :ConflictEvent :CustomerAccount :CustomerBill :DomainEvent :EmbeddingIndexes :EventSubscription :FederationTrustLedger :GeographicLocation :GeographicSite :NetworkSliceProfile :ObservationRecord :OntologyEvolutionProposals :OntologyVersionLedger :Organization :Party :PartyRole :PerformanceIndicator :Policy :Product :ProductOffering :ProductOfferingQualification :ProductOrder :ProductSpecification :Resource :ResourceRelationship :ResourceSpecification :RuntimeFlavor :RuntimeGrounding :RuntimePayload :Service :ServiceOrder :ServiceProblem :ServiceQualityReport :ServiceSpecification :TroubleTicket :UserRole ) ] ;
+                owl:unionOf ( :Agent :Agreement :Alarm :Asset :AssetType :Attachment :Characteristic :ConflictEvent :CustomerAccount :CustomerBill :DomainEvent :EmbeddingIndexes :EventSubscription :FederationTrustLedger :GeographicLocation :GeographicSite :NetworkSliceProfile :ObservationRecord :OntologyEvolutionProposals :OntologyVersionLedger :Organization :Party :PartyRole :PerformanceIndicator :Policy :Product :ProductOffering :ProductOfferingQualification :ProductOrder :ProductSpecification :Resource :ResourceRelationship :ResourceSpecification :RuntimeFlavor :RuntimeGrounding :RuntimePayload :Service :ServiceOrder :ServiceProblem :ServiceQualityReport :ServiceSpecification :TmfExportJob :TmfImportJob :TmfTask :TroubleTicket :UserRole ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -1097,7 +1127,7 @@
   a owl:DatatypeProperty ;
   rdfs:label "Asset Status" ;
   rdfs:domain [ a owl:Class ;
-                owl:unionOf ( :Agreement :Asset :ConflictEvent :CustomerAccount :DomainEvent :EventSubscription :FederationQueryLog :OntologyEvolutionProposals :PartyRole :Policy :Product :ServiceProblem :ServiceQualityReport :TroubleTicket ) ] ;
+                owl:unionOf ( :Agreement :Asset :ConflictEvent :CustomerAccount :DomainEvent :EventSubscription :FederationQueryLog :OntologyEvolutionProposals :PartyRole :Policy :Product :ServiceProblem :ServiceQualityReport :TmfExportJob :TmfImportJob :TmfTask :TroubleTicket ) ] ;
   rdfs:range xsd:string ;
   rdfs:comment "Current operational lifecycle status of the asset." ;
   :sensitivityTier :Internal .
@@ -1120,7 +1150,7 @@
   a owl:DatatypeProperty ;
   rdfs:label "Updated At" ;
   rdfs:domain [ a owl:Class ;
-                owl:unionOf ( :Asset :CustomerBill :DomainEvent :EmbeddingIndexes :EventSubscription :FederationPartners :GeographicSite :NetworkSliceProfile :OntologyEvolutionProposals :Organization :Party :Product :ProductOfferingQualification :ProductOrder :Resource :ResourceSpecification :Service :ServiceOrder :TroubleTicket ) ] ;
+                owl:unionOf ( :Asset :CustomerBill :DomainEvent :EmbeddingIndexes :EventSubscription :FederationPartners :GeographicSite :NetworkSliceProfile :OntologyEvolutionProposals :Organization :Party :Product :ProductOfferingQualification :ProductOrder :Resource :ResourceSpecification :Service :ServiceOrder :TmfTask :TroubleTicket ) ] ;
   rdfs:range xsd:dateTime ;
   :sensitivityTier :Internal .
 
@@ -2036,7 +2066,8 @@
 :hasUrl
   a owl:DatatypeProperty ;
   rdfs:label "Url" ;
-  rdfs:domain :Attachment ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Attachment :TmfExportJob :TmfImportJob ) ] ;
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
@@ -2382,6 +2413,77 @@
   rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
+:hasContentType
+  a owl:DatatypeProperty ;
+  rdfs:label "Content Type" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob ) ] ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasQuery
+  a owl:DatatypeProperty ;
+  rdfs:label "Query" ;
+  rdfs:domain :TmfExportJob ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasPath
+  a owl:DatatypeProperty ;
+  rdfs:label "Path" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob ) ] ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasCreationDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Creation Date" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob :TmfTask ) ] ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasCompletionDate
+  a owl:DatatypeProperty ;
+  rdfs:label "Completion Date" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :ProductOrder :ServiceOrder :TmfExportJob :TmfImportJob :TmfTask ) ] ;
+  rdfs:range xsd:date ;
+  :sensitivityTier :Internal .
+
+:hasErrorLog
+  a owl:DatatypeProperty ;
+  rdfs:label "Error Log" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob ) ] ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasHref
+  a owl:DatatypeProperty ;
+  rdfs:label "Href" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob :TmfTask ) ] ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasBaseType
+  a owl:DatatypeProperty ;
+  rdfs:label "Base Type" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob :TmfTask ) ] ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasSchemaLocation
+  a owl:DatatypeProperty ;
+  rdfs:label "Schema Location" ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :TmfExportJob :TmfImportJob :TmfTask ) ] ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
 :hasSiteIri
   a owl:DatatypeProperty ;
   rdfs:label "Site Iri" ;
@@ -2445,6 +2547,13 @@
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :GeographicLocation :GeographicSite ) ] ;
   rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasSourceUri
+  a owl:DatatypeProperty ;
+  rdfs:label "Source Uri" ;
+  rdfs:domain :TmfImportJob ;
+  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasProfileIri
@@ -2825,14 +2934,6 @@
   rdfs:range xsd:date ;
   :sensitivityTier :Internal .
 
-:hasCompletionDate
-  a owl:DatatypeProperty ;
-  rdfs:label "Completion Date" ;
-  rdfs:domain [ a owl:Class ;
-                owl:unionOf ( :ProductOrder :ServiceOrder ) ] ;
-  rdfs:range xsd:date ;
-  :sensitivityTier :Internal .
-
 :hasRequestedCompletion
   a owl:DatatypeProperty ;
   rdfs:label "Requested Completion" ;
@@ -3053,6 +3154,48 @@
   rdfs:label "Overall Quality Score" ;
   rdfs:domain :ServiceQualityReport ;
   rdfs:range xsd:decimal ;
+  :sensitivityTier :Internal .
+
+:hasTaskType
+  a owl:DatatypeProperty ;
+  rdfs:label "Task Type" ;
+  rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasPercentProgress
+  a owl:DatatypeProperty ;
+  rdfs:label "Percent Progress" ;
+  rdfs:domain :TmfTask ;
+  rdfs:range xsd:integer ;
+  :sensitivityTier :Internal .
+
+:hasTaskResourceRef
+  a owl:DatatypeProperty ;
+  rdfs:label "Task Resource Ref" ;
+  rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasTaskError
+  a owl:DatatypeProperty ;
+  rdfs:label "Task Error" ;
+  rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasRelatedEntityType
+  a owl:DatatypeProperty ;
+  rdfs:label "Related Entity Type" ;
+  rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
+  :sensitivityTier :Internal .
+
+:hasRequestedBy
+  a owl:DatatypeProperty ;
+  rdfs:label "Requested By" ;
+  rdfs:domain :TmfTask ;
+  rdfs:range xsd:string ;
   :sensitivityTier :Internal .
 
 :hasTicketIri
@@ -3390,6 +3533,12 @@
   rdfs:domain :EventSubscription ;
   rdfs:range :Party  .
 
+:exportJob
+  a owl:ObjectProperty ;
+  rdfs:label "Export Job Id" ;
+  rdfs:domain :TmfExportJob ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
+
 :place
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Place Id" ;
@@ -3402,6 +3551,12 @@
   rdfs:label "Owner Party Id" ;
   rdfs:domain :GeographicSite ;
   rdfs:range :Party  .
+
+:importJob
+  a owl:ObjectProperty ;
+  rdfs:label "Import Job Id" ;
+  rdfs:domain :TmfImportJob ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
 
 :resource
   a owl:ObjectProperty, owl:FunctionalProperty ;
@@ -3495,7 +3650,8 @@
 :external
   a owl:ObjectProperty ;
   rdfs:label "External Id" ;
-  rdfs:domain :Resource ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( :Resource :TmfTask ) ] ;
   rdfs:comment "Range unresolved: no FK target declared."  .
 
 :relatedResource
@@ -3535,6 +3691,18 @@
   rdfs:domain :ServiceProblem ;
   rdfs:range :Alarm  .
 
+:task
+  a owl:ObjectProperty ;
+  rdfs:label "Task Id" ;
+  rdfs:domain :TmfTask ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
+
+:relatedEntity
+  a owl:ObjectProperty ;
+  rdfs:label "Related Entity Id" ;
+  rdfs:domain :TmfTask ;
+  rdfs:comment "Range unresolved: no FK target declared."  .
+
 :affectedResource
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Affected Resource Id" ;
@@ -3552,44 +3720,6 @@
   rdfs:label "Related Alarm Id" ;
   rdfs:domain :TroubleTicket ;
   rdfs:range :Alarm  .
-
-
-# ── Deprecated ───────────────────────────────────────────
-# Present in the previous version and absent from this one.
-# Retained as tombstones so held IRIs still resolve, and
-# marked owl:deprecated so consumers can act on the change.
-
-:DerivationActivity
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:DomainEntity
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:SensitivityTierValue
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:derivationMethod
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:governedBy
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:hasParticipant
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:refersToAsset
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
-
-:wasProducedBy
-  owl:deprecated true ;
-  rdfs:comment "Deprecated: no longer produced by the source schema as of version 1.0.0." .
 
 
 

@@ -50,7 +50,10 @@ RetrievalBenchmarks,retrieval_benchmarks,0,0,ORPHAN
 RuntimeFlavor,runtime_flavor,0,0,ORPHAN
 Attachment,tmf_attachment,0,0,ORPHAN
 Characteristic,tmf_characteristic,0,0,ORPHAN
+TmfExportJob,tmf_export_job,0,0,ORPHAN
+TmfImportJob,tmf_import_job,0,0,ORPHAN
 Note,tmf_note,0,0,ORPHAN
 Policy,tmf_policy,0,0,ORPHAN
+TmfTask,tmf_task,0,0,ORPHAN
 UserRole,tmf_user_role,0,0,ORPHAN
 VectorQueryLog,vector_query_log,0,0,ORPHAN

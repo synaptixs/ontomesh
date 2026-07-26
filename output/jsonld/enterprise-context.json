@@ -171,8 +171,14 @@
     "EventSubscription": {
       "@id": "https://ontology.example.com/enterprise/EventSubscription"
     },
+    "TmfExportJob": {
+      "@id": "https://ontology.example.com/enterprise/TmfExportJob"
+    },
     "GeographicSite": {
       "@id": "https://ontology.example.com/enterprise/GeographicSite"
+    },
+    "TmfImportJob": {
+      "@id": "https://ontology.example.com/enterprise/TmfImportJob"
     },
     "NetworkSliceProfile": {
       "@id": "https://ontology.example.com/enterprise/NetworkSliceProfile"
@@ -230,6 +236,9 @@
     },
     "ServiceSpecification": {
       "@id": "https://ontology.example.com/enterprise/ServiceSpecification"
+    },
+    "TmfTask": {
+      "@id": "https://ontology.example.com/enterprise/TmfTask"
     },
     "TroubleTicket": {
       "@id": "https://ontology.example.com/enterprise/TroubleTicket"
@@ -1000,6 +1009,38 @@
       "@id": "https://ontology.example.com/enterprise/hasValidForEnd",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
+    "contentType": {
+      "@id": "https://ontology.example.com/enterprise/hasContentType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "query": {
+      "@id": "https://ontology.example.com/enterprise/hasQuery",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "path": {
+      "@id": "https://ontology.example.com/enterprise/hasPath",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "creationDate": {
+      "@id": "https://ontology.example.com/enterprise/hasCreationDate",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "completionDate": {
+      "@id": "https://ontology.example.com/enterprise/hasCompletionDate",
+      "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "errorLog": {
+      "@id": "https://ontology.example.com/enterprise/hasErrorLog",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "baseType": {
+      "@id": "https://ontology.example.com/enterprise/hasBaseType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "schemaLocation": {
+      "@id": "https://ontology.example.com/enterprise/hasSchemaLocation",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
     "siteIri": {
       "@id": "https://ontology.example.com/enterprise/hasSiteIri",
       "@type": "http://www.w3.org/2001/XMLSchema#anyURI"
@@ -1035,6 +1076,10 @@
     "longitude": {
       "@id": "https://ontology.example.com/enterprise/hasLongitude",
       "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "sourceUri": {
+      "@id": "https://ontology.example.com/enterprise/hasSourceUri",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "profileIri": {
       "@id": "https://ontology.example.com/enterprise/hasProfileIri",
@@ -1248,10 +1293,6 @@
       "@id": "https://ontology.example.com/enterprise/hasOrderDate",
       "@type": "http://www.w3.org/2001/XMLSchema#date"
     },
-    "completionDate": {
-      "@id": "https://ontology.example.com/enterprise/hasCompletionDate",
-      "@type": "http://www.w3.org/2001/XMLSchema#date"
-    },
     "requestedCompletion": {
       "@id": "https://ontology.example.com/enterprise/hasRequestedCompletion",
       "@type": "http://www.w3.org/2001/XMLSchema#string"
@@ -1371,6 +1412,30 @@
     "overallQualityScore": {
       "@id": "https://ontology.example.com/enterprise/hasOverallQualityScore",
       "@type": "http://www.w3.org/2001/XMLSchema#decimal"
+    },
+    "taskType": {
+      "@id": "https://ontology.example.com/enterprise/hasTaskType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "percentProgress": {
+      "@id": "https://ontology.example.com/enterprise/hasPercentProgress",
+      "@type": "http://www.w3.org/2001/XMLSchema#integer"
+    },
+    "taskResourceRef": {
+      "@id": "https://ontology.example.com/enterprise/hasTaskResourceRef",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "taskError": {
+      "@id": "https://ontology.example.com/enterprise/hasTaskError",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "relatedEntityType": {
+      "@id": "https://ontology.example.com/enterprise/hasRelatedEntityType",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    "requestedBy": {
+      "@id": "https://ontology.example.com/enterprise/hasRequestedBy",
+      "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "ticketIri": {
       "@id": "https://ontology.example.com/enterprise/hasTicketIri",

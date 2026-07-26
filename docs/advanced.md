@@ -553,7 +553,7 @@ Each transition (`MANIFEST_SENT`, `MANIFEST_RECEIVED`, `COUNTERSIGNED`, `ACTIVAT
 
 ### 12.6 W3C interoperability protocol specification
 
-Formal Community Group Draft Report at [`federation/specs/cross-enterprise-ontology-interop.md`](federation/specs/cross-enterprise-ontology-interop.md). Covers:
+Formal Community Group Draft Report at [`federation/specs/cross-enterprise-ontology-interop.md`](https://github.com/synaptixs/ontomesh/blob/main/federation/specs/cross-enterprise-ontology-interop.md). Covers:
 
 - **§3** capability manifest format (normative JSON-LD schema)
 - **§4** trust-bootstrap handshake (normative protocol + state machine)
@@ -576,7 +576,7 @@ Reference implementation: the toolkit's `federation/` module.
 | Boundary validator | [federation/boundary.py](federation/boundary.py) |
 | Trust-bootstrap protocol | [federation/trust.py](federation/trust.py) |
 | Federation SHACL shapes | [output/shapes/federation-shapes.ttl](output/shapes/federation-shapes.ttl) |
-| W3C CG draft report | [federation/specs/cross-enterprise-ontology-interop.md](federation/specs/cross-enterprise-ontology-interop.md) |
+| W3C CG draft report | [federation/specs/cross-enterprise-ontology-interop.md](https://github.com/synaptixs/ontomesh/blob/main/federation/specs/cross-enterprise-ontology-interop.md) |
 | DDL additions | [db/schema.sql](db/schema.sql) (`federation_partners`, `federation_query_log`, `federation_trust_ledger`) |
 | CLI wiring | [toolkit.py](toolkit.py) — `--phase federate` |
 

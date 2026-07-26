@@ -14,14 +14,14 @@
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  SKOS Vocabulary — Drift Detection Taxonomy
-#  Phase 3 · Sprint S14 · Generated 2026-07-26T17:28:43Z
+#  Phase 3 · Sprint S14 · Generated 2026-07-26T17:44:01Z
 # ═══════════════════════════════════════════════════════════════════════════
 
 drift:DriftConceptScheme
   a skos:ConceptScheme ;
   skos:prefLabel "Drift Detection Concept Scheme" ;
   dcterms:description "Taxonomy of ML drift monitoring concepts for the Ontology Toolkit." ;
-  dcterms:created "2026-07-26T17:28:43Z"^^xsd:dateTime .
+  dcterms:created "2026-07-26T17:44:01Z"^^xsd:dateTime .
 
 drift:DriftMonitoring
   a skos:Concept ;
