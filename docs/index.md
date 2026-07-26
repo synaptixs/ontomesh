@@ -1,6 +1,6 @@
 # Ontoforge
 
-**The ontology mesh for GraphRAG.** Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.
+**The semantic system of record for your enterprise.** Derive a formal model of the systems you already run, govern how it changes, and prove where every answer came from. Built from your schema and your logs — without hand-crafting a single Turtle file.
 
 [:material-rocket-launch: Get started](getting-started/index.md){ .md-button .md-button--primary }
 [:material-package-variant: Install from PyPI](getting-started/install.md){ .md-button }

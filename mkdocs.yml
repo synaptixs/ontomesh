@@ -13,7 +13,7 @@
 
 site_name:        Ontoforge
 site_url:         https://synaptixs.github.io/ontomesh/
-site_description: The ontology mesh for GraphRAG — mine ontologies from logs, validate with SHACL, ship a hybrid retriever.
+site_description: The semantic system of record for your enterprise — derive a formal model of the systems you already run, govern how it changes, and prove where every answer came from.
 site_author:      Synaptixs
 copyright:        Apache-2.0 · &copy; Synaptixs
 

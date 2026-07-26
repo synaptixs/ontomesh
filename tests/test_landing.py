@@ -38,8 +38,8 @@ def test_root_serves_landing_not_wizard(client):
     assert rv.status_code == 200
     body = rv.get_data(as_text=True)
     # Hero headline + tagline are landing-only.
-    assert "The ontology mesh" in body
-    assert "GraphRAG" in body
+    assert "The semantic system of record" in body
+    assert "your enterprise" in body
     # The wizard's sidebar (with the step-nav) is NOT present.
     assert 'id="step-nav"' not in body
     # Marketing-only sections.
@@ -54,7 +54,7 @@ def test_wizard_route_serves_the_chrome(client):
     # Sidebar step-nav (wizard) IS present.
     assert 'id="step-nav"' in body
     # Marketing hero is NOT in the wizard.
-    assert "The ontology mesh" not in body or "step-nav" in body
+    assert "The semantic system of record" not in body or "step-nav" in body
 
 
 def test_legacy_step_query_redirects_to_wizard(client):

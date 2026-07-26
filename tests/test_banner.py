@@ -47,7 +47,7 @@ def test_banner_uses_ontomesh_name():
 
 def test_banner_shows_canonical_tagline():
     out = _capture_banner()
-    assert "the ontology mesh for GraphRAG" in out
+    assert "the semantic system of record for your enterprise" in out
 
 
 def test_banner_shows_current_version():
