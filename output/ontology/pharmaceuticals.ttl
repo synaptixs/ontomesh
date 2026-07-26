@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Pharmaceuticals Ontology Module" ;
   rdfs:comment "Domain template for pharmaceutical manufacturers, CROs, and regulatory affairs teams. Covers drug product lifecycle from R&D through clinical trials, manufacturing, and pharmacovigilance. Aligned with IDMP (Identification of Medicinal Products, ISO 11616/11238/11239/11240/11615), EMA SPOR, ICH E2B(R3), and HL7 FHIR R4 MedicinalProduct resources." ;
-  dcterms:created "2026-07-26T16:48:30Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:58:56Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 

@@ -279,7 +279,28 @@ The competency questions were written against a vocabulary the generator has nev
 
 What this phase fixed is the half that is unambiguously wrong: **the ABox now derives property IRIs from the ontology generator's own naming functions rather than from the workbook**, so instance data and schema agree by construction — 206 predicates asserted, 0 undeclared. Building the ABox from the workbook would have produced an instance graph its own schema could not describe.
 
-**Remaining work, which is a design decision rather than a defect fix:** reconcile the hand-written vocabulary (`refersToAsset`, `derivationMethod`, `observationType`) with the schema-derived one. Either the generator should emit the intended names, or the 43 CQ files should be rewritten to match what it emits. The CQ files encode intent about what the ontology *should* look like, so this is not a mechanical rename — it needs a decision about which vocabulary is canonical.
+### Vocabulary reconciliation ✅ **DELIVERED** *(2026-07-26)*
+
+| Measure | Before | After |
+|---|---|---|
+| CQ terms undeclared in the TBox | 44 of 57 | **14** |
+| Workbook ↔ generator agreement (object properties) | 47/100 | **100/100** |
+| `cq_tests_returning_rows` | 3 | **4** |
+| `cq_tests_failing` | 34 | **33** |
+
+**The canonical choice was settled by evidence, not preference.** Three things pointed the same way: `hasX` is used by 498 data properties, by every SHACL `sh:path`, and by the JSON-LD context — only the 43 hand-written CQ files used bare nouns. So the ontology's convention won and the CQ files were rewritten (27 distinct renames across 14 files).
+
+**The `Of` suffix was the other half.** `object_property_name` appended `Of` to single-token names, so `agent_id` became `agentOf` — which reads as the *inverse* of what a foreign key asserts. Dropping it raised workbook↔generator agreement from 47 to 94 of 100. Making `mapping_generator` call the ontology's own function instead of keeping a private copy of the rule — a copy still carrying the pre-Phase-2 `_org`/`_type` collapse — took it to 100.
+
+**Semantic aliases are linked, not deleted.** `:refersToAsset` and `:derivationMethod` are better names than the structural `:asset` and `:hasDerivationMethod`, and no derivation can invent them from a schema. Rather than choosing, they are declared `owl:equivalentProperty` to their structural twins, so both are valid and a reasoner treats them as one property.
+
+### What still blocks the other 39 — and it is no longer vocabulary
+
+- **10 CQs need PROV-O structure the ABox does not emit.** They query `prov:wasGeneratedBy` / `prov:wasAssociatedWith`; the ABox contains **zero** PROV-O triples. The observations table carries flat foreign keys (`recorded_by`), and the ontology declares `:producedBy rdfs:subPropertyOf prov:wasGeneratedBy`, but nothing reifies an observation into an activity-and-agent chain. This is a modelling gap, and it sits directly under the provenance claim the product makes.
+- **~10** reference properties that exist but are never asserted, because the source column is empty.
+- **1** queries a class whose source table has no rows.
+
+Emitting a PROV-O chain from the ABox is the natural next piece of work and is worth more than the remaining vocabulary tail.
 
 Full suite: 1006 passed, 9 skipped, 1 xfailed.
 

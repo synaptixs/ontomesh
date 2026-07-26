@@ -14,7 +14,7 @@
   owl:versionInfo "1.0.0" ;
   rdfs:label "Enterprise Domain Ontology" ;
   rdfs:comment "Auto-generated from relational schema + ontology_metadata. Covers all operational domain entities, events, agents, policies, observations, and provenance patterns." ;
-  dcterms:created "2026-07-26T16:48:29Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:58:55Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit — Auto-generated from DB schema" .
 
 
@@ -3134,14 +3134,14 @@
 
 # ── Object Properties ───────────────────────────────────────────────
 
-:agentOf
+:agent
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agent Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :AgentRoles :EventParticipants ) ] ;
   rdfs:range :Agent  .
 
-:roleOf
+:role
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Role Id" ;
   rdfs:domain :AgentRoles ;
@@ -3153,7 +3153,7 @@
   rdfs:domain :AgentRoles ;
   rdfs:range :Asset  .
 
-:orgOf
+:org
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Org Id" ;
   rdfs:domain :Agent ;
@@ -3183,19 +3183,19 @@
   rdfs:domain :Asset ;
   rdfs:range :Organization  .
 
-:bundleOf
+:bundle
   a owl:ObjectProperty ;
   rdfs:label "Bundle Id" ;
   rdfs:domain :ComplianceBundles ;
   rdfs:comment "Range unresolved: no FK target declared."  .
 
-:regulationOf
+:regulation
   a owl:ObjectProperty ;
   rdfs:label "Regulation Id" ;
   rdfs:domain :ComplianceBundles ;
   rdfs:comment "Range unresolved: no FK target declared."  .
 
-:assetOf
+:asset
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Asset Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3208,14 +3208,14 @@
   rdfs:domain :DomainEvent ;
   rdfs:range :Agent  .
 
-:policyOf
+:policy
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Policy Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :DomainEvent :PolicyApplication ) ] ;
   rdfs:range :Policy  .
 
-:modelOf
+:model
   a owl:ObjectProperty ;
   rdfs:label "Model Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3228,21 +3228,21 @@
   rdfs:domain :EmbeddingRecords ;
   rdfs:range :EmbeddingIndexes  .
 
-:eventOf
+:event
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Event Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :EventParticipants :FederationTrustLedger :ObservationRecord :PolicyApplication ) ] ;
   rdfs:range :DomainEvent  .
 
-:partnerOf
+:partner
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Partner Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :FederationPartners :FederationQueryLog :FederationTrustLedger ) ] ;
   rdfs:range :FederationPartners  .
 
-:queryOf
+:query
   a owl:ObjectProperty ;
   rdfs:label "Query Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3255,14 +3255,14 @@
   rdfs:domain :ObservationRecord ;
   rdfs:range :Agent  .
 
-:proposalOf
+:proposal
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Proposal Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :OntologyEvolutionProposals :OntologyVersionLedger ) ] ;
   rdfs:range :OntologyEvolutionProposals  .
 
-:reviewerOf
+:reviewer
   a owl:ObjectProperty ;
   rdfs:label "Reviewer Id" ;
   rdfs:domain :OntologyEvolutionProposals ;
@@ -3292,19 +3292,19 @@
   rdfs:domain :PolicyApplication ;
   rdfs:range :Agent  .
 
-:runOf
+:run
   a owl:ObjectProperty ;
   rdfs:label "Run Id" ;
   rdfs:domain :RetrievalBenchmarks ;
   rdfs:comment "Range unresolved: no FK target declared."  .
 
-:groundingOf
+:grounding
   a owl:ObjectProperty ;
   rdfs:label "Grounding Id" ;
   rdfs:domain :RuntimeGrounding ;
   rdfs:comment "Range unresolved: no FK target declared."  .
 
-:payloadOf
+:payload
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Payload Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3348,7 +3348,7 @@
   rdfs:domain :Alarm ;
   rdfs:range :Party  .
 
-:ownerOf
+:owner
   a owl:ObjectProperty ;
   rdfs:label "Owner Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3369,7 +3369,7 @@
                 owl:unionOf ( :ConflictEvent :ServiceProblem :TroubleTicket ) ] ;
   rdfs:range :Party  .
 
-:partyOf
+:party
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Party Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3389,7 +3389,7 @@
   rdfs:domain :EventSubscription ;
   rdfs:range :Party  .
 
-:placeOf
+:place
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Place Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3402,21 +3402,21 @@
   rdfs:domain :GeographicSite ;
   rdfs:range :Party  .
 
-:resourceOf
+:resource
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Resource Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :NetworkSliceProfile :PerformanceIndicator :ResourceRelationship ) ] ;
   rdfs:range :Resource  .
 
-:agreementOf
+:agreement
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Agreement Id" ;
   rdfs:domain [ a owl:Class ;
                 owl:unionOf ( :NetworkSliceProfile :ServiceQualityReport ) ] ;
   rdfs:range :Agreement  .
 
-:serviceOf
+:service
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Service Id" ;
   rdfs:domain [ a owl:Class ;
@@ -3491,7 +3491,7 @@
   rdfs:domain :Resource ;
   rdfs:range :Resource  .
 
-:externalOf
+:external
   a owl:ObjectProperty ;
   rdfs:label "External Id" ;
   rdfs:domain :Resource ;
@@ -3528,7 +3528,7 @@
   rdfs:domain :ServiceOrder ;
   rdfs:range :ProductOrder  .
 
-:alarmOf
+:alarm
   a owl:ObjectProperty, owl:FunctionalProperty ;
   rdfs:label "Alarm Id" ;
   rdfs:domain :ServiceProblem ;
@@ -3580,10 +3580,17 @@
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .
 
+# Semantic alias. The schema-driven generator derives :hasDerivationMethod
+# from the derivation_method column, and that is the name instance data
+# carries. This hand-authored name reads better and is what the competency
+# questions were written against, so it is kept and *linked* rather than
+# either one being deleted — owl:equivalentProperty makes them the same
+# property to a reasoner. Domain is omitted: the authoritative declaration
+# carries it, and a second rdfs:domain would conjoin (see Phase 2).
 :derivationMethod
   a owl:DatatypeProperty ;
+  owl:equivalentProperty :hasDerivationMethod ;
   rdfs:label "Derivation Method" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:string ;
   rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
   :sensitivityTier :Internal .
@@ -3604,10 +3611,14 @@
   rdfs:comment "An agent that participated in this event." ;
   :sensitivityTier :Internal .
 
+# Semantic alias for the FK-derived :asset. Same reasoning as
+# :derivationMethod above — the structural name is what the data carries,
+# this one says what the relation means, and owl:equivalentProperty makes
+# a query against either find the same triples under a reasoner.
 :refersToAsset
   a owl:ObjectProperty ;
+  owl:equivalentProperty :asset ;
   rdfs:label "refers to asset" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range :Asset ;
   rdfs:comment "The asset this observation is about." ;
   :sensitivityTier :Internal .

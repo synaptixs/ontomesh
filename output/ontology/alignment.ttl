@@ -19,7 +19,7 @@
   rdfs:label "Ontology Alignment Module" ;
   rdfs:comment "Alignment axioms linking the generated ontology to DOLCE, FOAF, Schema.org, and SOSA." ;
   owl:imports <https://ontology.example.com/tmf/> ;
-  dcterms:created "2026-07-26T16:48:30Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:58:56Z"^^xsd:dateTime ;
   dcterms:description "Phase 2B: owl:equivalentClass and skos:exactMatch axioms for cross-ontology alignment." .
 
 # ═══════════════════════════════════════════════════════

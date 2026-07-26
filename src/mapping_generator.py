@@ -102,9 +102,14 @@ def generate_mapping(intro: DBIntrospector, output_dir: str):
         for col in t.object_properties:
             ref = col.fk_references or "unknown"
             ref_table = ref.split(".")[0] if ref != "unknown" else "?"
-            from db_introspector import snake_to_lower_camel
-            col_stripped = col.name.replace("_id", "").replace("_org", "").replace("_type", "")
-            prop_name = snake_to_lower_camel(col_stripped)
+            # Use the ontology's own naming function rather than a private
+            # copy of the rule. This module carried the pre-Phase-2 version,
+            # which stripped `_org` and `_type` anywhere in a column name and
+            # so mapped asset_type_id and asset_id onto the same property.
+            # The workbook is meant to describe the ontology; deriving names
+            # independently guaranteed it eventually described something else.
+            from ontology_generator import object_property_name
+            prop_name = object_property_name(col.name)
 
             # Find range class
             range_class = "?"

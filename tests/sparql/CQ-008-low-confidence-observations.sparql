@@ -11,9 +11,9 @@ SELECT ?asset ?assetLabel ?obs ?obsType ?confidence ?method WHERE {
   ?obs a :ObservationRecord ;
        :refersToAsset ?asset ;
        :hasConfidenceScore ?confidence ;
-       :derivationMethod ?method .
+       :hasDerivationMethod ?method .
   FILTER (?confidence < "0.8"^^xsd:decimal)
-  OPTIONAL { ?obs :observationType ?obsType }
+  OPTIONAL { ?obs :hasObservationType ?obsType }
   OPTIONAL { ?asset rdfs:label ?assetLabel }
 }
 ORDER BY ?confidence

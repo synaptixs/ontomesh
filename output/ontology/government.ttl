@@ -13,7 +13,7 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Government & Public Sector Ontology Module" ;
   rdfs:comment "Domain template for government agencies, municipalities, and public sector organisations. Aligned with W3C DCAT v3, INSPIRE Directive (EU), and FOAF for agent descriptions. Suitable for open data portals, regulatory compliance, public service delivery, and e-government." ;
-  dcterms:created "2026-07-26T16:48:30Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T16:58:56Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 

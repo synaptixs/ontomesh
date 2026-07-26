@@ -326,17 +326,25 @@ def _most_restrictive_tier(tiers: List[str]) -> str:
 def object_property_name(col_name: str) -> str:
     """Derive an object-property name from an FK column name.
 
-    Only a *trailing* `_id` is stripped. The previous rule removed `_id`,
+    The single source of truth for object-property naming — the ontology,
+    the mapping workbook and the ABox all call this, so the three cannot
+    drift apart. They previously each had their own rule and disagreed on
+    53 of 100 properties.
+
+    Only a *trailing* `_id` is stripped. The older rule removed `_id`,
     `_org` and `_type` anywhere in the name, which collapsed distinct
     relations onto one IRI: `asset_type_id` and `asset_id` both became
-    `assetOf`, giving a single property two unrelated domains and ranges.
+    `assetOf`, giving one property two unrelated domains and ranges.
+
+    No `Of` suffix. A foreign key means "this row *has* that thing", so
+    `agent_id` is `agent`, not `agentOf` — which reads as the inverse of
+    what the column asserts. Dropping it also raised agreement with the
+    mapping workbook from 47/100 to 94/100.
     """
     stripped = col_name[:-3] if col_name.endswith("_id") else col_name
     if not stripped:
         stripped = col_name
-    parts = stripped.split("_")
-    name = snake_to_lower_camel(stripped)
-    return name + "Of" if len(parts) == 1 else name
+    return snake_to_lower_camel(stripped)
 
 
 def _object_property_range(col: ColumnModel,
@@ -551,10 +559,17 @@ def _prov_patterns() -> str:
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .
 
+# Semantic alias. The schema-driven generator derives :hasDerivationMethod
+# from the derivation_method column, and that is the name instance data
+# carries. This hand-authored name reads better and is what the competency
+# questions were written against, so it is kept and *linked* rather than
+# either one being deleted — owl:equivalentProperty makes them the same
+# property to a reasoner. Domain is omitted: the authoritative declaration
+# carries it, and a second rdfs:domain would conjoin (see Phase 2).
 :derivationMethod
   a owl:DatatypeProperty ;
+  owl:equivalentProperty :hasDerivationMethod ;
   rdfs:label "Derivation Method" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:string ;
   rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
   :sensitivityTier :Internal .
@@ -575,10 +590,14 @@ def _prov_patterns() -> str:
   rdfs:comment "An agent that participated in this event." ;
   :sensitivityTier :Internal .
 
+# Semantic alias for the FK-derived :asset. Same reasoning as
+# :derivationMethod above — the structural name is what the data carries,
+# this one says what the relation means, and owl:equivalentProperty makes
+# a query against either find the same triples under a reasoner.
 :refersToAsset
   a owl:ObjectProperty ;
+  owl:equivalentProperty :asset ;
   rdfs:label "refers to asset" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range :Asset ;
   rdfs:comment "The asset this observation is about." ;
   :sensitivityTier :Internal .

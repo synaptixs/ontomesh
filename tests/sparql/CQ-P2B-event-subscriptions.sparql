@@ -6,10 +6,10 @@ PREFIX : <https://ontology.example.com/tmf/>
 SELECT ?subscription ?eventType ?eventDomain ?subscriber ?callbackUrl
 WHERE {
   ?subscription a :EventSubscription ;
-                :eventType ?eventType ;
-                :callbackUrl ?callbackUrl .
+                :hasEventType ?eventType ;
+                :hasCallbackUrl ?callbackUrl .
   FILTER NOT EXISTS { ?subscription :hasTicketStatus "Cancelled" }
-  OPTIONAL { ?subscription :eventDomain ?eventDomain }
+  OPTIONAL { ?subscription :hasEventDomain ?eventDomain }
   OPTIONAL { ?subscription :subscriberParty ?subscriber }
 }
 ORDER BY ?eventType

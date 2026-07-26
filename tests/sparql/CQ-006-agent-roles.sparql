@@ -9,7 +9,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?agent ?agentLabel ?agentType ?role ?roleLabel ?scopeAsset WHERE {
   ?agent a :Agent .
   OPTIONAL { ?agent rdfs:label ?agentLabel }
-  OPTIONAL { ?agent :agentType ?agentType }
+  OPTIONAL { ?agent :hasAgentType ?agentType }
   OPTIONAL {
     ?agentRole :agent ?agent ;
                :role ?role .

@@ -39,10 +39,17 @@
   rdfs:comment "Numeric confidence in the observation value. Range: 0.0–1.0." ;
   :sensitivityTier :Confidential .
 
+# Semantic alias. The schema-driven generator derives :hasDerivationMethod
+# from the derivation_method column, and that is the name instance data
+# carries. This hand-authored name reads better and is what the competency
+# questions were written against, so it is kept and *linked* rather than
+# either one being deleted — owl:equivalentProperty makes them the same
+# property to a reasoner. Domain is omitted: the authoritative declaration
+# carries it, and a second rdfs:domain would conjoin (see Phase 2).
 :derivationMethod
   a owl:DatatypeProperty ;
+  owl:equivalentProperty :hasDerivationMethod ;
   rdfs:label "Derivation Method" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range xsd:string ;
   rdfs:comment "How the value was obtained: MEASURED, INFERRED, IMPORTED, SYNTHESIZED." ;
   :sensitivityTier :Internal .
@@ -63,10 +70,14 @@
   rdfs:comment "An agent that participated in this event." ;
   :sensitivityTier :Internal .
 
+# Semantic alias for the FK-derived :asset. Same reasoning as
+# :derivationMethod above — the structural name is what the data carries,
+# this one says what the relation means, and owl:equivalentProperty makes
+# a query against either find the same triples under a reasoner.
 :refersToAsset
   a owl:ObjectProperty ;
+  owl:equivalentProperty :asset ;
   rdfs:label "refers to asset" ;
-  rdfs:domain :ObservationRecord ;
   rdfs:range :Asset ;
   rdfs:comment "The asset this observation is about." ;
   :sensitivityTier :Internal .

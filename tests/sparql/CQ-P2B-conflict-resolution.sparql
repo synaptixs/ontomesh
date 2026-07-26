@@ -6,11 +6,11 @@ PREFIX : <https://ontology.example.com/tmf/>
 SELECT ?conflict ?conflictType ?tier ?assertionA ?assertionB ?status
 WHERE {
   ?conflict a :ConflictEvent ;
-            :conflictType ?conflictType ;
+            :hasConflictType ?conflictType ;
             :hasTicketStatus ?status .
   FILTER(?status IN ("Open","Escalated"))
-  OPTIONAL { ?conflict :assertionAIri ?assertionA }
-  OPTIONAL { ?conflict :assertionBIri ?assertionB }
-  OPTIONAL { ?conflict :resolutionTier ?tier }
+  OPTIONAL { ?conflict :hasAssertionAIri ?assertionA }
+  OPTIONAL { ?conflict :hasAssertionBIri ?assertionB }
+  OPTIONAL { ?conflict :hasResolutionTier ?tier }
 }
 ORDER BY ?tier ?conflictType

@@ -18,8 +18,8 @@ SELECT ?flavor ?sensitivityTier ?owlClasses ?dbTables
 WHERE {
   ?flavor a :RuntimeFlavor ;
           :sensitivityTier ?sensitivityTier ;
-          :owlClasses      ?owlClasses ;
-          :dbTables        ?dbTables .
+          :hasOwlClasses      ?owlClasses ;
+          :hasDbTables        ?dbTables .
 
   # Require that all three critical properties are non-empty
   FILTER(BOUND(?sensitivityTier) && ?sensitivityTier != "")
