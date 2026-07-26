@@ -26,7 +26,7 @@
       "description": "Every observation involving ePHI must carry an agent attribution so the audit log can reconstruct who touched the data.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-004",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "HIPAA-312-B-2",
@@ -50,7 +50,7 @@
       "description": "Every observation must be attributable to a named agent IRI, not an anonymous source.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-004",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "HIPAA-312-E-1",
@@ -58,7 +58,7 @@
       "description": "RESTRICTED-tier observations must never cross the federation boundary to a partner endpoint.",
       "artefact_type": "SPARQL_CQ",
       "evidence_selector": "CQ-CMP-05",
-      "pass_expression": "status in ('PASS','PASS-STRUCTURAL')"
+      "pass_expression": "status == 'PASS'"
     },
     {
       "req_id": "HIPAA-312-AI-1",

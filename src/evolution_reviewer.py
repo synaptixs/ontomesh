@@ -298,8 +298,7 @@ def apply_approved(
             os.path.join(out_path, "reports"),
         )
         failing = [r for r in cq_results
-                   if r.get("status") not in ("PASS", "PASS-STRUCTURAL",
-                                               "SKIPPED")]
+                   if r.get("status") not in ("PASS", "SKIPPED")]
         sparql_status = "FAIL" if failing else "PASS"
         result["steps"].append(
             f"sparql CQ: {sparql_status} ({len(failing)} failing of "

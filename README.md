@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| **Image** | `ghcr.io/synaptixs/ontomesh:3.9.0` (and `:latest`) |
+| **Image** | `ghcr.io/synaptixs/ontomesh:3.10.0` (and `:latest`) |
 | **Size** | ~316 MB compressed |
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
@@ -107,7 +107,11 @@ grounded the answer with a SPARQL `SELECT` against the materialized RDF triples.
 | | |
 |---|---|
 | **Pipeline phases** | 8 build phases + 8 enrichment phases (log mining L4-L13, schema inference, multi-target generation) |
+| **Ontology** | OWL 2 DL — `owl:Restriction` class expressions, defined classes, `owl:hasKey` from UNIQUE constraints, union domains |
+| **Instance data** | `--phase abox` materialises individuals from your rows, with reified PROV-O chains and sensitivity-tier gating |
+| **Modelling depth** | OWL-Time bitemporal (valid vs transaction time) · QUDT united quantities · reified n-ary participation |
 | **Validation** | SHACL 1.1 shapes + materialised inference with `prov:wasDerivedFrom` lineage |
+| **Self-checking** | OOPS!-style pitfall detection, structural metrics, in-process consistency (`owlrl`), and a CI regression ratchet |
 | **Reasoning** | OWL-RL · SWRL · Datalog (Rulewerk) |
 | **Output formats** | OWL/Turtle · SHACL · JSON-LD · SKOS · materialisation report |
 | **Wizard surfaces** | 10 starter industries (telecom, healthcare, finance, manufacturing, retail, energy-utilities, government, insurance, logistics, pharmaceuticals) |
@@ -144,4 +148,4 @@ Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/synaptix
 
 ---
 
-*Ontomesh v3.9.0 · Apache-2.0 · Liquid Glass theme · Reasoning Search · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 1000+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.10.0 · Apache-2.0 · OWL 2 DL · instance data · self-checking output · Reasoning Search · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 1000+ tests · Docker, Compose, Fly.io, Render, Cloud Run*

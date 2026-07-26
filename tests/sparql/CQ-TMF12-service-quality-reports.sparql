@@ -6,10 +6,10 @@ PREFIX : <https://ontology.example.com/tmf/>
 SELECT ?report ?reportType ?service ?qualityScore ?slaCompliant
 WHERE {
   ?report a :ServiceQualityReport ;
-          :slaCompliant ?slaCompliant .
+          :hasSlaCompliant ?slaCompliant .
   FILTER(?slaCompliant = false)
-  OPTIONAL { ?report :reportType ?reportType }
+  OPTIONAL { ?report :hasReportType ?reportType }
   OPTIONAL { ?report :coversService ?service }
-  OPTIONAL { ?report :overallQualityScore ?qualityScore }
+  OPTIONAL { ?report :hasOverallQualityScore ?qualityScore }
 }
 ORDER BY ?qualityScore

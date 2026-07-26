@@ -1,19 +1,19 @@
 # OWL 2 Profile Recommendation
-**Recommended profile:** OWL 2 EL  
-**Recommended reasoner:** ELK  
+**Recommended profile:** OWL 2 DL  
+**Recommended reasoner:** HermiT  
 
 ## Axiom summary
 
 | Metric | Count |
 |--------|-------|
-| OWL classes | 58 |
-| Data properties | 533 |
-| Object properties | 105 |
-| **Total axioms (est.)** | **696** |
+| OWL classes | 55 |
+| Data properties | 498 |
+| Object properties | 100 |
+| **Total axioms (est.)** | **3665** |
 
 ## Decision rationale
 
-Axiom count 696 is within EL limits and no DL constructs detected — OWL 2 EL profile is sufficient. ELK reasoner recommended.
+OWL 2 DL constructs detected (owl:unionOf (disjunction)). OWL 2 EL does not permit these — the ontology requires a full DL reasoner. Use HermiT or Pellet.
 
 ## Profile decision rules
 
@@ -21,6 +21,9 @@ Axiom count 696 is within EL limits and no DL constructs detected — OWL 2 EL p
 |------|---------|--------|
 | Role chains present | `owl:propertyChainAxiom` in ontology | OWL 2 DL |
 | Nominals present | `owl:oneOf` in ontology | OWL 2 DL |
+| Inverse properties | `owl:inverseOf` in ontology | OWL 2 DL |
+| Symmetric properties | `owl:SymmetricProperty` in ontology | OWL 2 DL |
+| Inverse-functional properties | `owl:InverseFunctionalProperty` in ontology | OWL 2 DL |
 | Axiom count > 50 000 | Large schema | OWL 2 EL |
 | Default | No complex constructs, ≤ 50 000 axioms | OWL 2 EL |
 
@@ -29,7 +32,7 @@ Axiom count 696 is within EL limits and no DL constructs detected — OWL 2 EL p
 Run the reasoner via ROBOT after Phase 2:
 
 ```bash
-robot reason --reasoner elk \
+robot reason --reasoner hermit \
   --input output/ontology/enterprise.ttl \
   --output output/ontology/enterprise-classified.ttl
 ```

@@ -185,6 +185,12 @@ shapes:AssetShape
   a sh:NodeShape ;
   sh:targetClass :Asset ;
   sh:property [
+    sh:path :hasExternalId ;
+    sh:datatype xsd:string ;
+    sh:message "External Identifier: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
     sh:path :hasName ;
     sh:datatype xsd:string ;
     sh:minCount 1 ;
@@ -225,12 +231,6 @@ shapes:AssetShape
     sh:path :hasUpdatedAt ;
     sh:datatype xsd:dateTime ;
     sh:message "Updated At: type xsd:dateTime." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :external ;
-    sh:class owl:Thing ;
-    sh:message "External Identifier: reference to owl:Thing." ;
     sh:severity sh:Warning
   ] ;
   sh:property [
@@ -1105,6 +1105,18 @@ shapes:OntologyEvolutionProposalsShape
     sh:severity sh:Warning
   ] ;
   sh:property [
+    sh:path :hasSourceLogPath ;
+    sh:datatype xsd:string ;
+    sh:message "Source Log Path: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :hasEvidenceSample ;
+    sh:datatype xsd:string ;
+    sh:message "Evidence Sample: type xsd:string." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
     sh:path :hasCreatedAt ;
     sh:datatype xsd:dateTime ;
     sh:message "Created At: type xsd:dateTime." ;
@@ -1127,6 +1139,12 @@ shapes:OntologyEvolutionProposalsShape
     sh:path :reviewer ;
     sh:class owl:Thing ;
     sh:message "Reviewer Id: reference to owl:Thing." ;
+    sh:severity sh:Warning
+  ] ;
+  sh:property [
+    sh:path :evidenceTemplate ;
+    sh:class owl:Thing ;
+    sh:message "Evidence Template Id: reference to owl:Thing." ;
     sh:severity sh:Warning
   ] ;
   sh:property [
@@ -2451,99 +2469,6 @@ shapes:EventSubscriptionShape
   ] .
 
 
-# ── TmfExportJob ──────────────────────────────────────────
-shapes:TmfExportJobShape
-  a sh:NodeShape ;
-  sh:targetClass :TmfExportJob ;
-  sh:property [
-    sh:path :hasContentType ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:message "Content Type: required, type xsd:string." ;
-    sh:severity sh:Violation
-  ] ;
-  sh:property [
-    sh:path :hasQuery ;
-    sh:datatype xsd:string ;
-    sh:message "Query: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasPath ;
-    sh:datatype xsd:string ;
-    sh:message "Path: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasUrl ;
-    sh:datatype xsd:string ;
-    sh:message "Url: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCreationDate ;
-    sh:datatype xsd:date ;
-    sh:message "Creation Date: type xsd:date." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCompletionDate ;
-    sh:datatype xsd:date ;
-    sh:message "Completion Date: type xsd:date." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasStatus ;
-    sh:datatype xsd:string ;
-    sh:message "Status: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasErrorLog ;
-    sh:datatype xsd:string ;
-    sh:message "Error Log: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasHref ;
-    sh:datatype xsd:string ;
-    sh:message "Href: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasBaseType ;
-    sh:datatype xsd:string ;
-    sh:message "Base Type: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasSchemaLocation ;
-    sh:datatype xsd:string ;
-    sh:message "Schema Location: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCreatedAt ;
-    sh:datatype xsd:dateTime ;
-    sh:message "Created At: type xsd:dateTime." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :exportJob ;
-    sh:class owl:Thing ;
-    sh:minCount 1 ;
-    sh:message "Export Job Id: required reference to owl:Thing." ;
-    sh:severity sh:Violation
-  ] ;
-  sh:property [
-    sh:path :sensitivityTier ;
-    sh:minCount 1 ;
-    sh:in ( :Public :Internal :Confidential :Restricted ) ;
-    sh:message "Sensitivity tier annotation is required." ;
-    sh:severity sh:Violation
-  ] .
-
-
 # ── GeographicSite ──────────────────────────────────────────
 shapes:GeographicSiteShape
   a sh:NodeShape ;
@@ -2638,99 +2563,6 @@ shapes:GeographicSiteShape
     sh:class :Party ;
     sh:message "Owner Party Id: reference to :Party." ;
     sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :sensitivityTier ;
-    sh:minCount 1 ;
-    sh:in ( :Public :Internal :Confidential :Restricted ) ;
-    sh:message "Sensitivity tier annotation is required." ;
-    sh:severity sh:Violation
-  ] .
-
-
-# ── TmfImportJob ──────────────────────────────────────────
-shapes:TmfImportJobShape
-  a sh:NodeShape ;
-  sh:targetClass :TmfImportJob ;
-  sh:property [
-    sh:path :hasContentType ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:message "Content Type: required, type xsd:string." ;
-    sh:severity sh:Violation
-  ] ;
-  sh:property [
-    sh:path :hasSourceUri ;
-    sh:datatype xsd:string ;
-    sh:message "Source Uri: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCreationDate ;
-    sh:datatype xsd:date ;
-    sh:message "Creation Date: type xsd:date." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCompletionDate ;
-    sh:datatype xsd:date ;
-    sh:message "Completion Date: type xsd:date." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasStatus ;
-    sh:datatype xsd:string ;
-    sh:message "Status: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasErrorLog ;
-    sh:datatype xsd:string ;
-    sh:message "Error Log: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasPath ;
-    sh:datatype xsd:string ;
-    sh:message "Path: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasUrl ;
-    sh:datatype xsd:string ;
-    sh:message "Url: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasHref ;
-    sh:datatype xsd:string ;
-    sh:message "Href: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasBaseType ;
-    sh:datatype xsd:string ;
-    sh:message "Base Type: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasSchemaLocation ;
-    sh:datatype xsd:string ;
-    sh:message "Schema Location: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCreatedAt ;
-    sh:datatype xsd:dateTime ;
-    sh:message "Created At: type xsd:dateTime." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :importJob ;
-    sh:class owl:Thing ;
-    sh:minCount 1 ;
-    sh:message "Import Job Id: required reference to owl:Thing." ;
-    sh:severity sh:Violation
   ] ;
   sh:property [
     sh:path :sensitivityTier ;
@@ -4362,124 +4194,6 @@ shapes:ServiceSpecificationShape
     sh:path :hasCreatedAt ;
     sh:datatype xsd:dateTime ;
     sh:message "Created At: type xsd:dateTime." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :sensitivityTier ;
-    sh:minCount 1 ;
-    sh:in ( :Public :Internal :Confidential :Restricted ) ;
-    sh:message "Sensitivity tier annotation is required." ;
-    sh:severity sh:Violation
-  ] .
-
-
-# ── TmfTask ──────────────────────────────────────────
-shapes:TmfTaskShape
-  a sh:NodeShape ;
-  sh:targetClass :TmfTask ;
-  sh:property [
-    sh:path :hasTaskType ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:message "Task Type: required, type xsd:string." ;
-    sh:severity sh:Violation
-  ] ;
-  sh:property [
-    sh:path :hasStatus ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:message "Status: required, type xsd:string." ;
-    sh:severity sh:Violation
-  ] ;
-  sh:property [
-    sh:path :hasCreationDate ;
-    sh:datatype xsd:date ;
-    sh:message "Creation Date: type xsd:date." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCompletionDate ;
-    sh:datatype xsd:date ;
-    sh:message "Completion Date: type xsd:date." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasPercentProgress ;
-    sh:datatype xsd:integer ;
-    sh:message "Percent Progress: type xsd:integer." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasTaskResourceRef ;
-    sh:datatype xsd:string ;
-    sh:message "Task Resource Ref: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasTaskError ;
-    sh:datatype xsd:string ;
-    sh:message "Task Error: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasRelatedEntityType ;
-    sh:datatype xsd:string ;
-    sh:message "Related Entity Type: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasRequestedBy ;
-    sh:datatype xsd:string ;
-    sh:message "Requested By: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasHref ;
-    sh:datatype xsd:string ;
-    sh:message "Href: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasBaseType ;
-    sh:datatype xsd:string ;
-    sh:message "Base Type: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasSchemaLocation ;
-    sh:datatype xsd:string ;
-    sh:message "Schema Location: type xsd:string." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasCreatedAt ;
-    sh:datatype xsd:dateTime ;
-    sh:message "Created At: type xsd:dateTime." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :hasUpdatedAt ;
-    sh:datatype xsd:dateTime ;
-    sh:message "Updated At: type xsd:dateTime." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :task ;
-    sh:class owl:Thing ;
-    sh:minCount 1 ;
-    sh:message "Task Id: required reference to owl:Thing." ;
-    sh:severity sh:Violation
-  ] ;
-  sh:property [
-    sh:path :relatedEntity ;
-    sh:class owl:Thing ;
-    sh:message "Related Entity Id: reference to owl:Thing." ;
-    sh:severity sh:Warning
-  ] ;
-  sh:property [
-    sh:path :external ;
-    sh:class owl:Thing ;
-    sh:message "External Id: reference to owl:Thing." ;
     sh:severity sh:Warning
   ] ;
   sh:property [

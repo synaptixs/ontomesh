@@ -63,6 +63,70 @@ ontoforge --phase all-mining   # L4 through L13
 
 Each enrichment phase emits a JSON-LD ObservationRecord that the wizard's Evolution phase consumes to propose ontology changes.
 
+## CLI phase reference
+
+The wizard phases above describe the *modelling* flow. The CLI drives generation
+directly with `--phase`. This is the practical surface:
+
+```bash
+python toolkit.py --phase <name> --db db/enterprise.db --out output
+```
+
+### The core sequence
+
+Run in this order — each reads what the previous wrote.
+
+| `--phase` | Writes | Notes |
+|---|---|---|
+| `1` | schema introspection | Creates the DB from `db/schema.sql` if absent |
+| `2` | `ontology/enterprise.ttl`, `events.ttl`, `provenance.ttl`, `dimensions.ttl` | The TBox |
+| `3` | `shapes/*.ttl` | SHACL shapes and the agent gate |
+| `4` | `mapping/logical_physical_map.csv` | The mapping workbook — **editable** |
+| `5` | `jsonld/*`, `vocab/*` | JSON-LD context, SKOS, MCP tools |
+| `abox` | `ontology/instances.ttl` | **Instance data.** Needs phase 4's workbook |
+| `quality` | `reports/ontology_quality.csv` | Pitfalls, metrics, consistency |
+| `sparql` | `reports/sparql_cq_test_results.csv` | Competency questions against the graph |
+| `test` | `reports/governance_scorecard.csv` | 36 governance criteria |
+| `report` | `reports/toolkit_report.html` | Self-contained visual summary |
+
+Or just run everything:
+
+```bash
+python toolkit.py --phase all --db db/enterprise.db --out output
+```
+
+### Useful flags
+
+| Flag | Applies to | What it does |
+|---|---|---|
+| `--max-tier {Public,Internal,Confidential}` | `abox` | Sensitivity ceiling for materialised data. `Restricted` is always excluded. |
+| `--out DIR` | all | Output root. Use separate dirs to keep runs apart. |
+| `--db PATH` | all | SQLite path, or set a connection string for other backends. |
+| `--template NAME` | `templates` | Generate one industry module instead of all. |
+
+### Optional phases
+
+| `--phase` | Purpose |
+|---|---|
+| `reason` | OWL-RL / SHACL-rule materialisation with `prov:wasDerivedFrom` lineage |
+| `reasoner` | ROBOT consistency check (needs the ROBOT binary) |
+| `tmf` | TM Forum SID alignment |
+| `templates` | Industry starter modules |
+| `alignment` | DOLCE / FOAF / Schema.org / SOSA alignment axioms |
+| `comply` | Regulatory evidence coverage |
+| `evolve` | Evolution proposals and review |
+| `mine`, `sequence`, `causality` | Log-driven enrichment (see above) |
+
+!!! tip "The two-command sanity check"
+
+    ```bash
+    python toolkit.py --phase all --db db/enterprise.db --out output
+    python scripts/ontology_gate.py
+    ```
+
+    The first regenerates everything; the second tells you whether it got worse.
+    See [Quality gates](../reference/quality-gates.md).
+
 ## Composability
 
 Every phase reads a stable on-disk format. You can:

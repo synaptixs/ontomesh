@@ -34,7 +34,17 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-BASE_IRI   = "https://ontology.example.com/tmf/"
+# Alignment axioms describe entities in the *generated* ontologies, so their
+# subjects must be minted in whichever namespace actually declares them.
+#
+# This module previously minted every subject under the TMF module namespace
+# while 25 of its 29 class alignments describe enterprise classes, so none of
+# the 45 axioms attached to anything: `tmf/Agent` and `enterprise/Agent` are
+# different IRIs. Subjects are now resolved against the generated Turtle at
+# write time — see `_resolve_subject`.
+ENTERPRISE_IRI = "https://ontology.example.com/enterprise/"
+SID_IRI        = "https://ontology.example.com/tmf/"
+BASE_IRI       = SID_IRI  # retained: the alignment module's own ontology IRI
 DOLCE_NS   = "http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#"
 FOAF_NS    = "http://xmlns.com/foaf/0.1/"
 SCHEMA_NS  = "https://schema.org/"
@@ -48,7 +58,8 @@ TMF_NS     = "https://www.tmforum.org/sid/"
 PROV_NS    = "http://www.w3.org/ns/prov#"
 
 ALIGN_PREFIXES = f"""\
-@prefix :       <{BASE_IRI}> .
+@prefix :       <{ENTERPRISE_IRI}> .
+@prefix sid:    <{SID_IRI}> .
 @prefix dolce:  <{DOLCE_NS}> .
 @prefix foaf:   <{FOAF_NS}> .
 @prefix schema: <{SCHEMA_NS}> .
@@ -217,10 +228,67 @@ FEDERATION_ENDPOINTS: list[dict] = [
 ]
 
 
+def _declared_local_names(output_dir: str, filename: str) -> set[str]:
+    """Local names of every subject declared in a generated Turtle file.
+
+    Parsed with rdflib when available; falls back to a line scan so the
+    alignment phase still runs in a minimal install.
+    """
+    path = os.path.join(output_dir, filename)
+    if not os.path.isfile(path):
+        return set()
+    try:
+        import rdflib
+        g = rdflib.Graph()
+        g.parse(path, format="turtle")
+        return {str(s).rsplit("/", 1)[-1].rsplit("#", 1)[-1]
+                for s in g.subjects() if isinstance(s, rdflib.URIRef)}
+    except Exception:
+        names: set[str] = set()
+        try:
+            with open(path) as f:
+                for line in f:
+                    stripped = line.strip()
+                    if stripped.startswith(":") and len(stripped) > 1:
+                        names.add(stripped[1:].split()[0].rstrip(";,."))
+        except OSError:
+            return set()
+        return names
+
+
+def _resolve_subject(local_name: str,
+                     enterprise: set[str],
+                     sid: set[str]) -> str | None:
+    """Render an alignment subject in the namespace that declares it.
+
+    Returns a prefixed name (``:Agent`` or ``sid:TmfEntity``), or None when
+    the entity exists in neither ontology — in which case the axiom is
+    dropped rather than emitted against an IRI nothing declares.
+
+    Data properties are generated with a ``has`` prefix (``amountDue`` is
+    declared as ``hasAmountDue``), so that variant is tried too.
+    """
+    variants = [local_name, "has" + local_name[:1].upper() + local_name[1:]]
+    for name in variants:
+        if name in enterprise:
+            return f":{name}"
+    for name in variants:
+        if name in sid:
+            return f"sid:{name}"
+    return None
+
+
 def generate_alignment_ontology(output_dir: str) -> None:
     """Generate alignment.ttl with owl:equivalentClass/Property and skos:exactMatch axioms."""
     os.makedirs(output_dir, exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Resolve subjects against what was actually generated.
+    enterprise_names: set[str] = set()
+    for fname in ("enterprise.ttl", "events.ttl", "provenance.ttl", "drift.ttl"):
+        enterprise_names |= _declared_local_names(output_dir, fname)
+    sid_names = _declared_local_names(output_dir, "tmf-sid-hierarchy.ttl")
+    unresolved: list[str] = []
 
     lines = [
         ALIGN_PREFIXES,
@@ -255,6 +323,10 @@ def generate_alignment_ontology(output_dir: str) -> None:
             lines.append(f"# ── {section} Class Alignments {'─'*(48-len(section))}\n")
             current_section = section
         for local_cls, align_type, ext_iri, comment in relevant:
+            subject = _resolve_subject(local_cls, enterprise_names, sid_names)
+            if subject is None:
+                unresolved.append(local_cls)
+                continue
             pred = {
                 "equiv_class":  "owl:equivalentClass",
                 "exact_match":  "skos:exactMatch",
@@ -262,7 +334,7 @@ def generate_alignment_ontology(output_dir: str) -> None:
                 "broad_match":  "skos:broadMatch",
             }.get(align_type, "skos:closeMatch")
             lines.append(
-                f":{local_cls}\n"
+                f"{subject}\n"
                 f'  {pred} <{ext_iri}> ;\n'
                 f'  rdfs:comment "{comment}" .\n\n'
             )
@@ -273,15 +345,30 @@ def generate_alignment_ontology(output_dir: str) -> None:
     lines.append("# ═══════════════════════════════════════════════════════\n\n")
 
     for local_prop, align_type, ext_iri, comment in PROPERTY_ALIGNMENTS:
+        subject = _resolve_subject(local_prop, enterprise_names, sid_names)
+        if subject is None:
+            unresolved.append(local_prop)
+            continue
         pred = {
             "equiv_prop":   "owl:equivalentProperty",
             "exact_match":  "skos:exactMatch",
             "close_match":  "skos:closeMatch",
         }.get(align_type, "skos:closeMatch")
         lines.append(
-            f":{local_prop}\n"
+            f"{subject}\n"
             f'  {pred} <{ext_iri}> ;\n'
             f'  rdfs:comment "{comment}" .\n\n'
+        )
+
+    if unresolved:
+        lines.append(
+            "# ── Unresolved ─────────────────────────────────────────────\n"
+            "# These alignments name entities that neither the enterprise\n"
+            "# ontology nor the TMF SID module declares, so emitting them\n"
+            "# would create IRIs nothing defines. Fix the alignment table or\n"
+            "# generate the missing entity, then re-run.\n"
+            + "".join(f"#   {n}\n" for n in sorted(set(unresolved)))
+            + "\n"
         )
 
     path = os.path.join(output_dir, "alignment.ttl")
@@ -290,8 +377,14 @@ def generate_alignment_ontology(output_dir: str) -> None:
 
     n_class = len(CLASS_ALIGNMENTS)
     n_prop  = len(PROPERTY_ALIGNMENTS)
+    n_bound = n_class + n_prop - len(unresolved)
     print(f"  ✓ Alignment ontology       → {path}")
     print(f"    Class alignments: {n_class}  |  Property alignments: {n_prop}")
+    print(f"    Bound to a declared entity: {n_bound}/{n_class + n_prop}")
+    if unresolved:
+        print(f"    ⚠ {len(unresolved)} unresolved (listed in alignment.ttl): "
+              f"{', '.join(sorted(set(unresolved))[:6])}"
+              + (" …" if len(set(unresolved)) > 6 else ""))
     print(f"    Standards: DOLCE, FOAF, Schema.org, SOSA, SSN")
 
 

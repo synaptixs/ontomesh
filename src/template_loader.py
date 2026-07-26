@@ -136,10 +136,42 @@ def generate_sql_schema(tmpl: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _build_prefix_map(tmpl: dict[str, Any]) -> dict[str, str]:
+    """Flatten a template's `external_alignments:` into {prefix: namespace}.
+
+    The YAML carries this map (``[{idmp: https://…}, {fhir: http://…}]``)
+    but nothing read it, so CURIEs like ``fhir:MedicinalProduct`` were
+    written verbatim inside angle brackets.
+    """
+    prefix_map: dict[str, str] = {}
+    for entry in tmpl.get("external_alignments") or []:
+        if isinstance(entry, dict):
+            for prefix, namespace in entry.items():
+                if prefix and namespace:
+                    prefix_map[str(prefix)] = str(namespace)
+    return prefix_map
+
+
+def _expand_curie(value: str, prefix_map: dict[str, str]) -> str | None:
+    """Expand ``prefix:local`` to an absolute IRI, or None if impossible."""
+    if not value:
+        return None
+    if value.startswith(("http://", "https://", "urn:")):
+        return value
+    prefix, sep, local = value.partition(":")
+    if not sep or prefix not in prefix_map:
+        return None
+    return f"{prefix_map[prefix]}{local}"
+
+
 def generate_owl_module(tmpl: dict[str, Any]) -> str:
     industry  = tmpl.get("industry", "unknown")
     label     = tmpl.get("label", industry)
     base_iri  = tmpl.get("base_iri", f"{BASE_IRI}{industry}/")
+    prefix_map = _build_prefix_map(tmpl)
+    unexpanded: list[str] = []
+    module_props: dict[str, dict] = {}
+    required_by_class: dict[str, list[str]] = {}
     prefixes  = f"""\
 @prefix :      <{BASE_IRI}> .
 @prefix ind:   <{base_iri}> .
@@ -176,40 +208,136 @@ def generate_owl_module(tmpl: dict[str, Any]) -> str:
             if v:
                 equiv_items.append(v)
 
-        lines.append(f":{class_name}")
+        # Module-local terms are minted in the module's own namespace via
+        # `ind:`. The prefix was already declared but never used: every
+        # class and property went into the shared enterprise namespace, so
+        # `expiry_date` declared by insurance, logistics and pharmaceuticals
+        # collided on one IRI that then carried three conjunctive domains.
+        lines.append(f"ind:{class_name}")
         lines.append(f"  a owl:Class ;")
         if parent and parent != "owl:Thing":
-            lines.append(f"  rdfs:subClassOf :{parent} ;")
+            lines.append(f"  rdfs:subClassOf ind:{parent} ;")
         lines.append(f'  rdfs:label "{ent_label}" ;')
         if ent_desc:
             lines.append(f'  rdfs:comment "{ent_desc}" ;')
         for eq in equiv_items:
-            lines.append(f"  owl:equivalentClass <{eq}> ;")
+            expanded = _expand_curie(eq, prefix_map)
+            if expanded is None:
+                # An unexpandable CURIE would ship as <fhir:MedicinalProduct>
+                # — an IRI with an unregistered scheme that dereferences to
+                # nothing and misrepresents the ontology as standards-aligned.
+                # Drop it and say so rather than emit it.
+                unexpanded.append(eq)
+                continue
+            lines.append(f"  owl:equivalentClass <{expanded}> ;")
         lines.append(f"  :sensitivityTier :{tier} .")
         lines.append("")
 
+        # Properties are collected across entities and emitted once, below.
+        # Emitting per-entity re-declared a shared property name (a module's
+        # `product_id` used on three entities) with one rdfs:domain each,
+        # and multiple domains conjoin.
         for prop_name, prop_def in _iter_properties(entity):
             if not isinstance(prop_def, dict):
                 continue
-            fk = prop_def.get("fk")
-            xsd_type = _py_type_to_owl(prop_def.get("type", "string"))
-            prop_iri = f":{prop_name}"
-            lines.append(f":{prop_name}")
-            if fk:
-                lines.append(f"  a owl:ObjectProperty ;")
-                lines.append(f"  rdfs:domain :{class_name} ;")
-                lines.append(f"  rdfs:range :{fk} ;")
-            else:
-                lines.append(f"  a owl:DatatypeProperty ;")
-                lines.append(f"  rdfs:domain :{class_name} ;")
-                lines.append(f"  rdfs:range {xsd_type} ;")
-            prop_label = prop_name.replace("_", " ").title()
-            lines.append(f'  rdfs:label "{prop_label}" ;')
-            desc = prop_def.get("description", "")
-            if desc:
-                lines.append(f'  rdfs:comment "{desc}" ;')
-            lines.append(f"  :sensitivityTier :{tier} .")
+            cols = module_props.setdefault(prop_name, {
+                "def": prop_def, "classes": [], "tiers": [],
+            })
+            cols["classes"].append(class_name)
+            cols["tiers"].append(tier)
+            if prop_def.get("required"):
+                required_by_class.setdefault(class_name, []).append(prop_name)
+
+    _TIER_ORDER = ["Public", "Internal", "Confidential", "Restricted"]
+    enumerations: list[tuple[str, list]] = []
+    for prop_name, info in module_props.items():
+        prop_def = info["def"]
+        classes = sorted(set(info["classes"]))
+        fk = prop_def.get("fk")
+        xsd_type = _py_type_to_owl(prop_def.get("type", "string"))
+        lines.append(f"ind:{prop_name}")
+        lines.append("  a owl:ObjectProperty ;" if fk
+                     else "  a owl:DatatypeProperty ;")
+        if len(classes) == 1:
+            lines.append(f"  rdfs:domain ind:{classes[0]} ;")
+        else:
+            members = " ".join(f"ind:{c}" for c in classes)
+            lines.append("  rdfs:domain [ a owl:Class ;")
+            lines.append(f"                owl:unionOf ( {members} ) ] ;")
+        # A property with a declared value list gets a closed datarange
+        # rather than a bare xsd:string. The template stated the permitted
+        # values (regulatory_status: [PreClinical, Phase1, ...]) and nothing
+        # read them, so every enumeration shipped as an open string.
+        values = prop_def.get("values")
+        if not fk and isinstance(values, list) and values:
+            members = " ".join(f'"{v}"' for v in values)
+            lines.append(f"  rdfs:range [ a rdfs:Datatype ;")
+            lines.append(f"               owl:oneOf ( {members} ) ] ;")
+            enumerations.append((prop_name, values))
+        else:
+            lines.append(f"  rdfs:range ind:{fk} ;" if fk
+                         else f"  rdfs:range {xsd_type} ;")
+        lines.append(f'  rdfs:label "{prop_name.replace("_", " ").title()}" ;')
+        desc = prop_def.get("description", "")
+        if desc:
+            lines.append(f'  rdfs:comment "{desc}" ;')
+        tier = "Public"
+        for t in info["tiers"]:
+            if t in _TIER_ORDER and _TIER_ORDER.index(t) > _TIER_ORDER.index(tier):
+                tier = t
+        lines.append(f"  :sensitivityTier :{tier} .")
+        lines.append("")
+
+    # Required properties as owl:Restriction axioms on their owning class.
+    for class_name, required in sorted(required_by_class.items()):
+        for prop_name in sorted(set(required)):
+            lines.append(f"ind:{class_name}")
+            lines.append("  rdfs:subClassOf [ a owl:Restriction ;")
+            lines.append(f"                    owl:onProperty ind:{prop_name} ;")
+            lines.append('                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .')
             lines.append("")
+
+    # Event classes. Templates declare these with is_event: true and the
+    # generator iterated only `entities:`, so a pharmaceutical module
+    # carrying BatchRecallEvent, ClinicalTrialHoldEvent and
+    # PatentExpiryEvent emitted no event classes at all.
+    for event in tmpl.get("events") or []:
+        if not isinstance(event, dict) or not event.get("name"):
+            continue
+        name = event["name"]
+        lines.append(f"ind:{name}")
+        lines.append("  a owl:Class ;")
+        lines.append("  rdfs:subClassOf :DomainEvent ;")
+        lines.append(f'  rdfs:label "{event.get("label", name)}" ;')
+        if event.get("description"):
+            lines.append(f'  rdfs:comment "{event["description"].strip()}" ;')
+        lines.append(f'  :sensitivityTier :{event.get("sensitivity", "Internal")} .')
+        lines.append("")
+
+    # Relationship statements are prose ("A ClinicalTrial investigates
+    # exactly one MedicinalProduct"), not machine-readable triples, so they
+    # cannot be turned into axioms without guessing. They are preserved as
+    # documentation on the module rather than discarded, which is where the
+    # cardinality constraints for a future phase will come from.
+    relationships = [r for r in (tmpl.get("relationships") or []) if isinstance(r, str)]
+    if relationships:
+        lines.append(f"<{base_iri}>")
+        for statement in relationships:
+            lines.append(f'  rdfs:comment "Relationship (unformalised): '
+                         f'{statement.strip()}" ;')
+        lines[-1] = lines[-1][:-1] + " ."
+        lines.append("")
+
+    if unexpanded:
+        lines.append(
+            "# ── Dropped alignments ─────────────────────────────────────\n"
+            "# These CURIEs had no matching prefix under the template's\n"
+            "# `external_alignments:` map, so no absolute IRI could be\n"
+            "# formed. Add the prefix to the template and re-run."
+        )
+        for curie in sorted(set(unexpanded)):
+            lines.append(f"#   {curie}")
+        lines.append("")
 
     return "\n".join(lines)
 

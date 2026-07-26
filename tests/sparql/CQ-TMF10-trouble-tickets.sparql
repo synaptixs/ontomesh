@@ -11,6 +11,6 @@ WHERE {
           :ticketSeverity ?severity .
   FILTER(?status NOT IN ("Resolved","Closed","Cancelled"))
   OPTIONAL { ?ticket :affectsResource ?resource }
-  OPTIONAL { ?ticket :slaViolated ?slaViolated }
+  OPTIONAL { ?ticket :hasSlaViolated ?slaViolated }
 }
 ORDER BY ?severity

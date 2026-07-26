@@ -13,415 +13,560 @@
   owl:imports <https://ontology.example.com/enterprise/> ;
   rdfs:label "Energy & Utilities Ontology Module" ;
   rdfs:comment "Domain template for electric utilities, gas networks, and renewable energy operators. Aligned with IEC Common Information Model (CIM) IEC 61968/61970 and NERC reliability standards." ;
-  dcterms:created "2026-04-22T20:08:54Z"^^xsd:dateTime ;
+  dcterms:created "2026-07-26T19:51:24Z"^^xsd:dateTime ;
   dcterms:creator "Ontology Toolkit Phase 3 — auto-generated from template" .
 
 
-:PowerAsset
+ind:PowerAsset
   a owl:Class ;
   rdfs:label "Power Asset" ;
   rdfs:comment "A physical component of the electrical grid — generator, transformer, line, substation." ;
-  owl:equivalentClass <cim:Equipment> ;
+  owl:equivalentClass <http://iec.ch/TC57/CIM100#Equipment> ;
   :sensitivityTier :Internal .
 
-:asset_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Asset Id" ;
-  :sensitivityTier :Internal .
-
-:asset_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Asset Type" ;
-  :sensitivityTier :Internal .
-
-:voltage_level_kv
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Voltage Level Kv" ;
-  :sensitivityTier :Internal .
-
-:capacity_mw
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Capacity Mw" ;
-  :sensitivityTier :Internal .
-
-:installation_date
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:date ;
-  rdfs:label "Installation Date" ;
-  :sensitivityTier :Internal .
-
-:asset_status
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Asset Status" ;
-  :sensitivityTier :Internal .
-
-:geo_location
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Geo Location" ;
-  rdfs:comment "WKT POINT or GeoJSON" ;
-  :sensitivityTier :Internal .
-
-:owner_utility
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Owner Utility" ;
-  :sensitivityTier :Internal .
-
-:cim_mrid
-  a owl:DatatypeProperty ;
-  rdfs:domain :PowerAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Cim Mrid" ;
-  rdfs:comment "CIM master resource identifier" ;
-  :sensitivityTier :Internal .
-
-:EnergyMeter
+ind:EnergyMeter
   a owl:Class ;
   rdfs:label "Energy Meter" ;
   rdfs:comment "Smart or conventional meter measuring energy consumption or production." ;
-  owl:equivalentClass <cim:Meter> ;
+  owl:equivalentClass <http://iec.ch/TC57/CIM100#Meter> ;
   :sensitivityTier :Confidential .
 
-:meter_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMeter ;
-  rdfs:range xsd:string ;
-  rdfs:label "Meter Id" ;
-  :sensitivityTier :Confidential .
-
-:meter_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMeter ;
-  rdfs:range xsd:string ;
-  rdfs:label "Meter Type" ;
-  :sensitivityTier :Confidential .
-
-:location_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMeter ;
-  rdfs:range xsd:string ;
-  rdfs:label "Location Id" ;
-  :sensitivityTier :Confidential .
-
-:communication_protocol
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMeter ;
-  rdfs:range xsd:string ;
-  rdfs:label "Communication Protocol" ;
-  :sensitivityTier :Confidential .
-
-:interval_minutes
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMeter ;
-  rdfs:range xsd:integer ;
-  rdfs:label "Interval Minutes" ;
-  rdfs:comment "Reading interval in minutes" ;
-  :sensitivityTier :Confidential .
-
-:EnergyReading
+ind:EnergyReading
   a owl:Class ;
   rdfs:label "Energy Reading" ;
   rdfs:comment "A time-series measurement from a meter — consumption, production, or reactive power." ;
-  owl:equivalentClass <cim:ReadingType> ;
+  owl:equivalentClass <http://iec.ch/TC57/CIM100#ReadingType> ;
   :sensitivityTier :Confidential .
 
-:reading_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyReading ;
-  rdfs:range xsd:string ;
-  rdfs:label "Reading Id" ;
-  :sensitivityTier :Confidential .
-
-:meter_id
-  a owl:ObjectProperty ;
-  rdfs:domain :EnergyReading ;
-  rdfs:range :EnergyMeter ;
-  rdfs:label "Meter Id" ;
-  :sensitivityTier :Confidential .
-
-:reading_datetime
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyReading ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Reading Datetime" ;
-  :sensitivityTier :Confidential .
-
-:kwh_value
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyReading ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Kwh Value" ;
-  :sensitivityTier :Confidential .
-
-:reading_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyReading ;
-  rdfs:range xsd:string ;
-  rdfs:label "Reading Type" ;
-  :sensitivityTier :Confidential .
-
-:quality_code
-  a owl:DatatypeProperty ;
-  rdfs:domain :EnergyReading ;
-  rdfs:range xsd:string ;
-  rdfs:label "Quality Code" ;
-  :sensitivityTier :Confidential .
-
-:GridTopology
+ind:GridTopology
   a owl:Class ;
   rdfs:label "Grid Topology" ;
   rdfs:comment "Connectivity model describing how power assets are interconnected." ;
-  owl:equivalentClass <cim:ConnectivityNode> ;
+  owl:equivalentClass <http://iec.ch/TC57/CIM100#ConnectivityNode> ;
   :sensitivityTier :Internal .
 
-:topology_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridTopology ;
-  rdfs:range xsd:string ;
-  rdfs:label "Topology Id" ;
-  :sensitivityTier :Internal .
-
-:from_asset_id
-  a owl:ObjectProperty ;
-  rdfs:domain :GridTopology ;
-  rdfs:range :PowerAsset ;
-  rdfs:label "From Asset Id" ;
-  :sensitivityTier :Internal .
-
-:to_asset_id
-  a owl:ObjectProperty ;
-  rdfs:domain :GridTopology ;
-  rdfs:range :PowerAsset ;
-  rdfs:label "To Asset Id" ;
-  :sensitivityTier :Internal .
-
-:connection_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridTopology ;
-  rdfs:range xsd:string ;
-  rdfs:label "Connection Type" ;
-  :sensitivityTier :Internal .
-
-:nominal_voltage_kv
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridTopology ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Nominal Voltage Kv" ;
-  :sensitivityTier :Internal .
-
-:OutageEvent
+ind:OutageEvent
   a owl:Class ;
   rdfs:label "Outage Event" ;
   rdfs:comment "An unplanned or planned interruption of electrical supply." ;
-  owl:equivalentClass <cim:Outage> ;
+  owl:equivalentClass <http://iec.ch/TC57/CIM100#Outage> ;
   :sensitivityTier :Internal .
 
-:outage_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Outage Id" ;
-  :sensitivityTier :Internal .
-
-:affected_asset_id
-  a owl:ObjectProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range :PowerAsset ;
-  rdfs:label "Affected Asset Id" ;
-  :sensitivityTier :Internal .
-
-:start_time
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "Start Time" ;
-  :sensitivityTier :Internal .
-
-:end_time
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:dateTime ;
-  rdfs:label "End Time" ;
-  :sensitivityTier :Internal .
-
-:cause_code
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Cause Code" ;
-  :sensitivityTier :Internal .
-
-:customers_affected
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:integer ;
-  rdfs:label "Customers Affected" ;
-  :sensitivityTier :Internal .
-
-:saidi_minutes
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Saidi Minutes" ;
-  rdfs:comment "System Average Interruption Duration Index contribution" ;
-  :sensitivityTier :Internal .
-
-:restoration_crew_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :OutageEvent ;
-  rdfs:range xsd:string ;
-  rdfs:label "Restoration Crew Id" ;
-  :sensitivityTier :Internal .
-
-:GridKPI
+ind:GridKPI
   a owl:Class ;
   rdfs:label "Grid KPI" ;
   rdfs:comment "Reliability and performance indicators for grid operations (SAIDI, SAIFI, CAIDI)." ;
-  owl:equivalentClass <cim:PerformanceIndex> ;
+  owl:equivalentClass <http://iec.ch/TC57/CIM100#PerformanceIndex> ;
   :sensitivityTier :Public .
 
-:kpi_id
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridKPI ;
-  rdfs:range xsd:string ;
-  rdfs:label "Kpi Id" ;
-  :sensitivityTier :Public .
-
-:kpi_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridKPI ;
-  rdfs:range xsd:string ;
-  rdfs:label "Kpi Type" ;
-  :sensitivityTier :Public .
-
-:measurement_period
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridKPI ;
-  rdfs:range xsd:string ;
-  rdfs:label "Measurement Period" ;
-  :sensitivityTier :Public .
-
-:value
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridKPI ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Value" ;
-  :sensitivityTier :Public .
-
-:utility_region
-  a owl:DatatypeProperty ;
-  rdfs:domain :GridKPI ;
-  rdfs:range xsd:string ;
-  rdfs:label "Utility Region" ;
-  :sensitivityTier :Public .
-
-:RenewableAsset
+ind:RenewableAsset
   a owl:Class ;
-  rdfs:subClassOf :PowerAsset ;
+  rdfs:subClassOf ind:PowerAsset ;
   rdfs:label "Renewable Energy Asset" ;
   rdfs:comment "A solar PV, wind turbine, battery storage, or hydro plant." ;
   :sensitivityTier :Internal .
 
-:renewable_type
-  a owl:DatatypeProperty ;
-  rdfs:domain :RenewableAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Renewable Type" ;
-  :sensitivityTier :Internal .
-
-:capacity_mw
-  a owl:DatatypeProperty ;
-  rdfs:domain :RenewableAsset ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Capacity Mw" ;
-  :sensitivityTier :Internal .
-
-:capacity_factor_pct
-  a owl:DatatypeProperty ;
-  rdfs:domain :RenewableAsset ;
-  rdfs:range xsd:decimal ;
-  rdfs:label "Capacity Factor Pct" ;
-  :sensitivityTier :Internal .
-
-:interconnection_point
-  a owl:DatatypeProperty ;
-  rdfs:domain :RenewableAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Interconnection Point" ;
-  :sensitivityTier :Internal .
-
-:forecast_model
-  a owl:DatatypeProperty ;
-  rdfs:domain :RenewableAsset ;
-  rdfs:range xsd:string ;
-  rdfs:label "Forecast Model" ;
-  :sensitivityTier :Internal .
-
-:EnergyMarketTransaction
+ind:EnergyMarketTransaction
   a owl:Class ;
   rdfs:label "Energy Market Transaction" ;
   rdfs:comment "A buy/sell transaction in a wholesale or balancing electricity market." ;
   :sensitivityTier :Restricted .
 
-:transaction_id
+ind:asset_id
   a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( ind:EnergyMarketTransaction ind:PowerAsset ) ] ;
+  rdfs:range xsd:string ;
+  rdfs:label "Asset Id" ;
+  :sensitivityTier :Restricted .
+
+ind:asset_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Generator" "Transformer" "TransmissionLine" "Substation" "Meter" "Switch" "Capacitor" ) ] ;
+  rdfs:label "Asset Type" ;
+  :sensitivityTier :Internal .
+
+ind:voltage_level_kv
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Voltage Level Kv" ;
+  :sensitivityTier :Internal .
+
+ind:capacity_mw
+  a owl:DatatypeProperty ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( ind:PowerAsset ind:RenewableAsset ) ] ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Capacity Mw" ;
+  :sensitivityTier :Internal .
+
+ind:installation_date
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range xsd:date ;
+  rdfs:label "Installation Date" ;
+  :sensitivityTier :Internal .
+
+ind:asset_status
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Operational" "Maintenance" "Decommissioned" "Planned" ) ] ;
+  rdfs:label "Asset Status" ;
+  :sensitivityTier :Internal .
+
+ind:geo_location
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Geo Location" ;
+  rdfs:comment "WKT POINT or GeoJSON" ;
+  :sensitivityTier :Internal .
+
+ind:owner_utility
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Owner Utility" ;
+  :sensitivityTier :Internal .
+
+ind:cim_mrid
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:PowerAsset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Cim Mrid" ;
+  rdfs:comment "CIM master resource identifier" ;
+  :sensitivityTier :Internal .
+
+ind:meter_id
+  a owl:DatatypeProperty ;
+  rdfs:domain [ a owl:Class ;
+                owl:unionOf ( ind:EnergyMeter ind:EnergyReading ) ] ;
+  rdfs:range xsd:string ;
+  rdfs:label "Meter Id" ;
+  :sensitivityTier :Confidential .
+
+ind:meter_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyMeter ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "SmartMeter" "ConventionalMeter" "SubMeter" "ProductionMeter" ) ] ;
+  rdfs:label "Meter Type" ;
+  :sensitivityTier :Confidential .
+
+ind:location_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyMeter ;
+  rdfs:range xsd:string ;
+  rdfs:label "Location Id" ;
+  :sensitivityTier :Confidential .
+
+ind:communication_protocol
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyMeter ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "DLMS" "ANSI_C12" "COSEM" "ModBus" "LoRaWAN" ) ] ;
+  rdfs:label "Communication Protocol" ;
+  :sensitivityTier :Confidential .
+
+ind:interval_minutes
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyMeter ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Interval Minutes" ;
+  rdfs:comment "Reading interval in minutes" ;
+  :sensitivityTier :Confidential .
+
+ind:reading_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyReading ;
+  rdfs:range xsd:string ;
+  rdfs:label "Reading Id" ;
+  :sensitivityTier :Confidential .
+
+ind:reading_datetime
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyReading ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Reading Datetime" ;
+  :sensitivityTier :Confidential .
+
+ind:kwh_value
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyReading ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Kwh Value" ;
+  :sensitivityTier :Confidential .
+
+ind:reading_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyReading ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Consumption" "Production" "Net" "ReactiveImport" "ReactiveExport" ) ] ;
+  rdfs:label "Reading Type" ;
+  :sensitivityTier :Confidential .
+
+ind:quality_code
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyReading ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Valid" "Estimated" "Missing" "Replaced" "Calculated" ) ] ;
+  rdfs:label "Quality Code" ;
+  :sensitivityTier :Confidential .
+
+ind:topology_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridTopology ;
+  rdfs:range xsd:string ;
+  rdfs:label "Topology Id" ;
+  :sensitivityTier :Internal .
+
+ind:from_asset_id
+  a owl:ObjectProperty ;
+  rdfs:domain ind:GridTopology ;
+  rdfs:range ind:PowerAsset ;
+  rdfs:label "From Asset Id" ;
+  :sensitivityTier :Internal .
+
+ind:to_asset_id
+  a owl:ObjectProperty ;
+  rdfs:domain ind:GridTopology ;
+  rdfs:range ind:PowerAsset ;
+  rdfs:label "To Asset Id" ;
+  :sensitivityTier :Internal .
+
+ind:connection_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridTopology ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Series" "Parallel" "BusBar" "Feeder" ) ] ;
+  rdfs:label "Connection Type" ;
+  :sensitivityTier :Internal .
+
+ind:nominal_voltage_kv
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridTopology ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Nominal Voltage Kv" ;
+  :sensitivityTier :Internal .
+
+ind:outage_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Outage Id" ;
+  :sensitivityTier :Internal .
+
+ind:affected_asset_id
+  a owl:ObjectProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range ind:PowerAsset ;
+  rdfs:label "Affected Asset Id" ;
+  :sensitivityTier :Internal .
+
+ind:start_time
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "Start Time" ;
+  :sensitivityTier :Internal .
+
+ind:end_time
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range xsd:dateTime ;
+  rdfs:label "End Time" ;
+  :sensitivityTier :Internal .
+
+ind:cause_code
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "EquipmentFailure" "Weather" "ThirdParty" "Planned" "Unknown" ) ] ;
+  rdfs:label "Cause Code" ;
+  :sensitivityTier :Internal .
+
+ind:customers_affected
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range xsd:integer ;
+  rdfs:label "Customers Affected" ;
+  :sensitivityTier :Internal .
+
+ind:saidi_minutes
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Saidi Minutes" ;
+  rdfs:comment "System Average Interruption Duration Index contribution" ;
+  :sensitivityTier :Internal .
+
+ind:restoration_crew_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:OutageEvent ;
+  rdfs:range xsd:string ;
+  rdfs:label "Restoration Crew Id" ;
+  :sensitivityTier :Internal .
+
+ind:kpi_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridKPI ;
+  rdfs:range xsd:string ;
+  rdfs:label "Kpi Id" ;
+  :sensitivityTier :Public .
+
+ind:kpi_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridKPI ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "SAIDI" "SAIFI" "CAIDI" "MAIFI" "ENS" "ASAI" ) ] ;
+  rdfs:label "Kpi Type" ;
+  :sensitivityTier :Public .
+
+ind:measurement_period
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridKPI ;
+  rdfs:range xsd:string ;
+  rdfs:label "Measurement Period" ;
+  :sensitivityTier :Public .
+
+ind:value
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridKPI ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Value" ;
+  :sensitivityTier :Public .
+
+ind:utility_region
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:GridKPI ;
+  rdfs:range xsd:string ;
+  rdfs:label "Utility Region" ;
+  :sensitivityTier :Public .
+
+ind:renewable_type
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:RenewableAsset ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "Solar" "Wind" "Hydro" "Battery" "Biomass" "Geothermal" ) ] ;
+  rdfs:label "Renewable Type" ;
+  :sensitivityTier :Internal .
+
+ind:capacity_factor_pct
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:RenewableAsset ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "Capacity Factor Pct" ;
+  :sensitivityTier :Internal .
+
+ind:interconnection_point
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:RenewableAsset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Interconnection Point" ;
+  :sensitivityTier :Internal .
+
+ind:forecast_model
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:RenewableAsset ;
+  rdfs:range xsd:string ;
+  rdfs:label "Forecast Model" ;
+  :sensitivityTier :Internal .
+
+ind:transaction_id
+  a owl:DatatypeProperty ;
+  rdfs:domain ind:EnergyMarketTransaction ;
   rdfs:range xsd:string ;
   rdfs:label "Transaction Id" ;
   :sensitivityTier :Restricted .
 
-:market_type
+ind:market_type
   a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
-  rdfs:range xsd:string ;
+  rdfs:domain ind:EnergyMarketTransaction ;
+  rdfs:range [ a rdfs:Datatype ;
+               owl:oneOf ( "DayAhead" "Intraday" "BalancingMechanism" "Bilateral" ) ] ;
   rdfs:label "Market Type" ;
   :sensitivityTier :Restricted .
 
-:asset_id
-  a owl:ObjectProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
-  rdfs:range :PowerAsset ;
-  rdfs:label "Asset Id" ;
-  :sensitivityTier :Restricted .
-
-:delivery_period
+ind:delivery_period
   a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
+  rdfs:domain ind:EnergyMarketTransaction ;
   rdfs:range xsd:string ;
   rdfs:label "Delivery Period" ;
   :sensitivityTier :Restricted .
 
-:volume_mwh
+ind:volume_mwh
   a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
+  rdfs:domain ind:EnergyMarketTransaction ;
   rdfs:range xsd:decimal ;
   rdfs:label "Volume Mwh" ;
   :sensitivityTier :Restricted .
 
-:price_per_mwh
+ind:price_per_mwh
   a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
+  rdfs:domain ind:EnergyMarketTransaction ;
   rdfs:range xsd:decimal ;
   rdfs:label "Price Per Mwh" ;
   :sensitivityTier :Restricted .
 
-:counterparty
+ind:counterparty
   a owl:DatatypeProperty ;
-  rdfs:domain :EnergyMarketTransaction ;
+  rdfs:domain ind:EnergyMarketTransaction ;
   rdfs:range xsd:string ;
   rdfs:label "Counterparty" ;
   :sensitivityTier :Restricted .
+
+ind:EnergyMarketTransaction
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:asset_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyMarketTransaction
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:delivery_period ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyMarketTransaction
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:price_per_mwh ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyMarketTransaction
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:transaction_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyMarketTransaction
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:volume_mwh ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyMeter
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:location_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyMeter
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:meter_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyReading
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:kwh_value ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyReading
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:meter_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyReading
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:reading_datetime ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:EnergyReading
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:reading_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GridKPI
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:kpi_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GridKPI
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:measurement_period ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GridKPI
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:value ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GridTopology
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:from_asset_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GridTopology
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:to_asset_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:GridTopology
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:topology_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:OutageEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:affected_asset_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:OutageEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:outage_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:OutageEvent
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:start_time ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:PowerAsset
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:asset_id ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:PowerAsset
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:asset_type ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:RenewableAsset
+  rdfs:subClassOf [ a owl:Restriction ;
+                    owl:onProperty ind:capacity_mw ;
+                    owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ind:VoltageExcursion
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Voltage Excursion" ;
+  rdfs:comment "Voltage exceeds or falls below acceptable operational limits." ;
+  :sensitivityTier :Internal .
+
+ind:FrequencyDeviation
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Frequency Deviation" ;
+  rdfs:comment "Grid frequency deviates from nominal (50/60 Hz)." ;
+  :sensitivityTier :Internal .
+
+ind:TheftDetectionAlert
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Theft Detection Alert" ;
+  rdfs:comment "Statistical anomaly in meter readings suggesting energy theft." ;
+  :sensitivityTier :Confidential .
+
+ind:AssetMaintenanceEvent
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  rdfs:label "Asset Maintenance Event" ;
+  rdfs:comment "Scheduled or reactive maintenance on a power asset." ;
+  :sensitivityTier :Internal .
+
+<https://ontology.example.com/energy/>
+  rdfs:comment "Relationship (unformalised): A PowerAsset belongs to exactly one GridTopology connectivity node." ;
+  rdfs:comment "Relationship (unformalised): An EnergyMeter measures one or more PowerAssets." ;
+  rdfs:comment "Relationship (unformalised): An EnergyReading is produced by exactly one EnergyMeter." ;
+  rdfs:comment "Relationship (unformalised): An OutageEvent affects one or more PowerAssets." ;
+  rdfs:comment "Relationship (unformalised): A RenewableAsset is a specialisation of PowerAsset." ;
+  rdfs:comment "Relationship (unformalised): A GridKPI is computed from one or more OutageEvents within a measurement period." ;
+  rdfs:comment "Relationship (unformalised): An EnergyMarketTransaction is associated with one PowerAsset (generation unit or load)."  .
