@@ -5,7 +5,7 @@
 [![Docker pulls](https://img.shields.io/badge/docker-ghcr.io%2Fsynaptixs%2Fontomesh-2496ED?logo=docker)](https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh)
 [![Discussions](https://img.shields.io/badge/Discussions-join-1f6feb?logo=github)](https://github.com/synaptixs/ontomesh/discussions)
 
-**The ontology mesh for GraphRAG.** Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.
+**The semantic system of record for your enterprise.** Derive a formal model of the systems you already run, govern how it changes, and prove where every answer came from. Built from your schema and your logs — without hand-crafting a single Turtle file.
 
 > **Preview release.** Public API surface is stabilising; expect occasional breaking changes until 1.0.
 

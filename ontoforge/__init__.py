@@ -1,4 +1,4 @@
-"""Ontomesh — the ontology mesh for GraphRAG.
+"""Ontomesh — the semantic system of record for your enterprise.
 
 This package is the top-level public API surface that ships on PyPI
 as ``ontoforge``.  Internally the toolkit's modules still live under

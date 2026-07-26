@@ -1,6 +1,6 @@
 # Quickstart
 
-Five minutes from `docker run` to an exported, SHACL-validated ontology you can drop into a GraphRAG retriever.
+Five minutes from `docker run` to an exported, SHACL-validated ontology you can ground a retriever or an agent on.
 
 ## 0 · Run the wizard
 
