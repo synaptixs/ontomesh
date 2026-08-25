@@ -1,0 +1,147 @@
+{
+  "artifacts": {
+    "id": "3451125761",
+    "src": "docs/artifacts.md",
+    "title": "Generated artifacts"
+  },
+  "capabilities": {
+    "id": "3450765313",
+    "src": "PROJECT_STATE.md",
+    "title": "Capabilities"
+  },
+  "changelog": {
+    "id": "3450667019",
+    "src": "CHANGELOG.md",
+    "title": "Changelog"
+  },
+  "compose": {
+    "id": "3451322369",
+    "src": "docs/deployment/compose.md",
+    "title": "Docker Compose"
+  },
+  "deploy": {
+    "id": "3451256833",
+    "src": "docs/deployment/index.md",
+    "title": "5. Deployment"
+  },
+  "docker": {
+    "id": "3451289601",
+    "src": "docs/deployment/docker.md",
+    "title": "Docker"
+  },
+  "drift": {
+    "id": "3451060225",
+    "src": "docs/concepts/drift.md",
+    "title": "Drift monitoring"
+  },
+  "first-wizard": {
+    "id": "3450863617",
+    "src": "docs/getting-started/first-wizard.md",
+    "title": "First wizard run"
+  },
+  "for-teams": {
+    "id": "3450732545",
+    "src": "PROJECT_STATE.md",
+    "title": "What it gives an engineering team"
+  },
+  "gates": {
+    "id": "3451158529",
+    "src": "docs/reference/quality-gates.md",
+    "title": "Quality gates"
+  },
+  "grounding": {
+    "id": "3451027457",
+    "src": "PROJECT_STATE.md",
+    "title": "Grounding an LLM"
+  },
+  "how": {
+    "id": "3450896385",
+    "src": null,
+    "title": "3. How it works"
+  },
+  "install": {
+    "id": "3450470402",
+    "src": "docs/getting-started/install.md",
+    "title": "Install"
+  },
+  "limitations": {
+    "id": "3450437661",
+    "src": "PROJECT_STATE.md",
+    "title": "Honest limitations"
+  },
+  "logs": {
+    "id": "3450994689",
+    "src": "PROJECT_STATE.md",
+    "title": "Finding the model in your logs (ML)"
+  },
+  "metadata": {
+    "id": "3451224065",
+    "src": "docs/metadata.md",
+    "title": "Driving generation with metadata"
+  },
+  "model": {
+    "id": "3450601474",
+    "src": "docs/concepts/ontology-model.md",
+    "title": "The ontology model"
+  },
+  "overview": {
+    "id": "3450437634",
+    "src": null,
+    "title": "1. Overview"
+  },
+  "pipeline": {
+    "id": "3450929153",
+    "src": "docs/concepts/pipeline.md",
+    "title": "Pipeline phases"
+  },
+  "postgres": {
+    "id": "3450863648",
+    "src": "docs/deployment/postgres.md",
+    "title": "Postgres backend"
+  },
+  "production": {
+    "id": "3451355137",
+    "src": "docs/deployment/production.md",
+    "title": "Production hardening"
+  },
+  "project": {
+    "id": "3451387905",
+    "src": null,
+    "title": "6. Project"
+  },
+  "quickstart": {
+    "id": "3450830849",
+    "src": "docs/getting-started/quickstart.md",
+    "title": "Quickstart"
+  },
+  "reference": {
+    "id": "3451092993",
+    "src": null,
+    "title": "4. Reference"
+  },
+  "roadmap": {
+    "id": "3451420673",
+    "src": "ONTOLOGY_ROADMAP.md",
+    "title": "Roadmap and history"
+  },
+  "runtime": {
+    "id": "3451191297",
+    "src": "docs/runtime.md",
+    "title": "Runtime layer"
+  },
+  "search": {
+    "id": "3451027486",
+    "src": "docs/reference/search.md",
+    "title": "Reasoning search"
+  },
+  "start": {
+    "id": "3450798081",
+    "src": null,
+    "title": "2. Getting started"
+  },
+  "what-is": {
+    "id": "3450699777",
+    "src": "PROJECT_STATE.md",
+    "title": "What Ontomesh is"
+  }
+}

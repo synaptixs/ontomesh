@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" width="960" height="320" font-family="Helvetica, Arial, sans-serif">
+  <rect width="960" height="320" fill="#0B1220" rx="10"/>
+  <text x="480" y="38" fill="#E2E8F0" font-size="19" font-weight="600" text-anchor="middle">Four gates between a question and an answer</text>
+
+  <!-- question -->
+  <rect x="26" y="112" width="104" height="56" rx="8" fill="#1E293B" stroke="#38BDF8"/>
+  <text x="78" y="138" fill="#E2E8F0" font-size="13" text-anchor="middle">question</text>
+  <text x="78" y="156" fill="#64748B" font-size="11" text-anchor="middle">from a user</text>
+
+  <!-- gates: shield outline, label, and a stroke that brightens as the token passes -->
+  <g font-size="12">
+    <g>
+      <path d="M176 100 l68 -14 l68 14 v42 q0 34 -68 52 q-68 -18 -68 -52 z" fill="#121C2E" stroke="#334155" stroke-width="1.5">
+        <animate attributeName="stroke" values="#334155;#334155;#A3E635;#A3E635;#334155;#334155"
+                 keyTimes="0;0.10;0.16;0.30;0.36;1" dur="9s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="#121C2E;#121C2E;#16233A;#16233A;#121C2E;#121C2E"
+                 keyTimes="0;0.10;0.16;0.30;0.36;1" dur="9s" repeatCount="indefinite"/>
+      </path>
+      <text x="244" y="126" fill="#A3E635" font-size="12.5" text-anchor="middle" font-weight="600">1 &#183; vocabulary</text>
+      <text x="244" y="146" fill="#94A3B8" text-anchor="middle">only words the</text>
+      <text x="244" y="161" fill="#94A3B8" text-anchor="middle">ontology has</text>
+    </g>
+    <g>
+      <path d="M348 100 l68 -14 l68 14 v42 q0 34 -68 52 q-68 -18 -68 -52 z" fill="#121C2E" stroke="#334155" stroke-width="1.5">
+        <animate attributeName="stroke" values="#334155;#334155;#A3E635;#A3E635;#334155;#334155"
+                 keyTimes="0;0.28;0.34;0.48;0.54;1" dur="9s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="#121C2E;#121C2E;#16233A;#16233A;#121C2E;#121C2E"
+                 keyTimes="0;0.28;0.34;0.48;0.54;1" dur="9s" repeatCount="indefinite"/>
+      </path>
+      <text x="416" y="126" fill="#A3E635" font-size="12.5" text-anchor="middle" font-weight="600">2 &#183; sensitivity</text>
+      <text x="416" y="146" fill="#94A3B8" text-anchor="middle">tier ceiling,</text>
+      <text x="416" y="161" fill="#94A3B8" text-anchor="middle">fail-closed</text>
+    </g>
+    <g>
+      <path d="M520 100 l68 -14 l68 14 v42 q0 34 -68 52 q-68 -18 -68 -52 z" fill="#121C2E" stroke="#334155" stroke-width="1.5">
+        <animate attributeName="stroke" values="#334155;#334155;#A3E635;#A3E635;#334155;#334155"
+                 keyTimes="0;0.46;0.52;0.64;0.70;1" dur="9s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="#121C2E;#121C2E;#16233A;#16233A;#121C2E;#121C2E"
+                 keyTimes="0;0.46;0.52;0.64;0.70;1" dur="9s" repeatCount="indefinite"/>
+      </path>
+      <text x="588" y="126" fill="#A3E635" font-size="12.5" text-anchor="middle" font-weight="600">3 &#183; query</text>
+      <text x="588" y="146" fill="#94A3B8" text-anchor="middle">read-only,</text>
+      <text x="588" y="161" fill="#94A3B8" text-anchor="middle">allow-listed</text>
+    </g>
+    <g>
+      <path d="M692 100 l68 -14 l68 14 v42 q0 34 -68 52 q-68 -18 -68 -52 z" fill="#121C2E" stroke="#334155" stroke-width="1.5">
+        <animate attributeName="stroke" values="#334155;#334155;#A3E635;#A3E635;#334155;#334155"
+                 keyTimes="0;0.62;0.68;0.80;0.86;1" dur="9s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="#121C2E;#121C2E;#16233A;#16233A;#121C2E;#121C2E"
+                 keyTimes="0;0.62;0.68;0.80;0.86;1" dur="9s" repeatCount="indefinite"/>
+      </path>
+      <text x="760" y="126" fill="#A3E635" font-size="12.5" text-anchor="middle" font-weight="600">4 &#183; output</text>
+      <text x="760" y="146" fill="#94A3B8" text-anchor="middle">SHACL</text>
+      <text x="760" y="161" fill="#94A3B8" text-anchor="middle">validated</text>
+    </g>
+  </g>
+
+  <!-- answer: fades in only after the last gate -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.80;0.86;0.96;1" dur="9s" repeatCount="indefinite"/>
+    <rect x="856" y="112" width="86" height="56" rx="8" fill="#16233A" stroke="#A3E635" stroke-width="1.5"/>
+    <text x="899" y="134" fill="#E2E8F0" font-size="13" text-anchor="middle">answer</text>
+    <text x="899" y="152" fill="#A3E635" font-size="11" text-anchor="middle">+ citations</text>
+  </g>
+
+  <!-- static rails -->
+  <g stroke="#1E293B" stroke-width="1.8" fill="none">
+    <path d="M130 140 L172 140"/><path d="M312 140 L344 140"/>
+    <path d="M484 140 L516 140"/><path d="M656 140 L688 140"/><path d="M828 140 L852 140"/>
+  </g>
+
+  <!-- the travelling query token -->
+  <circle r="7" fill="#38BDF8">
+    <animate attributeName="opacity" values="0;1;1;1;0;0" keyTimes="0;0.04;0.80;0.86;0.90;1" dur="9s" repeatCount="indefinite"/>
+    <animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;0.18;0.34;0.52;0.70;0.88;1"
+                   keyTimes="0;0.16;0.34;0.52;0.68;0.86;1" calcMode="linear"
+                   path="M78 140 L244 140 L416 140 L588 140 L760 140 L899 140 L899 140"/>
+  </circle>
+
+  <!-- withheld column: rises at gate 2 and stops dead -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.32;0.38;0.60;0.66" dur="9s" repeatCount="indefinite"/>
+    <rect x="352" y="212" width="128" height="24" rx="12" fill="#2A1416" stroke="#F87171"/>
+    <text x="416" y="228" fill="#F87171" font-size="11" text-anchor="middle">credential_expiry</text>
+    <text x="416" y="252" fill="#F87171" font-size="10.5" text-anchor="middle">Confidential &#8212; withheld</text>
+    <path d="M416 208 L416 196" stroke="#F87171" stroke-width="1.6"/>
+    <path d="M404 196 L428 196" stroke="#F87171" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+
+  <text x="480" y="292" fill="#64748B" font-size="12" text-anchor="middle">Nothing to support an answer returns status: empty &#8212; never invented prose.</text>
+</svg>
