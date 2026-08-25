@@ -6,6 +6,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [3.10.2] — 2026-08-25 · Repositioning
+
+No functional change. The package description, the boot banner and the wizard
+UI carry a new tagline; the code is identical to 3.10.1.
+
+### Changed
+
+- **Repositioned away from "GraphRAG".** `The ontology mesh for GraphRAG` named
+  a component rather than the product: GraphRAG is a retrieval technique, and
+  retrieval is roughly one of eleven wizard steps — discovery, causal mining,
+  drift, evolution governance, compliance evidence and federation all sit
+  outside it. "for GraphRAG" also positioned the product as an input to a
+  pipeline we do not own.
+
+  Now: **Ontomesh — the semantic system of record for your enterprise.** Derive
+  a formal model of the systems you already run, govern how it changes, and
+  prove where every answer came from.
+
+  Applied across the landing hero and footer, the wizard page, the CLI boot
+  banner and argparse description, the package docstring, the pyproject and
+  mkdocs descriptions, the README and docs subheads, the OCI image label, and
+  both social-card SVGs. Subheads that still led with "ship a hybrid retriever"
+  were rewritten to match.
+
+- Corrected two stale `v3.7` version strings on the landing page, left behind by
+  earlier releases.
+
+### Added (repository only, not shipped in the wheel)
+
+- `scripts/confluence_sync.py` — publishes the documentation to Confluence as a
+  generated, one-directional mirror; the repository stays the source of truth.
+- `docs/diagrams/` — four SVG architecture diagrams, three animated with SMIL.
+- `PROJECT_STATE.md` — expanded with what the toolkit gives an engineering team,
+  how the log-mining ML works, and a runnable five-minute demo.
+
+---
+
 ## [3.10.1] — 2026-07-26 · Security patch
 
 ### Security

@@ -5,7 +5,7 @@
 [![Docker pulls](https://img.shields.io/badge/docker-ghcr.io%2Fsynaptixs%2Fontomesh-2496ED?logo=docker)](https://github.com/synaptixs/ontomesh/pkgs/container/ontomesh)
 [![Discussions](https://img.shields.io/badge/Discussions-join-1f6feb?logo=github)](https://github.com/synaptixs/ontomesh/discussions)
 
-**The ontology mesh for GraphRAG.** Mine ontologies from your logs, validate with SHACL, ship a hybrid retriever — without hand-crafting a single Turtle file.
+**The semantic system of record for your enterprise.** Derive a formal model of the systems you already run, govern how it changes, and prove where every answer came from. Built from your schema and your logs — without hand-crafting a single Turtle file.
 
 > **Preview release.** Public API surface is stabilising; expect occasional breaking changes until 1.0.
 
@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| **Image** | `ghcr.io/synaptixs/ontomesh:3.10.1` (and `:latest`) |
+| **Image** | `ghcr.io/synaptixs/ontomesh:3.10.2` (and `:latest`) |
 | **Size** | ~316 MB compressed |
 | **Architectures** | `linux/amd64`, `linux/arm64` (Apple Silicon ready) |
 | **Base** | `python:3.12-slim` |
@@ -148,4 +148,4 @@ Looking for what changed when?  See [`CHANGELOG.md`](https://github.com/synaptix
 
 ---
 
-*Ontomesh v3.10.1 · Apache-2.0 · OWL 2 DL · instance data · self-checking output · Reasoning Search · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 1000+ tests · Docker, Compose, Fly.io, Render, Cloud Run*
+*Ontomesh v3.10.2 · Apache-2.0 · OWL 2 DL · instance data · self-checking output · Reasoning Search · gunicorn · Redis SSE · Prometheus · cosign-signed · OWL 2 · SHACL · PROV-O · SKOS · JSON-LD · 1000+ tests · Docker, Compose, Fly.io, Render, Cloud Run*

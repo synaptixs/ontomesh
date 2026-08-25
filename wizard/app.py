@@ -2327,7 +2327,7 @@ def main():
         _version = "unknown"
 
     parser = argparse.ArgumentParser(
-        description=f"Ontomesh — the ontology mesh for GraphRAG (v{_version})",
+        description=f"Ontomesh — the semantic system of record for your enterprise (v{_version})",
     )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=5000)
@@ -2335,7 +2335,7 @@ def main():
     args = parser.parse_args()
 
     print()
-    print(f"  Ontomesh — the ontology mesh for GraphRAG  ·  v{_version}")
+    print(f"  Ontomesh — the semantic system of record for your enterprise  ·  v{_version}")
     print(f"  ──────────────────────────────────────────────────────────────")
     print(f"  Landing:     http://{args.host}:{args.port}/")
     print(f"  Wizard:      http://{args.host}:{args.port}/wizard")

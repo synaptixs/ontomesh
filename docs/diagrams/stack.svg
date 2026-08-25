@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="900" height="420" font-family="Helvetica, Arial, sans-serif">
+  <rect width="900" height="420" fill="#0B1220" rx="10"/>
+  <text x="450" y="42" fill="#E2E8F0" font-size="19" font-weight="600" text-anchor="middle">Where Ontomesh sits</text>
+
+  <!-- AI features -->
+  <rect x="70" y="72" width="760" height="72" rx="8" fill="#121C2E" stroke="#334155"/>
+  <text x="90" y="99" fill="#94A3B8" font-size="12" letter-spacing="1.5">YOUR AI FEATURES</text>
+  <g font-size="13" fill="#E2E8F0">
+    <rect x="92" y="108" width="150" height="26" rx="13" fill="#1E293B"/><text x="167" y="126" text-anchor="middle">support assistant</text>
+    <rect x="256" y="108" width="140" height="26" rx="13" fill="#1E293B"/><text x="326" y="126" text-anchor="middle">anomaly triage</text>
+    <rect x="410" y="108" width="150" height="26" rx="13" fill="#1E293B"/><text x="485" y="126" text-anchor="middle">retrieval service</text>
+    <rect x="574" y="108" width="120" height="26" rx="13" fill="#1E293B"/><text x="634" y="126" text-anchor="middle">agents</text>
+  </g>
+
+  <path d="M450 144 L450 172" stroke="#38BDF8" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Grounding -->
+  <rect x="70" y="176" width="760" height="76" rx="8" fill="#121C2E" stroke="#A3E635" stroke-width="1.5"/>
+  <text x="90" y="203" fill="#A3E635" font-size="12" letter-spacing="1.5">GROUNDING</text>
+  <g font-size="13" fill="#E2E8F0">
+    <text x="96" y="232">controlled vocabulary</text>
+    <text x="266" y="232">sensitivity ceiling</text>
+    <text x="420" y="232">SHACL gate</text>
+    <text x="548" y="232">citations + provenance</text>
+  </g>
+
+  <path d="M450 252 L450 280" stroke="#A3E635" stroke-width="2" marker-end="url(#b)"/>
+
+  <!-- Ontology -->
+  <rect x="70" y="284" width="760" height="60" rx="8" fill="#16233A" stroke="#A3E635" stroke-width="1.5"/>
+  <text x="90" y="309" fill="#A3E635" font-size="12" letter-spacing="1.5">ONTOMESH ONTOLOGY</text>
+  <text x="96" y="332" fill="#E2E8F0" font-size="13">classes &#183; relationships &#183; constraints &#183; instance data &#183; provenance</text>
+
+  <path d="M450 344 L450 368" stroke="#64748B" stroke-width="2" marker-end="url(#c)"/>
+
+  <!-- Sources -->
+  <rect x="70" y="368" width="760" height="38" rx="8" fill="#121C2E" stroke="#334155"/>
+  <text x="90" y="392" fill="#94A3B8" font-size="12" letter-spacing="1.5">YOUR SYSTEMS</text>
+  <text x="250" y="392" fill="#E2E8F0" font-size="13">database schema &#183; application logs</text>
+
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#38BDF8"/></marker>
+    <marker id="b" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#A3E635"/></marker>
+    <marker id="c" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#64748B"/></marker>
+  </defs>
+</svg>

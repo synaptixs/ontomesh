@@ -601,8 +601,8 @@ HELP_PAGES: dict[str, dict] = {
         "slug":     "retrieve",
         "step_num": "11",
         "title":    "Vector Retrieval",
-        "tagline":  "Hybrid semantic + graph retrieval — the GraphRAG "
-                    "frontend of the toolkit.",
+        "tagline":  "Hybrid semantic + graph retrieval over the "
+                    "governed ontology.",
         "what": (
             "Vector Retrieval indexes the ontology + materialized "
             "graph into a vector store and exposes a hybrid retriever "
