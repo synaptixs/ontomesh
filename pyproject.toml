@@ -53,14 +53,13 @@ postgres = ["psycopg2-binary>=2.9.9", "psycopg[binary]>=3.2.0"]
 mysql    = ["mysql-connector-python>=8.3.0"]
 mssql    = ["pyodbc>=5.1.0"]
 oracle   = ["oracledb>=2.3.0"]
-db2      = ["ibm_db>=3.2.3", "ibm_db_dbi>=3.2.3"]
+db2      = ["ibm_db>=3.2.3"]
 db = [
     "psycopg2-binary>=2.9.9",
     "mysql-connector-python>=8.3.0",
     "pyodbc>=5.1.0",
     "oracledb>=2.3.0",
     "ibm_db>=3.2.3",
-    "ibm_db_dbi>=3.2.3",
 ]
 
 # ── Log-driven RCA (log mining, sequence learning, causality) ───────────
@@ -142,7 +141,6 @@ all = [
     "pyodbc>=5.1.0",
     "oracledb>=2.3.0",
     "ibm_db>=3.2.3",
-    "ibm_db_dbi>=3.2.3",
     # runtime
     "anthropic>=0.34.0",
     "openai>=1.40.0",

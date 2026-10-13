@@ -9,4 +9,4 @@ mysql-connector-python>=8.3.0   # MySQL / MariaDB
 pyodbc>=5.1.0                   # SQL Server (also needs ODBC Driver 17/18 on host)
 oracledb>=2.3.0                 # Oracle / Oracle ADB (thin mode — no Instant Client)
 ibm_db>=3.2.3                   # IBM DB2 (also needs DB2 ODBC/CLI driver from IBM)
-ibm_db_dbi>=3.2.3               # IBM DB2 DBI interface
+# The ibm_db distribution also installs the ibm_db_dbi module.
